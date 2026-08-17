@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { withTestDatabase } from './helpers.js';
+
+test('creates the six milestone tables and seeds the approved source', () => {
+  withTestDatabase((db) => {
+    const tableNames = db.prepare(`
+      SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name
+    `).all().map(({ name }) => name);
+
+    for (const required of ['sources', 'plans', 'plan_sources', 'categories', 'plan_categories', 'import_runs']) {
+      assert.ok(tableNames.includes(required), `missing table ${required}`);
+    }
+
+    const source = db.prepare("SELECT * FROM sources WHERE key = 'gencat-agenda'").get();
+    assert.equal(source.enabled, 1);
+    assert.equal(source.allows_data_reuse, 1);
+    assert.equal(source.allows_transformation, 1);
+    assert.equal(source.allows_images, 0);
+    assert.equal(source.requires_update_date, 1);
+    assert.equal(source.dataset_id, 'rhpv-yr4f');
+    assert.equal(db.prepare('SELECT count(*) AS count FROM categories').get().count, 18);
+  });
+});

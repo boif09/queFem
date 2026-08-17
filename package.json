@@ -1,0 +1,44 @@
+{
+  "name": "que-fem",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pipeline de dades de Què Fem?",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "db:init": "node backend/src/db/migrate.js",
+    "db:purge": "node backend/src/jobs/purgeOldPlans.js",
+    "import:gencat": "node backend/src/jobs/importGencat.js",
+    "start": "node backend/src/server.js",
+    "dev": "node --watch backend/src/server.js",
+    "dev:backend": "node --watch backend/src/server.js",
+    "dev:frontend": "vite frontend",
+    "build:frontend": "vite build frontend",
+    "preview:frontend": "vite preview frontend",
+    "test:backend": "node --test test/*.test.js",
+    "test:frontend": "vitest run --config frontend/vite.config.js",
+    "test": "npm run test:backend && npm run test:frontend"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "i18next": "^25.6.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-i18next": "^16.4.0",
+    "react-router-dom": "^7.9.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "jsdom": "^27.0.0",
+    "supertest": "^7.1.4",
+    "vite": "^8.1.0",
+    "vitest": "^4.0.0"
+  }
+}
