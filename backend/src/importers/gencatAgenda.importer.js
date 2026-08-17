@@ -4,6 +4,10 @@ import { canonicalJson } from '../db/repositories/plan.repository.js';
 import { isOutsideCatalonia } from '../location/cataloniaScope.js';
 import { normalizePlan } from '../normalizers/plan.normalizer.js';
 import { nullableString } from '../normalizers/text.normalizer.js';
+import {
+  currentYearInCatalonia,
+  temporalCoherenceIssue,
+} from '../quality/temporalCoherence.js';
 import { isPlanRetained, retentionCutoff } from '../retention/eventRetention.js';
 
 export const GENCAT_DATASET_ID = 'rhpv-yr4f';
@@ -87,6 +91,23 @@ export class GencatAgendaImporter extends BaseImporter {
 
   getSourceUpdatedAt() {
     return this.datasetUpdatedAt;
+  }
+
+  getInvalidIssue(record, normalized) {
+    return temporalCoherenceIssue(normalized.plan, {
+      currentYear: currentYearInCatalonia(this.now()),
+    });
+  }
+
+  describeInvalidRecord(record, normalized, issue) {
+    return {
+      source_record_id: String(record.codi),
+      title: normalized.plan.original_title,
+      reason: issue.code,
+      message: issue.message,
+      start_date: normalized.plan.start_date,
+      end_date: normalized.plan.end_date,
+    };
   }
 
   shouldImport(record, normalized) {

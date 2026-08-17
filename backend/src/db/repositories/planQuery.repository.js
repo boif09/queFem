@@ -1,4 +1,8 @@
 import { outsideCataloniaWhere } from '../../location/cataloniaScope.js';
+import {
+  currentYearInCatalonia,
+  temporallyInvalidWhere,
+} from '../../quality/temporalCoherence.js';
 import { retainedPlanWhere, retentionCutoff } from '../../retention/eventRetention.js';
 
 const QUALITY_THRESHOLD = 35;
@@ -44,16 +48,19 @@ export class PlanQueryRepository {
   }
 
   visiblePlanConditions(alias = 'p') {
+    const now = this.now();
     return {
       clauses: [
         `${alias}.status = 'active'`,
         `${alias}.quality_score >= ?`,
         retainedPlanWhere(alias),
         `NOT (${outsideCataloniaWhere(alias)})`,
+        `NOT (${temporallyInvalidWhere(alias)})`,
       ],
       parameters: [
         QUALITY_THRESHOLD,
-        retentionCutoff(this.eventRetentionDays, this.now()),
+        retentionCutoff(this.eventRetentionDays, now),
+        currentYearInCatalonia(now),
       ],
     };
   }

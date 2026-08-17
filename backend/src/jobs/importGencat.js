@@ -5,6 +5,7 @@ import { openDatabase } from '../db/database.js';
 import { migrate } from '../db/migrate.js';
 import { GencatAgendaImporter } from '../importers/gencatAgenda.importer.js';
 import { purgeOutsideCataloniaPlans } from '../location/cataloniaScope.js';
+import { purgeTemporallyInvalidPlans } from '../quality/temporalCoherence.js';
 import { purgeExpiredPlans } from '../retention/eventRetention.js';
 
 function printSummary(summary) {
@@ -12,6 +13,7 @@ function printSummary(summary) {
   console.log(`Inserted: ${summary.inserted}`);
   console.log(`Updated: ${summary.updated}`);
   console.log(`Skipped: ${summary.skipped}`);
+  console.log(`Invalid: ${summary.invalid}`);
   console.log(`Errors: ${summary.errors}`);
 }
 
@@ -23,8 +25,12 @@ export async function importGencat(config = loadConfig()) {
   const db = openDatabase(config.databasePath);
   try {
     migrate(db);
+    const invalidSummary = purgeTemporallyInvalidPlans(db);
     const expiredSummary = purgeExpiredPlans(db, { retentionDays: config.eventRetentionDays });
     const outsideSummary = purgeOutsideCataloniaPlans(db);
+    if (invalidSummary.plans > 0) {
+      console.log(`Purged temporally invalid: ${invalidSummary.plans} plans`);
+    }
     if (expiredSummary.plans > 0) {
       console.log(`Purged expired: ${expiredSummary.plans} plans older than ${expiredSummary.cutoff}`);
     }

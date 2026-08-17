@@ -140,6 +140,17 @@ function seedApiData(db) {
     municipality: null,
   });
 
+  const temporallyInvalid = insertPlan(db, {
+    fingerprint: 'espai-vapor|terrassa|2024-06-28',
+    original_title: 'Espai Vapor',
+    title_ca: 'Espai Vapor',
+    start_date: '2024-06-28',
+    end_date: '2924-06-30',
+    province: 'Barcelona',
+    comarca: 'Valles Occidental',
+    municipality: 'Terrassa',
+  });
+
   const source = db.prepare("SELECT id FROM sources WHERE key = 'gencat-agenda'").get();
   db.prepare(`
     INSERT INTO plan_sources (
@@ -158,7 +169,9 @@ function seedApiData(db) {
     '2026-08-17T09:00:00.000Z',
   );
 
-  return { event, translatedEvent, permanent, expired, outsideCatalonia };
+  return {
+    event, translatedEvent, permanent, expired, outsideCatalonia, temporallyInvalid,
+  };
 }
 
 test('Milestone 2 REST API', async (context) => {
@@ -184,11 +197,13 @@ test('Milestone 2 REST API', async (context) => {
         assert.ok(body.data.every(({ quality_score }) => quality_score >= 35));
       });
 
-      await context.test('oculta caducados y ubicaciones fuera de Catalunya incluso por id', async () => {
+      await context.test('oculta caducados, ubicaciones externas y fechas inválidas incluso por id', async () => {
         const expired = await apiRequest(`/api/plans/${ids.expired}`);
         const outside = await apiRequest(`/api/plans/${ids.outsideCatalonia}`);
+        const temporallyInvalid = await apiRequest(`/api/plans/${ids.temporallyInvalid}`);
         assert.equal(expired.response.status, 404);
         assert.equal(outside.response.status, 404);
+        assert.equal(temporallyInvalid.response.status, 404);
       });
 
       await context.test('filtra por comarca', async () => {

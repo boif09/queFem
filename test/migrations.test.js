@@ -20,5 +20,8 @@ test('creates the six milestone tables and seeds the approved source', () => {
     assert.equal(source.requires_update_date, 1);
     assert.equal(source.dataset_id, 'rhpv-yr4f');
     assert.equal(db.prepare('SELECT count(*) AS count FROM categories').get().count, 18);
+    const importRunColumns = new Set(db.pragma('table_info(import_runs)').map(({ name }) => name));
+    assert.ok(importRunColumns.has('invalid'));
+    assert.ok(importRunColumns.has('invalid_details'));
   });
 });

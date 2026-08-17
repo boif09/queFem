@@ -12,6 +12,8 @@ export class ImportRunRepository {
           inserted = @inserted,
           updated = @updated,
           skipped = @skipped,
+          invalid = @invalid,
+          invalid_details = @invalid_details,
           errors = @errors,
           error_message = @error_message
       WHERE id = @id
@@ -22,12 +24,13 @@ export class ImportRunRepository {
     return Number(this.createStatement.run(sourceId, new Date().toISOString()).lastInsertRowid);
   }
 
-  finish(id, summary, status, errorMessage = null) {
+  finish(id, summary, status, errorMessage = null, invalidDetails = []) {
     this.finishStatement.run({
       id,
       finished_at: new Date().toISOString(),
       status,
       ...summary,
+      invalid_details: invalidDetails.length > 0 ? JSON.stringify(invalidDetails) : null,
       error_message: errorMessage,
     });
   }

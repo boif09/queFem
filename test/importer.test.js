@@ -42,12 +42,12 @@ test('imports a real-shaped row and skips it when the payload is unchanged', asy
     };
     const first = new GencatAgendaImporter(options);
     assert.deepEqual(await first.run(), {
-      fetched: 1, inserted: 1, updated: 0, skipped: 0, errors: 0,
+      fetched: 1, inserted: 1, updated: 0, skipped: 0, invalid: 0, errors: 0,
     });
 
     const second = new GencatAgendaImporter(options);
     assert.deepEqual(await second.run(), {
-      fetched: 1, inserted: 0, updated: 0, skipped: 1, errors: 0,
+      fetched: 1, inserted: 0, updated: 0, skipped: 1, invalid: 0, errors: 0,
     });
 
     const plan = db.prepare('SELECT * FROM plans').get();
@@ -109,7 +109,7 @@ test('requests only retained official records and defensively skips an expired r
     });
 
     assert.deepEqual(await importer.run(), {
-      fetched: 2, inserted: 1, updated: 0, skipped: 1, errors: 0,
+      fetched: 2, inserted: 1, updated: 0, skipped: 1, invalid: 0, errors: 0,
     });
     const dataUrl = new URL(requestedUrls.find((url) => url.includes('/resource/')));
     assert.equal(dataUrl.searchParams.get('$where'), [
@@ -168,7 +168,7 @@ test('excludes explicit outside locations and keeps a Catalonia plan without coo
     });
 
     assert.deepEqual(await importer.run(), {
-      fetched: 3, inserted: 1, updated: 0, skipped: 2, errors: 0,
+      fetched: 3, inserted: 1, updated: 0, skipped: 2, invalid: 0, errors: 0,
     });
     const imported = db.prepare(`
       SELECT original_title, province, comarca, latitude, longitude FROM plans
@@ -180,5 +180,69 @@ test('excludes explicit outside locations and keeps a Catalonia plan without coo
       latitude: null,
       longitude: null,
     }]);
+  });
+});
+
+test('counts incoherent dates as invalid and stores auditable details', async () => {
+  await withTestDatabase(async (db) => {
+    const espaiVapor = {
+      ...record,
+      codi: 'TEMPORAL-2924',
+      denominaci: 'Espai Vapor',
+      data_inici: '2024-06-28T00:00:00.000',
+      data_fi: '2924-06-30T00:00:00.000',
+    };
+    const reversed = {
+      ...record,
+      codi: 'TEMPORAL-REVERSED',
+      denominaci: 'Dates invertides',
+      data_inici: '2026-10-02T00:00:00.000',
+      data_fi: '2026-10-01T00:00:00.000',
+    };
+    const valid = {
+      ...record,
+      codi: 'TEMPORAL-VALID',
+      denominaci: 'Exposició de dos anys',
+      data_inici: '2026-08-17T00:00:00.000',
+      data_fi: '2028-08-17T00:00:00.000',
+    };
+    const warnings = [];
+    const fetchImpl = (input) => {
+      if (String(input).includes('/api/views/')) return officialFetch(input);
+      return Promise.resolve(new Response(JSON.stringify([espaiVapor, reversed, valid]), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }));
+    };
+    const importer = new GencatAgendaImporter({
+      db,
+      fetchImpl,
+      pageSize: 10,
+      retentionDays: 0,
+      now: () => new Date('2026-08-17T12:00:00.000Z'),
+      logger: { warn(message) { warnings.push(message); } },
+    });
+
+    assert.deepEqual(await importer.run(), {
+      fetched: 3, inserted: 1, updated: 0, skipped: 2, invalid: 2, errors: 0,
+    });
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plans').get().count, 1);
+    assert.ok(warnings.some((message) => (
+      message.includes('TEMPORAL-2924') && message.includes('EXTREME_FUTURE_DATE')
+    )));
+    assert.ok(warnings.some((message) => (
+      message.includes('TEMPORAL-REVERSED') && message.includes('END_BEFORE_START')
+    )));
+
+    const run = db.prepare(`
+      SELECT skipped, invalid, invalid_details FROM import_runs ORDER BY id DESC LIMIT 1
+    `).get();
+    assert.equal(run.skipped, 2);
+    assert.equal(run.invalid, 2);
+    const details = JSON.parse(run.invalid_details);
+    assert.deepEqual(details.map(({ source_record_id, reason }) => ({ source_record_id, reason })), [
+      { source_record_id: 'TEMPORAL-2924', reason: 'EXTREME_FUTURE_DATE' },
+      { source_record_id: 'TEMPORAL-REVERSED', reason: 'END_BEFORE_START' },
+    ]);
   });
 });

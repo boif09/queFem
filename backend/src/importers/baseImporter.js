@@ -50,11 +50,29 @@ export class BaseImporter {
     return true;
   }
 
+  getInvalidIssue() {
+    return null;
+  }
+
+  describeInvalidRecord(record, normalized, issue) {
+    return {
+      source_record_id: this.getExternalId(record),
+      reason: issue.code,
+      message: issue.message,
+      start_date: normalized.plan.start_date,
+      end_date: normalized.plan.end_date,
+    };
+  }
+
   async run() {
     const source = this.sources.requireApproved(this.getSourceId());
     const runId = this.importRuns.start(source.id);
-    const summary = { fetched: 0, inserted: 0, updated: 0, skipped: 0, errors: 0 };
+    const summary = {
+      fetched: 0, inserted: 0, updated: 0, skipped: 0, invalid: 0, errors: 0,
+    };
+    const invalidDetails = [];
     let reportedErrors = 0;
+    let reportedInvalid = 0;
 
     try {
       for await (const record of this.fetch()) {
@@ -63,6 +81,20 @@ export class BaseImporter {
           const normalized = this.normalize(record);
           if (!normalized) {
             summary.skipped += 1;
+            continue;
+          }
+          const invalidIssue = this.getInvalidIssue(record, normalized);
+          if (invalidIssue) {
+            summary.skipped += 1;
+            summary.invalid += 1;
+            const detail = this.describeInvalidRecord(record, normalized, invalidIssue);
+            if (invalidDetails.length < 100) invalidDetails.push(detail);
+            if (reportedInvalid < 20) {
+              this.logger.warn(
+                `Registre invàlid omès (${detail.source_record_id}): [${invalidIssue.code}] ${invalidIssue.message}`,
+              );
+              reportedInvalid += 1;
+            }
             continue;
           }
           if (!this.shouldImport(record, normalized)) {
@@ -89,11 +121,17 @@ export class BaseImporter {
         }
       }
 
-      this.importRuns.finish(runId, summary, summary.errors > 0 ? 'completed_with_errors' : 'completed');
+      this.importRuns.finish(
+        runId,
+        summary,
+        summary.errors > 0 ? 'completed_with_errors' : 'completed',
+        null,
+        invalidDetails,
+      );
       return summary;
     } catch (error) {
       summary.errors += 1;
-      this.importRuns.finish(runId, summary, 'failed', error.message);
+      this.importRuns.finish(runId, summary, 'failed', error.message, invalidDetails);
       error.importSummary = summary;
       throw error;
     }
