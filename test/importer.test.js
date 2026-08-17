@@ -123,3 +123,62 @@ test('requests only retained official records and defensively skips an expired r
     );
   });
 });
+
+test('excludes explicit outside locations and keeps a Catalonia plan without coordinates', async () => {
+  await withTestDatabase(async (db) => {
+    const outsideCatalonia = {
+      ...record,
+      codi: '20260817002',
+      denominaci: 'Activitat fora de Catalunya',
+      municipi: 'agenda:ubicacions/fora-catalunya/fora-espanya',
+      comarca: 'agenda:ubicacions/fora-catalunya/fora-espanya',
+    };
+    const outsideSpain = {
+      ...record,
+      codi: '20260817003',
+      denominaci: 'Activitat fora d’Espanya',
+      municipi: 'agenda:ubicacions/barcelona/fora-espanya',
+      comarca: 'agenda:ubicacions/barcelona/fora-espanya',
+    };
+    const cataloniaWithoutCoordinates = {
+      ...record,
+      codi: '20260817004',
+      denominaci: 'Activitat catalana sense coordenades',
+      latitud: undefined,
+      longitud: undefined,
+    };
+    const fetchImpl = (input) => {
+      const url = String(input);
+      if (url.includes('/api/views/')) return officialFetch(input);
+      return Promise.resolve(new Response(JSON.stringify([
+        outsideCatalonia,
+        outsideSpain,
+        cataloniaWithoutCoordinates,
+      ]), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }));
+    };
+    const importer = new GencatAgendaImporter({
+      db,
+      fetchImpl,
+      pageSize: 10,
+      retentionDays: 0,
+      now: () => new Date('2026-08-17T12:00:00.000Z'),
+    });
+
+    assert.deepEqual(await importer.run(), {
+      fetched: 3, inserted: 1, updated: 0, skipped: 2, errors: 0,
+    });
+    const imported = db.prepare(`
+      SELECT original_title, province, comarca, latitude, longitude FROM plans
+    `).all();
+    assert.deepEqual(imported, [{
+      original_title: 'Activitat catalana sense coordenades',
+      province: 'Barcelona',
+      comarca: 'Barcelones',
+      latitude: null,
+      longitude: null,
+    }]);
+  });
+});

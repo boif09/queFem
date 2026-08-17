@@ -18,7 +18,7 @@ npm run import:gencat
 
 La base de dades es crea per defecte a `data/quefem.sqlite`. `DATABASE_PATH` permet canviar-ne la ubicació i `GENCAT_PAGE_SIZE` la mida de cada pàgina oficial descarregada.
 
-La importació consulta només activitats permanents o activitats que no hagin superat el període de retenció. Per defecte es conserven els esdeveniments fins a 90 dies després de la seva finalització, segons `EVENT_RETENTION_DAYS=90`. Abans de cada importació també es purguen de SQLite els plans que ja han superat aquest límit.
+La importació consulta només activitats permanents o activitats que no hagin superat el període de retenció. Per defecte es conserven els esdeveniments fins a 90 dies després de la seva finalització, segons `EVENT_RETENTION_DAYS=90`; amb el valor `0`, qualsevol esdeveniment finalitzat abans d'avui s'exclou. Abans de cada importació també es purguen de SQLite els plans que ja han superat aquest límit i els registres administrativament marcats com a fora de Catalunya.
 
 Per executar manualment la purga i compactar físicament la base de dades:
 
@@ -26,7 +26,7 @@ Per executar manualment la purga i compactar físicament la base de dades:
 npm run db:purge
 ```
 
-La purga elimina primer les relacions de `plan_sources` i `plan_categories`, conserva els `import_runs` i no elimina mai plans marcats com a permanents.
+La purga elimina primer les relacions de `plan_sources` i `plan_categories`, conserva els `import_runs` i no elimina mai plans marcats com a permanents per antiguitat. La comprovació territorial utilitza els camps administratius de Gencat i no exigeix coordenades.
 
 El comandament d'importació mostra sempre:
 

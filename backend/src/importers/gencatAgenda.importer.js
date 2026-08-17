@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { BaseImporter } from './baseImporter.js';
 import { canonicalJson } from '../db/repositories/plan.repository.js';
+import { isOutsideCatalonia } from '../location/cataloniaScope.js';
 import { normalizePlan } from '../normalizers/plan.normalizer.js';
 import { nullableString } from '../normalizers/text.normalizer.js';
 import { isPlanRetained, retentionCutoff } from '../retention/eventRetention.js';
@@ -89,7 +90,8 @@ export class GencatAgendaImporter extends BaseImporter {
   }
 
   shouldImport(record, normalized) {
-    return isPlanRetained(normalized.plan, this.cutoff || retentionCutoff(this.retentionDays, this.now()));
+    const cutoff = this.cutoff || retentionCutoff(this.retentionDays, this.now());
+    return isPlanRetained(normalized.plan, cutoff) && !isOutsideCatalonia(normalized.plan);
   }
 
   async requestJson(url) {

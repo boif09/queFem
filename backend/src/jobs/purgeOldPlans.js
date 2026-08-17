@@ -3,18 +3,21 @@ import 'dotenv/config';
 import { loadConfig } from '../config.js';
 import { openDatabase } from '../db/database.js';
 import { migrate } from '../db/migrate.js';
+import { purgeOutsideCataloniaPlans } from '../location/cataloniaScope.js';
 import { purgeExpiredPlans } from '../retention/eventRetention.js';
 
 export function purgeOldPlans(config = loadConfig(), { compact = true, now = new Date() } = {}) {
   const db = openDatabase(config.databasePath);
   try {
     migrate(db);
-    const summary = purgeExpiredPlans(db, {
+    const expired = purgeExpiredPlans(db, {
       retentionDays: config.eventRetentionDays,
       now,
     });
+    const outsideCatalonia = purgeOutsideCataloniaPlans(db);
+    const summary = { expired, outsideCatalonia };
     if (compact) {
-      if (summary.plans > 0) db.exec('VACUUM');
+      if (expired.plans > 0 || outsideCatalonia.plans > 0) db.exec('VACUUM');
       db.pragma('wal_checkpoint(TRUNCATE)');
     }
     return summary;
@@ -24,10 +27,11 @@ export function purgeOldPlans(config = loadConfig(), { compact = true, now = new
 }
 
 function printSummary(summary) {
-  console.log(`Cutoff: ${summary.cutoff}`);
-  console.log(`Plans deleted: ${summary.plans}`);
-  console.log(`Plan sources deleted: ${summary.planSources}`);
-  console.log(`Plan categories deleted: ${summary.planCategories}`);
+  console.log(`Cutoff: ${summary.expired.cutoff}`);
+  console.log(`Expired plans deleted: ${summary.expired.plans}`);
+  console.log(`Outside Catalonia plans deleted: ${summary.outsideCatalonia.plans}`);
+  console.log(`Plan sources deleted: ${summary.expired.planSources + summary.outsideCatalonia.planSources}`);
+  console.log(`Plan categories deleted: ${summary.expired.planCategories + summary.outsideCatalonia.planCategories}`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

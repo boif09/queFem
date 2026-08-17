@@ -6,11 +6,29 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('en-CA', {
   day: '2-digit',
 });
 
-const STALE_PLAN_WHERE = `
-  permanent = 0
-  AND COALESCE(end_date, start_date) IS NOT NULL
-  AND COALESCE(end_date, start_date) < ?
-`;
+export function expiredPlanWhere(alias = '') {
+  if (alias && !/^[a-z][a-z0-9_]*$/i.test(alias)) {
+    throw new TypeError('Àlies SQL no vàlid.');
+  }
+  const prefix = alias ? `${alias}.` : '';
+  return `
+    ${prefix}permanent = 0
+    AND COALESCE(${prefix}end_date, ${prefix}start_date) IS NOT NULL
+    AND COALESCE(${prefix}end_date, ${prefix}start_date) < ?
+  `;
+}
+
+export function retainedPlanWhere(alias = '') {
+  if (alias && !/^[a-z][a-z0-9_]*$/i.test(alias)) {
+    throw new TypeError('Àlies SQL no vàlid.');
+  }
+  const prefix = alias ? `${alias}.` : '';
+  return `(
+    ${prefix}permanent = 1
+    OR COALESCE(${prefix}end_date, ${prefix}start_date) IS NULL
+    OR COALESCE(${prefix}end_date, ${prefix}start_date) >= ?
+  )`;
+}
 
 function datePartsInCatalonia(date) {
   return Object.fromEntries(
@@ -21,8 +39,8 @@ function datePartsInCatalonia(date) {
 }
 
 export function retentionCutoff(retentionDays, now = new Date()) {
-  if (!Number.isInteger(retentionDays) || retentionDays <= 0) {
-    throw new TypeError('EVENT_RETENTION_DAYS ha de ser un enter positiu.');
+  if (!Number.isInteger(retentionDays) || retentionDays < 0) {
+    throw new TypeError('EVENT_RETENTION_DAYS ha de ser un enter no negatiu.');
   }
   const { year, month, day } = datePartsInCatalonia(now);
   const cutoff = new Date(Date.UTC(year, month - 1, day));
@@ -37,15 +55,16 @@ export function isPlanRetained(plan, cutoff) {
 }
 
 export function countExpiredPlans(db, cutoff) {
-  return db.prepare(`SELECT COUNT(*) AS count FROM plans WHERE ${STALE_PLAN_WHERE}`)
+  return db.prepare(`SELECT COUNT(*) AS count FROM plans WHERE ${expiredPlanWhere()}`)
     .get(cutoff).count;
 }
 
 export function purgeExpiredPlans(db, { retentionDays, now = new Date() }) {
   const cutoff = retentionCutoff(retentionDays, now);
+  const stalePlanWhere = expiredPlanWhere();
   const countLinks = (table) => db.prepare(`
     SELECT COUNT(*) AS count FROM ${table}
-    WHERE plan_id IN (SELECT id FROM plans WHERE ${STALE_PLAN_WHERE})
+    WHERE plan_id IN (SELECT id FROM plans WHERE ${stalePlanWhere})
   `).get(cutoff).count;
 
   const summary = {
@@ -59,13 +78,13 @@ export function purgeExpiredPlans(db, { retentionDays, now = new Date() }) {
   db.transaction(() => {
     db.prepare(`
       DELETE FROM plan_categories
-      WHERE plan_id IN (SELECT id FROM plans WHERE ${STALE_PLAN_WHERE})
+      WHERE plan_id IN (SELECT id FROM plans WHERE ${stalePlanWhere})
     `).run(cutoff);
     db.prepare(`
       DELETE FROM plan_sources
-      WHERE plan_id IN (SELECT id FROM plans WHERE ${STALE_PLAN_WHERE})
+      WHERE plan_id IN (SELECT id FROM plans WHERE ${stalePlanWhere})
     `).run(cutoff);
-    db.prepare(`DELETE FROM plans WHERE ${STALE_PLAN_WHERE}`).run(cutoff);
+    db.prepare(`DELETE FROM plans WHERE ${stalePlanWhere}`).run(cutoff);
   })();
 
   return summary;

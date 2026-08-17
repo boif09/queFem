@@ -4,6 +4,7 @@ import { loadConfig } from '../config.js';
 import { openDatabase } from '../db/database.js';
 import { migrate } from '../db/migrate.js';
 import { GencatAgendaImporter } from '../importers/gencatAgenda.importer.js';
+import { purgeOutsideCataloniaPlans } from '../location/cataloniaScope.js';
 import { purgeExpiredPlans } from '../retention/eventRetention.js';
 
 function printSummary(summary) {
@@ -22,9 +23,13 @@ export async function importGencat(config = loadConfig()) {
   const db = openDatabase(config.databasePath);
   try {
     migrate(db);
-    const purgeSummary = purgeExpiredPlans(db, { retentionDays: config.eventRetentionDays });
-    if (purgeSummary.plans > 0) {
-      console.log(`Purged: ${purgeSummary.plans} plans older than ${purgeSummary.cutoff}`);
+    const expiredSummary = purgeExpiredPlans(db, { retentionDays: config.eventRetentionDays });
+    const outsideSummary = purgeOutsideCataloniaPlans(db);
+    if (expiredSummary.plans > 0) {
+      console.log(`Purged expired: ${expiredSummary.plans} plans older than ${expiredSummary.cutoff}`);
+    }
+    if (outsideSummary.plans > 0) {
+      console.log(`Purged outside Catalonia: ${outsideSummary.plans} plans`);
     }
     const importer = new GencatAgendaImporter({
       db,

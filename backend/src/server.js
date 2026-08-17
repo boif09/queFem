@@ -8,7 +8,11 @@ const config = loadConfig();
 const db = openDatabase(config.databasePath);
 migrate(db);
 
-const app = createApp({ db, defaultLanguage: config.defaultLanguage });
+const app = createApp({
+  db,
+  defaultLanguage: config.defaultLanguage,
+  eventRetentionDays: config.eventRetentionDays,
+});
 const server = app.listen(config.port, () => {
   console.log(`API de Què Fem? disponible a http://localhost:${config.port}`);
 });

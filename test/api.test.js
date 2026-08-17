@@ -119,6 +119,27 @@ function seedApiData(db) {
     quality_score: 20,
   });
 
+  const expired = insertPlan(db, {
+    fingerprint: 'expired|girona|2026-08-16',
+    original_title: 'Esdeveniment caducat',
+    title_ca: 'Esdeveniment caducat',
+    start_date: '2026-08-16',
+    end_date: '2026-08-16',
+    comarca: 'Girones',
+    municipality: 'Girona',
+  });
+
+  const outsideCatalonia = insertPlan(db, {
+    fingerprint: 'outside|buenos-aires|2026-08-20',
+    original_title: 'Esdeveniment fora de Catalunya',
+    title_ca: 'Esdeveniment fora de Catalunya',
+    start_date: '2026-08-20',
+    end_date: '2026-08-20',
+    province: 'Fora Catalunya',
+    comarca: 'Fora Espanya',
+    municipality: null,
+  });
+
   const source = db.prepare("SELECT id FROM sources WHERE key = 'gencat-agenda'").get();
   db.prepare(`
     INSERT INTO plan_sources (
@@ -137,13 +158,19 @@ function seedApiData(db) {
     '2026-08-17T09:00:00.000Z',
   );
 
-  return { event, translatedEvent, permanent };
+  return { event, translatedEvent, permanent, expired, outsideCatalonia };
 }
 
 test('Milestone 2 REST API', async (context) => {
   await withTestDatabase(async (db) => {
     const ids = seedApiData(db);
-    const app = createApp({ db, defaultLanguage: 'ca', logger: { error() {} } });
+    const app = createApp({
+      db,
+      defaultLanguage: 'ca',
+      eventRetentionDays: 0,
+      now: () => new Date('2026-08-17T12:00:00.000Z'),
+      logger: { error() {} },
+    });
     const apiRequest = async (path) => {
       const response = await request(app).get(path);
       return { response, body: response.body };
@@ -155,6 +182,13 @@ test('Milestone 2 REST API', async (context) => {
         assert.equal(body.pagination.total, 3);
         assert.equal(body.pagination.page, 1);
         assert.ok(body.data.every(({ quality_score }) => quality_score >= 35));
+      });
+
+      await context.test('oculta caducados y ubicaciones fuera de Catalunya incluso por id', async () => {
+        const expired = await apiRequest(`/api/plans/${ids.expired}`);
+        const outside = await apiRequest(`/api/plans/${ids.outsideCatalonia}`);
+        assert.equal(expired.response.status, 404);
+        assert.equal(outside.response.status, 404);
       });
 
       await context.test('filtra por comarca', async () => {

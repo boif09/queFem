@@ -6,9 +6,15 @@ import { createSourcesRouter } from './api/sources.routes.js';
 import { ValidationError } from './api/validation.js';
 import { PlanQueryRepository } from './db/repositories/planQuery.repository.js';
 
-export function createApp({ db, defaultLanguage = 'ca', logger = console }) {
+export function createApp({
+  db,
+  defaultLanguage = 'ca',
+  eventRetentionDays = 90,
+  now = () => new Date(),
+  logger = console,
+}) {
   const app = express();
-  const repository = new PlanQueryRepository(db);
+  const repository = new PlanQueryRepository(db, { eventRetentionDays, now });
 
   app.disable('x-powered-by');
   app.use('/api/plans', createPlansRouter(repository, defaultLanguage));

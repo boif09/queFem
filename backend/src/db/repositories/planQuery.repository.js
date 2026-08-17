@@ -1,3 +1,6 @@
+import { outsideCataloniaWhere } from '../../location/cataloniaScope.js';
+import { retainedPlanWhere, retentionCutoff } from '../../retention/eventRetention.js';
+
 const QUALITY_THRESHOLD = 35;
 
 function localizedExpressions(language) {
@@ -34,13 +37,29 @@ function mapPlan(row) {
 }
 
 export class PlanQueryRepository {
-  constructor(db) {
+  constructor(db, { eventRetentionDays = 90, now = () => new Date() } = {}) {
     this.db = db;
+    this.eventRetentionDays = eventRetentionDays;
+    this.now = now;
+  }
+
+  visiblePlanConditions(alias = 'p') {
+    return {
+      clauses: [
+        `${alias}.status = 'active'`,
+        `${alias}.quality_score >= ?`,
+        retainedPlanWhere(alias),
+        `NOT (${outsideCataloniaWhere(alias)})`,
+      ],
+      parameters: [
+        QUALITY_THRESHOLD,
+        retentionCutoff(this.eventRetentionDays, this.now()),
+      ],
+    };
   }
 
   buildWhere(filters) {
-    const clauses = ["p.status = 'active'", 'p.quality_score >= ?'];
-    const parameters = [QUALITY_THRESHOLD];
+    const { clauses, parameters } = this.visiblePlanConditions();
     const equalFilters = [
       ['province', 'p.province'],
       ['comarca', 'p.comarca'],
@@ -160,11 +179,12 @@ export class PlanQueryRepository {
 
   findById(id, language) {
     const text = localizedExpressions(language);
+    const visible = this.visiblePlanConditions();
     const row = this.db.prepare(`
       SELECT p.*, ${text.title} AS title, ${text.subtitle} AS subtitle, ${text.description} AS description
       FROM plans p
-      WHERE p.id = ? AND p.status = 'active' AND p.quality_score >= ?
-    `).get(id, QUALITY_THRESHOLD);
+      WHERE p.id = ? AND ${visible.clauses.join(' AND ')}
+    `).get(id, ...visible.parameters);
     if (!row) return null;
 
     const plan = mapPlan(row);
@@ -185,23 +205,23 @@ export class PlanQueryRepository {
   }
 
   findComarques() {
+    const visible = this.visiblePlanConditions('plans');
     return this.db.prepare(`
       SELECT DISTINCT comarca
       FROM plans
-      WHERE status = 'active'
-        AND quality_score >= ?
+      WHERE ${visible.clauses.join(' AND ')}
         AND comarca IS NOT NULL
         AND trim(comarca) <> ''
-        AND (province IS NULL OR province <> 'Fora de Catalunya')
       ORDER BY comarca COLLATE NOCASE
-    `).all(QUALITY_THRESHOLD).map(({ comarca }) => comarca);
+    `).all(...visible.parameters).map(({ comarca }) => comarca);
   }
 
   findMunicipalities(comarca) {
+    const visible = this.visiblePlanConditions('plans');
     const conditions = [
-      "status = 'active'", 'quality_score >= ?', "municipality IS NOT NULL", "trim(municipality) <> ''",
+      ...visible.clauses, "municipality IS NOT NULL", "trim(municipality) <> ''",
     ];
-    const parameters = [QUALITY_THRESHOLD];
+    const parameters = [...visible.parameters];
     if (comarca) {
       conditions.push('comarca = ? COLLATE NOCASE');
       parameters.push(comarca);
