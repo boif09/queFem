@@ -18,6 +18,8 @@ describe('PlanCard', () => {
           end_date: '2026-08-22',
           permanent: false,
           free: true,
+          image_url: 'https://example.test/not-authorized.jpg',
+          image_reuse_allowed: false,
           municipality: 'Palafrugell',
           comarca: 'Baix Empordà',
           categories: [{ slug: 'musica', name: 'Música', icon: 'music' }],
@@ -30,5 +32,29 @@ describe('PlanCard', () => {
     expect(screen.getByText('Gratuït')).toBeInTheDocument();
     expect(screen.getByRole('link')).toHaveAttribute('href', '/plans/42');
     expect(document.querySelector('img')).not.toBeInTheDocument();
+  });
+
+  it('uses an external image only when its reuse is explicitly allowed', () => {
+    render(
+      <MemoryRouter>
+        <PlanCard plan={{
+          id: 43,
+          kind: 'event',
+          title: 'Imatge autoritzada',
+          start_date: '2026-08-22',
+          end_date: '2026-08-22',
+          permanent: false,
+          free: false,
+          image_url: 'https://example.test/allowed.jpg',
+          image_reuse_allowed: true,
+          categories: [{ slug: 'cultura', name: 'Cultura', icon: 'book-open' }],
+        }} />
+      </MemoryRouter>,
+    );
+
+    expect(document.querySelector('.plan-visual img')).toHaveAttribute(
+      'src',
+      'https://example.test/allowed.jpg',
+    );
   });
 });

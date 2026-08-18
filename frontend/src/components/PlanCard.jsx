@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../utils/dates.js';
-import { CategoryIcon } from './CategoryIcon.jsx';
+import { PlanVisual } from './PlanVisual.jsx';
 
 export function PlanCard({ plan }) {
   const { t, i18n } = useTranslation();
@@ -23,11 +23,7 @@ export function PlanCard({ plan }) {
         state={{ from: `${location.pathname}${location.search}` }}
         aria-label={t('plan.openDetail', { title: plan.title })}
       >
-        <div className="plan-visual" data-category={primaryCategory?.slug || plan.kind}>
-          <div className="visual-orbit" aria-hidden="true" />
-          <CategoryIcon icon={primaryCategory?.icon} className="category-icon-large" />
-          <span className="kind-label">{t(`plan.kind.${plan.kind}`)}</span>
-        </div>
+        <PlanVisual plan={plan} showKind />
         <div className="plan-card-body">
           {primaryCategory && <span className="category-label">{primaryCategory.name}</span>}
           <h2>{plan.title}</h2>

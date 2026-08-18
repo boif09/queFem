@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CategoryIcon } from '../components/CategoryIcon.jsx';
+import { PlanVisual } from '../components/PlanVisual.jsx';
 import { SourceAttribution } from '../components/SourceAttribution.jsx';
 import { ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
@@ -45,9 +46,12 @@ export function PlanDetailPage() {
 
   return (
     <article className="detail-page">
+      <div className="container detail-header">
+        <Link className="back-link" to={back}>← {t('detail.back')}</Link>
+        <PlanVisual plan={plan} className="detail-visual" />
+      </div>
       <div className="detail-hero" data-category={primaryCategory?.slug || plan.kind}>
         <div className="container">
-          <Link className="back-link" to={back}>← {t('detail.back')}</Link>
           <div className="detail-title-row">
             <CategoryIcon icon={primaryCategory?.icon} className="detail-icon" />
             <div>

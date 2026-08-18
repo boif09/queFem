@@ -2,6 +2,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { SearchFilters } from '../components/SearchFilters.jsx';
 import { createPlansSearch, filtersFromSearchParams } from '../utils/search.js';
+import { BrandLogo } from '../components/BrandLogo.jsx';
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -15,8 +16,9 @@ export function HomePage() {
   return (
     <>
       <section className="hero">
-        <div className="hero-pattern" aria-hidden="true"><i /><i /><i /><i /></div>
+        <div className="hero-pattern" aria-hidden="true"><i /><i /></div>
         <div className="container hero-content">
+          <BrandLogo className="hero-logo" />
           <p className="eyebrow">{t('home.eyebrow')}</p>
           <h1>{t('home.title')}</h1>
           <p className="hero-intro">{t('home.intro')}</p>

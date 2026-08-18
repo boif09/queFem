@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './LanguageSwitcher.jsx';
+import { BrandLogo } from './BrandLogo.jsx';
 
 export function Header() {
   const { t } = useTranslation();
@@ -9,11 +10,7 @@ export function Header() {
     <header className="site-header">
       <div className="container header-inner">
         <NavLink className="brand" to="/" aria-label={t('nav.home')}>
-          <span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>
-          <span className="brand-copy">
-            <strong>{t('app.name')}</strong>
-            <small>{t('app.tagline')}</small>
-          </span>
+          <BrandLogo />
         </NavLink>
         <nav className="primary-nav" aria-label={t('nav.explore')}>
           <NavLink className={navClass} to="/">{t('nav.home')}</NavLink>

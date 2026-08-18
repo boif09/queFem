@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Header } from './Header.jsx';
+import { BrandLogo } from './BrandLogo.jsx';
 
 export function Layout() {
   const { t } = useTranslation();
@@ -13,10 +14,12 @@ export function Layout() {
       <footer className="site-footer">
         <div className="container footer-inner">
           <div>
-            <strong>{t('app.name')}</strong>
-            <span>{t('app.tagline')}</span>
+            <BrandLogo className="footer-logo" />
           </div>
-          <p>{t('app.notOfficial')}</p>
+          <div className="footer-meta">
+            <span>{t('app.tagline')}</span>
+            <p>{t('app.notOfficial')}</p>
+          </div>
         </div>
       </footer>
     </div>
