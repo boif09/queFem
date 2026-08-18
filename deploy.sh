@@ -14,7 +14,7 @@ echo "======================================"
 cd "$APP_DIR"
 
 echo
-echo "1/6 🔎 Comprobando repositorio..."
+echo "1/7 🔎 Comprobando repositorio..."
 
 if ! git diff --quiet || ! git diff --cached --quiet; then
     echo "❌ Hay cambios locales sin guardar."
@@ -23,27 +23,32 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
 fi
 
 echo
-echo "2/6 ⬇️ Descargando cambios de Git..."
+echo "2/7 ⬇️ Descargando cambios de Git..."
 
 git pull --ff-only
 
 echo
-echo "3/6 📦 Instalando dependencias..."
+echo "3/7 📦 Instalando dependencias..."
 
 npm ci
 
 echo
-echo "4/6 🗄️ Actualizando base de datos..."
+echo "4/7 🧪 Ejecutando tests..."
+
+npm test
+
+echo
+echo "5/7 🗄️ Actualizando base de datos..."
 
 npm run db:init
 
 echo
-echo "5/6 🏗️ Compilando frontend..."
+echo "6/7 🏗️ Compilando frontend..."
 
 npm run build:frontend
 
 echo
-echo "6/6 ♻️ Reiniciando backend..."
+echo "7/7 ♻️ Reiniciando backend..."
 
 pm2 restart "$PM2_APP" --update-env
 pm2 save

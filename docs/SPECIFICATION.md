@@ -1302,12 +1302,12 @@ No hardcodejar-la.
 
 # 36. Gestió d'esdeveniments antics
 
-No eliminar immediatament esdeveniments finalitzats.
+No conservar esdeveniments finalitzats abans del dia actual.
 
-Mantenir-los durant:
+Valor per defecte:
 
 ```text
-90 dies
+0 dies
 ```
 
 i posteriorment purgar-los.
@@ -1315,7 +1315,7 @@ i posteriorment purgar-los.
 Configurable:
 
 ```env
-EVENT_RETENTION_DAYS=90
+EVENT_RETENTION_DAYS=0
 ```
 
 ---
@@ -1382,7 +1382,7 @@ DATABASE_PATH=./data/quefem.sqlite
 GENCAT_SYNC_ENABLED=true
 GENCAT_SYNC_CRON=
 
-EVENT_RETENTION_DAYS=90
+EVENT_RETENTION_DAYS=0
 
 DEFAULT_LANGUAGE=ca
 ```

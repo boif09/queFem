@@ -1,0 +1,10 @@
+- Read docs/SPECIFICATION.md before major changes.
+- Catalan is the primary UI language.
+- Spanish must be fully supported.
+- Never scrape a website unless reuse has been explicitly approved.
+- Never add a data source before checking its licence/terms.
+- Never assume external images can be reused.
+- Preserve source attribution and update information.
+- Do not implement future milestones unless explicitly requested.
+- Prefer official APIs/open data.
+- Run relevant tests before considering work complete.

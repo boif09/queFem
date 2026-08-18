@@ -41,7 +41,7 @@ function mapPlan(row) {
 }
 
 export class PlanQueryRepository {
-  constructor(db, { eventRetentionDays = 90, now = () => new Date() } = {}) {
+  constructor(db, { eventRetentionDays = 0, now = () => new Date() } = {}) {
     this.db = db;
     this.eventRetentionDays = eventRetentionDays;
     this.now = now;

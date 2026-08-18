@@ -43,7 +43,7 @@ export class GencatAgendaImporter extends BaseImporter {
     db,
     fetchImpl = globalThis.fetch,
     pageSize = 1000,
-    retentionDays = 90,
+    retentionDays = 0,
     now = () => new Date(),
     logger = console,
   }) {

@@ -104,7 +104,7 @@ test('requests only retained official records and defensively skips an expired r
       db,
       fetchImpl,
       pageSize: 10,
-      retentionDays: 90,
+      retentionDays: 0,
       now: () => new Date('2026-08-17T12:00:00.000Z'),
     });
 
@@ -113,8 +113,8 @@ test('requests only retained official records and defensively skips an expired r
     });
     const dataUrl = new URL(requestedUrls.find((url) => url.includes('/resource/')));
     assert.equal(dataUrl.searchParams.get('$where'), [
-      "data_fi >= '2026-05-19T00:00:00.000'",
-      "(data_fi IS NULL AND data_inici >= '2026-05-19T00:00:00.000')",
+      "data_fi >= '2026-08-17T00:00:00.000'",
+      "(data_fi IS NULL AND data_inici >= '2026-08-17T00:00:00.000')",
       "permanent = 'Sí'",
     ].join(' OR '));
     assert.deepEqual(

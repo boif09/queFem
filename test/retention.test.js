@@ -26,9 +26,10 @@ function insertPlan(db, { fingerprint, startDate, endDate, permanent = 0 }) {
   return Number(result.lastInsertRowid);
 }
 
-test('calculates the 90-day cutoff using the Catalonia calendar date', () => {
+test('uses no retention by default and calculates cutoffs using the Catalonia calendar date', () => {
   assert.equal(retentionCutoff(90, new Date('2026-08-17T12:00:00.000Z')), '2026-05-19');
   assert.equal(retentionCutoff(0, new Date('2026-08-17T12:00:00.000Z')), '2026-08-17');
+  assert.equal(loadConfig({}).eventRetentionDays, 0);
   assert.equal(loadConfig({ EVENT_RETENTION_DAYS: '0' }).eventRetentionDays, 0);
   assert.throws(() => retentionCutoff(-1), /enter no negatiu/);
 });
@@ -46,7 +47,7 @@ test('purges only expired events and removes their dependent records atomically'
       fingerprint: 'expired', startDate: '2020-01-01', endDate: '2020-01-02',
     });
     const retainedId = insertPlan(db, {
-      fingerprint: 'cutoff', startDate: '2026-05-18', endDate: '2026-05-19',
+      fingerprint: 'cutoff', startDate: '2026-08-16', endDate: '2026-08-17',
     });
     const permanentId = insertPlan(db, {
       fingerprint: 'permanent', startDate: '2020-01-01', endDate: '2020-01-02', permanent: 1,
@@ -63,12 +64,12 @@ test('purges only expired events and removes their dependent records atomically'
     `).run(expiredId);
 
     const summary = purgeExpiredPlans(db, {
-      retentionDays: 90,
+      retentionDays: 0,
       now: new Date('2026-08-17T12:00:00.000Z'),
     });
 
     assert.deepEqual(summary, {
-      cutoff: '2026-05-19', plans: 1, planSources: 1, planCategories: 1,
+      cutoff: '2026-08-17', plans: 1, planSources: 1, planCategories: 1,
     });
     assert.deepEqual(
       db.prepare('SELECT id FROM plans ORDER BY id').all().map(({ id }) => id),

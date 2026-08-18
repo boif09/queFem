@@ -9,7 +9,7 @@ import { PlanQueryRepository } from './db/repositories/planQuery.repository.js';
 export function createApp({
   db,
   defaultLanguage = 'ca',
-  eventRetentionDays = 90,
+  eventRetentionDays = 0,
   now = () => new Date(),
   logger = console,
 }) {

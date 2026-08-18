@@ -24,7 +24,7 @@ export function loadConfig(env = process.env) {
       : path.resolve(projectRoot, configuredDatabasePath),
     gencatSyncEnabled: env.GENCAT_SYNC_ENABLED !== 'false',
     gencatPageSize: positiveInteger(env.GENCAT_PAGE_SIZE, 1000),
-    eventRetentionDays: nonNegativeInteger(env.EVENT_RETENTION_DAYS, 90),
+    eventRetentionDays: nonNegativeInteger(env.EVENT_RETENTION_DAYS, 0),
     defaultLanguage: env.DEFAULT_LANGUAGE || 'ca',
   };
 }

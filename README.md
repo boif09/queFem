@@ -1,6 +1,8 @@
 # Què Fem?
 
-Milestones 1, 2 i 3 de Què Fem?: Agenda Cultural de Catalunya → normalització → SQLite → API REST → interfície web React.
+Què Fem? és una aplicació web per descobrir esdeveniments a Catalunya. Les milestones 1, 2 i 3 estan implementades: Agenda Cultural de Catalunya → normalització i controls de qualitat → SQLite → API REST → interfície web React.
+
+El backend utilitza Node.js i Express; el frontend, React i Vite. La interfície és bilingüe, amb català per defecte i castellà complet. Inclou cercador, filtres, resultats, detall del pla i informació sobre les fonts de dades.
 
 ## Requisits
 
@@ -18,7 +20,7 @@ npm run import:gencat
 
 La base de dades es crea per defecte a `data/quefem.sqlite`. `DATABASE_PATH` permet canviar-ne la ubicació i `GENCAT_PAGE_SIZE` la mida de cada pàgina oficial descarregada.
 
-La importació consulta només activitats permanents o activitats que no hagin superat el període de retenció. Per defecte es conserven els esdeveniments fins a 90 dies després de la seva finalització, segons `EVENT_RETENTION_DAYS=90`; amb el valor `0`, qualsevol esdeveniment finalitzat abans d'avui s'exclou. Abans de cada importació també es purguen de SQLite els plans que ja han superat aquest límit i els registres administrativament marcats com a fora de Catalunya.
+La importació consulta només activitats permanents o activitats que encara no hagin finalitzat. El valor per defecte és `EVENT_RETENTION_DAYS=0`: un esdeveniment finalitzat abans d'avui s'exclou, un que acaba avui continua vigent i els plans permanents no s'eliminen per antiguitat. Abans de cada importació també es purguen de SQLite els esdeveniments caducats, els registres administrativament marcats com a fora de Catalunya i les dates clarament absurdes o incoherents.
 
 Per executar manualment la purga i compactar físicament la base de dades:
 
@@ -60,9 +62,9 @@ La font està habilitada només perquè les metadades i la llicència oficials p
 - El model intern no té columnes per a tots els camps oficials (documents, vídeos, contactes, enllaços múltiples, etc.). Cada fila es desa canònicament a `plan_sources.source_payload_json`, excepte els camps de les imatges sense permís de reutilització.
 - Els registres anteriors al canvi d'esquema de març de 2025 tenen camps buits, tal com indiquen les metadades oficials. L'importador no inventa valors per omplir-los.
 - La descàrrega aplica un filtre SoQL sobre els camps oficials `data_fi`, `data_inici` i `permanent`. La mateixa regla es torna a comprovar després de normalitzar cada registre per evitar conservar una fila caducada si la font retorna dades incoherents amb el filtre.
-- La font conté almenys una data de finalització aparentment anòmala: `Espai Vapor` figura amb `data_fi=2924-06-30`. No es corregeix ni s'elimina automàticament perquè no hi ha una dada oficial alternativa; la retenció prioritza no perdre activitats que la font encara considera vigents.
+- La font conté almenys una data de finalització aparentment anòmala: `Espai Vapor` figura amb `data_fi=2924-06-30`. L'importador no inventa una data alternativa: rebutja el registre per incoherència temporal i en conserva el detall auditable a l'execució d'importació.
 
-## Estructura de la milestone
+## Estructura actual
 
 ```text
 backend/src/
@@ -76,10 +78,10 @@ backend/src/
   app.js              configuració d'Express
   server.js           arrencada del backend
 data/                 base SQLite local (ignorada per git)
-test/                 proves de la milestone
+frontend/             aplicació React/Vite i proves de la interfície
+test/                 proves del backend, importer i base de dades
+deploy.sh             desplegament de codi a producció
 ```
-
-No s'inclouen encara frontend, cron, purga d'esdeveniments ni fonts addicionals.
 
 ## API REST (Milestone 2)
 
@@ -152,3 +154,9 @@ Rutes web disponibles:
 ```
 
 La Milestone 3 no inclou login, favorits, mapes avançats, monetització, IA, fonts noves ni scraping.
+
+## Producció i desplegament
+
+L'aplicació està publicada a `https://quefem.jusboif.es`. El backend està gestionat per PM2, el frontend compilat el serveix Nginx i `deploy.sh` desplega els canvis de codi. La sincronització de Gencat s'executa cada dues hores mitjançant el cron extern del servidor; no forma part del desplegament.
+
+La infraestructura, el cron real i les ordres d'operació estan documentats a [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
