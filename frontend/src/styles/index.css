@@ -409,6 +409,15 @@ input[type="date"], select { border-color: var(--line); background-color: #fbf9f
 .footer-logo { width: 170px; }
 .footer-meta { display: grid; justify-items: end; gap: 6px; }
 .footer-meta p { margin: 0; }
+.coordinate-value { display: block; margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+.mini-map { display: grid; gap: 6px; }
+.mini-map-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-md); background: #e4e3da; }
+.mini-map-frame iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }
+.mini-map-link { position: absolute; inset: 0; display: flex; align-items: end; justify-content: end; padding: 10px; color: var(--ink); text-decoration: none; }
+.mini-map-link > span { display: inline-flex; align-items: center; gap: 5px; padding: 7px 10px; border: 1px solid rgba(217,193,187,.8); border-radius: 999px; background: rgba(255,255,255,.94); box-shadow: var(--shadow-soft); color: var(--coral); font-size: .72rem; font-weight: 700; }
+.mini-map-link:hover > span { background: var(--coral); color: white; }
+.mini-map-link:focus-visible { outline-offset: -4px; }
+.map-attribution { width: fit-content; color: var(--ink-soft); font-size: .62rem; text-underline-offset: 2px; }
 
 @media (max-width: 980px) {
   .container { width: min(calc(100% - 40px), var(--container)); }

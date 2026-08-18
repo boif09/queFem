@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CategoryIcon } from '../components/CategoryIcon.jsx';
 import { PlanVisual } from '../components/PlanVisual.jsx';
+import { hasValidCoordinates, MiniMap } from '../components/MiniMap.jsx';
 import { SourceAttribution } from '../components/SourceAttribution.jsx';
 import { ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
@@ -43,6 +44,7 @@ export function PlanDetailPage() {
       : t('date.range', { start: formatDate(plan.start_date, language), end: formatDate(plan.end_date, language) });
   const price = plan.free ? t('plan.free') : (plan.price_text || t('plan.priceUnknown'));
   const back = location.state?.from || '/plans';
+  const hasCoordinates = hasValidCoordinates(plan.latitude, plan.longitude);
 
   return (
     <article className="detail-page">
@@ -81,10 +83,10 @@ export function PlanDetailPage() {
             <InfoItem label={t('detail.municipality')}>{plan.municipality}</InfoItem>
             <InfoItem label={t('detail.comarca')}>{plan.comarca}</InfoItem>
             <InfoItem label={t('detail.locality')}>{plan.locality}</InfoItem>
-            {plan.latitude !== null && plan.longitude !== null && (
+            {hasCoordinates && (
               <InfoItem label={t('detail.coordinates')}>
-                <span>{plan.latitude}, {plan.longitude}</span>
-                <small>{t('detail.mapFuture')}</small>
+                <span className="coordinate-value">{plan.latitude}, {plan.longitude}</span>
+                <MiniMap latitude={plan.latitude} longitude={plan.longitude} />
               </InfoItem>
             )}
           </dl>

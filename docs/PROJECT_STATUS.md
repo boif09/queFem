@@ -33,6 +33,7 @@ Last updated: 2026-08-18
 - resultados
 - detalle
 - página de fuentes
+- minimapa de ubicación en el detalle para planes con coordenadas, enlazado a Google Maps
 
 ### Producción
 
@@ -68,7 +69,7 @@ Last updated: 2026-08-18
 - Civitatis
 - Tiqets
 - planes permanentes
-- mapas
+- mapas avanzados y búsqueda por proximidad
 - favoritos
 - IA
 - monetización

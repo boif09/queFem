@@ -54,6 +54,14 @@ describe('PlanDetailPage', () => {
     expect(await screen.findByRole('heading', { name: 'Festival de prova' })).toBeInTheDocument();
     expect(screen.getByText('Descripció original del festival.')).toBeInTheDocument();
     expect(screen.getByText('Plaça Major')).toBeInTheDocument();
+    expect(screen.getByTitle('Mapa de la ubicació')).toHaveAttribute(
+      'src',
+      expect.stringContaining('openstreetmap.org/export/embed.html'),
+    );
+    expect(screen.getByRole('link', { name: 'Obrir a Google Maps' })).toHaveAttribute(
+      'href',
+      'https://www.google.com/maps/search/?api=1&query=41.95%2C3.2',
+    );
     expect(screen.getByRole('heading', { name: 'Font de la informació' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Agenda Cultural de Catalunya' })).toBeInTheDocument();
     expect(screen.getAllByText('Generalitat de Catalunya. Departament de Cultura')).toHaveLength(2);
