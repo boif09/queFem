@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 function validCoordinate(value, minimum, maximum) {
@@ -42,37 +43,48 @@ export function mapUrls(latitude, longitude) {
 
 export function MiniMap({ latitude, longitude }) {
   const { t } = useTranslation();
+  const [mapLoaded, setMapLoaded] = useState(false);
   const urls = mapUrls(latitude, longitude);
   if (!urls) return null;
 
   return (
     <div className="mini-map">
       <div className="mini-map-frame">
-        <iframe
-          src={urls.embed}
-          title={t('detail.mapTitle')}
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          tabIndex="-1"
-        />
+        {mapLoaded ? (
+          <>
+            <iframe
+              src={urls.embed}
+              title={t('detail.mapTitle')}
+              referrerPolicy="no-referrer"
+              tabIndex="-1"
+            />
+            <a
+              className="mini-map-link"
+              href={urls.google}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t('detail.openGoogleMaps')}
+            >
+              <span>{t('detail.openGoogleMaps')} <span aria-hidden="true">↗</span></span>
+            </a>
+          </>
+        ) : (
+          <button className="mini-map-placeholder" type="button" onClick={() => setMapLoaded(true)}>
+            <strong>{t('detail.loadMap')}</strong>
+            <span>{t('detail.mapLocation', { latitude, longitude })}</span>
+          </button>
+        )}
+      </div>
+      {mapLoaded && (
         <a
-          className="mini-map-link"
-          href={urls.google}
+          className="map-attribution"
+          href="https://www.openstreetmap.org/copyright"
           target="_blank"
           rel="noreferrer"
-          aria-label={t('detail.openGoogleMaps')}
         >
-          <span>{t('detail.openGoogleMaps')} <span aria-hidden="true">↗</span></span>
+          © OpenStreetMap contributors
         </a>
-      </div>
-      <a
-        className="map-attribution"
-        href="https://www.openstreetmap.org/copyright"
-        target="_blank"
-        rel="noreferrer"
-      >
-        © OpenStreetMap contributors
-      </a>
+      )}
     </div>
   );
 }

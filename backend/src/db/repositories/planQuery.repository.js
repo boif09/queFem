@@ -69,10 +69,16 @@ export class PlanQueryRepository {
     const { clauses, parameters } = this.visiblePlanConditions();
     const equalFilters = [
       ['province', 'p.province'],
-      ['comarca', 'p.comarca'],
-      ['municipality', 'p.municipality'],
       ['kind', 'p.kind'],
     ];
+    if (filters.municipality !== undefined) {
+      clauses.push('normalize_location(p.municipality) = normalize_location(?)');
+      parameters.push(filters.municipality);
+    }
+    if (filters.comarca !== undefined && filters.municipality === undefined) {
+      clauses.push('p.comarca = ? COLLATE NOCASE');
+      parameters.push(filters.comarca);
+    }
     for (const [key, column] of equalFilters) {
       if (filters[key] !== undefined) {
         clauses.push(`${column} = ? COLLATE NOCASE`);
@@ -128,8 +134,15 @@ export class PlanQueryRepository {
   findMany(filters) {
     const text = localizedExpressions(filters.lang);
     const where = this.buildWhere(filters);
+    const dateOrder = filters.date
+      ? `CASE
+          WHEN p.permanent = 0 AND p.start_date = '${filters.date}' THEN 0
+          WHEN p.permanent = 0 THEN 1
+          ELSE 2
+        END, p.start_date DESC, p.id ASC`
+      : 'p.permanent ASC, p.start_date IS NULL ASC, p.start_date ASC, p.id ASC';
     const orderBy = {
-      date: 'p.permanent ASC, p.start_date IS NULL ASC, p.start_date ASC, p.id ASC',
+      date: dateOrder,
       quality: 'p.quality_score DESC, p.start_date IS NULL ASC, p.start_date ASC, p.id ASC',
       title: `${text.title} COLLATE NOCASE ASC, p.id ASC`,
     }[filters.sort];

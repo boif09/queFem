@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import i18n from '../i18n.js';
 import { PlanDetailPage } from '../pages/PlanDetailPage.jsx';
@@ -54,6 +54,8 @@ describe('PlanDetailPage', () => {
     expect(await screen.findByRole('heading', { name: 'Festival de prova' })).toBeInTheDocument();
     expect(screen.getByText('Descripció original del festival.')).toBeInTheDocument();
     expect(screen.getByText('Plaça Major')).toBeInTheDocument();
+    expect(screen.queryByTitle('Mapa de la ubicació')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Veure mapa/i }));
     expect(screen.getByTitle('Mapa de la ubicació')).toHaveAttribute(
       'src',
       expect.stringContaining('openstreetmap.org/export/embed.html'),

@@ -24,7 +24,10 @@ export function loadConfig(env = process.env) {
       : path.resolve(projectRoot, configuredDatabasePath),
     gencatSyncEnabled: env.GENCAT_SYNC_ENABLED !== 'false',
     gencatPageSize: positiveInteger(env.GENCAT_PAGE_SIZE, 1000),
+    ticketmasterApiKey: env.TICKETMASTER_API_KEY || '',
+    ticketmasterLookaheadDays: positiveInteger(env.TICKETMASTER_LOOKAHEAD_DAYS, 90),
     eventRetentionDays: nonNegativeInteger(env.EVENT_RETENTION_DAYS, 0),
+    inactivePlanRetentionDays: positiveInteger(env.INACTIVE_PLAN_RETENTION_DAYS, 7),
     defaultLanguage: env.DEFAULT_LANGUAGE || 'ca',
   };
 }

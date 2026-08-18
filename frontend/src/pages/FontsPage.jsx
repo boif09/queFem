@@ -20,10 +20,11 @@ export function FontsPage() {
   return (
     <section className="page-section fonts-page">
       <div className="container narrow-container">
-        <header className="page-heading"><p className="eyebrow dark">{t('fonts.eyebrow')}</p><h1>{t('fonts.title')}</h1><p>{t('fonts.intro')}</p></header>
+        <header className="page-heading"><p className="eyebrow dark">{t('fonts.eyebrow')}</p><h1>{t('fonts.title')}</h1><p>{t('fonts.intro')}</p><p>{t('fonts.independence')}</p></header>
         {state.status === 'loading' && <LoadingState />}
         {state.status === 'error' && <ErrorState titleKey="fonts.error" onRetry={() => setReloadKey((value) => value + 1)} />}
         {state.status === 'success' && state.sources.length === 0 && <EmptyState titleKey="fonts.empty" textKey="fonts.intro" />}
+        <div className="source-registry">
         {state.status === 'success' && state.sources.map((source) => (
           <article className="legal-source-card" key={source.key}>
             <div className="legal-source-top"><span aria-hidden="true">◎</span><div><p>{t('sources.dataset')}</p><h2>{source.name}</h2></div></div>
@@ -38,8 +39,11 @@ export function FontsPage() {
               {source.dataset_url && <a href={source.dataset_url} target="_blank" rel="noreferrer">{t('sources.originalLink')} <span aria-hidden="true">↗</span></a>}
               {source.license_url && <a href={source.license_url} target="_blank" rel="noreferrer">{t('sources.licenseLink')} <span aria-hidden="true">↗</span></a>}
             </div>
+            {source.key === 'ticketmaster-discovery-feed' && <p className="source-policy-note">{t('fonts.ticketmaster')}</p>}
           </article>
         ))}
+        </div>
+        <p className="source-corrections">{t('fonts.corrections')} <a href="mailto:contacte@jusboif.es">contacte@jusboif.es</a></p>
       </div>
     </section>
   );

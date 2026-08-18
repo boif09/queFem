@@ -3,11 +3,12 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import { isOutsideCatalonia } from '../location/cataloniaScope.js';
 import { isTemporallyInvalid } from '../quality/temporalCoherence.js';
+import { normalizeForFingerprint } from '../normalizers/text.normalizer.js';
 
-export function openDatabase(databasePath) {
-  fs.mkdirSync(path.dirname(databasePath), { recursive: true });
+export function openDatabase(databasePath, { readonly = false } = {}) {
+  if (!readonly) fs.mkdirSync(path.dirname(databasePath), { recursive: true });
 
-  const db = new Database(databasePath);
+  const db = new Database(databasePath, readonly ? { readonly: true, fileMustExist: true } : undefined);
   db.function('is_outside_catalonia', { deterministic: true }, (province, comarca, municipality, locality) => (
     isOutsideCatalonia({
       province,
@@ -16,6 +17,7 @@ export function openDatabase(databasePath) {
       locality,
     }) ? 1 : 0
   ));
+  db.function('normalize_location', { deterministic: true }, (value) => normalizeForFingerprint(value));
   db.function(
     'is_temporally_invalid',
     { deterministic: true },
@@ -29,7 +31,7 @@ export function openDatabase(databasePath) {
     ),
   );
   db.pragma('foreign_keys = ON');
-  db.pragma('journal_mode = WAL');
+  if (!readonly) db.pragma('journal_mode = WAL');
   db.pragma('busy_timeout = 5000');
   return db;
 }

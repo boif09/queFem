@@ -31,12 +31,15 @@ export class PlanRepository {
     this.updatePlan = db.prepare(`
       UPDATE plans SET
         ${PLAN_FIELDS.filter((field) => field !== 'fingerprint').map((field) => `${field} = @${field}`).join(', ')},
+        inactive_at = CASE WHEN @status = 'active' THEN NULL ELSE inactive_at END,
         updated_at = @updated_at
       WHERE id = @id
     `);
     this.fillPlan = db.prepare(`
       UPDATE plans SET
-        ${PLAN_FIELDS.filter((field) => !['fingerprint', 'quality_score'].includes(field)).map((field) => `${field} = COALESCE(${field}, @${field})`).join(', ')},
+        ${PLAN_FIELDS.filter((field) => !['fingerprint', 'quality_score', 'status'].includes(field)).map((field) => `${field} = COALESCE(${field}, @${field})`).join(', ')},
+        status = CASE WHEN status = 'inactive' AND @status = 'active' THEN 'active' ELSE status END,
+        inactive_at = CASE WHEN @status = 'active' THEN NULL ELSE inactive_at END,
         quality_score = MAX(quality_score, @quality_score),
         updated_at = @updated_at
       WHERE id = @id
@@ -63,6 +66,11 @@ export class PlanRepository {
     this.touchSourceRecord = db.prepare(`
       UPDATE plan_sources SET last_seen_at = ?, source_updated_at = ? WHERE id = ?
     `);
+    this.reactivatePlan = db.prepare(`
+      UPDATE plans
+      SET status = 'active', inactive_at = NULL, updated_at = ?
+      WHERE id = ? AND status = 'inactive'
+    `);
     this.findCategory = db.prepare('SELECT id FROM categories WHERE slug = ?');
     this.linkCategory = db.prepare(`
       INSERT OR IGNORE INTO plan_categories (plan_id, category_id) VALUES (?, ?)
@@ -75,12 +83,30 @@ export class PlanRepository {
     return this.persistTransaction(entry);
   }
 
+  persistGroup(entry, sourceRecords) {
+    return this.db.transaction(() => {
+      let planId = entry.targetPlanId || null;
+      let outcome = null;
+      for (const [index, sourceRecord] of sourceRecords.entries()) {
+        const current = this.persistWithinTransaction({
+          ...entry, ...sourceRecord, targetPlanId: planId,
+          preserveExistingPlan: entry.preserveExistingPlan || index > 0,
+        });
+        const linked = this.findSourceRecord.get(entry.sourceId, sourceRecord.sourceRecordId);
+        planId = linked.plan_id;
+        if (index === 0) outcome = current;
+      }
+      return { outcome, planId };
+    })();
+  }
+
   persistWithinTransaction(entry) {
     const now = new Date().toISOString();
     const sourcePayloadJson = canonicalJson(entry.sourcePayload);
     const existingSourceRecord = this.findSourceRecord.get(entry.sourceId, entry.sourceRecordId);
 
     if (existingSourceRecord && existingSourceRecord.source_payload_json === sourcePayloadJson) {
+      if (entry.plan.status === 'active') this.reactivatePlan.run(now, existingSourceRecord.plan_id);
       this.touchSourceRecord.run(now, entry.sourceUpdatedAt, existingSourceRecord.id);
       return 'skipped';
     }
@@ -89,7 +115,8 @@ export class PlanRepository {
     let outcome;
     if (existingSourceRecord) {
       planId = existingSourceRecord.plan_id;
-      this.updatePlan.run({ id: planId, ...entry.plan, updated_at: now });
+      if (entry.preserveExistingPlan) this.fillPlan.run({ id: planId, ...entry.plan, updated_at: now });
+      else this.updatePlan.run({ id: planId, ...entry.plan, updated_at: now });
       this.updateSourceRecord.run({
         id: existingSourceRecord.id,
         source_url: entry.sourceUrl,
@@ -101,7 +128,9 @@ export class PlanRepository {
       });
       outcome = 'updated';
     } else {
-      const duplicate = this.deduplicator.findByFingerprint(entry.plan.fingerprint);
+      const duplicate = entry.targetPlanId
+        ? this.db.prepare('SELECT * FROM plans WHERE id = ?').get(entry.targetPlanId)
+        : this.deduplicator.findByFingerprint(entry.plan.fingerprint);
       if (duplicate) {
         planId = duplicate.id;
         this.fillPlan.run({ id: planId, ...entry.plan, updated_at: now });

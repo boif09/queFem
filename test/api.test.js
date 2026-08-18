@@ -218,10 +218,25 @@ test('Milestone 2 REST API', async (context) => {
         assert.equal(body.data[0].id, ids.event);
       });
 
+      await context.test('el municipio prevalece sobre comarca para fuentes sin comarca', async () => {
+        const { body } = await apiRequest('/api/plans?comarca=Comarca%20incorrecta&municipality=Palafrugell');
+        assert.equal(body.pagination.total, 1);
+        assert.equal(body.data[0].id, ids.event);
+      });
+
+      await context.test('normaliza acentos al filtrar por municipio', async () => {
+        db.prepare('UPDATE plans SET municipality = ? WHERE id = ?').run('Palafrug\u00e8ll', ids.event);
+        const { body } = await apiRequest('/api/plans?municipality=Palafrugell');
+        assert.equal(body.pagination.total, 1);
+        assert.equal(body.data[0].id, ids.event);
+        db.prepare('UPDATE plans SET municipality = ? WHERE id = ?').run('Palafrugell', ids.event);
+      });
+
       await context.test('combina evento activo y plan permanente al filtrar por fecha', async () => {
-        const { body } = await apiRequest('/api/plans?date=2026-08-20');
+        const { body } = await apiRequest('/api/plans?date=2026-08-20&sort=date');
         assert.equal(body.pagination.total, 2);
         assert.deepEqual(new Set(body.data.map(({ id }) => id)), new Set([ids.event, ids.permanent]));
+        assert.equal(body.data[0].id, ids.event);
       });
 
       await context.test('filtra por intervalo de fechas', async () => {
@@ -312,16 +327,20 @@ test('Milestone 2 REST API', async (context) => {
         )));
       });
 
-      await context.test('expone únicamente el registro legal existente de fuentes activas', async () => {
+      await context.test('expone los registros legales existentes de fuentes activas', async () => {
         const sources = await apiRequest('/api/sources');
         assert.equal(sources.response.status, 200);
-        assert.equal(sources.body.data.length, 1);
-        assert.equal(sources.body.data[0].name, 'Agenda Cultural de Catalunya');
+        assert.equal(sources.body.data.length, 2);
+        const gencat = sources.body.data.find(({ name }) => name === 'Agenda Cultural de Catalunya');
+        const ticketmaster = sources.body.data.find(({ name }) => name === 'Ticketmaster Discovery Feed España');
+        assert.ok(gencat);
+        assert.ok(ticketmaster);
         assert.equal(
-          sources.body.data[0].attribution_text,
+          gencat.attribution_text,
           'Generalitat de Catalunya. Departament de Cultura',
         );
-        assert.match(sources.body.data[0].license_url, /^https:\/\//);
+        assert.match(gencat.license_url, /^https:\/\//);
+        assert.match(ticketmaster.license_url, /^https:\/\//);
       });
   });
 });

@@ -1,6 +1,6 @@
 # Què Fem?
 
-Què Fem? és una aplicació web per descobrir esdeveniments a Catalunya. Les milestones 1, 2 i 3 estan implementades: Agenda Cultural de Catalunya → normalització i controls de qualitat → SQLite → API REST → interfície web React.
+Què Fem? és una aplicació web per descobrir esdeveniments a Catalunya. Les milestones 1, 2, 3 i 4A estan implementades en local: Agenda Cultural de Catalunya i Ticketmaster Discovery Feed → normalització i controls de qualitat → SQLite → API REST → interfície web React. Ticketmaster encara no està habilitat en producció.
 
 El backend utilitza Node.js i Express; el frontend, React i Vite. La interfície és bilingüe, amb català per defecte i castellà complet. Inclou cercador, filtres, resultats, detall del pla i informació sobre les fonts de dades.
 
@@ -31,6 +31,14 @@ npm run db:purge
 La purga elimina primer les relacions de `plan_sources` i `plan_categories`, conserva els `import_runs` i no elimina mai plans marcats com a permanents per antiguitat. La comprovació territorial utilitza els camps administratius de Gencat i no exigeix coordenades.
 
 Els esdeveniments no permanents amb dates incoherents no es corregeixen ni s'exposen: es consideren invàlids si `end_date < start_date`, si alguna data supera en més de 10 anys l'any actual o si la durada supera 10 anys. Els plans permanents n'estan exempts. Cada importació inclou el recompte `Invalid` dins de `Skipped`, registra els primers avisos al log i conserva a `import_runs.invalid_details` els detalls necessaris per investigar-los.
+
+La integració local de Ticketmaster utilitza Discovery Feed 2.0 i es pot validar sense escriure amb `npm run import:ticketmaster -- --dry-run`. La importació local amb escriptura s'executa amb `npm run import:ticketmaster`. Requereix `TICKETMASTER_API_KEY` i aplica un horitzó configurable amb `TICKETMASTER_LOOKAHEAD_DAYS=90`. La Milestone 4A ha estat validada amb una importació local real, una segona execució idempotent i comprovacions manuals de l'API i el frontend. No hi ha cron de producció: malgrat que les pàgines legals i de privacitat ja estan implementades, l'activació pública continua bloquejada fins a l'aprovació final dels termes aplicables.
+
+La retirada operativa d'una procedència concreta es comprova primer amb `npm run ticketmaster:remove -- EVENT_ID --dry-run` i s'executa, després del backup, sense `--dry-run`. Un pla compartit conserva les altres fonts; un pla exclusiu queda `inactive`. El procediment complet és a [`docs/TICKETMASTER_REMOVAL.md`](docs/TICKETMASTER_REMOVAL.md).
+
+Per a una sol·licitud expressa aprovada, `npm run ticketmaster:remove -- EVENT_ID --purge --dry-run` mostra si el pla quedaria compartit o s'eliminaria físicament; l'execució equivalent sense `--dry-run` elimina immediatament el pla només quan no queda cap altra font.
+
+Els plans `inactive` sense cap procedència es conserven durant 7 dies des d'`inactive_at` i després es poden purgar físicament. La comprovació segura és `npm run purge:inactive -- --dry-run`; l'execució real és `npm run purge:inactive`. Aquesta és una política interna de minimització, no un termini legal. Les retirades expresses continuen tenint prioritat operativa i un objectiu inferior a 24 hores.
 
 El comandament d'importació mostra sempre:
 
@@ -70,9 +78,9 @@ La font està habilitada només perquè les metadades i la llicència oficials p
 backend/src/
   api/                rutes i validació de l'API REST
   db/                 SQLite, migracions i repositoris
-  deduplication/      fingerprint inicial
-  importers/          BaseImporter i GencatAgendaImporter
-  jobs/               comandament d'importació
+  deduplication/      fingerprint inicial i matching conservador entre fonts
+  importers/          BaseImporter i importers de Gencat/Ticketmaster
+  jobs/               comandaments d'importació i purga
   legal/              registre i bloqueig de fonts no aprovades
   normalizers/        plans, categories, localització i text
   app.js              configuració d'Express
@@ -112,6 +120,8 @@ GET /api/sources
 
 `GET /api/plans` admet `date`, `dateFrom`, `dateTo`, `province`, `comarca`, `municipality`, `category`, `free`, `family`, `indoor`, `outdoor`, `kind`, `page`, `limit`, `sort` i `lang`. `lang` pot ser `ca` (per defecte) o `es`; si una traducció no existeix, es retorna el text original. `sort` admet `date`, `quality` i `title`. La distància queda ajornada fins que el contracte incorpori coordenades de cerca.
 
+Quan hi ha un municipi, aquest filtre més precís preval sobre la comarca per admetre fonts que no la publiquen; la comparació municipal ignora diferències d'accents i puntuació. En cerques amb una data exacta, els esdeveniments que comencen aquell dia es mostren abans que els esdeveniments en curs i els plans permanents.
+
 Els plans amb `quality_score < 35` no s'exposen. Tots els paràmetres són validats i `limit` no pot superar 100.
 
 Per executar totes les proves:
@@ -123,6 +133,10 @@ npm test
 ## Interfície web (Milestone 3)
 
 La interfície és bilingüe, amb català per defecte i castellà seleccionable. La preferència es conserva a `localStorage`. No incorpora imatges externes: les targetes utilitzen composicions gràfiques pròpies basades en la categoria.
+
+Inter i Source Serif 4 s'autoallotgen en WOFF2 dins del frontend amb les llicències OFL corresponents. Les fitxes amb coordenades no contacten OpenStreetMap fins que el visitant prem el botó per carregar el mapa; l'enllaç de Google Maps continua sent una navegació externa voluntària.
+
+Què Fem? no utilitza cookies, analítica, publicitat, comptes ni seguiment. L'única preferència local és `quefem.language`, amb valor `ca` o `es`. Les pàgines legals identifiquen Xavier Delgado Garcia com a responsable i `contacte@jusboif.es` com a canal públic. Qualsevol monetització, analítica, publicitat, sistema de comptes, formulari o nou mecanisme d'emmagatzematge o seguiment exigeix revisar la documentació legal i, si escau, implementar consentiment abans de desplegar-lo.
 
 Per treballar en local, obre dos terminals des de l'arrel del projecte:
 
@@ -151,6 +165,13 @@ Rutes web disponibles:
 /plans
 /plans/:id
 /fonts
+/legal
+/privacitat
+/privacidad
+/emmagatzematge
+/almacenamiento
+/contacte
+/contacto
 ```
 
 La Milestone 3 no inclou login, favorits, mapes avançats, monetització, IA, fonts noves ni scraping.

@@ -38,15 +38,16 @@ export function PlansPage() {
   const filters = useMemo(() => filtersFromSearchParams(searchParams), [searchKey]);
   const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
   const page = searchParams.get('page') || '1';
+  const sort = filters.date || filters.dateFrom || filters.dateTo ? 'date' : 'quality';
 
   useEffect(() => {
     let active = true;
     setState((current) => ({ ...current, status: 'loading' }));
-    api.getPlans({ ...filters, page, limit: 12, sort: 'quality', lang: language })
+    api.getPlans({ ...filters, page, limit: 12, sort, lang: language })
       .then((payload) => active && setState({ status: 'success', plans: payload.data, pagination: payload.pagination }))
       .catch(() => active && setState({ status: 'error', plans: [], pagination: null }));
     return () => { active = false; };
-  }, [searchKey, language, reloadKey]);
+  }, [searchKey, language, reloadKey, sort]);
 
   const homeQuery = createPlansSearch(filters);
   return (

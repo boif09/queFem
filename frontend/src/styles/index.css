@@ -218,6 +218,27 @@ select:disabled { opacity: .55; cursor: not-allowed; }
 .legal-source-card dt { color: var(--ink-soft); font-size: .74rem; font-weight: 800; }
 .legal-source-card dd { margin: 0; font-size: .88rem; line-height: 1.5; }
 .legal-links { display: flex; flex-wrap: wrap; gap: 22px; }
+.source-registry { display: grid; gap: 22px; }
+.source-policy-note, .source-corrections { color: var(--ink-soft); font-size: .86rem; line-height: 1.65; }
+.source-policy-note { margin: 20px 0 0; padding-top: 18px; border-top: 1px solid var(--line); }
+.source-corrections { margin: 28px 0 0; }
+.source-corrections a { color: var(--forest); font-weight: 800; }
+
+.legal-container { width: min(calc(100% - 48px), 860px); }
+.legal-heading { padding-bottom: 30px; border-bottom: 1px solid var(--line); }
+.legal-heading > p:not(.eyebrow):not(.legal-updated) { max-width: 680px; color: var(--ink-soft); font-size: 1.05rem; line-height: 1.7; }
+.legal-heading .legal-updated { margin-top: 18px; color: var(--coral); font-size: .78rem; font-weight: 750; }
+.legal-document { display: grid; gap: 34px; }
+.legal-section { scroll-margin-top: 110px; }
+.legal-section + .legal-section { padding-top: 34px; border-top: 1px solid var(--line); }
+.legal-section h2 { margin: 0 0 16px; font-family: "Source Serif 4", Georgia, serif; font-size: clamp(1.55rem, 3vw, 2rem); }
+.legal-section h3 { margin: 24px 0 8px; font-size: 1rem; }
+.legal-section p, .legal-section li { color: var(--ink-soft); font-size: .98rem; line-height: 1.75; }
+.legal-section p { margin: 0 0 13px; }
+.legal-section ul { display: grid; gap: 9px; padding-left: 22px; }
+.legal-section a { color: var(--forest-2); font-weight: 750; text-underline-offset: 3px; }
+.legal-inline-links { display: flex; flex-wrap: wrap; gap: 18px; }
+.contact-email a { display: inline-flex; border: 1px solid var(--coral); border-radius: 999px; padding: 10px 16px; text-decoration: none; color: var(--coral); }
 
 .not-found-page { text-align: center; }
 .not-found-page h1 { margin: 6px 0 14px; font-size: clamp(2.6rem, 6vw, 4.8rem); }
@@ -231,6 +252,9 @@ select:disabled { opacity: .55; cursor: not-allowed; }
 .footer-inner strong { font-family: Georgia, serif; font-size: 1.3rem; }
 .footer-inner span, .footer-inner p { color: var(--ink-soft); font-size: .76rem; }
 .footer-inner p { max-width: 430px; text-align: right; line-height: 1.5; }
+.footer-links { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 4px; }
+.footer-links a { color: var(--ink-soft); font-size: .75rem; font-weight: 700; text-underline-offset: 3px; }
+.footer-links a:hover { color: var(--coral); }
 
 @media (max-width: 980px) {
   .header-inner { flex-wrap: wrap; padding-block: 10px; }
@@ -275,6 +299,7 @@ select:disabled { opacity: .55; cursor: not-allowed; }
   .source-card p, .legal-source-card dl > div { grid-template-columns: 1fr; gap: 4px; }
   .footer-inner { padding-block: 28px; align-items: start; flex-direction: column; }
   .footer-inner p { margin: 0; text-align: left; }
+  .footer-links { justify-content: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -282,6 +307,22 @@ select:disabled { opacity: .55; cursor: not-allowed; }
 }
 
 /* Modern Catalan Horizon — adapted from the approved Stitch direction. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("../assets/fonts/inter-latin-400-700.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 600 700;
+  font-display: swap;
+  src: url("../assets/fonts/source-serif-4-latin-600-700.woff2") format("woff2");
+}
+
 :root {
   --ink: #1b1c17;
   --ink-soft: #54433e;
@@ -413,6 +454,11 @@ input[type="date"], select { border-color: var(--line); background-color: #fbf9f
 .mini-map { display: grid; gap: 6px; }
 .mini-map-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-md); background: #e4e3da; }
 .mini-map-frame iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }
+.mini-map-placeholder { width: 100%; height: 100%; display: grid; place-content: center; justify-items: center; gap: 8px; padding: 18px; border: 0; background: radial-gradient(circle at 70% 30%, rgba(255,255,255,.7), transparent 32%), #e4e3da; color: var(--ink); cursor: pointer; text-align: center; }
+.mini-map-placeholder strong { color: var(--coral); font-size: .82rem; }
+.mini-map-placeholder span { color: var(--ink-soft); font-size: .72rem; }
+.mini-map-placeholder:hover strong { text-decoration: underline; text-underline-offset: 3px; }
+.mini-map-placeholder:focus-visible { outline: 3px solid var(--coral); outline-offset: -4px; }
 .mini-map-link { position: absolute; inset: 0; display: flex; align-items: end; justify-content: end; padding: 10px; color: var(--ink); text-decoration: none; }
 .mini-map-link > span { display: inline-flex; align-items: center; gap: 5px; padding: 7px 10px; border: 1px solid rgba(217,193,187,.8); border-radius: 999px; background: rgba(255,255,255,.94); box-shadow: var(--shadow-soft); color: var(--coral); font-size: .72rem; font-weight: 700; }
 .mini-map-link:hover > span { background: var(--coral); color: white; }
@@ -454,4 +500,5 @@ input[type="date"], select { border-color: var(--line); background-color: #fbf9f
   .detail-hero h1 { font-size: clamp(2.5rem, 12vw, 4rem); }
   .footer-inner { align-items: flex-start; }
   .footer-meta { justify-items: start; }
+  .legal-container { width: min(calc(100% - 32px), 860px); }
 }

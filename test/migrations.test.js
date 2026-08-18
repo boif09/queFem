@@ -19,9 +19,18 @@ test('creates the six milestone tables and seeds the approved source', () => {
     assert.equal(source.allows_images, 0);
     assert.equal(source.requires_update_date, 1);
     assert.equal(source.dataset_id, 'rhpv-yr4f');
+    const ticketmaster = db.prepare("SELECT * FROM sources WHERE key = 'ticketmaster-discovery-feed'").get();
+    assert.equal(ticketmaster.enabled, 1);
+    assert.equal(ticketmaster.allows_data_reuse, 1);
+    assert.equal(ticketmaster.allows_transformation, 0);
+    assert.equal(ticketmaster.allows_commercial_use, 0);
+    assert.equal(ticketmaster.allows_images, 0);
+    assert.match(ticketmaster.review_notes, /NO es Open Data/);
     assert.equal(db.prepare('SELECT count(*) AS count FROM categories').get().count, 18);
     const importRunColumns = new Set(db.pragma('table_info(import_runs)').map(({ name }) => name));
     assert.ok(importRunColumns.has('invalid'));
     assert.ok(importRunColumns.has('invalid_details'));
+    const planColumns = new Set(db.pragma('table_info(plans)').map(({ name }) => name));
+    assert.ok(planColumns.has('inactive_at'));
   });
 });

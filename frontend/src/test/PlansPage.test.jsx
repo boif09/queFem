@@ -28,4 +28,16 @@ describe('PlansPage', () => {
       comarca: 'Baix Empordà', lang: 'ca', page: '1', limit: 12,
     }));
   });
+
+  it('sorts dated searches by date so exact events precede permanent plans', async () => {
+    api.getPlans.mockResolvedValue({
+      data: [], pagination: { page: 1, limit: 12, total: 0, pages: 0 },
+    });
+    render(<MemoryRouter initialEntries={['/plans?date=2026-09-01&municipality=Barcelona&category=musica']}><PlansPage /></MemoryRouter>);
+
+    await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
+    expect(api.getPlans).toHaveBeenCalledWith(expect.objectContaining({
+      date: '2026-09-01', municipality: 'Barcelona', category: 'musica', sort: 'date',
+    }));
+  });
 });
