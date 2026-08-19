@@ -3,6 +3,7 @@ import { createCategoriesRouter } from './api/categories.routes.js';
 import { createLocationsRouter } from './api/locations.routes.js';
 import { createPlansRouter } from './api/plans.routes.js';
 import { createSourcesRouter } from './api/sources.routes.js';
+import { createSitemapRouter } from './api/sitemap.routes.js';
 import { ValidationError } from './api/validation.js';
 import { PlanQueryRepository } from './db/repositories/planQuery.repository.js';
 
@@ -17,6 +18,7 @@ export function createApp({
   const repository = new PlanQueryRepository(db, { eventRetentionDays, now });
 
   app.disable('x-powered-by');
+  app.use('/api/sitemap.xml', createSitemapRouter(repository));
   app.use('/api/plans', createPlansRouter(repository, defaultLanguage));
   app.use('/api/categories', createCategoriesRouter(repository));
   app.use('/api/sources', createSourcesRouter(repository));

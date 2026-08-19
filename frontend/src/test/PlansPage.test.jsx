@@ -59,6 +59,24 @@ describe('PlansPage', () => {
       q: 'Weeknd', date: '2026-09-01', municipality: 'Barcelona', category: 'musica',
     }));
     expect(screen.getByText('Cerca: Weeknd')).toBeInTheDocument();
+    expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
+    expect(document.head.querySelector('link[rel="canonical"]')).not.toBeInTheDocument();
+  });
+
+  it('keeps unfiltered plans indexable with its own canonical', async () => {
+    api.getPlans.mockResolvedValue({ data: [], pagination: { page: 1, limit: 12, total: 0, pages: 0 } });
+    render(<MemoryRouter initialEntries={['/plans']}><PlansPage /></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
+    expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'index,follow');
+    expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute('href', 'https://tenspla.cat/plans');
+  });
+
+  it('marks any filtered plans URL noindex, including free-only searches', async () => {
+    api.getPlans.mockResolvedValue({ data: [], pagination: { page: 1, limit: 12, total: 0, pages: 0 } });
+    render(<MemoryRouter initialEntries={['/plans?free=true']}><PlansPage /></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
+    expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
+    expect(document.head.querySelector('link[rel="canonical"]')).not.toBeInTheDocument();
   });
 
   function LocationProbe() {

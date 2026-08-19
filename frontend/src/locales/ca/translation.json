@@ -140,5 +140,15 @@
   "notFound.text": "Potser l’enllaç ha canviat o la ruta no és correcta.",
   "notFound.home": "Tornar a l’inici",
   "date.single": "{{date}}",
-  "date.range": "Del {{start}} al {{end}}"
+  "date.range": "Del {{start}} al {{end}}",
+  "seo.homeTitle": "Tens pla? | Plans i activitats a Catalunya",
+  "seo.homeDescription": "Descobreix concerts, festes, cultura, mercats i activitats arreu de Catalunya. Troba què fer avui o aquest cap de setmana amb Tens pla?.",
+  "seo.plansTitle": "Explora plans a Catalunya | Tens pla?",
+  "seo.plansDescription": "Explora concerts, festes, cultura, mercats i activitats disponibles arreu de Catalunya amb Tens pla?.",
+  "seo.fontsTitle": "Fonts de dades | Tens pla?",
+  "seo.fontsDescription": "Consulta les fonts de dades, l'atribució i les condicions de reutilització de Tens pla?.",
+  "seo.detailFallback": "Consulta data, ubicació i informació de {{title}}{{location}}.",
+  "seo.detailLoadingTitle": "Carregant pla | Tens pla?",
+  "seo.notFoundTitle": "Pàgina no trobada | Tens pla?",
+  "seo.notFoundDescription": "La pàgina sol·licitada no existeix o ja no està disponible."
 }

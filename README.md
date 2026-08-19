@@ -180,6 +180,10 @@ La Milestone 3 no inclou login, favorits, mapes avançats, monetització, IA, fo
 
 L'aplicació està publicada a `https://tenspla.cat`. El backend està gestionat per PM2, el frontend compilat el serveix Nginx i `deploy.sh` desplega els canvis de codi. La sincronització de Gencat s'executa cada dues hores mitjançant el cron extern del servidor; no forma part del desplegament.
 
-La marca pública és **Tens pla?**, el domini públic principal és `https://tenspla.cat` i el correu públic és `contacte@tenspla.cat`. `https://quefem.jusboif.es` es conserva temporalment com a domini legacy pendent de redirecció. Els identificadors interns legacy (`quefem`, `queFem`, `quefem-api`, `quefem.sqlite`) es mantenen sense canvis.
+La marca pública és **Tens pla?**, el domini públic principal és `https://tenspla.cat` i el correu públic és `contacte@tenspla.cat`. `https://quefem.jusboif.es` es conserva com a domini legacy i redirigeix al nou domini mantenint path i query. Els identificadors interns legacy (`quefem`, `queFem`, `quefem-api`, `quefem.sqlite`) es mantenen sense canvis.
 
 La infraestructura, el cron real i les ordres d'operació estan documentats a [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+## SEO tècnic
+
+SEO V1 utilitza `https://tenspla.cat` com a origen canònic, metadata centralitzada per ruta, Open Graph i Twitter/X amb una imatge de marca local, favicon local, Event JSON-LD i `robots.txt` sense bloquejar recursos. `/plans` amb qualsevol paràmetre de cerca o filtre i les pàgines de transparència utilitzen `noindex,follow`. El sitemap d'esdeveniments és dinàmic a `/api/sitemap.xml`; la publicació de `/sitemap.xml` requereix el proxy Nginx documentat a [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). No s'ha afegit analítica, tracking, cookies ni scripts SEO externs.

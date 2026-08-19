@@ -44,7 +44,7 @@ Last updated: 2026-08-19
 - Home conectada a datos reales con búsqueda `q`, accesos rápidos, “Passa avui” y categorías reales.
 - Cards y heroes sin fotografías basados en patrones gráficos por slug de categoría, con fallback genérico.
 - Dominio público principal activo: `https://tenspla.cat`; `https://www.tenspla.cat` redirige al dominio principal.
-- `https://quefem.jusboif.es` permanece temporalmente como dominio legacy pendiente de redirección. Los identificadores internos `quefem` se mantienen por compatibilidad técnica.
+- `https://quefem.jusboif.es` permanece como dominio legacy y redirige 301 al dominio principal conservando path y query. Los identificadores internos `quefem` se mantienen por compatibilidad técnica.
 
 ### Milestone 4A — Ticketmaster
 
@@ -79,6 +79,16 @@ Last updated: 2026-08-19
 - frontend estático servido por Nginx
 - sincronización de Gencat cada dos horas mediante cron externo
 - despliegue de código mediante `./deploy.sh`
+
+### SEO V1 preparado en local
+
+- Metadata centralizada por ruta con dominio canónico `https://tenspla.cat`.
+- Home, exploración sin filtros, fuentes y fichas de eventos públicos configuradas como indexables.
+- Búsquedas, filtros, legales, contacto y Not Found configurados como `noindex,follow`.
+- Open Graph, Twitter/X, favicon e imagen social de marca servidos localmente.
+- Event JSON-LD limitado a campos estructurados reales, sin imágenes, organizadores u ofertas inferidas.
+- `robots.txt` preparado y sitemap XML dinámico implementado en `/api/sitemap.xml` sin `lastmod` engañoso.
+- Pendiente después del deploy: proxy Nginx de `/sitemap.xml`, validación pública y alta en Google Search Console.
 
 ## Fuentes activas en local
 

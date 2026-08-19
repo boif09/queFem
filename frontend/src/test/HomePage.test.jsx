@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import i18n from '../i18n.js';
@@ -31,6 +31,11 @@ describe('Pop Editorial home', () => {
     expect(await screen.findByRole('heading', { name: 'Pla real' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Música/ })).toHaveAttribute('href', '/plans?category=musica');
     expect(screen.queryByText('Què Fem?')).not.toBeInTheDocument();
+    await waitFor(() => expect(document.title).toBe('Tens pla? | Plans i activitats a Catalunya'));
+    expect(document.head.querySelector('meta[name="description"]')).toHaveAttribute('content', expect.stringContaining('Descobreix concerts'));
+    expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute('href', 'https://tenspla.cat/');
+    expect(document.head.querySelector('meta[property="og:title"]')).toHaveAttribute('content', document.title);
+    expect(document.head.querySelector('meta[property="og:url"]')).toHaveAttribute('content', 'https://tenspla.cat/');
   });
 
   it('submits quick text search and exposes functional Today and Free actions', async () => {

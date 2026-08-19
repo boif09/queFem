@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../components/BrandLogo.jsx';
 import { CategoryIcon } from '../components/CategoryIcon.jsx';
 import { PlanList } from '../components/PlanList.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
 import { getQuickDateRange, toISODate } from '../utils/dates.js';
@@ -49,6 +50,7 @@ export function HomePage() {
   const weekendUrl = `/plans?${createPlansSearch(weekend)}`;
 
   return (
+    <><Seo title={t('seo.homeTitle')} description={t('seo.homeDescription')} canonicalPath="/" />
     <div className="home-page">
       <section className="home-hero">
         <div className="home-question" aria-hidden="true">?</div>
@@ -104,6 +106,6 @@ export function HomePage() {
           <div className="explore-all"><Link className="button button-primary" to="/plans">{t('home.exploreAll')} →</Link></div>
         </div>
       </section>
-    </div>
+    </div></>
   );
 }

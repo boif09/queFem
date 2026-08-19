@@ -5,6 +5,7 @@ import { CategoryIcon } from '../components/CategoryIcon.jsx';
 import { PlanVisual } from '../components/PlanVisual.jsx';
 import { hasValidCoordinates, MiniMap } from '../components/MiniMap.jsx';
 import { SourceAttribution } from '../components/SourceAttribution.jsx';
+import { PUBLIC_ORIGIN, Seo } from '../components/Seo.jsx';
 import { ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
 import { formatDate } from '../utils/dates.js';
@@ -12,6 +13,49 @@ import { formatDate } from '../utils/dates.js';
 function InfoItem({ label, children }) {
   if (children === null || children === undefined || children === '') return null;
   return <div className="info-item"><dt>{label}</dt><dd>{children}</dd></div>;
+}
+
+function compactDescription(value, limit = 160) {
+  const compact = value?.replace(/\s+/g, ' ').trim();
+  if (!compact || compact.length <= limit) return compact || '';
+  const shortened = compact.slice(0, limit - 1);
+  return `${shortened.slice(0, shortened.lastIndexOf(' ')) || shortened}…`;
+}
+
+export function buildEventJsonLd(plan, url, description) {
+  const hasStartDate = /^\d{4}-\d{2}-\d{2}$/.test(plan.start_date || '');
+  const hasCoordinates = hasValidCoordinates(plan.latitude, plan.longitude);
+  const address = [plan.address, plan.postal_code, plan.locality, plan.municipality, plan.province]
+    .filter(Boolean).join(', ');
+  const hasNamedPlace = Boolean(plan.venue_name || plan.address);
+  const hasGeographicContext = Boolean(address || hasCoordinates);
+  if (!plan.title?.trim() || !hasStartDate || !hasNamedPlace || !hasGeographicContext) return null;
+
+  const event = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: plan.title,
+    url,
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    eventStatus: 'https://schema.org/EventScheduled',
+  };
+  event.startDate = plan.start_date;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(plan.end_date || '')) event.endDate = plan.end_date;
+  if (description) event.description = description;
+
+  event.location = {
+    '@type': 'Place',
+    name: plan.venue_name || plan.address,
+  };
+  if (address) event.location.address = address;
+  if (hasCoordinates) {
+    event.location.geo = {
+      '@type': 'GeoCoordinates',
+      latitude: Number(plan.latitude),
+      longitude: Number(plan.longitude),
+    };
+  }
+  return event;
 }
 
 export function PlanDetailPage() {
@@ -31,9 +75,9 @@ export function PlanDetailPage() {
     return () => { active = false; };
   }, [id, language, reloadKey]);
 
-  if (state.status === 'loading') return <section className="page-section"><div className="container"><LoadingState /></div></section>;
-  if (state.status === 'error') return <section className="page-section"><div className="container"><ErrorState titleKey="detail.errorTitle" onRetry={() => setReloadKey((value) => value + 1)} /></div></section>;
-  if (state.status === 'not-found') return <section className="page-section"><div className="container"><ErrorState titleKey="detail.errorTitle" textKey="detail.notFound" /></div></section>;
+  if (state.status === 'loading') return <><Seo title={t('seo.detailLoadingTitle')} description={t('seo.notFoundDescription')} robots="noindex,follow" /><section className="page-section"><div className="container"><LoadingState /></div></section></>;
+  if (state.status === 'error') return <><Seo title={`${t('detail.errorTitle')} | Tens pla?`} description={t('detail.notFound')} robots="noindex,follow" /><section className="page-section"><div className="container"><ErrorState titleKey="detail.errorTitle" onRetry={() => setReloadKey((value) => value + 1)} /></div></section></>;
+  if (state.status === 'not-found') return <><Seo title={t('seo.notFoundTitle')} description={t('detail.notFound')} robots="noindex,follow" /><section className="page-section"><div className="container"><ErrorState titleKey="detail.errorTitle" textKey="detail.notFound" /></div></section></>;
 
   const plan = state.plan;
   const primaryCategory = plan.categories?.[0];
@@ -45,8 +89,23 @@ export function PlanDetailPage() {
   const price = plan.free ? t('plan.free') : (plan.price_text || t('plan.priceUnknown'));
   const back = location.state?.from || '/plans';
   const hasCoordinates = hasValidCoordinates(plan.latitude, plan.longitude);
+  const locationLabel = plan.municipality ? `${language === 'es' ? ' en ' : ' a '}${plan.municipality}` : '';
+  const seoTitle = `${plan.title}${locationLabel} | Tens pla?`;
+  const seoDescription = compactDescription(plan.description)
+    || t('seo.detailFallback', { title: plan.title, location: locationLabel });
+  const canonicalPath = `/plans/${encodeURIComponent(plan.id)}`;
+  const canonicalUrl = `${PUBLIC_ORIGIN}${canonicalPath}`;
+  const indexableEvent = plan.kind === 'event';
+  const jsonLd = indexableEvent ? buildEventJsonLd(plan, canonicalUrl, seoDescription) : null;
 
   return (
+    <><Seo
+      title={seoTitle}
+      description={seoDescription}
+      canonicalPath={indexableEvent ? canonicalPath : null}
+      robots={indexableEvent ? 'index,follow' : 'noindex,follow'}
+      jsonLd={jsonLd}
+    />
     <article className="detail-page">
       <div className="container detail-header">
         <Link className="back-link" to={back}>← {t('detail.back')}</Link>
@@ -96,6 +155,6 @@ export function PlanDetailPage() {
           </div>
         </aside>
       </div>
-    </article>
+    </article></>
   );
 }

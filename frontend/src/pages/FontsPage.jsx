@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { api } from '../services/api.js';
 import { formatDate } from '../utils/dates.js';
 
@@ -18,6 +19,7 @@ export function FontsPage() {
     return () => { active = false; };
   }, [reloadKey]);
   return (
+    <><Seo title={t('seo.fontsTitle')} description={t('seo.fontsDescription')} canonicalPath="/fonts" />
     <section className="page-section fonts-page">
       <div className="container narrow-container">
         <header className="page-heading"><p className="eyebrow dark">{t('fonts.eyebrow')}</p><h1>{t('fonts.title')}</h1><p>{t('fonts.intro')}</p><p>{t('fonts.independence')}</p></header>
@@ -45,7 +47,7 @@ export function FontsPage() {
         </div>
         <p className="source-corrections">{t('fonts.corrections')} <a href="mailto:contacte@tenspla.cat">contacte@tenspla.cat</a></p>
       </div>
-    </section>
+    </section></>
   );
 }
 

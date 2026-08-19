@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#fcf9f5"/>
+  <path d="M0 94h1200M0 536h1200" stroke="#1a1a1a" stroke-width="4"/>
+  <circle cx="1080" cy="108" r="170" fill="#0055ff"/>
+  <circle cx="1110" cy="548" r="210" fill="#db3327"/>
+  <path d="M0 455L490 0h210L0 630z" fill="#0055ff" opacity=".12"/>
+  <rect x="102" y="116" width="208" height="208" fill="#1a1a1a"/>
+  <rect x="88" y="102" width="208" height="208" fill="#fabd00" stroke="#1a1a1a" stroke-width="10"/>
+  <text x="192" y="266" fill="#b71511" font-family="Montserrat,Arial,sans-serif" font-size="176" font-weight="900" text-anchor="middle">?</text>
+  <text x="88" y="452" fill="#1a1a1a" font-family="Montserrat,Arial,sans-serif" font-size="116" font-weight="900" letter-spacing="-7">TENS PLA?</text>
+  <text x="94" y="514" fill="#0041c8" font-family="Montserrat,Arial,sans-serif" font-size="29" font-weight="800" letter-spacing="2">PLANS I ACTIVITATS A CATALUNYA</text>
+</svg>

@@ -279,4 +279,15 @@ export class PlanQueryRepository {
       ORDER BY name COLLATE NOCASE
     `).all();
   }
+
+  findSitemapPlanIds() {
+    const visible = this.visiblePlanConditions();
+    return this.db.prepare(`
+      SELECT p.id
+      FROM plans p
+      WHERE ${visible.clauses.join(' AND ')}
+        AND p.kind = 'event'
+      ORDER BY p.id
+    `).all(...visible.parameters).map(({ id }) => id);
+  }
 }

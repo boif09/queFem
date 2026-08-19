@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Pagination } from '../components/Pagination.jsx';
 import { PlanList } from '../components/PlanList.jsx';
 import { SearchFilters } from '../components/SearchFilters.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
 import { formatDate } from '../utils/dates.js';
@@ -46,6 +47,7 @@ export function PlansPage() {
   const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
   const page = searchParams.get('page') || '1';
   const sort = filters.date || filters.dateFrom || filters.dateTo ? 'date' : 'quality';
+  const filtered = searchParams.size > 0;
 
   useEffect(() => {
     let active = true;
@@ -65,6 +67,12 @@ export function PlansPage() {
     }
   };
   return (
+    <><Seo
+      title={t('seo.plansTitle')}
+      description={t('seo.plansDescription')}
+      canonicalPath={filtered ? null : '/plans'}
+      robots={filtered ? 'noindex,follow' : 'index,follow'}
+    />
     <section className="results-page page-section">
       <div className="container">
         <header className="results-header">
@@ -86,6 +94,6 @@ export function PlansPage() {
           </>
         )}
       </div>
-    </section>
+    </section></>
   );
 }

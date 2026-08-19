@@ -2,7 +2,7 @@
 
 Este documento describe la infraestructura actual de producción. La sincronización de datos y el despliegue de código son procesos separados.
 
-La marca pública es Tens pla? y el dominio público principal activo es `https://tenspla.cat`. `https://www.tenspla.cat` redirige al dominio principal. `https://quefem.jusboif.es` permanece temporalmente como dominio legacy pendiente de redirección. Las rutas, servicios y nombres internos legacy `quefem` no se modifican.
+La marca pública es Tens pla? y el dominio público principal activo es `https://tenspla.cat`. `https://www.tenspla.cat` y el dominio legacy `https://quefem.jusboif.es` redirigen 301 al dominio principal; el dominio legacy conserva path y query. Las rutas, servicios y nombres internos legacy `quefem` no se modifican.
 
 ## Servidor
 
@@ -37,6 +37,27 @@ pm2 logs quefem-api
 El frontend React/Vite se compila en `/var/www/queFem/frontend/dist` y Nginx lo sirve directamente. Nginx utiliza fallback a `index.html` para React Router y hace proxy de `/api/` a `http://127.0.0.1:3014`.
 
 La aplicación se publica mediante HTTPS en `https://tenspla.cat`.
+
+## SEO V1 y sitemap público
+
+El dominio canónico de toda la metadata es `https://tenspla.cat`. Home, `/plans` sin parámetros, `/fonts` y las fichas públicas de eventos activos son indexables. Las búsquedas, filtros, páginas legales, privacidad, almacenamiento, contacto y rutas no encontradas utilizan `noindex,follow`. La metadata por ruta, Open Graph, Twitter/X y Event JSON-LD se generan localmente, sin analytics, cookies ni scripts externos.
+
+`frontend/public/robots.txt` anuncia `https://tenspla.cat/sitemap.xml`. El sitemap se genera dinámicamente desde SQLite en `/api/sitemap.xml`, reutilizando las mismas condiciones de visibilidad pública de la API. No incluye `lastmod`, porque `plans.updated_at` también puede cambiar por procesos técnicos y no representa de forma fiable un cambio visible de contenido.
+
+Para publicar la URL anunciada por robots después del despliegue, Nginx necesitará este bloque exacto dentro del `server` canónico de `tenspla.cat`, antes del fallback de la SPA:
+
+```nginx
+location = /sitemap.xml {
+    proxy_pass http://127.0.0.1:3014/api/sitemap.xml;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+Este repositorio no aplica el cambio de Nginx. Tras desplegar y validar metadata, structured data, `robots.txt` y el sitemap público, queda pendiente verificar la propiedad de dominio `tenspla.cat` mediante DNS en Google Search Console, enviar `https://tenspla.cat/sitemap.xml`, inspeccionar home y varias fichas y solo entonces solicitar indexación.
+
+La SPA continúa sirviendo `index.html` mediante fallback para rutas desconocidas. Aunque React muestra una vista noindex, el estado HTTP puede seguir siendo 200: **SPA soft-404 HTTP status remains a possible SEO limitation**.
 
 ## Despliegue de código
 

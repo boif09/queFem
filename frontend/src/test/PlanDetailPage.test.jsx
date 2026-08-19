@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import i18n from '../i18n.js';
-import { PlanDetailPage } from '../pages/PlanDetailPage.jsx';
+import { buildEventJsonLd, PlanDetailPage } from '../pages/PlanDetailPage.jsx';
 import { api } from '../services/api.js';
 
 vi.mock('../services/api.js', () => ({
@@ -69,5 +69,33 @@ describe('PlanDetailPage', () => {
     expect(screen.getAllByText('Generalitat de Catalunya. Departament de Cultura')).toHaveLength(2);
     expect(screen.getByRole('link', { name: /Consultar la font original/i })).toHaveAttribute('href', 'https://example.test/source');
     expect(api.getPlan).toHaveBeenCalledWith('7', 'ca');
+    await waitFor(() => expect(document.title).toBe('Festival de prova a Begur | Tens pla?'));
+    expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute('href', 'https://tenspla.cat/plans/7');
+    const structuredData = JSON.parse(document.head.querySelector('script[data-tenspla-jsonld]').textContent);
+    expect(structuredData).toMatchObject({
+      '@context': 'https://schema.org', '@type': 'Event', name: 'Festival de prova',
+      startDate: '2026-08-22', endDate: '2026-08-23', url: 'https://tenspla.cat/plans/7',
+      location: {
+        '@type': 'Place', name: 'Plaça Major',
+        geo: { '@type': 'GeoCoordinates', latitude: 41.95, longitude: 3.2 },
+      },
+    });
+    expect(structuredData).not.toHaveProperty('organizer');
+    expect(structuredData).not.toHaveProperty('image');
+    expect(structuredData).not.toHaveProperty('offers');
+  });
+
+  it('does not generate Event JSON-LD without a sufficiently reliable location', () => {
+    expect(buildEventJsonLd({
+      kind: 'event', title: 'Concert sense lloc', start_date: '2026-09-01',
+      municipality: 'Barcelona', venue_name: null, address: null,
+    }, 'https://tenspla.cat/plans/8', 'Informació factual.')).toBeNull();
+  });
+
+  it('does not generate Event JSON-LD without startDate', () => {
+    expect(buildEventJsonLd({
+      kind: 'event', title: 'Concert sense data', start_date: null,
+      municipality: 'Barcelona', venue_name: 'Sala de prova', address: 'Carrer Major, 1',
+    }, 'https://tenspla.cat/plans/9', 'Informació factual.')).toBeNull();
   });
 });

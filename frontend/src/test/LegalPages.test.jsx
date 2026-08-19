@@ -32,6 +32,8 @@ describe('legal and privacy pages', () => {
     renderRoute(route);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
     expect(screen.getByText('Darrera actualització: 19/08/2026')).toBeInTheDocument();
+    expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
+    expect(document.head.querySelector('link[rel="canonical"]')).not.toBeInTheDocument();
   });
 
   it.each([

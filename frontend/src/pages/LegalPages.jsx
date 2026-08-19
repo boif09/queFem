@@ -1,17 +1,14 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Seo } from '../components/Seo.jsx';
 
 const CONTACT_EMAIL = 'contacte@tenspla.cat';
 
 function LegalPage({ pageKey, children }) {
   const { t } = useTranslation();
   const title = t(`legal.${pageKey}.title`);
-  useEffect(() => {
-    document.title = `${title} · ${t('app.name')}`;
-    return () => { document.title = t('app.name'); };
-  }, [t, title]);
   return (
+    <><Seo title={`${title} | ${t('app.name')}`} description={t(`legal.${pageKey}.intro`)} robots="noindex,follow" />
     <section className="page-section legal-page">
       <article className="container legal-container">
         <header className="page-heading legal-heading">
@@ -22,7 +19,7 @@ function LegalPage({ pageKey, children }) {
         </header>
         <div className="legal-document">{children}</div>
       </article>
-    </section>
+    </section></>
   );
 }
 
