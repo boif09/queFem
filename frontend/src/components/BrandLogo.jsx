@@ -1,13 +1,12 @@
-import logoUrl from '../assets/quefem-logo.png';
+export function BrandMark({ className = '' }) {
+  return <span className={`brand-stamp${className ? ` ${className}` : ''}`} aria-hidden="true">?</span>;
+}
 
-export function BrandLogo({ className = '' }) {
+export function BrandLogo({ className = '', compact = false }) {
   return (
-    <img
-      className={`brand-logo${className ? ` ${className}` : ''}`}
-      src={logoUrl}
-      width="512"
-      height="157"
-      alt="Què Fem?"
-    />
+    <span className={`brand-wordmark${compact ? ' is-compact' : ''}${className ? ` ${className}` : ''}`} aria-label="Tens pla?">
+      <BrandMark />
+      {!compact && <strong aria-hidden="true">TENS PLA?</strong>}
+    </span>
   );
 }

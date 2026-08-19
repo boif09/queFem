@@ -6,13 +6,16 @@ import { PlansPage } from '../pages/PlansPage.jsx';
 import { api } from '../services/api.js';
 
 vi.mock('../services/api.js', () => ({
-  api: { getPlans: vi.fn() },
+  api: { getPlans: vi.fn(), getComarques: vi.fn(), getMunicipalities: vi.fn(), getCategories: vi.fn() },
 }));
 
 describe('PlansPage', () => {
   beforeEach(async () => {
     vi.resetAllMocks();
     await i18n.changeLanguage('ca');
+    api.getComarques.mockResolvedValue({ data: [] });
+    api.getMunicipalities.mockResolvedValue({ data: [] });
+    api.getCategories.mockResolvedValue({ data: [] });
   });
 
   it('renders the empty result state returned by the API', async () => {

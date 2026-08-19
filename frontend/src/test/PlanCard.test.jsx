@@ -32,6 +32,14 @@ describe('PlanCard', () => {
     expect(screen.getByText('Gratuït')).toBeInTheDocument();
     expect(screen.getByRole('link')).toHaveAttribute('href', '/plans/42');
     expect(document.querySelector('img')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-pattern="musica"]')).toBeInTheDocument();
+  });
+
+  it('keeps long titles in the DOM and provides a generic visual fallback', () => {
+    const title = 'Un títol extraordinàriament llarg que continua complet i accessible a la targeta';
+    render(<MemoryRouter><PlanCard plan={{ id: 44, kind: 'activity', title, permanent: true, free: false, categories: [] }} /></MemoryRouter>);
+    expect(screen.getByRole('heading', { name: title })).toBeInTheDocument();
+    expect(document.querySelector('[data-pattern="activity"]')).toBeInTheDocument();
   });
 
   it('uses an external image only when its reuse is explicitly allowed', () => {

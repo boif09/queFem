@@ -31,7 +31,7 @@ describe('legal and privacy pages', () => {
   ])('renders the Catalan route %s', (route, heading) => {
     renderRoute(route);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
-    expect(screen.getByText('Darrera actualització: 18/08/2026')).toBeInTheDocument();
+    expect(screen.getByText('Darrera actualització: 19/08/2026')).toBeInTheDocument();
   });
 
   it.each([
@@ -42,7 +42,7 @@ describe('legal and privacy pages', () => {
     await i18n.changeLanguage('es');
     renderRoute(route);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
-    expect(screen.getByText('Última actualización: 18/08/2026')).toBeInTheDocument();
+    expect(screen.getByText('Última actualización: 19/08/2026')).toBeInTheDocument();
   });
 
   it('states the controller, hosting, minimized logs and retention accurately', async () => {
@@ -85,6 +85,46 @@ describe('legal and privacy pages', () => {
     expect(screen.getByRole('link', { name: 'Emmagatzematge' })).toHaveAttribute('href', '/emmagatzematge');
     await user.click(screen.getByRole('link', { name: 'Privacitat' }));
     expect(screen.getByRole('heading', { level: 1, name: 'Política de privacitat' })).toBeInTheDocument();
+  });
+
+  it('uses the same canonical brand mark and wordmark in header and footer', () => {
+    const { container } = renderRoute('/legal');
+    const headerBrand = container.querySelector('.site-header .brand-wordmark');
+    const footerBrand = container.querySelector('.site-footer .brand-wordmark');
+
+    expect(headerBrand).toBeInTheDocument();
+    expect(footerBrand).toBeInTheDocument();
+    expect(headerBrand.innerHTML).toBe(footerBrand.innerHTML);
+    expect(headerBrand.querySelector('.brand-stamp')).toHaveTextContent('?');
+    expect(footerBrand.querySelector('.brand-stamp')).toHaveTextContent('?');
+    expect(headerBrand.querySelector('strong')).toHaveTextContent('TENS PLA?');
+    expect(footerBrand.querySelector('strong')).toHaveTextContent('TENS PLA?');
+  });
+
+  it('shows mobile navigation only on home and results routes', () => {
+    const pending = new Promise(() => {});
+    api.getPlans.mockReturnValue(pending);
+    api.getCategories.mockReturnValue(pending);
+    api.getPlan.mockReturnValue(pending);
+
+    const home = renderRoute('/');
+    expect(home.container.querySelector('.mobile-nav')).toBeInTheDocument();
+    expect(home.container.querySelector('.site-shell')).toHaveClass('has-mobile-nav');
+    home.unmount();
+
+    const results = renderRoute('/plans');
+    expect(results.container.querySelector('.mobile-nav')).toBeInTheDocument();
+    expect(results.container.querySelector('.site-shell')).toHaveClass('has-mobile-nav');
+    results.unmount();
+
+    const detail = renderRoute('/plans/123');
+    expect(detail.container.querySelector('.mobile-nav')).not.toBeInTheDocument();
+    expect(detail.container.querySelector('.site-shell')).not.toHaveClass('has-mobile-nav');
+    detail.unmount();
+
+    const legal = renderRoute('/legal');
+    expect(legal.container.querySelector('.mobile-nav')).not.toBeInTheDocument();
+    expect(legal.container.querySelector('.site-shell')).not.toHaveClass('has-mobile-nav');
   });
 
   it('keeps /fonts operational and explains Ticketmaster from confirmed data', async () => {

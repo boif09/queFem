@@ -8,7 +8,7 @@ No deben copiarse a este documento el nombre, email ni otros datos personales de
 
 ## 1. Localizar el event ID
 
-Usar el identificador oficial del evento recibido en la solicitud o extraído de su procedencia en Què Fem?. El comando acepta exclusivamente el Ticketmaster event ID; no acepta un ID interno de `plans`, un título ni una URL.
+Usar el identificador oficial del evento recibido en la solicitud o extraído de su procedencia en Tens pla?. El comando acepta exclusivamente el Ticketmaster event ID; no acepta un ID interno de `plans`, un título ni una URL.
 
 ## 2. Comprobar sin escrituras
 

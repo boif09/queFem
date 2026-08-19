@@ -1,13 +1,15 @@
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Header } from './Header.jsx';
 import { BrandLogo } from './BrandLogo.jsx';
 
 export function Layout() {
   const { t, i18n } = useTranslation();
+  const { pathname } = useLocation();
   const spanish = i18n.resolvedLanguage?.startsWith('es');
+  const showMobileNav = pathname === '/' || pathname === '/plans';
   return (
-    <div className="site-shell">
+    <div className={`site-shell${showMobileNav ? ' has-mobile-nav' : ''}`}>
       <Header />
       <main id="main-content">
         <Outlet />
@@ -30,6 +32,12 @@ export function Layout() {
           </div>
         </div>
       </footer>
+      {showMobileNav && (
+        <nav className="mobile-nav" aria-label={t('nav.mobile')}>
+          <Link to="/"><span aria-hidden="true">⌂</span>{t('nav.home')}</Link>
+          <Link to="/plans"><span aria-hidden="true">◇</span>{t('nav.exploreShort')}</Link>
+        </nav>
+      )}
     </div>
   );
 }

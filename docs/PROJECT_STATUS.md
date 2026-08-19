@@ -1,6 +1,6 @@
-# Què Fem? - Project Status
+# Tens pla? - Project Status
 
-Last updated: 2026-08-18
+Last updated: 2026-08-19
 
 ## Completado
 
@@ -34,6 +34,17 @@ Last updated: 2026-08-18
 - detalle
 - página de fuentes
 - minimapa de ubicación en el detalle para planes con coordenadas, enlazado a Google Maps
+- búsqueda textual por títulos y recinto, parcial y sin distinguir mayúsculas o acentos
+
+### Rebranding Pop Editorial
+
+- Marca pública cambiada de Què Fem? a **Tens pla?**.
+- Sistema visual **Pop Editorial / Mediterranean Pop** aplicado a home, resultados, detalle, estados y páginas informativas.
+- Montserrat Variable autoalojada mediante Fontsource, sin Google Fonts ni iconos remotos.
+- Home conectada a datos reales con búsqueda `q`, accesos rápidos, “Passa avui” y categorías reales.
+- Cards y heroes sin fotografías basados en patrones gráficos por slug de categoría, con fallback genérico.
+- Dominio futuro `tenspla.cat` reservado pero no activo; producción continúa en `https://quefem.jusboif.es`.
+- Email e identificadores internos legacy `quefem` permanecen hasta una migración posterior de dominio e infraestructura.
 
 ### Milestone 4A — Ticketmaster
 
@@ -47,7 +58,7 @@ Last updated: 2026-08-18
 
 ### Páginas legales y preparación de privacidad
 
-- Inter y Source Serif 4 se sirven como assets WOFF2 locales con sus licencias OFL; el frontend ya no necesita Google Fonts.
+- Montserrat Variable se empaqueta como WOFF2 local mediante Fontsource y licencia OFL; el frontend no necesita Google Fonts.
 - OpenStreetMap solo se carga después de que el visitante pulse “Veure mapa”/“Ver mapa”.
 - La retirada manual por Ticketmaster event ID dispone de dry-run, transacción e idempotencia y reutiliza la lógica de desactivación de reconciliation.
 - Las solicitudes expresas disponen además de `--purge`: elimina físicamente un plan exclusivamente Ticketmaster en la misma transacción, pero conserva cualquier plan que mantenga otra fuente.

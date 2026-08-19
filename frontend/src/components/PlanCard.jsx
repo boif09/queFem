@@ -14,7 +14,9 @@ export function PlanCard({ plan }) {
       ? formatDate(plan.start_date, language)
       : t('date.range', { start: formatDate(plan.start_date, language), end: formatDate(plan.end_date, language) });
   const price = plan.free ? t('plan.free') : (plan.price_text || t('plan.priceUnknown'));
-  const place = [plan.municipality, plan.comarca].filter(Boolean).join(' · ') || t('plan.locationUnknown');
+  const place = plan.venue_name
+    ? [plan.venue_name, plan.municipality].filter(Boolean).join(' · ')
+    : [plan.municipality, plan.comarca].filter(Boolean).join(' · ') || t('plan.locationUnknown');
   return (
     <article className="plan-card">
       <Link

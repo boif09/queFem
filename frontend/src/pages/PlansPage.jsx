@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Pagination } from '../components/Pagination.jsx';
 import { PlanList } from '../components/PlanList.jsx';
+import { SearchFilters } from '../components/SearchFilters.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
 import { formatDate } from '../utils/dates.js';
@@ -10,6 +11,8 @@ import { createPlansSearch, filtersFromSearchParams } from '../utils/search.js';
 
 function ActiveFilters({ filters }) {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
   const items = [
     filters.q && t('filter.query', { query: filters.q }),
@@ -51,13 +54,21 @@ export function PlansPage() {
   }, [searchKey, language, reloadKey, sort]);
 
   const homeQuery = createPlansSearch(filters);
+  const applyFilters = (nextFilters) => {
+    const query = createPlansSearch(nextFilters);
+    navigate(query ? `/plans?${query}` : '/plans');
+  };
   return (
     <section className="results-page page-section">
       <div className="container">
         <header className="results-header">
-          <div><p className="eyebrow dark">{t('results.eyebrow')}</p><h1>{t('results.title')}</h1></div>
+          <div><p className="eyebrow dark">{t('results.eyebrow')}</p><h1>{filters.q || t('results.title')}</h1></div>
           <Link className="button button-secondary" to={homeQuery ? `/?${homeQuery}` : '/'}>{t('results.changeSearch')}</Link>
         </header>
+        <details className="results-filters" id="filters" defaultOpen={Boolean(location.state?.openFilters)}>
+          <summary>{t('results.filtersToggle')}</summary>
+          <SearchFilters key={searchKey} initialFilters={filters} onSearch={applyFilters} />
+        </details>
         <ActiveFilters filters={filters} />
         {state.status === 'loading' && <LoadingState />}
         {state.status === 'error' && <ErrorState onRetry={() => setReloadKey((value) => value + 1)} />}

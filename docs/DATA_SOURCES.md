@@ -56,7 +56,7 @@ Technical retention and removal:
 
 Internal legal flags:
 
-- `allows_data_reuse = true` is the technical importer gate and only represents approved local use inside Què Fem? under the API terms. It does not mean open reuse.
+- `allows_data_reuse = true` is the technical importer gate and only represents approved local use inside Tens pla? under the API terms. It does not mean open reuse.
 - `allows_transformation = false` records the absence of an open transformation grant. The current validator does not use this flag to block technical normalization into `Plan`.
 - `allows_commercial_use = false`.
 - `allows_images = false`.

@@ -12,8 +12,8 @@ export function PlanVisual({ plan, className = '', showKind = false }) {
       {canShowImage ? (
         <img src={plan.image_url} alt="" loading="lazy" />
       ) : (
-        <div className="category-artwork" aria-hidden="true">
-          <i /><i /><i />
+        <div className="category-artwork" data-pattern={category} aria-hidden="true">
+          <i /><i /><i /><i />
           <CategoryIcon icon={primaryCategory?.icon} className="category-icon-large" />
         </div>
       )}

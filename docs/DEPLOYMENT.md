@@ -1,6 +1,8 @@
-# Despliegue de Què Fem?
+# Despliegue de Tens pla?
 
 Este documento describe la infraestructura actual de producción. La sincronización de datos y el despliegue de código son procesos separados.
+
+La marca pública es Tens pla?, pero el dominio público sigue siendo `https://quefem.jusboif.es`. `tenspla.cat` está reservado y no está activo. Las rutas, servicios y nombres internos legacy `quefem` no se modifican en este rebranding.
 
 ## Servidor
 

@@ -11,13 +11,14 @@ describe('local fonts', () => {
     expect(`${html}\n${css}`).not.toMatch(/fonts\.(googleapis|gstatic)\.com/);
   });
 
-  it('references versioned local WOFF2 assets with swap rendering', () => {
-    const css = fs.readFileSync(path.join(frontendRoot, 'src/styles/index.css'), 'utf8');
-    expect(css).toContain('inter-latin-400-700.woff2');
-    expect(css).toContain('source-serif-4-latin-600-700.woff2');
-    expect(css.match(/font-display: swap/g)).toHaveLength(2);
-    for (const filename of ['inter-latin-400-700.woff2', 'source-serif-4-latin-600-700.woff2']) {
-      expect(fs.statSync(path.join(frontendRoot, 'src/assets/fonts', filename)).size).toBeGreaterThan(0);
-    }
+  it('bundles the licensed Montserrat variable font locally', () => {
+    const main = fs.readFileSync(path.join(frontendRoot, 'src/main.jsx'), 'utf8');
+    const packageJson = JSON.parse(fs.readFileSync(path.resolve(frontendRoot, '../package.json'), 'utf8'));
+    const fontPackage = path.resolve(frontendRoot, '../node_modules/@fontsource-variable/montserrat');
+    expect(main).toContain("@fontsource-variable/montserrat/wght.css");
+    expect(packageJson.dependencies['@fontsource-variable/montserrat']).toBeTruthy();
+    expect(fs.statSync(path.join(fontPackage, 'LICENSE')).size).toBeGreaterThan(0);
+    expect(fs.readFileSync(path.join(frontendRoot, 'src/assets/fonts/MONTSERRAT-OFL.txt'), 'utf8')).toContain('SIL OPEN FONT LICENSE');
+    expect(fs.readdirSync(path.join(fontPackage, 'files')).some((file) => file.endsWith('.woff2'))).toBe(true);
   });
 });

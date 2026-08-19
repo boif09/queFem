@@ -1,6 +1,6 @@
-# Què Fem?
+# Tens pla?
 
-Què Fem? és una aplicació web per descobrir esdeveniments a Catalunya. Les milestones 1, 2, 3 i 4A estan implementades en local: Agenda Cultural de Catalunya i Ticketmaster Discovery Feed → normalització i controls de qualitat → SQLite → API REST → interfície web React. Ticketmaster encara no està habilitat en producció.
+Tens pla? és una aplicació web per descobrir esdeveniments a Catalunya. Les milestones 1, 2, 3 i 4A estan implementades en local: Agenda Cultural de Catalunya i Ticketmaster Discovery Feed → normalització i controls de qualitat → SQLite → API REST → interfície web React. Ticketmaster encara no està habilitat en producció.
 
 El backend utilitza Node.js i Express; el frontend, React i Vite. La interfície és bilingüe, amb català per defecte i castellà complet. Inclou cercador, filtres, resultats, detall del pla i informació sobre les fonts de dades.
 
@@ -118,7 +118,7 @@ GET /api/categories
 GET /api/sources
 ```
 
-`GET /api/plans` admet `date`, `dateFrom`, `dateTo`, `province`, `comarca`, `municipality`, `category`, `free`, `family`, `indoor`, `outdoor`, `kind`, `page`, `limit`, `sort` i `lang`. `lang` pot ser `ca` (per defecte) o `es`; si una traducció no existeix, es retorna el text original. `sort` admet `date`, `quality` i `title`. La distància queda ajornada fins que el contracte incorpori coordenades de cerca.
+`GET /api/plans` admet `q`, `date`, `dateFrom`, `dateTo`, `province`, `comarca`, `municipality`, `category`, `free`, `family`, `indoor`, `outdoor`, `kind`, `page`, `limit`, `sort` i `lang`. `q` cerca parcialment, sense distingir majúscules ni accents, als títols i al recinte. `lang` pot ser `ca` (per defecte) o `es`; si una traducció no existeix, es retorna el text original. `sort` admet `date`, `quality` i `title`. La distància queda ajornada fins que el contracte incorpori coordenades de cerca.
 
 Quan hi ha un municipi, aquest filtre més precís preval sobre la comarca per admetre fonts que no la publiquen; la comparació municipal ignora diferències d'accents i puntuació. En cerques amb una data exacta, els esdeveniments que comencen aquell dia es mostren abans que els esdeveniments en curs i els plans permanents.
 
@@ -134,9 +134,9 @@ npm test
 
 La interfície és bilingüe, amb català per defecte i castellà seleccionable. La preferència es conserva a `localStorage`. No incorpora imatges externes: les targetes utilitzen composicions gràfiques pròpies basades en la categoria.
 
-Inter i Source Serif 4 s'autoallotgen en WOFF2 dins del frontend amb les llicències OFL corresponents. Les fitxes amb coordenades no contacten OpenStreetMap fins que el visitant prem el botó per carregar el mapa; l'enllaç de Google Maps continua sent una navegació externa voluntària.
+La interfície utilitza el sistema visual **Pop Editorial / Mediterranean Pop**. Montserrat Variable s'empaqueta localment en WOFF2 mitjançant Fontsource, amb llicència OFL i sense Google Fonts en runtime. Les fitxes amb coordenades no contacten OpenStreetMap fins que el visitant prem el botó per carregar el mapa; l'enllaç de Google Maps continua sent una navegació externa voluntària.
 
-Què Fem? no utilitza cookies, analítica, publicitat, comptes ni seguiment. L'única preferència local és `quefem.language`, amb valor `ca` o `es`. Les pàgines legals identifiquen Xavier Delgado Garcia com a responsable i `contacte@jusboif.es` com a canal públic. Qualsevol monetització, analítica, publicitat, sistema de comptes, formulari o nou mecanisme d'emmagatzematge o seguiment exigeix revisar la documentació legal i, si escau, implementar consentiment abans de desplegar-lo.
+Tens pla? no utilitza cookies, analítica, publicitat, comptes ni seguiment. L'única preferència local continua sent la clau legacy `quefem.language`, amb valor `ca` o `es`. Les pàgines legals identifiquen Xavier Delgado Garcia com a responsable i `contacte@jusboif.es` com a canal públic. Qualsevol monetització, analítica, publicitat, sistema de comptes, formulari o nou mecanisme d'emmagatzematge o seguiment exigeix revisar la documentació legal i, si escau, implementar consentiment abans de desplegar-lo.
 
 Per treballar en local, obre dos terminals des de l'arrel del projecte:
 
@@ -179,5 +179,7 @@ La Milestone 3 no inclou login, favorits, mapes avançats, monetització, IA, fo
 ## Producció i desplegament
 
 L'aplicació està publicada a `https://quefem.jusboif.es`. El backend està gestionat per PM2, el frontend compilat el serveix Nginx i `deploy.sh` desplega els canvis de codi. La sincronització de Gencat s'executa cada dues hores mitjançant el cron extern del servidor; no forma part del desplegament.
+
+La marca pública nova és **Tens pla?** i `tenspla.cat` està reservat, però encara no és actiu. El domini públic, email i identificadors interns legacy (`quefem`, `queFem`, `quefem-api`, `quefem.sqlite`) es mantenen temporalment fins a una migració d'infraestructura separada.
 
 La infraestructura, el cron real i les ordres d'operació estan documentats a [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).

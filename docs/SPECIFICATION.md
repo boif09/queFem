@@ -1,6 +1,7 @@
-# Què Fem? — Especificació tècnica inicial
+# Tens pla? — Especificació tècnica inicial
 
-> **Nom provisional del projecte:** Què Fem?  
+> **Marca pública actual:** Tens pla?
+> **Nom intern legacy:** Què Fem? / `quefem` fins a la migració de domini i infraestructura
 > **Objectiu:** aplicació web per descobrir plans, activitats, esdeveniments i llocs per visitar a Catalunya.  
 > **Idioma principal:** català  
 > **Idioma secundari:** castellà  
@@ -61,7 +62,7 @@ La navegació inicial serà sempre en català.
 Exemples:
 
 ```text
-Què fem?
+Tens pla?
 Aquest cap de setmana
 Avui
 Demà
@@ -111,7 +112,8 @@ Exemple:
 
 ```json
 {
-  "home.title": "Què fem?",
+  "app.name": "Tens pla?",
+  "home.mobileTitle": "Què vols fer avui?",
   "home.weekend": "Aquest cap de setmana",
   "filters.location": "On vols anar?",
   "filters.comarca": "Comarca",
@@ -1562,7 +1564,7 @@ que:
 
 # 47. Filosofia del producte
 
-Què Fem? no ha de ser una còpia d'una agenda cultural.
+Tens pla? no ha de ser una còpia d'una agenda cultural.
 
 Ha de respondre:
 
