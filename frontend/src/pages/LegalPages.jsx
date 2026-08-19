@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-const CONTACT_EMAIL = 'contacte@jusboif.es';
+const CONTACT_EMAIL = 'contacte@tenspla.cat';
 
 function LegalPage({ pageKey, children }) {
   const { t } = useTranslation();

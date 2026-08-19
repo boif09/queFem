@@ -1,7 +1,7 @@
 # Tens pla? — Especificació tècnica inicial
 
 > **Marca pública actual:** Tens pla?
-> **Nom intern legacy:** Què Fem? / `quefem` fins a la migració de domini i infraestructura
+> **Nom intern legacy:** Què Fem? / `quefem`; es manté per compatibilitat tècnica
 > **Objectiu:** aplicació web per descobrir plans, activitats, esdeveniments i llocs per visitar a Catalunya.  
 > **Idioma principal:** català  
 > **Idioma secundari:** castellà  
@@ -1100,7 +1100,7 @@ per millorar l'ordre.
 Pantalla principal:
 
 ```text
-QUÈ FEM?
+TENS PLA?
 
 Quan?
 

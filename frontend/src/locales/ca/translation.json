@@ -126,7 +126,7 @@
   "fonts.intro": "Aquí pots consultar d’on provenen les dades i sota quines condicions les reutilitzem.",
   "fonts.independence": "Tens pla? és un projecte independent: no és un servei oficial de la Generalitat de Catalunya ni de Ticketmaster. Les dades poden canviar en origen; preus, disponibilitat i entrades depenen dels proveïdors originals.",
   "fonts.ticketmaster": "Ticketmaster Discovery Feed/API no és Open Data. S'utilitza conforme a les seves condicions, no se'n reutilitzen imatges i els enllaços d'entrades porten al proveïdor extern. Ticketmaster encara no està habilitat en producció.",
-  "fonts.corrections": "Per comunicar una correcció o sol·licitar una retirada, escriu a contacte@jusboif.es.",
+  "fonts.corrections": "Per comunicar una correcció o sol·licitar una retirada, escriu a contacte@tenspla.cat.",
   "fonts.empty": "No hi ha fonts actives registrades.",
   "fonts.error": "No hem pogut carregar el registre de fonts.",
   "pagination.label": "Paginació",

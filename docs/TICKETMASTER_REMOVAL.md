@@ -2,7 +2,7 @@
 
 Este procedimiento permite retirar una procedencia concreta de Ticketmaster sin modificar las demás fuentes de un plan. El objetivo operativo es atender las solicitudes válidas en menos de 24 horas.
 
-Canal público de contacto: `contacte@jusboif.es`
+Canal público de contacto: `contacte@tenspla.cat`
 
 No deben copiarse a este documento el nombre, email ni otros datos personales de quien solicite una retirada. El registro interno debe limitarse a la referencia de la solicitud, el Ticketmaster event ID, las fechas y el resultado técnico.
 
@@ -73,7 +73,7 @@ Una solicitud expresa no espera esos 7 días: se revisa, se valida primero con `
 Comprobar la API usando el ID interno mostrado por el comando:
 
 ```bash
-curl -i https://quefem.jusboif.es/api/plans/PLAN_ID
+curl -i https://tenspla.cat/api/plans/PLAN_ID
 ```
 
 - Un plan exclusivamente Ticketmaster debe dejar de exponerse porque queda `inactive`.

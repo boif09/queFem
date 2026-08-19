@@ -48,7 +48,7 @@ Technical retention and removal:
 - Ticketmaster images are neither downloaded nor persisted.
 - A manual removal is available as `npm run ticketmaster:remove -- EVENT_ID --dry-run`, followed after review and backup by the same command without `--dry-run`. See `docs/TICKETMASTER_REMOVAL.md`.
 - For an approved express request, `--purge --dry-run` previews immediate physical deletion. The real `--purge` removes the plan only if no provenance remains; shared Gencat or other provenance always preserves the plan. The normal seven-day retention remains unchanged when `--purge` is omitted.
-- Express correction or removal requests are received at `contacte@jusboif.es` and have an operational target below 24 hours.
+- Express correction or removal requests are received at `contacte@tenspla.cat` and have an operational target below 24 hours.
 - When removal of the final source changes a plan to `inactive`, `inactive_at` records that transition explicitly. Re-importing an active source reactivates the plan and clears `inactive_at`.
 - Internal minimization policy: an `inactive` plan with no `plan_sources` becomes eligible for physical deletion after 7 complete days (`INACTIVE_PLAN_RETENTION_DAYS=7`). Exactly seven days is eligible. This is an internal operational policy, not a legal deadline.
 - `npm run purge:inactive -- --dry-run` previews eligible plans without writes. `npm run purge:inactive` deletes their `plan_categories` and then the plan in one transaction; it never deletes shared categories, sources or import runs.

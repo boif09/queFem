@@ -43,7 +43,7 @@ export function FontsPage() {
           </article>
         ))}
         </div>
-        <p className="source-corrections">{t('fonts.corrections')} <a href="mailto:contacte@jusboif.es">contacte@jusboif.es</a></p>
+        <p className="source-corrections">{t('fonts.corrections')} <a href="mailto:contacte@tenspla.cat">contacte@tenspla.cat</a></p>
       </div>
     </section>
   );

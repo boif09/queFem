@@ -43,8 +43,8 @@ Last updated: 2026-08-19
 - Montserrat Variable autoalojada mediante Fontsource, sin Google Fonts ni iconos remotos.
 - Home conectada a datos reales con búsqueda `q`, accesos rápidos, “Passa avui” y categorías reales.
 - Cards y heroes sin fotografías basados en patrones gráficos por slug de categoría, con fallback genérico.
-- Dominio futuro `tenspla.cat` reservado pero no activo; producción continúa en `https://quefem.jusboif.es`.
-- Email e identificadores internos legacy `quefem` permanecen hasta una migración posterior de dominio e infraestructura.
+- Dominio público principal activo: `https://tenspla.cat`; `https://www.tenspla.cat` redirige al dominio principal.
+- `https://quefem.jusboif.es` permanece temporalmente como dominio legacy pendiente de redirección. Los identificadores internos `quefem` se mantienen por compatibilidad técnica.
 
 ### Milestone 4A — Ticketmaster
 
@@ -62,18 +62,18 @@ Last updated: 2026-08-19
 - OpenStreetMap solo se carga después de que el visitante pulse “Veure mapa”/“Ver mapa”.
 - La retirada manual por Ticketmaster event ID dispone de dry-run, transacción e idempotencia y reutiliza la lógica de desactivación de reconciliation.
 - Las solicitudes expresas disponen además de `--purge`: elimina físicamente un plan exclusivamente Ticketmaster en la misma transacción, pero conserva cualquier plan que mantenga otra fuente.
-- El runbook operativo fija `contacte@jusboif.es` como canal y un objetivo inferior a 24 horas.
+- El runbook operativo fija `contacte@tenspla.cat` como canal y un objetivo inferior a 24 horas.
 - La configuración Nginx minimizada está aplicada: registra IP, fecha/hora, método, path sin query, protocolo, estado, bytes y User-Agent; omite query strings y `Referer`. Los logs rotan a diario y se conservan aproximadamente 14 días.
 - Los planes sin fuentes pasan a `inactive` con un `inactive_at` explícito. Una purga independiente puede eliminarlos físicamente al cumplir 7 días, previa validación de estado, antigüedad y ausencia de fuentes.
 - La purga dispone de dry-run, transacción, rollback e idempotencia. Su futura automatización diaria está documentada, pero no se ha añadido ningún cron.
 - Aviso legal, privacidad, almacenamiento local y contacto están implementados en catalán y castellano, con enlaces permanentes desde el footer.
-- Xavier Delgado Garcia consta como responsable y `contacte@jusboif.es` como único canal público; no se publican datos privados adicionales.
+- Xavier Delgado Garcia consta como responsable y `contacte@tenspla.cat` como único canal público; no se publican datos privados adicionales.
 - La documentación refleja Hetzner en Falkenstein (Alemania, `eu-central`) con acuerdo de encargo del tratamiento, OVHcloud para el correo, ausencia de cookies/analítica/seguimiento y carga voluntaria de servicios externos.
 - Ticketmaster no se ha activado en producción.
 
 ### Producción
 
-- aplicación desplegada y funcionando en `https://quefem.jusboif.es`
+- aplicación desplegada y funcionando en `https://tenspla.cat`
 - backend Node.js/Express gestionado por PM2 como `quefem-api`, puerto 3014
 - SQLite
 - frontend estático servido por Nginx

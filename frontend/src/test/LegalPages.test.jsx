@@ -49,15 +49,16 @@ describe('legal and privacy pages', () => {
     await i18n.changeLanguage('es');
     renderRoute('/privacidad');
     expect(screen.getByText(/Xavier Delgado Garcia es el responsable/)).toBeInTheDocument();
+    expect(screen.getByText(/La web es https:\/\/tenspla.cat/)).toBeInTheDocument();
     expect(screen.getByText(/Falkenstein, Alemania, zona eu-central/)).toBeInTheDocument();
     expect(screen.getByText(/aproximadamente 14 días/)).toBeInTheDocument();
     expect(screen.getByText(/No registra query strings ni Referer/)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Carácter de los datos' })).toBeInTheDocument();
     expect(screen.getByText(/No es necesario facilitar datos personales para navegar/)).toBeInTheDocument();
     expect(screen.getByText(/no vende ni cede datos personales a terceros/)).toBeInTheDocument();
-    const privacyEmailLinks = screen.getAllByRole('link', { name: /Escribir a contacte@jusboif.es/ });
+    const privacyEmailLinks = screen.getAllByRole('link', { name: /Escribir a contacte@tenspla.cat/ });
     expect(privacyEmailLinks).toHaveLength(2);
-    expect(privacyEmailLinks[0]).toHaveAttribute('href', 'mailto:contacte@jusboif.es');
+    expect(privacyEmailLinks[0]).toHaveAttribute('href', 'mailto:contacte@tenspla.cat');
   });
 
   it('describes language storage without claiming tracking cookies', async () => {
@@ -144,6 +145,6 @@ describe('legal and privacy pages', () => {
     expect(await screen.findByRole('heading', { name: 'Ticketmaster Discovery Feed España' })).toBeInTheDocument();
     expect(screen.getByText(/no és Open Data/)).toBeInTheDocument();
     expect(screen.getByText(/Ticketmaster encara no està habilitat en producció/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'contacte@jusboif.es' })).toHaveAttribute('href', 'mailto:contacte@jusboif.es');
+    expect(screen.getByRole('link', { name: 'contacte@tenspla.cat' })).toHaveAttribute('href', 'mailto:contacte@tenspla.cat');
   });
 });

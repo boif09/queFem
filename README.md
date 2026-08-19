@@ -136,7 +136,7 @@ La interfície és bilingüe, amb català per defecte i castellà seleccionable.
 
 La interfície utilitza el sistema visual **Pop Editorial / Mediterranean Pop**. Montserrat Variable s'empaqueta localment en WOFF2 mitjançant Fontsource, amb llicència OFL i sense Google Fonts en runtime. Les fitxes amb coordenades no contacten OpenStreetMap fins que el visitant prem el botó per carregar el mapa; l'enllaç de Google Maps continua sent una navegació externa voluntària.
 
-Tens pla? no utilitza cookies, analítica, publicitat, comptes ni seguiment. L'única preferència local continua sent la clau legacy `quefem.language`, amb valor `ca` o `es`. Les pàgines legals identifiquen Xavier Delgado Garcia com a responsable i `contacte@jusboif.es` com a canal públic. Qualsevol monetització, analítica, publicitat, sistema de comptes, formulari o nou mecanisme d'emmagatzematge o seguiment exigeix revisar la documentació legal i, si escau, implementar consentiment abans de desplegar-lo.
+Tens pla? no utilitza cookies, analítica, publicitat, comptes ni seguiment. L'única preferència local continua sent la clau legacy `quefem.language`, amb valor `ca` o `es`. Les pàgines legals identifiquen Xavier Delgado Garcia com a responsable i `contacte@tenspla.cat` com a canal públic. Qualsevol monetització, analítica, publicitat, sistema de comptes, formulari o nou mecanisme d'emmagatzematge o seguiment exigeix revisar la documentació legal i, si escau, implementar consentiment abans de desplegar-lo.
 
 Per treballar en local, obre dos terminals des de l'arrel del projecte:
 
@@ -178,8 +178,8 @@ La Milestone 3 no inclou login, favorits, mapes avançats, monetització, IA, fo
 
 ## Producció i desplegament
 
-L'aplicació està publicada a `https://quefem.jusboif.es`. El backend està gestionat per PM2, el frontend compilat el serveix Nginx i `deploy.sh` desplega els canvis de codi. La sincronització de Gencat s'executa cada dues hores mitjançant el cron extern del servidor; no forma part del desplegament.
+L'aplicació està publicada a `https://tenspla.cat`. El backend està gestionat per PM2, el frontend compilat el serveix Nginx i `deploy.sh` desplega els canvis de codi. La sincronització de Gencat s'executa cada dues hores mitjançant el cron extern del servidor; no forma part del desplegament.
 
-La marca pública nova és **Tens pla?** i `tenspla.cat` està reservat, però encara no és actiu. El domini públic, email i identificadors interns legacy (`quefem`, `queFem`, `quefem-api`, `quefem.sqlite`) es mantenen temporalment fins a una migració d'infraestructura separada.
+La marca pública és **Tens pla?**, el domini públic principal és `https://tenspla.cat` i el correu públic és `contacte@tenspla.cat`. `https://quefem.jusboif.es` es conserva temporalment com a domini legacy pendent de redirecció. Els identificadors interns legacy (`quefem`, `queFem`, `quefem-api`, `quefem.sqlite`) es mantenen sense canvis.
 
 La infraestructura, el cron real i les ordres d'operació estan documentats a [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).

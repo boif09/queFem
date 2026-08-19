@@ -2,7 +2,7 @@
 
 Este documento describe la infraestructura actual de producción. La sincronización de datos y el despliegue de código son procesos separados.
 
-La marca pública es Tens pla?, pero el dominio público sigue siendo `https://quefem.jusboif.es`. `tenspla.cat` está reservado y no está activo. Las rutas, servicios y nombres internos legacy `quefem` no se modifican en este rebranding.
+La marca pública es Tens pla? y el dominio público principal activo es `https://tenspla.cat`. `https://www.tenspla.cat` redirige al dominio principal. `https://quefem.jusboif.es` permanece temporalmente como dominio legacy pendiente de redirección. Las rutas, servicios y nombres internos legacy `quefem` no se modifican.
 
 ## Servidor
 
@@ -10,10 +10,10 @@ La marca pública es Tens pla?, pero el dominio público sigue siendo `https://q
 Proveedor: Hetzner
 Ubicación: Falkenstein, Alemania (eu-central)
 Directorio del proyecto: /var/www/queFem
-URL pública: https://quefem.jusboif.es
+URL pública: https://tenspla.cat
 ```
 
-Hetzner aloja el frontend, backend, SQLite, infraestructura web y logs técnicos. Existe un acuerdo de encargo del tratamiento conforme al artículo 28 del RGPD. El correo de `contacte@jusboif.es` está alojado por OVHcloud.
+Hetzner aloja el frontend, backend, SQLite, infraestructura web y logs técnicos. Existe un acuerdo de encargo del tratamiento conforme al artículo 28 del RGPD. El correo de `contacte@tenspla.cat` está alojado por OVHcloud.
 
 ## Backend
 
@@ -36,7 +36,7 @@ pm2 logs quefem-api
 
 El frontend React/Vite se compila en `/var/www/queFem/frontend/dist` y Nginx lo sirve directamente. Nginx utiliza fallback a `index.html` para React Router y hace proxy de `/api/` a `http://127.0.0.1:3014`.
 
-La aplicación se publica mediante HTTPS en `https://quefem.jusboif.es`.
+La aplicación se publica mediante HTTPS en `https://tenspla.cat`.
 
 ## Despliegue de código
 

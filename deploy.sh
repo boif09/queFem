@@ -5,10 +5,10 @@ set -euo pipefail
 APP_DIR="/var/www/queFem"
 PM2_APP="quefem-api"
 LOCAL_API="http://127.0.0.1:3014/api/plans?limit=1"
-PUBLIC_URL="https://quefem.jusboif.es"
+PUBLIC_URL="https://tenspla.cat"
 
 echo "======================================"
-echo "🚀 Desplegando Què Fem?"
+echo "🚀 Desplegando Tens pla?"
 echo "======================================"
 
 cd "$APP_DIR"
@@ -82,6 +82,6 @@ fi
 
 echo
 echo "======================================"
-echo "✅ Què Fem? desplegado correctamente"
+echo "✅ Tens pla? desplegado correctamente"
 echo "🌐 $PUBLIC_URL"
 echo "======================================"
