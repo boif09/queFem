@@ -83,6 +83,13 @@ img, svg { display: block; max-width: 100%; }
 .search-section { position: relative; z-index: 5; margin-top: -66px; padding-bottom: 90px; }
 .section-kicker { width: fit-content; margin: 0 0 12px 26px; padding: 9px 15px; border-radius: 20px 20px 0 0; background: var(--coral); color: white; font-size: .76rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .search-panel { background: var(--paper); border: 1px solid rgba(215,221,213,.9); border-radius: var(--radius-xl); box-shadow: var(--shadow); overflow: hidden; }
+.text-search-section { padding: 28px 38px; border-bottom: 1px solid var(--line); }
+.text-search-section > label { display: block; margin-bottom: 8px; font-size: .75rem; font-weight: 750; color: var(--ink-soft); }
+.text-search-control { display: flex; align-items: center; gap: 10px; padding: 0 16px; border: 1px solid var(--line); border-radius: 999px; background: white; }
+.text-search-control > span { color: var(--accent); font-size: 1.4rem; line-height: 1; }
+.text-search-control input { width: 100%; border: 0; padding: 14px 0; background: transparent; }
+.text-search-control input:focus { outline: 0; }
+.text-search-control:focus-within { outline: 3px solid rgba(151, 73, 48, .2); border-color: var(--accent); }
 .filter-section { padding: 32px 38px; border-bottom: 1px solid var(--line); }
 .filter-section-date { background: #fbf8f0; }
 .section-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
@@ -382,6 +389,7 @@ h1, h2, h3, .result-count { text-wrap: balance; }
 .search-section { margin-top: -112px; padding-bottom: 110px; }
 .section-kicker { display: none; }
 .search-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-color: rgba(217, 193, 187, .7); border-radius: var(--radius-xl); box-shadow: var(--shadow); }
+.text-search-section { grid-column: 1 / -1; }
 .filter-section { padding: 34px 40px; }
 .filter-section-date { min-height: 248px; border-right: 1px solid var(--line); background: white; }
 .filter-section-date + .filter-section { min-height: 248px; background: white; }

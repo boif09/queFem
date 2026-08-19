@@ -40,4 +40,17 @@ describe('PlansPage', () => {
       date: '2026-09-01', municipality: 'Barcelona', category: 'musica', sort: 'date',
     }));
   });
+
+  it('restores q, combines it with filters, sends it to the API and shows its active chip', async () => {
+    api.getPlans.mockResolvedValue({
+      data: [], pagination: { page: 1, limit: 12, total: 0, pages: 0 },
+    });
+    render(<MemoryRouter initialEntries={['/plans?q=Weeknd&date=2026-09-01&municipality=Barcelona&category=musica']}><PlansPage /></MemoryRouter>);
+
+    await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
+    expect(api.getPlans).toHaveBeenCalledWith(expect.objectContaining({
+      q: 'Weeknd', date: '2026-09-01', municipality: 'Barcelona', category: 'musica',
+    }));
+    expect(screen.getByText('Cerca: Weeknd')).toBeInTheDocument();
+  });
 });

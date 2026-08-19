@@ -67,6 +67,15 @@ export class PlanQueryRepository {
 
   buildWhere(filters) {
     const { clauses, parameters } = this.visiblePlanConditions();
+    if (filters.q !== undefined) {
+      clauses.push(`(
+        instr(normalize_location(p.original_title), normalize_location(?)) > 0 OR
+        instr(normalize_location(p.title_ca), normalize_location(?)) > 0 OR
+        instr(normalize_location(p.title_es), normalize_location(?)) > 0 OR
+        instr(normalize_location(p.venue_name), normalize_location(?)) > 0
+      )`);
+      parameters.push(filters.q, filters.q, filters.q, filters.q);
+    }
     const equalFilters = [
       ['province', 'p.province'],
       ['kind', 'p.kind'],

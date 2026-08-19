@@ -12,6 +12,7 @@ function ActiveFilters({ filters }) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
   const items = [
+    filters.q && t('filter.query', { query: filters.q }),
     filters.date && t('filter.date', { value: formatDate(filters.date, language) }),
     filters.dateFrom && filters.dateTo && t('filter.range', {
       from: formatDate(filters.dateFrom, language), to: formatDate(filters.dateTo, language),

@@ -1,11 +1,14 @@
 export const SEARCH_FILTER_KEYS = [
-  'date', 'dateFrom', 'dateTo', 'comarca', 'municipality', 'category', 'free',
+  'q', 'date', 'dateFrom', 'dateTo', 'comarca', 'municipality', 'category', 'free',
 ];
 
 export function filtersFromSearchParams(searchParams) {
   return Object.fromEntries(
     SEARCH_FILTER_KEYS
-      .map((key) => [key, searchParams.get(key) || ''])
+      .map((key) => {
+        const value = searchParams.get(key) || '';
+        return [key, key === 'q' ? value.trim() : value];
+      })
       .filter(([, value]) => value !== ''),
   );
 }
@@ -13,7 +16,8 @@ export function filtersFromSearchParams(searchParams) {
 export function createPlansSearch(filters, extra = {}) {
   const parameters = new URLSearchParams();
   for (const key of SEARCH_FILTER_KEYS) {
-    const value = filters[key];
+    const rawValue = filters[key];
+    const value = key === 'q' && typeof rawValue === 'string' ? rawValue.trim() : rawValue;
     if (value !== undefined && value !== null && value !== '' && value !== false) {
       parameters.set(key, value === true ? 'true' : String(value));
     }

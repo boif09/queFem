@@ -342,5 +342,73 @@ test('Milestone 2 REST API', async (context) => {
         assert.match(gencat.license_url, /^https:\/\//);
         assert.match(ticketmaster.license_url, /^https:\/\//);
       });
+
+      await context.test('busca texto normalizado en títulos y venue antes de filtros y paginación', async () => {
+        const searchIds = [];
+        try {
+          const weeknd = insertPlan(db, {
+            fingerprint: 'weeknd|barcelona|2026-09-01',
+            original_title: 'The Weeknd: After Hours Til Dawn Tour',
+            title_ca: null,
+            title_es: null,
+            start_date: '2026-09-01', end_date: '2026-09-01',
+            province: 'Barcelona', comarca: 'Barcelones', municipality: 'Barcelona',
+            venue_name: 'Estadi Olímpic Lluís Companys', quality_score: 90,
+          });
+          searchIds.push(weeknd);
+          linkCategory(db, weeknd, 'musica');
+          const gutierrez = insertPlan(db, {
+            fingerprint: 'gutierrez|girona|2026-09-02',
+            original_title: 'Actuació especial', title_ca: 'Hermanos Gutiérrez', title_es: null,
+            start_date: '2026-09-02', end_date: '2026-09-02',
+            comarca: 'Girones', municipality: 'Girona', venue_name: 'Auditori',
+          });
+          searchIds.push(gutierrez);
+          const living = insertPlan(db, {
+            fingerprint: 'living|barcelona|2026-09-03',
+            original_title: 'Concert internacional', title_ca: null,
+            title_es: 'The Living Tombstone: The Multiplayer Tour',
+            start_date: '2026-09-03', end_date: '2026-09-03',
+            province: 'Barcelona', comarca: 'Barcelones', municipality: 'Barcelona',
+            venue_name: 'Razzmatazz',
+          });
+          searchIds.push(living);
+          const venue = insertPlan(db, {
+            fingerprint: 'festival|barcelona|2026-09-04',
+            original_title: 'Festival de tardor', title_ca: 'Festival de tardor', title_es: null,
+            start_date: '2026-09-04', end_date: '2026-09-04',
+            province: 'Barcelona', comarca: 'Barcelones', municipality: 'Barcelona',
+            venue_name: 'Estadi Olímpic',
+          });
+          searchIds.push(venue);
+
+          assert.equal((await apiRequest('/api/plans?q=week')).body.data[0].id, weeknd);
+          assert.equal((await apiRequest('/api/plans?q=WEEKND')).body.data[0].id, weeknd);
+          assert.equal((await apiRequest('/api/plans?q=gutierrez')).body.data[0].id, gutierrez);
+          assert.equal((await apiRequest('/api/plans?q=guti%C3%A9rrez')).body.data[0].id, gutierrez);
+          assert.equal((await apiRequest('/api/plans?q=living&lang=es')).body.data[0].id, living);
+          assert.equal((await apiRequest('/api/plans?q=olimpic')).body.pagination.total, 2);
+          assert.equal((await apiRequest('/api/plans?q=ol%C3%ADmpic')).body.pagination.total, 2);
+
+          const combinedMunicipality = await apiRequest('/api/plans?q=weeknd&municipality=Barcelona');
+          assert.deepEqual(combinedMunicipality.body.data.map(({ id }) => id), [weeknd]);
+          const combinedDate = await apiRequest('/api/plans?q=weeknd&date=2026-09-01');
+          assert.deepEqual(combinedDate.body.data.map(({ id }) => id), [weeknd]);
+          const combinedCategory = await apiRequest('/api/plans?q=weeknd&category=musica');
+          assert.deepEqual(combinedCategory.body.data.map(({ id }) => id), [weeknd]);
+
+          assert.equal((await apiRequest('/api/plans?q=no-existe')).body.pagination.total, 0);
+          assert.equal((await apiRequest('/api/plans?q=%20%20')).body.pagination.total, 7);
+          assert.equal((await apiRequest(`/api/plans?q=${'a'.repeat(101)}`)).response.status, 400);
+          assert.equal((await apiRequest('/api/plans?q=%25_%27%20OR%201%3D1--')).body.pagination.total, 0);
+
+          const paginated = await apiRequest('/api/plans?q=tour&limit=1&page=2');
+          assert.deepEqual(paginated.body.pagination, { page: 2, limit: 1, total: 2, pages: 2 });
+          assert.equal(paginated.body.data.length, 1);
+        } finally {
+          db.prepare(`DELETE FROM plan_categories WHERE plan_id IN (${searchIds.map(() => '?').join(',')})`).run(...searchIds);
+          db.prepare(`DELETE FROM plans WHERE id IN (${searchIds.map(() => '?').join(',')})`).run(...searchIds);
+        }
+      });
   });
 });

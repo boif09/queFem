@@ -5,7 +5,7 @@ import { getQuickDateRange, toISODate } from '../utils/dates.js';
 import { CategorySelector } from './CategorySelector.jsx';
 
 const EMPTY_FILTERS = {
-  date: '', dateFrom: '', dateTo: '', comarca: '', municipality: '', category: '', free: false,
+  q: '', date: '', dateFrom: '', dateTo: '', comarca: '', municipality: '', category: '', free: false,
 };
 
 export function SearchFilters({ initialFilters = {}, onSearch }) {
@@ -76,12 +76,27 @@ export function SearchFilters({ initialFilters = {}, onSearch }) {
     event.preventDefault();
     onSearch({
       ...filters,
+      q: filters.q.trim(),
       free: filters.free ? 'true' : '',
     });
   };
 
   return (
     <form className="search-panel" onSubmit={submit}>
+      <div className="text-search-section">
+        <label htmlFor="plan-text-search">{t('filters.textSearch')}</label>
+        <div className="text-search-control">
+          <span aria-hidden="true">⌕</span>
+          <input
+            id="plan-text-search"
+            type="search"
+            maxLength="100"
+            value={filters.q}
+            placeholder={t('filters.textSearchPlaceholder')}
+            onChange={(event) => update('q', event.target.value)}
+          />
+        </div>
+      </div>
       <div className="filter-section filter-section-date">
         <div className="section-heading">
           <span className="section-number" aria-hidden="true">01</span>

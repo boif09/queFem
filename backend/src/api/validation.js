@@ -1,5 +1,5 @@
 const PLAN_QUERY_PARAMETERS = new Set([
-  'date', 'dateFrom', 'dateTo', 'province', 'comarca', 'municipality',
+  'q', 'date', 'dateFrom', 'dateTo', 'province', 'comarca', 'municipality',
   'category', 'free', 'family', 'indoor', 'outdoor', 'kind',
   'page', 'limit', 'sort', 'lang',
 ]);
@@ -27,6 +27,17 @@ function singleString(value, name, { required = false, maxLength = 120 } = {}) {
   const trimmed = value.trim();
   if (!trimmed) throw new ValidationError(`El paràmetre ${name} no pot estar buit.`);
   if (trimmed.length > maxLength) throw new ValidationError(`El paràmetre ${name} és massa llarg.`);
+  return trimmed;
+}
+
+function optionalSearchQuery(value) {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string') {
+    throw new ValidationError('El paràmetre q només es pot indicar una vegada.');
+  }
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.length > 100) throw new ValidationError('El paràmetre q és massa llarg.');
   return trimmed;
 }
 
@@ -99,6 +110,7 @@ export function validatePlansQuery(query, defaultLanguage = 'ca') {
   }
 
   return {
+    q: optionalSearchQuery(query.q),
     date,
     dateFrom,
     dateTo,
