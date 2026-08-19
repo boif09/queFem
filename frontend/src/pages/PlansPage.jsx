@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Pagination } from '../components/Pagination.jsx';
@@ -35,7 +35,10 @@ function ActiveFilters({ filters }) {
 
 export function PlansPage() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
+  const filtersPanelRef = useRef(null);
   const [state, setState] = useState({ status: 'loading', plans: [], pagination: null });
   const [reloadKey, setReloadKey] = useState(0);
   const searchKey = searchParams.toString();
@@ -57,6 +60,9 @@ export function PlansPage() {
   const applyFilters = (nextFilters) => {
     const query = createPlansSearch(nextFilters);
     navigate(query ? `/plans?${query}` : '/plans');
+    if (window.matchMedia?.('(max-width: 680px)').matches && filtersPanelRef.current) {
+      filtersPanelRef.current.open = false;
+    }
   };
   return (
     <section className="results-page page-section">
@@ -65,7 +71,7 @@ export function PlansPage() {
           <div><p className="eyebrow dark">{t('results.eyebrow')}</p><h1>{filters.q || t('results.title')}</h1></div>
           <Link className="button button-secondary" to={homeQuery ? `/?${homeQuery}` : '/'}>{t('results.changeSearch')}</Link>
         </header>
-        <details className="results-filters" id="filters" defaultOpen={Boolean(location.state?.openFilters)}>
+        <details ref={filtersPanelRef} className="results-filters" id="filters" defaultOpen={Boolean(location.state?.openFilters)}>
           <summary>{t('results.filtersToggle')}</summary>
           <SearchFilters key={searchKey} initialFilters={filters} onSearch={applyFilters} />
         </details>
