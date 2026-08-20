@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../components/BrandLogo.jsx';
-import { CategoryIcon } from '../components/CategoryIcon.jsx';
+import { ExploreCategoryArtwork } from '../components/ExploreCategoryArtwork.jsx';
 import { PlanList } from '../components/PlanList.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
@@ -92,11 +92,11 @@ export function HomePage() {
           {categories.status === 'error' && <ErrorState />}
           {categories.status === 'success' && (
             <div className="explore-categories">
-              {categories.items.slice(0, 8).map((category) => {
+              {categories.items.slice(0, 8).map((category, index) => {
                 const name = language === 'es' ? (category.name_es || category.name_ca) : (category.name_ca || category.name_es);
                 return (
                   <Link key={category.slug} data-category={category.slug} to={`/plans?category=${encodeURIComponent(category.slug)}`}>
-                    <span className="explore-category-artwork" aria-hidden="true"><i /><i /><CategoryIcon icon={category.icon} /></span>
+                    <ExploreCategoryArtwork category={category} eager={index < 4} />
                     <strong>{name}</strong>
                   </Link>
                 );

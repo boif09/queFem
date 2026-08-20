@@ -109,6 +109,10 @@ h1, h2, h3, h4, h5, h6, strong, .legal-section h2, .prose { font-family: var(--f
 .explore-category-artwork i:first-child { width: 120%; height: 26px; transform: rotate(-8deg); }
 .explore-category-artwork i:nth-child(2) { width: 80px; height: 80px; right: -24px; bottom: -38px; border-radius: 50%; }
 .explore-category-artwork .category-icon { position: relative; z-index: 1; width: 48px; height: 48px; border: var(--border-strong); background: var(--color-background); color: var(--color-text); box-shadow: 3px 3px 0 var(--color-text); font-size: 1.45rem; }
+.explore-categories a:has(.explore-category-photo) { min-height: 0; grid-template-rows: auto auto; }
+.explore-category-photo { min-height: 0; aspect-ratio: 4 / 3; display: block; background: var(--color-text); }
+.explore-category-photo img { width: 100%; height: 100%; min-height: 0; display: block; object-fit: cover; transition: transform 160ms ease; }
+.explore-categories a:hover .explore-category-photo img { transform: scale(1.02); }
 .explore-categories a[data-category="musica"] { --category-color: #0b49d1; }
 .explore-categories a[data-category="festes"], .explore-categories a[data-category="espectacles"] { --category-color: var(--color-red); }
 .explore-categories a[data-category="gastronomia"], .explore-categories a[data-category="fires-mercats"] { --category-color: var(--color-yellow); }

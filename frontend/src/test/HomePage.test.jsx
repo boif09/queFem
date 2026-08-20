@@ -53,4 +53,30 @@ describe('Pop Editorial home', () => {
     expect(screen.getByText('¿Todavía no? Te encontramos uno.')).toBeInTheDocument();
     expect(screen.queryByText(/Saved|Profile|Cuenta/i)).not.toBeInTheDocument();
   });
+
+  it('uses local decorative category photos and preserves the pattern fallback and links in CA/ES', async () => {
+    api.getCategories.mockResolvedValue({ data: [
+      { slug: 'cultura', name_ca: 'Cultura', name_es: 'Cultura', icon: 'culture' },
+      { slug: 'natura', name_ca: 'Natura', name_es: 'Naturaleza', icon: 'nature' },
+    ] });
+    const { container } = renderHome();
+    const culturaLink = await screen.findByRole('link', { name: 'Cultura' });
+    const photo = culturaLink.querySelector('img');
+    expect(photo).toHaveAttribute('src', '/images/explore/cultura.webp');
+    expect(photo).toHaveAttribute('alt', '');
+    expect(photo).toHaveAttribute('decoding', 'async');
+    expect(culturaLink.querySelector('.category-icon')).not.toBeInTheDocument();
+    expect(culturaLink.querySelector('.explore-category-artwork i')).not.toBeInTheDocument();
+    expect(culturaLink).toHaveAttribute('href', '/plans?category=cultura');
+
+    const naturaLink = screen.getByRole('link', { name: 'Natura' });
+    expect(naturaLink.querySelector('img')).not.toBeInTheDocument();
+    expect(naturaLink.querySelector('.category-icon')).toBeInTheDocument();
+    expect(naturaLink.querySelectorAll('.explore-category-artwork i')).toHaveLength(2);
+    expect(container.querySelectorAll('.explore-category-photo')).toHaveLength(1);
+
+    await i18n.changeLanguage('es');
+    await waitFor(() => expect(screen.getByRole('link', { name: 'Naturaleza' })).toHaveAttribute('href', '/plans?category=natura'));
+    expect(screen.getByRole('link', { name: 'Cultura' }).querySelector('img')).toHaveAttribute('src', '/images/explore/cultura.webp');
+  });
 });
