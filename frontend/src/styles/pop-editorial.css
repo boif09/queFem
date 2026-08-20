@@ -50,6 +50,7 @@ h1, h2, h3, h4, h5, h6, strong, .legal-section h2, .prose { font-family: var(--f
 .site-header { position: sticky; top: 0; z-index: 30; background: rgba(252,249,245,.97); border-bottom: var(--border-strong); backdrop-filter: none; }
 .header-inner { min-height: 86px; gap: 44px; }
 .brand { color: var(--color-text); }
+.header-brand-logo { display: block; width: 184px; height: auto; }
 .brand-wordmark { display: inline-flex; align-items: center; gap: 20px; color: #1a1a1a; }
 .brand-wordmark > strong { color: #1a1a1a; font-family: "Montserrat Variable", Montserrat, sans-serif; font-size: clamp(1.1rem, 2vw, 1.65rem); font-weight: 800; letter-spacing: -.05em; white-space: nowrap; }
 .brand-wordmark .brand-stamp { width: 46px; height: 46px; display: grid; place-items: center; border: 2px solid #1a1a1a; background: #fabd00; color: #b71511; box-shadow: 3px 3px 0 #1a1a1a; font-family: "Montserrat Variable", Montserrat, sans-serif; font-size: 2rem; font-weight: 900; line-height: 1; opacity: 1; }
@@ -229,7 +230,7 @@ h1, h2, h3, h4, h5, h6, strong, .legal-section h2, .prose { font-family: var(--f
 /* Footer */
 .site-footer { border-top: var(--border-strong); background: var(--color-background); padding: 38px 0 46px; }
 .footer-inner { align-items: start; }
-.footer-logo { width: auto; }
+.footer-logo { display: block; width: 146px; height: auto; }
 .footer-links { gap: 10px 22px; }
 .footer-links a { font-size: .7rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .footer-meta { gap: 10px; }
@@ -251,6 +252,7 @@ h1, h2, h3, h4, h5, h6, strong, .legal-section h2, .prose { font-family: var(--f
   .container { width: min(calc(100% - 40px), var(--container)); }
   .site-header { position: static; border-bottom: 1px solid #e5e2de; }
   .header-inner { min-height: 68px; }
+  .header-brand-logo { width: 132px; }
   .brand-wordmark > strong, .primary-nav, .language-long { display: none; }
   .brand-wordmark .brand-stamp { width: 36px; height: 36px; }
   .language-short { display: inline; }

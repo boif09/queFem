@@ -90,18 +90,17 @@ describe('legal and privacy pages', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Política de privacitat' })).toBeInTheDocument();
   });
 
-  it('uses the same canonical brand mark and wordmark in header and footer', () => {
+  it('uses the horizontal Stitch logo in the header and footer', () => {
     const { container } = renderRoute('/legal');
-    const headerBrand = container.querySelector('.site-header .brand-wordmark');
-    const footerBrand = container.querySelector('.site-footer .brand-wordmark');
+    const headerBrand = container.querySelector('.site-header .header-brand-logo');
+    const footerBrand = container.querySelector('.site-footer .footer-logo');
 
     expect(headerBrand).toBeInTheDocument();
     expect(footerBrand).toBeInTheDocument();
-    expect(headerBrand.innerHTML).toBe(footerBrand.innerHTML);
-    expect(headerBrand.querySelector('.brand-stamp')).toHaveTextContent('?');
-    expect(footerBrand.querySelector('.brand-stamp')).toHaveTextContent('?');
-    expect(headerBrand.querySelector('strong')).toHaveTextContent('TENS PLA?');
-    expect(footerBrand.querySelector('strong')).toHaveTextContent('TENS PLA?');
+    expect(headerBrand).toHaveTextContent('Tens pla?');
+    expect(headerBrand.querySelector('[fill="#1A1A1A"]')).toHaveTextContent('Tens pla');
+    expect(headerBrand.querySelector('[fill="#FF4D3D"]')).toHaveTextContent('?');
+    expect(footerBrand.innerHTML).toBe(headerBrand.innerHTML);
   });
 
   it('shows mobile navigation only on home and results routes', () => {
