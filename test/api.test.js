@@ -272,9 +272,17 @@ test('Milestone 2 REST API', async (context) => {
       });
 
       await context.test('pagina los resultados', async () => {
+        assert.equal((await apiRequest('/api/plans?page=1')).response.status, 200);
         const { body } = await apiRequest('/api/plans?page=2&limit=1');
         assert.equal(body.data.length, 1);
         assert.deepEqual(body.pagination, { page: 2, limit: 1, total: 3, pages: 3 });
+      });
+
+      await context.test('limita la página máxima a 200', async () => {
+        assert.equal((await apiRequest('/api/plans?page=200')).response.status, 200);
+        const invalid = await apiRequest('/api/plans?page=201');
+        assert.equal(invalid.response.status, 400);
+        assert.match(invalid.body.error.message, /entre 1 i 200/);
       });
 
       await context.test('acepta limit 100 y rechaza valores superiores', async () => {

@@ -19,8 +19,8 @@ const app = createApp({
   ticketmasterImageRequestTimeoutMs: config.ticketmasterImageRequestTimeoutMs,
   ticketmasterImageMaximumBytes: config.ticketmasterImageMaximumBytes,
 });
-const server = app.listen(config.port, () => {
-  console.log(`API de Què Fem? disponible a http://localhost:${config.port}`);
+const server = app.listen(config.port, config.host, () => {
+  console.log(`API de Què Fem? disponible a http://${config.host}:${config.port}`);
 });
 
 function shutdown() {

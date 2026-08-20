@@ -6,6 +6,7 @@ const PLAN_QUERY_PARAMETERS = new Set([
 const KINDS = new Set(['event', 'place', 'route', 'beach', 'nature', 'activity']);
 const SORTS = new Set(['date', 'quality', 'title']);
 const LANGUAGES = new Set(['ca', 'es']);
+export const MAX_PLANS_PAGE = 200;
 
 export class ValidationError extends Error {
   constructor(message) {
@@ -123,7 +124,7 @@ export function validatePlansQuery(query, defaultLanguage = 'ca') {
     indoor: boolean(query.indoor, 'indoor'),
     outdoor: boolean(query.outdoor, 'outdoor'),
     kind,
-    page: integer(query.page, 'page', 1, 1, 1_000_000),
+    page: integer(query.page, 'page', 1, 1, MAX_PLANS_PAGE),
     limit: integer(query.limit, 'limit', 20, 1, 100),
     sort,
     lang: validateLanguage(query.lang, defaultLanguage),

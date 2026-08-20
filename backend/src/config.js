@@ -20,6 +20,7 @@ export function loadConfig(env = process.env) {
 
   return {
     projectRoot,
+    host: env.HOST || '127.0.0.1',
     port: positiveInteger(env.PORT, 3000),
     databasePath: path.isAbsolute(configuredDatabasePath)
       ? configuredDatabasePath

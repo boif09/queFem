@@ -34,6 +34,11 @@ test('uses no retention by default and calculates cutoffs using the Catalonia ca
   assert.throws(() => retentionCutoff(-1), /enter no negatiu/);
 });
 
+test('uses localhost as the default host and accepts an explicit host', () => {
+  assert.equal(loadConfig({}).host, '127.0.0.1');
+  assert.equal(loadConfig({ HOST: '0.0.0.0' }).host, '0.0.0.0');
+});
+
 test('retains cutoff-day, undated and permanent plans', () => {
   assert.equal(isPlanRetained({ permanent: 0, end_date: '2026-05-18' }, '2026-05-19'), false);
   assert.equal(isPlanRetained({ permanent: 0, end_date: '2026-05-19' }, '2026-05-19'), true);
