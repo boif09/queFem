@@ -1,9 +1,12 @@
 import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import 'dotenv/config';
 import { loadConfig } from '../config.js';
 import { openDatabase } from '../db/database.js';
 import { TicketmasterReconciliationRepository } from '../db/repositories/ticketmasterReconciliation.repository.js';
+import { PlanSourceImageRepository } from '../db/repositories/planSourceImage.repository.js';
 import { deleteOrphanPlanWithinTransaction } from '../retention/inactivePlanRetention.js';
+import { TicketmasterImageCache } from '../ticketmaster/imageCache.js';
 
 const TICKETMASTER_SOURCE_KEY = 'ticketmaster-discovery-feed';
 
@@ -35,6 +38,7 @@ export function removeTicketmasterEvent(
     if (!source) return { outcome: 'source-not-found', eventId: eventId.trim(), dryRun };
 
     const repository = new TicketmasterReconciliationRepository(db);
+    const imageRepository = new PlanSourceImageRepository(db);
     const link = repository.findSourceRecord(source.id, eventId.trim());
     if (!link) return { outcome: 'not-found', eventId: eventId.trim(), dryRun };
 
@@ -43,6 +47,7 @@ export function removeTicketmasterEvent(
       item.key === TICKETMASTER_SOURCE_KEY && item.source_record_id === eventId.trim()
     ));
     const planWouldBePurged = purge && remainingSources.length === 0;
+    const imageIds = imageRepository.findImageIdsForPlanSource(link.source_link_id);
     let purgeResult = null;
     repository.removeSourceLinks([link], {
       dryRun,
@@ -52,6 +57,16 @@ export function removeTicketmasterEvent(
         purgeResult = deleteOrphanPlanWithinTransaction(db, link.plan_id, { beforeDeletePlan });
       } : undefined,
     });
+    let imageCacheFilesDeleted = 0;
+    if (!dryRun && imageIds.length > 0) {
+      const cache = new TicketmasterImageCache({
+        directory: config.ticketmasterImageCachePath
+          || path.resolve(path.dirname(config.databasePath), 'cache', 'ticketmaster-images'),
+        ttlHours: config.ticketmasterImageCacheTtlHours || 6,
+        maximumMb: config.ticketmasterImageCacheMaxMb || 512,
+      });
+      imageCacheFilesDeleted = cache.invalidateSync(imageIds);
+    }
 
     return {
       outcome: dryRun ? 'dry-run' : 'removed',
@@ -65,6 +80,8 @@ export function removeTicketmasterEvent(
       planWouldBePurged,
       planPurged: purgeResult?.deleted === 1,
       planCategoriesDeleted: purgeResult?.planCategoriesDeleted || 0,
+      imageIds,
+      imageCacheFilesDeleted,
     };
   } finally {
     db.close();
@@ -86,6 +103,7 @@ export function printRemovalResult(result) {
   console.log('Fonts abans:');
   for (const source of result.sourcesBefore) console.log(`- ${source.key} | ${source.source_record_id}`);
   console.log(`Resultat: ${result.dryRun ? 'cap canvi' : 'procedència Ticketmaster eliminada'}`);
+  if (!result.dryRun) console.log(`Fitxers de cache d'imatge eliminats: ${result.imageCacheFilesDeleted}`);
   if (result.planWouldBePurged) {
     console.log(`Pla ${result.dryRun ? 's’eliminaria físicament' : 'eliminat físicament'} perquè no té altres fonts.`);
   } else if (result.planDeactivated) {

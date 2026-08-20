@@ -98,4 +98,43 @@ describe('PlanDetailPage', () => {
       municipality: 'Barcelona', venue_name: 'Sala de prova', address: 'Carrer Major, 1',
     }, 'https://tenspla.cat/plans/9', 'Informació factual.')).toBeNull();
   });
+
+  it('shows a prominent detail image and literal attribution only when provided', async () => {
+    api.getPlan.mockResolvedValue({ data: {
+      id: 10, kind: 'event', title: 'Concert Ticketmaster', start_date: '2026-09-01',
+      end_date: '2026-09-01', permanent: false, free: false,
+      venue_name: 'Sala Example', municipality: 'Barcelona',
+      image: {
+        url: '/api/media/ticketmaster/10', width: 1136, height: 639,
+        attribution: 'Crèdit literal Ticketmaster', source: 'ticketmaster',
+      },
+      categories: [{ slug: 'musica', name: 'Música', icon: 'music' }], sources: [],
+    } });
+    render(<MemoryRouter initialEntries={['/plans/10']}><Routes><Route path="/plans/:id" element={<PlanDetailPage />} /></Routes></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'Concert Ticketmaster' });
+    const image = document.querySelector('.detail-visual img');
+    expect(image).toHaveAttribute('src', '/api/media/ticketmaster/10');
+    expect(image).toHaveAttribute('alt', '');
+    expect(image).toHaveAttribute('decoding', 'async');
+    expect(image).not.toHaveAttribute('referrerpolicy');
+    expect(document.querySelector('.detail-visual')).toHaveClass('has-image');
+    expect(screen.getByText('Crèdit literal Ticketmaster')).toBeInTheDocument();
+    fireEvent.error(image);
+    expect(document.querySelector('.detail-visual img')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-pattern="musica"]')).toBeInTheDocument();
+    expect(screen.queryByText('Crèdit literal Ticketmaster')).not.toBeInTheDocument();
+  });
+
+  it('keeps the existing detail pattern and no attribution without an image', async () => {
+    api.getPlan.mockResolvedValue({ data: {
+      id: 11, kind: 'event', title: 'Pla sense foto', start_date: '2026-09-01',
+      end_date: '2026-09-01', permanent: false, free: false, image: null,
+      categories: [{ slug: 'cultura', name: 'Cultura', icon: 'book-open' }], sources: [],
+    } });
+    render(<MemoryRouter initialEntries={['/plans/11']}><Routes><Route path="/plans/:id" element={<PlanDetailPage />} /></Routes></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'Pla sense foto' });
+    expect(document.querySelector('.detail-visual img')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-pattern="cultura"]')).toBeInTheDocument();
+    expect(document.querySelector('.image-attribution')).not.toBeInTheDocument();
+  });
 });

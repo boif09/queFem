@@ -34,6 +34,14 @@ Els esdeveniments no permanents amb dates incoherents no es corregeixen ni s'exp
 
 La integració local de Ticketmaster utilitza Discovery Feed 2.0 i es pot validar sense escriure amb `npm run import:ticketmaster -- --dry-run`. La importació local amb escriptura s'executa amb `npm run import:ticketmaster`. Requereix `TICKETMASTER_API_KEY` i aplica un horitzó configurable amb `TICKETMASTER_LOOKAHEAD_DAYS=90`. La Milestone 4A ha estat validada amb una importació local real, una segona execució idempotent i comprovacions manuals de l'API i el frontend. No hi ha cron de producció: malgrat que les pàgines legals i de privacitat ja estan implementades, l'activació pública continua bloquejada fins a l'aprovació final dels termes aplicables.
 
+Les imatges Ticketmaster es preparen amb `npm run ticketmaster:images:sync`. El comandament és
+incremental (24 hores per defecte) i admet `--force`. El frontend rep exclusivament URLs
+same-origin `/api/media/ticketmaster/:imageId`; el backend valida la provenance i utilitza una
+cache temporal a `data/cache/ticketmaster-images/` (6 hores per defecte). Gencat continua sense
+imatges. La cache té un límit configurable de 512 MB i la sincronització evita execucions
+solapades amb un lock recuperable. Aquesta infraestructura encara no està desplegada ni
+programada en producció.
+
 La retirada operativa d'una procedència concreta es comprova primer amb `npm run ticketmaster:remove -- EVENT_ID --dry-run` i s'executa, després del backup, sense `--dry-run`. Un pla compartit conserva les altres fonts; un pla exclusiu queda `inactive`. El procediment complet és a [`docs/TICKETMASTER_REMOVAL.md`](docs/TICKETMASTER_REMOVAL.md).
 
 Per a una sol·licitud expressa aprovada, `npm run ticketmaster:remove -- EVENT_ID --purge --dry-run` mostra si el pla quedaria compartit o s'eliminaria físicament; l'execució equivalent sense `--dry-run` elimina immediatament el pla només quan no queda cap altra font.
@@ -132,7 +140,7 @@ npm test
 
 ## Interfície web (Milestone 3)
 
-La interfície és bilingüe, amb català per defecte i castellà seleccionable. La preferència es conserva a `localStorage`. No incorpora imatges externes: les targetes utilitzen composicions gràfiques pròpies basades en la categoria.
+La interfície és bilingüe, amb català per defecte i castellà seleccionable. La preferència es conserva a `localStorage`. Els plans sense fotografia utilitzen composicions gràfiques pròpies basades en la categoria. Les fotografies Ticketmaster, quan estan habilitades, es carreguen exclusivament des del backend same-origin de Tens pla?.
 
 La interfície utilitza el sistema visual **Pop Editorial / Mediterranean Pop**. Montserrat Variable s'empaqueta localment en WOFF2 mitjançant Fontsource, amb llicència OFL i sense Google Fonts en runtime. Les fitxes amb coordenades no contacten OpenStreetMap fins que el visitant prem el botó per carregar el mapa; l'enllaç de Google Maps continua sent una navegació externa voluntària.
 

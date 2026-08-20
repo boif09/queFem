@@ -65,6 +65,7 @@ export function PlanDetailPage() {
   const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
   const [state, setState] = useState({ status: 'loading', plan: null });
   const [reloadKey, setReloadKey] = useState(0);
+  const [detailImageFailed, setDetailImageFailed] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -74,6 +75,8 @@ export function PlanDetailPage() {
       .catch((error) => active && setState({ status: error.status === 404 ? 'not-found' : 'error', plan: null }));
     return () => { active = false; };
   }, [id, language, reloadKey]);
+
+  useEffect(() => setDetailImageFailed(false), [id, state.plan?.image?.url]);
 
   if (state.status === 'loading') return <><Seo title={t('seo.detailLoadingTitle')} description={t('seo.notFoundDescription')} robots="noindex,follow" /><section className="page-section"><div className="container"><LoadingState /></div></section></>;
   if (state.status === 'error') return <><Seo title={`${t('detail.errorTitle')} | Tens pla?`} description={t('detail.notFound')} robots="noindex,follow" /><section className="page-section"><div className="container"><ErrorState titleKey="detail.errorTitle" onRetry={() => setReloadKey((value) => value + 1)} /></div></section></>;
@@ -109,7 +112,16 @@ export function PlanDetailPage() {
     <article className="detail-page">
       <div className="container detail-header">
         <Link className="back-link" to={back}>← {t('detail.back')}</Link>
-        <PlanVisual plan={plan} className="detail-visual" />
+        <figure className="detail-media">
+          <PlanVisual
+            plan={plan}
+            className="detail-visual"
+            onImageError={() => setDetailImageFailed(true)}
+          />
+          {plan.image?.attribution && !detailImageFailed && (
+            <figcaption className="image-attribution">{plan.image.attribution}</figcaption>
+          )}
+        </figure>
       </div>
       <div className="detail-hero" data-category={primaryCategory?.slug || plan.kind}>
         <div className="container">

@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import test from 'node:test';
 import { removeTicketmasterEvent, parseRemovalArguments } from '../backend/src/jobs/removeTicketmasterEvent.js';
+import { TicketmasterImageCache } from '../backend/src/ticketmaster/imageCache.js';
 import { withTestDatabase } from './helpers.js';
 
 const NOW = '2026-08-18T12:00:00.000Z';
@@ -16,9 +20,24 @@ function seedPlan(db, { shared = false, eventId = 'tm-remove' } = {}) {
   const insertSource = db.prepare(`INSERT INTO plan_sources (
     plan_id, source_id, source_record_id, source_payload_json, imported_at, last_seen_at
   ) VALUES (?, ?, ?, '{}', ?, ?)`);
-  insertSource.run(planId, ticketmaster.id, eventId, NOW, NOW);
+  const ticketmasterPlanSourceId = Number(insertSource.run(planId, ticketmaster.id, eventId, NOW, NOW).lastInsertRowid);
   if (shared) insertSource.run(planId, gencat.id, 'gencat-keep', NOW, NOW);
-  return { planId, ticketmasterId: ticketmaster.id, gencatId: gencat.id };
+  return { planId, ticketmasterId: ticketmaster.id, gencatId: gencat.id, ticketmasterPlanSourceId };
+}
+
+async function seedCachedImage(db, planSourceId, cacheDirectory) {
+  const imageId = Number(db.prepare(`INSERT INTO plan_source_images (
+    plan_source_id, role, url, ratio, width, height, is_fallback,
+    attribution, last_seen_at, created_at, updated_at
+  ) VALUES (?,'card','https://s1.ticketm.net/removal.jpg','16_9',640,360,0,NULL,?,?,?)`)
+    .run(planSourceId, NOW, NOW, NOW).lastInsertRowid);
+  const cache = new TicketmasterImageCache({
+    directory: cacheDirectory, ttlHours: 6, now: () => new Date(NOW),
+  });
+  await cache.write({ id: imageId, url: 'https://s1.ticketm.net/removal.jpg' }, {
+    data: Buffer.from([1, 2, 3]), contentType: 'image/jpeg',
+  });
+  return { imageId, files: cache.paths(imageId) };
 }
 
 test('validates the removal command arguments', () => {
@@ -163,5 +182,66 @@ test('purge rolls back provenance, status and categories after a failure', () =>
     });
     assert.ok(db.prepare("SELECT 1 FROM plan_sources WHERE plan_id=? AND source_record_id='tm-rollback'").get(planId));
     assert.ok(db.prepare('SELECT 1 FROM plan_categories WHERE plan_id=?').get(planId));
+  });
+});
+
+test('removal dry-run leaves image metadata and cache untouched', async () => {
+  await withTestDatabase(async (db) => {
+    const cacheDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'tenspla-remove-dry-'));
+    try {
+      const { ticketmasterPlanSourceId } = seedPlan(db, { eventId: 'tm-image-dry' });
+      const { imageId, files } = await seedCachedImage(db, ticketmasterPlanSourceId, cacheDirectory);
+      const result = removeTicketmasterEvent({ databasePath: db.name, ticketmasterImageCachePath: cacheDirectory }, {
+        eventId: 'tm-image-dry', dryRun: true, removedAt: NOW,
+      });
+      assert.deepEqual(result.imageIds, [imageId]);
+      assert.equal(result.imageCacheFilesDeleted, 0);
+      assert.ok(db.prepare('SELECT 1 FROM plan_source_images WHERE id=?').get(imageId));
+      assert.equal(fs.existsSync(files.binary), true);
+      assert.equal(fs.existsSync(files.metadata), true);
+    } finally {
+      fs.rmSync(cacheDirectory, { recursive: true, force: true });
+    }
+  });
+});
+
+test('real multisource removal deletes Ticketmaster image/cache and preserves Gencat plan', async () => {
+  await withTestDatabase(async (db) => {
+    const cacheDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'tenspla-remove-shared-'));
+    try {
+      const { planId, ticketmasterPlanSourceId } = seedPlan(db, { shared: true, eventId: 'tm-image-shared' });
+      const { imageId, files } = await seedCachedImage(db, ticketmasterPlanSourceId, cacheDirectory);
+      const result = removeTicketmasterEvent({ databasePath: db.name, ticketmasterImageCachePath: cacheDirectory }, {
+        eventId: 'tm-image-shared', removedAt: NOW,
+      });
+      assert.equal(result.planDeactivated, false);
+      assert.equal(result.imageCacheFilesDeleted, 2);
+      assert.equal(db.prepare('SELECT 1 FROM plan_source_images WHERE id=?').get(imageId), undefined);
+      assert.equal(db.prepare('SELECT status FROM plans WHERE id=?').get(planId).status, 'active');
+      assert.equal(fs.existsSync(files.binary), false);
+      assert.equal(fs.existsSync(files.metadata), false);
+    } finally {
+      fs.rmSync(cacheDirectory, { recursive: true, force: true });
+    }
+  });
+});
+
+test('purge removes Ticketmaster image cache without leaving an orphan plan', async () => {
+  await withTestDatabase(async (db) => {
+    const cacheDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'tenspla-remove-purge-'));
+    try {
+      const { planId, ticketmasterPlanSourceId } = seedPlan(db, { eventId: 'tm-image-purge' });
+      const { files } = await seedCachedImage(db, ticketmasterPlanSourceId, cacheDirectory);
+      const result = removeTicketmasterEvent({ databasePath: db.name, ticketmasterImageCachePath: cacheDirectory }, {
+        eventId: 'tm-image-purge', purge: true, removedAt: NOW,
+      });
+      assert.equal(result.planPurged, true);
+      assert.equal(result.imageCacheFilesDeleted, 2);
+      assert.equal(db.prepare('SELECT 1 FROM plans WHERE id=?').get(planId), undefined);
+      assert.equal(fs.existsSync(files.binary), false);
+      assert.equal(fs.existsSync(files.metadata), false);
+    } finally {
+      fs.rmSync(cacheDirectory, { recursive: true, force: true });
+    }
   });
 });

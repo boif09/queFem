@@ -3,6 +3,7 @@ node_modules/
 data/*.sqlite
 data/*.sqlite-shm
 data/*.sqlite-wal
+data/cache/
 coverage/
 frontend/dist/
 npm-debug.log*

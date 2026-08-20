@@ -38,6 +38,48 @@ El frontend React/Vite se compila en `/var/www/queFem/frontend/dist` y Nginx lo 
 
 La aplicación se publica mediante HTTPS en `https://tenspla.cat`.
 
+## Imágenes Ticketmaster pendientes de activación
+
+La implementación está preparada pero no activada en producción. Requiere configurar:
+
+```text
+TICKETMASTER_IMAGES_ENABLED=true
+TICKETMASTER_IMAGE_CACHE_PATH=./data/cache/ticketmaster-images
+TICKETMASTER_IMAGE_CACHE_TTL_HOURS=6
+TICKETMASTER_IMAGE_CACHE_MAX_MB=512
+TICKETMASTER_IMAGE_METADATA_REFRESH_HOURS=24
+TICKETMASTER_IMAGE_REQUEST_TIMEOUT_MS=15000
+TICKETMASTER_IMAGE_MAX_BYTES=10485760
+```
+
+`TICKETMASTER_IMAGES_ENABLED` es el único feature flag de esta función y su valor seguro por
+defecto es `false`. Con `false`, el sync termina sin realizar peticiones remotas, la API no
+selecciona ni sirve imágenes Ticketmaster y el frontend conserva sus patterns; el resto de la
+aplicación no cambia. Con `true`, quedan habilitados el sync de metadata, la selección en la API
+y el proxy/cache same-origin.
+
+El navegador solicita `/api/media/ticketmaster/:imageId`; el backend valida SQLite, descarga
+solo desde `s1.ticketm.net` y mantiene una caché temporal fuera de `frontend/dist`. No se necesita
+una location Nginx nueva porque `/api/` ya se proxifica al backend.
+
+La ruta relativa se resuelve desde la raíz del proyecto: en `/var/www/queFem` corresponde a
+`/var/www/queFem/data/cache/ticketmaster-images`. Node crea el directorio recursivamente cuando
+se usa por primera vez; `/var/www/queFem/data` debe ser escribible por el mismo usuario de PM2.
+El cron debe ejecutarse con ese mismo usuario o el directorio debe prepararse previamente con
+propietario y permisos compatibles; la aplicación no intenta elevar privilegios.
+La limpieza se aplica al llenar la caché y al terminar el sync: elimina primero huérfanos y
+expirados y, si aún supera 512 MB, las entradas más antiguas. El proxy aplica timeout de 15
+segundos y un máximo de 10 MiB por imagen.
+
+El comando utiliza un lock atómico dentro de la caché. Una segunda ejecución sale correctamente
+sin sincronizar; un lock cuyo PID ya no existe se recupera automáticamente.
+
+Cron definitivo propuesto, todavía no aplicado, cada dos horas después del import Ticketmaster:
+
+```cron
+52 */2 * * * cd /var/www/queFem && npm run ticketmaster:images:sync >> /var/log/quefem-ticketmaster-images.log 2>&1
+```
+
 ## SEO V1 y sitemap público
 
 El dominio canónico de toda la metadata es `https://tenspla.cat`. Home, `/plans` sin parámetros, `/fonts` y las fichas públicas de eventos activos son indexables. Las búsquedas, filtros, páginas legales, privacidad, almacenamiento, contacto y rutas no encontradas utilizan `noindex,follow`. La metadata por ruta, Open Graph, Twitter/X y Event JSON-LD se generan localmente, sin analytics, cookies ni scripts externos.

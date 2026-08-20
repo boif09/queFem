@@ -41,10 +41,15 @@ function mapPlan(row) {
 }
 
 export class PlanQueryRepository {
-  constructor(db, { eventRetentionDays = 0, now = () => new Date() } = {}) {
+  constructor(db, {
+    eventRetentionDays = 0,
+    now = () => new Date(),
+    ticketmasterImagesEnabled = false,
+  } = {}) {
     this.db = db;
     this.eventRetentionDays = eventRetentionDays;
     this.now = now;
+    this.ticketmasterImagesEnabled = ticketmasterImagesEnabled;
   }
 
   visiblePlanConditions(alias = 'p') {
@@ -179,7 +184,41 @@ export class PlanQueryRepository {
 
     const plans = rows.map(mapPlan);
     this.attachCategories(plans, filters.lang);
+    this.attachImages(plans, 'card');
     return { plans, total };
+  }
+
+  attachImages(plans, role) {
+    for (const plan of plans) plan.image = null;
+    if (!this.ticketmasterImagesEnabled || plans.length === 0) return;
+    const placeholders = plans.map(() => '?').join(', ');
+    const rows = this.db.prepare(`
+      SELECT plan_id, image_id, width, height, attribution
+      FROM (
+        SELECT
+          ps.plan_id, psi.id image_id, psi.width, psi.height, psi.attribution,
+          ROW_NUMBER() OVER (
+            PARTITION BY ps.plan_id
+            ORDER BY psi.is_fallback ASC, psi.last_seen_at DESC, psi.id ASC
+          ) image_rank
+        FROM plan_source_images psi
+        JOIN plan_sources ps ON ps.id = psi.plan_source_id
+        JOIN sources s ON s.id = ps.source_id
+        WHERE ps.plan_id IN (${placeholders})
+          AND psi.role = ?
+          AND s.key = 'ticketmaster-discovery-feed'
+          AND s.enabled = 1
+      ) ranked
+      WHERE image_rank = 1
+    `).all(...plans.map(({ id }) => id), role);
+    const byPlan = new Map(rows.map((row) => [row.plan_id, {
+      url: `/api/media/ticketmaster/${row.image_id}`,
+      width: row.width,
+      height: row.height,
+      ...(row.attribution ? { attribution: row.attribution } : {}),
+      source: 'ticketmaster',
+    }]));
+    for (const plan of plans) plan.image = byPlan.get(plan.id) || null;
   }
 
   attachCategories(plans, language) {
@@ -221,6 +260,7 @@ export class PlanQueryRepository {
     delete plan.is_free;
     delete plan.family_friendly;
     this.attachCategories([plan], language);
+    this.attachImages([plan], 'detail');
     plan.sources = this.db.prepare(`
       SELECT
         s.name, s.publisher, ps.source_url, s.attribution_text,

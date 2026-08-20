@@ -90,6 +90,22 @@ Last updated: 2026-08-19
 - `robots.txt` preparado y sitemap XML dinámico implementado en `/api/sitemap.xml` sin `lastmod` engañoso.
 - Pendiente después del deploy: proxy Nginx de `/sitemap.xml`, validación pública y alta en Google Search Console.
 
+### Imágenes Ticketmaster preparadas técnicamente para producción
+
+- La fase visual local ha sido validada y se ha eliminado el hotlink directo del navegador.
+- Las variantes `card` y `detail` se seleccionan desde el endpoint oficial de imágenes y se
+  almacenan vinculadas a `plan_sources`, nunca como una imagen sin procedencia del plan canónico.
+- La sincronización es un comando independiente y no forma parte del importer ni del cron.
+- La API expone rutas same-origin y el backend utiliza una caché temporal configurable, con
+  allowlist estricta de host, tipo/tamaño máximo y timeout.
+- `TICKETMASTER_IMAGES_ENABLED=false` sigue siendo el valor seguro por defecto.
+- Gencat continúa sin reutilizar imágenes y el patrón Pop Editorial sigue siendo el fallback.
+- Las imágenes Ticketmaster no se incorporan a Event JSON-LD, Open Graph, Twitter ni sitemap.
+- El sync de metadata es incremental a 24 horas, dispone de `--force` y limpia caché expirada o huérfana.
+- Retirada y purge invalidan la caché asociada; reconciliation deja de servirla inmediatamente
+  por ausencia de provenance y el siguiente sync elimina el fichero huérfano.
+- El despliegue y cron siguen pendientes de aprobación final de términos.
+
 ## Fuentes activas en local
 
 - Agenda Cultural de Catalunya

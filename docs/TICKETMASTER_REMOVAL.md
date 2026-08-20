@@ -51,6 +51,8 @@ npm run ticketmaster:remove -- EVENT_ID --purge
 La operación se ejecuta dentro de una transacción:
 
 - elimina únicamente el `plan_sources` de Ticketmaster cuyo `source_record_id` coincide;
+- elimina por cascade la metadata `plan_source_images` de esa procedencia e invalida sus ficheros
+  de caché temporal; el dry-run no modifica ni SQLite ni filesystem;
 - si quedan procedencias, por ejemplo Gencat, conserva el plan activo y no modifica esas procedencias;
 - sin `--purge`, si no queda ninguna procedencia, marca el plan como `inactive` siguiendo la misma lógica de reconciliation;
 - registra `inactive_at` cuando el plan pierde su última procedencia;
@@ -79,7 +81,10 @@ curl -i https://tenspla.cat/api/plans/PLAN_ID
 - Un plan exclusivamente Ticketmaster debe dejar de exponerse porque queda `inactive`.
 - Un plan compartido debe seguir disponible y su respuesta no debe incluir la procedencia Ticketmaster retirada.
 
-Después, abrir la ficha o repetir su búsqueda en el frontend y verificar el mismo resultado. Si existe una capa de caché futura, invalidarla conforme a su runbook; actualmente no hay ninguna documentada.
+Después, abrir la ficha o repetir su búsqueda en el frontend y verificar el mismo resultado.
+La caché temporal de imágenes Ticketmaster está integrada en el comando: una retirada real
+elimina los ficheros asociados. Además, el endpoint revalida la procedencia en SQLite antes de
+servir cualquier HIT, por lo que un fichero huérfano nunca mantiene una imagen pública.
 
 ## 6. Cerrar la actuación
 

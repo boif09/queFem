@@ -8,7 +8,7 @@ test('creates the six milestone tables and seeds the approved source', () => {
       SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name
     `).all().map(({ name }) => name);
 
-    for (const required of ['sources', 'plans', 'plan_sources', 'categories', 'plan_categories', 'import_runs']) {
+    for (const required of ['sources', 'plans', 'plan_sources', 'plan_source_images', 'categories', 'plan_categories', 'import_runs']) {
       assert.ok(tableNames.includes(required), `missing table ${required}`);
     }
 
@@ -32,5 +32,9 @@ test('creates the six milestone tables and seeds the approved source', () => {
     assert.ok(importRunColumns.has('invalid_details'));
     const planColumns = new Set(db.pragma('table_info(plans)').map(({ name }) => name));
     assert.ok(planColumns.has('inactive_at'));
+    const imageColumns = new Set(db.pragma('table_info(plan_source_images)').map(({ name }) => name));
+    for (const column of ['plan_source_id', 'role', 'url', 'ratio', 'width', 'height', 'is_fallback', 'attribution', 'last_seen_at']) {
+      assert.ok(imageColumns.has(column));
+    }
   });
 });

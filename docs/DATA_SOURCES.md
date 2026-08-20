@@ -26,11 +26,21 @@ Product/test exclusions in M4A:
 - A `| Paquetes VIP` record is excluded only when a matching main event exists with the same normalized base title, local date, local time, municipality and venue.
 - An `Upgrade`/`Meet&Greet` record is excluded only when its main event is recognizable in the title and exists on the same local date, municipality and venue.
 - Provider test artifacts are never inferred from title text. The manually reviewed event ID `Z698xZ2qZ1kqe-F3f` is explicitly excluded; adding another ID requires a new review.
-Images: not downloaded, persisted or displayed
+Images: technically prepared for same-origin delivery, pending production approval. The separate
+`ticketmaster:images:sync` command selects one 16:9 card variant and one detail variant from the
+official event images endpoint and links them to the corresponding `plan_sources` row. The public
+API exposes only `/api/media/ticketmaster/:imageId`; the backend validates the persisted URL and
+serves a temporary filesystem cache. The browser does not contact `s1.ticketm.net`. Ticketmaster
+images are not used in SEO, JSON-LD, Open Graph or Twitter metadata.
 Commercial use: not approved
 Redistribution: not approved
 Automatic production cron: prohibited until final review
-Public transparency: the `/fonts` page identifies Ticketmaster as an official Discovery Feed source, distinguishes it from Open Data, states that images are not reused and makes clear that ticket links lead to Ticketmaster.
+Public transparency: the `/fonts` page identifies Ticketmaster as an official Discovery Feed source, distinguishes it from Open Data and makes clear that ticket links lead to Ticketmaster. Production remains blocked pending final approval, so public legal wording has not been changed in this technical preparation.
+
+`TICKETMASTER_IMAGES_ENABLED=false` is the safe default. In that state no remote image metadata
+sync is performed, the API does not select Ticketmaster images and the frontend uses its local
+category patterns. Enabling it activates the same-origin proxy and temporary filesystem cache;
+it does not affect Gencat plans.
 
 Operational validation:
 
@@ -45,7 +55,14 @@ Technical retention and removal:
 - The importer evaluates a future horizon of 90 days by default (`TICKETMASTER_LOOKAHEAD_DAYS=90`).
 - Reconciliation removes Ticketmaster provenance when an accepted event disappears from a complete valid feed. A plan with another source remains; a plan with no remaining source becomes `inactive`.
 - `EVENT_RETENTION_DAYS=0` applies to finished events: the general purge does not retain an event once its effective end date is before today.
-- Ticketmaster images are neither downloaded nor persisted.
+- Ticketmaster image URLs and selected metadata are persisted by provenance when the explicit
+  feature flag is enabled. Binary images use a six-hour temporary server-side cache by default.
+- Media requests revalidate the active Ticketmaster provenance before every cache read. The
+  browser receives a same-origin URL and a one-hour HTTP cache policy without `immutable`.
+- Gencat images remain excluded and `allows_images = false` remains unchanged for both sources;
+  the local Ticketmaster mechanism is source-key-specific rather than a generic image permission.
+- The metadata sync is incremental: missing or older than 24 hours by default; `--force` is manual.
+- Removal deletes provenance metadata through FK cascade and invalidates its filesystem cache.
 - A manual removal is available as `npm run ticketmaster:remove -- EVENT_ID --dry-run`, followed after review and backup by the same command without `--dry-run`. See `docs/TICKETMASTER_REMOVAL.md`.
 - For an approved express request, `--purge --dry-run` previews immediate physical deletion. The real `--purge` removes the plan only if no provenance remains; shared Gencat or other provenance always preserves the plan. The normal seven-day retention remains unchanged when `--purge` is omitted.
 - Express correction or removal requests are received at `contacte@tenspla.cat` and have an operational target below 24 hours.

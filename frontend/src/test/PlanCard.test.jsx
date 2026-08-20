@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import i18n from '../i18n.js';
 import { PlanCard } from '../components/PlanCard.jsx';
@@ -64,5 +64,39 @@ describe('PlanCard', () => {
       'src',
       'https://example.test/allowed.jpg',
     );
+  });
+
+  it('renders the controlled card image lazily and falls back to the category pattern on error', () => {
+    render(
+      <MemoryRouter>
+        <PlanCard plan={{
+          id: 45,
+          kind: 'event',
+          title: 'Concert amb foto',
+          start_date: '2026-08-22',
+          end_date: '2026-08-22',
+          permanent: false,
+          free: false,
+          image: {
+            url: '/api/media/ticketmaster/45', width: 640, height: 360,
+            source: 'ticketmaster',
+          },
+          categories: [{ slug: 'musica', name: 'Música', icon: 'music' }],
+        }} />
+      </MemoryRouter>,
+    );
+
+    const image = document.querySelector('.plan-visual img');
+    expect(image).toHaveAttribute('src', '/api/media/ticketmaster/45');
+    expect(image).toHaveAttribute('alt', '');
+    expect(image).toHaveAttribute('loading', 'lazy');
+    expect(image).toHaveAttribute('decoding', 'async');
+    expect(image).not.toHaveAttribute('referrerpolicy');
+    expect(image).toHaveAttribute('width', '640');
+    expect(image).toHaveAttribute('height', '360');
+    expect(document.querySelector('.plan-visual')).toHaveClass('has-image');
+    fireEvent.error(image);
+    expect(document.querySelector('.plan-visual img')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-pattern="musica"]')).toBeInTheDocument();
   });
 });

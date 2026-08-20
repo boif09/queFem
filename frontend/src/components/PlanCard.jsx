@@ -25,7 +25,7 @@ export function PlanCard({ plan }) {
         state={{ from: `${location.pathname}${location.search}` }}
         aria-label={t('plan.openDetail', { title: plan.title })}
       >
-        <PlanVisual plan={plan} showKind />
+        <PlanVisual plan={plan} showKind loading="lazy" />
         <div className="plan-card-body">
           {primaryCategory && <span className="category-label">{primaryCategory.name}</span>}
           <h2>{plan.title}</h2>
