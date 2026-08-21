@@ -89,8 +89,8 @@ export class PlanQueryRepository {
       clauses.push('normalize_location(p.municipality) = normalize_location(?)');
       parameters.push(filters.municipality);
     }
-    if (filters.comarca !== undefined && filters.municipality === undefined) {
-      clauses.push('p.comarca = ? COLLATE NOCASE');
+    if (filters.comarca !== undefined) {
+      clauses.push('normalize_location(p.comarca) = normalize_location(?)');
       parameters.push(filters.comarca);
     }
     for (const [key, column] of equalFilters) {
@@ -113,13 +113,13 @@ export class PlanQueryRepository {
       }
     }
 
-    if (filters.category) {
+    if (filters.categories?.length) {
       clauses.push(`p.id IN (
         SELECT pc_filter.plan_id FROM plan_categories pc_filter
         JOIN categories c_filter ON c_filter.id = pc_filter.category_id
-        WHERE c_filter.slug = ?
+        WHERE c_filter.slug IN (${filters.categories.map(() => '?').join(', ')})
       )`);
-      parameters.push(filters.category);
+      parameters.push(...filters.categories);
     }
 
     if (filters.date) {
@@ -273,34 +273,57 @@ export class PlanQueryRepository {
     return plan;
   }
 
-  findComarques() {
+  findProvinces() {
     const visible = this.visiblePlanConditions('plans');
     return this.db.prepare(`
-      SELECT DISTINCT comarca
+      SELECT DISTINCT province
       FROM plans
       WHERE ${visible.clauses.join(' AND ')}
-        AND comarca IS NOT NULL
-        AND trim(comarca) <> ''
-      ORDER BY comarca COLLATE NOCASE
-    `).all(...visible.parameters).map(({ comarca }) => comarca);
+        AND province IS NOT NULL AND trim(province) <> ''
+      ORDER BY province COLLATE NOCASE
+    `).all(...visible.parameters).map(({ province }) => province);
   }
 
-  findMunicipalities(comarca) {
+  findComarques(province) {
+    const visible = this.visiblePlanConditions('plans');
+    const conditions = [
+      ...visible.clauses, "comarca IS NOT NULL", "trim(comarca) <> ''",
+    ];
+    const parameters = [...visible.parameters];
+    if (province) {
+      conditions.push('province = ? COLLATE NOCASE');
+      parameters.push(province);
+    }
+    return this.db.prepare(`
+      SELECT comarca, MIN(province) province
+      FROM plans
+      WHERE ${conditions.join(' AND ')}
+      GROUP BY comarca COLLATE NOCASE
+      ORDER BY comarca COLLATE NOCASE
+    `).all(...parameters);
+  }
+
+  findMunicipalities({ province, comarca } = {}) {
     const visible = this.visiblePlanConditions('plans');
     const conditions = [
       ...visible.clauses, "municipality IS NOT NULL", "trim(municipality) <> ''",
     ];
     const parameters = [...visible.parameters];
+    if (province) {
+      conditions.push('province = ? COLLATE NOCASE');
+      parameters.push(province);
+    }
     if (comarca) {
       conditions.push('comarca = ? COLLATE NOCASE');
       parameters.push(comarca);
     }
     return this.db.prepare(`
-      SELECT DISTINCT municipality
+      SELECT municipality, MIN(comarca) comarca, MIN(province) province
       FROM plans
       WHERE ${conditions.join(' AND ')}
+      GROUP BY municipality COLLATE NOCASE
       ORDER BY municipality COLLATE NOCASE
-    `).all(...parameters).map(({ municipality }) => municipality);
+    `).all(...parameters);
   }
 
   findCategories() {

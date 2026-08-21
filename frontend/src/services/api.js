@@ -37,11 +37,14 @@ export const api = {
   getPlan(id, language) {
     return request(`/api/plans/${encodeURIComponent(id)}`, { lang: language });
   },
-  getComarques() {
-    return request('/api/comarques');
+  getProvinces() {
+    return request('/api/provinces');
   },
-  getMunicipalities(comarca) {
-    return request('/api/municipalities', { comarca });
+  getComarques(province) {
+    return request('/api/comarques', { province });
+  },
+  getMunicipalities(province, comarca) {
+    return request('/api/municipalities', { province, comarca });
   },
   getCategories() {
     return request('/api/categories');

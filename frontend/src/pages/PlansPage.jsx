@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Pagination } from '../components/Pagination.jsx';
@@ -10,26 +10,26 @@ import { api } from '../services/api.js';
 import { formatDate } from '../utils/dates.js';
 import { createPlansSearch, filtersFromSearchParams } from '../utils/search.js';
 
-function ActiveFilters({ filters }) {
+function ActiveFilters({ filters, onRemove, onClear }) {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-  const location = useLocation();
   const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
   const items = [
-    filters.q && t('filter.query', { query: filters.q }),
-    filters.date && t('filter.date', { value: formatDate(filters.date, language) }),
-    filters.dateFrom && filters.dateTo && t('filter.range', {
+    filters.q && { key: 'q', label: t('filter.query', { query: filters.q }) },
+    filters.date && { key: 'date', label: t('filter.date', { value: formatDate(filters.date, language) }) },
+    filters.dateFrom && filters.dateTo && { key: 'range', label: t('filter.range', {
       from: formatDate(filters.dateFrom, language), to: formatDate(filters.dateTo, language),
-    }),
-    filters.comarca && t('filter.comarca', { value: filters.comarca }),
-    filters.municipality && t('filter.municipality', { value: filters.municipality }),
-    filters.category && t('filter.category', { value: filters.category }),
-    filters.free && t('filter.free'),
+    }) },
+    filters.province && { key: 'province', label: t('filter.province', { value: filters.province }) },
+    filters.comarca && { key: 'comarca', label: t('filter.comarca', { value: filters.comarca }) },
+    filters.municipality && { key: 'municipality', label: t('filter.municipality', { value: filters.municipality }) },
+    ...(filters.category || '').split(',').filter(Boolean).map((category) => ({ key: `category:${category}`, label: t('filter.category', { value: category }) })),
+    filters.free && { key: 'free', label: t('filter.free') },
   ].filter(Boolean);
   return (
     <div className="active-filters">
       <strong>{t('results.activeFilters')}</strong>
-      <div>{items.length ? items.map((item) => <span key={item}>{item}</span>) : <span>{t('results.noActiveFilters')}</span>}</div>
+      <div>{items.length ? items.map((item) => <button type="button" className="filter-chip" aria-label={t('filter.remove', { label: item.label })} key={item.key} onClick={() => onRemove(item.key)}><span className="filter-chip-label">{item.label}</span><span className="filter-chip-remove" aria-hidden="true">×</span></button>) : <span className="no-active-filters">{t('results.noActiveFilters')}</span>}</div>
+      {items.length > 0 && <button type="button" className="clear-active-filters" onClick={onClear}>{t('filters.clear')}</button>}
     </div>
   );
 }
@@ -50,6 +50,10 @@ export function PlansPage() {
   const filtered = searchParams.size > 0;
 
   useEffect(() => {
+    if (location.state?.openFilters && filtersPanelRef.current) filtersPanelRef.current.open = true;
+  }, [location.state]);
+
+  useEffect(() => {
     let active = true;
     setState((current) => ({ ...current, status: 'loading' }));
     api.getPlans({ ...filters, page, limit: 12, sort, lang: language })
@@ -59,12 +63,18 @@ export function PlansPage() {
   }, [searchKey, language, reloadKey, sort]);
 
   const homeQuery = createPlansSearch(filters);
-  const applyFilters = (nextFilters) => {
+  const applyFilters = useCallback((nextFilters) => {
     const query = createPlansSearch(nextFilters);
-    navigate(query ? `/plans?${query}` : '/plans');
-    if (window.matchMedia?.('(max-width: 680px)').matches && filtersPanelRef.current) {
-      filtersPanelRef.current.open = false;
-    }
+    navigate(query ? `/plans?${query}` : '/plans', { replace: true });
+  }, [navigate]);
+  const removeFilter = (key) => {
+    const next = { ...filters };
+    if (key === 'range') { delete next.dateFrom; delete next.dateTo; }
+    else if (key.startsWith('category:')) {
+      const category = key.slice('category:'.length);
+      next.category = (next.category || '').split(',').filter((value) => value !== category).join(',');
+    } else delete next[key];
+    applyFilters(next);
   };
   return (
     <><Seo
@@ -79,17 +89,17 @@ export function PlansPage() {
           <div><p className="eyebrow dark">{t('results.eyebrow')}</p><h1>{filters.q || t('results.title')}</h1></div>
           <Link className="button button-secondary" to={homeQuery ? `/?${homeQuery}` : '/'}>{t('results.changeSearch')}</Link>
         </header>
-        <details ref={filtersPanelRef} className="results-filters" id="filters" defaultOpen={Boolean(location.state?.openFilters)}>
+        <details ref={filtersPanelRef} className="results-filters" id="filters">
           <summary>{t('results.filtersToggle')}</summary>
-          <SearchFilters key={searchKey} initialFilters={filters} onSearch={applyFilters} />
+          <SearchFilters initialFilters={filters} onSearch={applyFilters} />
         </details>
-        <ActiveFilters filters={filters} />
+        <ActiveFilters filters={filters} onRemove={removeFilter} onClear={() => applyFilters({})} />
         {state.status === 'loading' && <LoadingState />}
         {state.status === 'error' && <ErrorState onRetry={() => setReloadKey((value) => value + 1)} />}
         {state.status === 'success' && (
           <>
             <p className="result-count">{t('results.count', { count: state.pagination.total })}</p>
-            {state.plans.length > 0 ? <PlanList plans={state.plans} /> : <EmptyState />}
+            {state.plans.length > 0 ? <PlanList plans={state.plans} /> : <div className="filtered-empty"><EmptyState /><button type="button" className="button button-primary" onClick={() => applyFilters({})}>{t('filters.clear')}</button></div>}
             <Pagination pagination={state.pagination} />
           </>
         )}

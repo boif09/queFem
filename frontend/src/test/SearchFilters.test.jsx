@@ -8,6 +8,7 @@ import { api } from '../services/api.js';
 vi.mock('../services/api.js', () => ({
   api: {
     getComarques: vi.fn(),
+    getProvinces: vi.fn(),
     getMunicipalities: vi.fn(),
     getCategories: vi.fn(),
   },
@@ -17,11 +18,12 @@ describe('SearchFilters', () => {
   beforeEach(async () => {
     vi.resetAllMocks();
     await i18n.changeLanguage('ca');
-    api.getComarques.mockResolvedValue({ data: ['Baix Empordà', 'Barcelonès'] });
+    api.getProvinces.mockResolvedValue({ data: ['Barcelona', 'Girona'] });
+    api.getComarques.mockResolvedValue({ data: [{ comarca: 'Baix Empordà', province: 'Girona' }, { comarca: 'Barcelonès', province: 'Barcelona' }] });
     api.getCategories.mockResolvedValue({
       data: [{ slug: 'musica', name_ca: 'Música', name_es: 'Música', icon: 'music' }],
     });
-    api.getMunicipalities.mockResolvedValue({ data: ['Begur', 'Palafrugell'] });
+    api.getMunicipalities.mockResolvedValue({ data: [{ municipality: 'Begur', comarca: 'Baix Empordà', province: 'Girona' }, { municipality: 'Palafrugell', comarca: 'Baix Empordà', province: 'Girona' }] });
   });
 
   it('loads locations from the API, filters municipalities and generates a search', async () => {
@@ -37,32 +39,34 @@ describe('SearchFilters', () => {
     await screen.findByRole('option', { name: 'Baix Empordà' });
     await user.selectOptions(screen.getByLabelText('Comarca'), 'Baix Empordà');
 
-    await waitFor(() => expect(api.getMunicipalities).toHaveBeenCalledWith('Baix Empordà'));
-    await screen.findByRole('option', { name: 'Palafrugell' });
-    await user.selectOptions(screen.getByLabelText('Municipi'), 'Palafrugell');
+    await waitFor(() => expect(api.getMunicipalities).toHaveBeenCalledWith('', 'Baix Empordà'));
+    const municipality = screen.getByRole('combobox', { name: 'Municipi' });
+    await user.type(municipality, 'palafragell');
+    expect(screen.getByText('Cap municipi coincideix amb la cerca.')).toBeInTheDocument();
+    await user.clear(municipality);
+    await user.type(municipality, 'palafrugell');
+    await user.click(await screen.findByRole('option', { name: 'Palafrugell · Baix Empordà · Girona' }));
     await user.click(screen.getByRole('button', { name: 'Música' }));
     await user.click(screen.getByRole('checkbox', { name: 'Només plans gratuïts' }));
-    await user.click(screen.getByRole('button', { name: /Buscar plans/i }));
-
-    expect(onSearch).toHaveBeenCalledWith(expect.objectContaining({
+    await waitFor(() => expect(onSearch).toHaveBeenCalledWith(expect.objectContaining({
       comarca: 'Baix Empordà',
       municipality: 'Palafrugell',
       category: 'musica',
       free: 'true',
       q: 'rock',
-    }));
+    })));
   });
 
-  it('submits text-only searches with Enter and omits an empty query', async () => {
+  it('debounces text-only searches and omits an empty query', async () => {
     const user = userEvent.setup();
     const onSearch = vi.fn();
     render(<SearchFilters onSearch={onSearch} />);
     const input = screen.getByRole('searchbox', { name: 'Cerca' });
-    await user.type(input, 'weeknd{Enter}');
-    expect(onSearch).toHaveBeenLastCalledWith(expect.objectContaining({ q: 'weeknd' }));
+    await user.type(input, 'weeknd');
+    await waitFor(() => expect(onSearch).toHaveBeenLastCalledWith(expect.objectContaining({ q: 'weeknd' })));
     await user.clear(input);
-    await user.type(input, '   {Enter}');
-    expect(onSearch).toHaveBeenLastCalledWith(expect.objectContaining({ q: '' }));
+    await user.type(input, '   ');
+    await waitFor(() => expect(onSearch).toHaveBeenLastCalledWith(expect.objectContaining({ q: '' })));
   });
 
   it('renders the complete Spanish search label and placeholder', async () => {
@@ -71,5 +75,19 @@ describe('SearchFilters', () => {
     expect(screen.getByRole('searchbox', { name: 'Búsqueda' })).toHaveAttribute(
       'placeholder', 'Busca un concierto, una fiesta, una exposición...',
     );
+  });
+
+  it('supports keyboard selection and an integrated clear action', async () => {
+    const user = userEvent.setup();
+    const onSearch = vi.fn();
+    render(<SearchFilters onSearch={onSearch} />);
+    const municipality = await screen.findByPlaceholderText('Busca qualsevol municipi');
+    await user.click(municipality);
+    await user.keyboard('{ArrowDown}{Enter}');
+    expect(municipality).toHaveValue('Begur');
+    const clear = screen.getByRole('button', { name: 'Esborrar el municipi seleccionat' });
+    await user.click(clear);
+    expect(municipality).toHaveValue('');
+    expect(municipality).toHaveFocus();
   });
 });

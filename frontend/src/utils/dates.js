@@ -20,9 +20,9 @@ export function getQuickDateRange(type, today = new Date()) {
   }
   if (type === 'weekend') {
     const day = startOfToday.getDay();
-    const daysUntilSaturday = day === 0 ? -1 : day === 6 ? 0 : 6 - day;
-    const saturday = addDays(startOfToday, daysUntilSaturday);
-    return { dateFrom: toISODate(saturday), dateTo: toISODate(addDays(saturday, 1)) };
+    const daysUntilFriday = day === 0 ? -2 : day === 6 ? -1 : 5 - day;
+    const friday = addDays(startOfToday, daysUntilFriday);
+    return { dateFrom: toISODate(day === 0 || day === 6 ? startOfToday : friday), dateTo: toISODate(addDays(friday, 2)) };
   }
   return {};
 }

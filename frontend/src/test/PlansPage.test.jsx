@@ -7,7 +7,7 @@ import { PlansPage } from '../pages/PlansPage.jsx';
 import { api } from '../services/api.js';
 
 vi.mock('../services/api.js', () => ({
-  api: { getPlans: vi.fn(), getComarques: vi.fn(), getMunicipalities: vi.fn(), getCategories: vi.fn() },
+  api: { getPlans: vi.fn(), getProvinces: vi.fn(), getComarques: vi.fn(), getMunicipalities: vi.fn(), getCategories: vi.fn() },
 }));
 
 describe('PlansPage', () => {
@@ -15,8 +15,9 @@ describe('PlansPage', () => {
     vi.resetAllMocks();
     await i18n.changeLanguage('ca');
     vi.unstubAllGlobals();
-    api.getComarques.mockResolvedValue({ data: ['Barcelones'] });
-    api.getMunicipalities.mockResolvedValue({ data: ['Barcelona', 'Badalona'] });
+    api.getProvinces.mockResolvedValue({ data: ['Barcelona'] });
+    api.getComarques.mockResolvedValue({ data: [{ comarca: 'Barcelones', province: 'Barcelona' }] });
+    api.getMunicipalities.mockResolvedValue({ data: [{ municipality: 'Barcelona', comarca: 'Barcelones', province: 'Barcelona' }, { municipality: 'Badalona', comarca: 'Barcelones', province: 'Barcelona' }] });
     api.getCategories.mockResolvedValue({
       data: [{ slug: 'musica', name_ca: 'MÃºsica', name_es: 'MÃºsica', icon: 'music' }],
     });
@@ -59,6 +60,7 @@ describe('PlansPage', () => {
       q: 'Weeknd', date: '2026-09-01', municipality: 'Barcelona', category: 'musica',
     }));
     expect(screen.getByText('Cerca: Weeknd')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Treure el filtre Cerca: Weeknd' })).toHaveTextContent('Cerca: Weeknd×');
     expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
     expect(document.head.querySelector('link[rel="canonical"]')).not.toBeInTheDocument();
   });
@@ -96,23 +98,22 @@ describe('PlansPage', () => {
     );
   }
 
-  async function apply(user) {
-    await user.click(await screen.findByRole('button', { name: /Buscar plans/i }));
-  }
-
   it('applies municipality and replaces it when the selection changes', async () => {
     const user = userEvent.setup();
     renderPlans();
-    const [comarca, municipality] = await screen.findAllByRole('combobox');
-    await user.selectOptions(comarca, 'Barcelones');
-    await user.selectOptions(municipality, 'Barcelona');
-    await apply(user);
+    await screen.findByRole('option', { name: 'Barcelones' });
+    await user.selectOptions(screen.getByLabelText('Comarca'), 'Barcelones');
+    const municipality = screen.getByPlaceholderText('Busca qualsevol municipi');
+    await user.type(municipality, 'Barcelona');
+    await user.click(await screen.findByRole('option', { name: /Barcelona · Barcelones · Barcelona/ }));
     await waitFor(() => expect(screen.getByTestId('current-location')).toHaveTextContent(
       '/plans?comarca=Barcelones&municipality=Barcelona',
     ));
 
-    await user.selectOptions((await screen.findAllByRole('combobox'))[1], 'Badalona');
-    await apply(user);
+    const nextMunicipality = screen.getByPlaceholderText('Busca qualsevol municipi');
+    await user.clear(nextMunicipality);
+    await user.type(nextMunicipality, 'Badalona');
+    await user.click(await screen.findByRole('option', { name: /Badalona · Barcelones · Barcelona/ }));
     await waitFor(() => {
       const url = screen.getByTestId('current-location').textContent;
       expect(url).toContain('municipality=Badalona');
@@ -120,13 +121,12 @@ describe('PlansPage', () => {
     });
   });
 
-  it('applies category, date and free through the real submit button', async () => {
+  it('applies category, date and free immediately', async () => {
     const user = userEvent.setup();
     renderPlans();
     await user.click(await screen.findByRole('button', { name: /sica$/i }));
     await user.type(screen.getByLabelText('Data'), '2026-09-01');
     await user.click(screen.getByRole('checkbox'));
-    await apply(user);
     await waitFor(() => expect(screen.getByTestId('current-location')).toHaveTextContent(
       '/plans?date=2026-09-01&category=musica&free=true',
     ));
@@ -136,10 +136,11 @@ describe('PlansPage', () => {
     const user = userEvent.setup();
     renderPlans();
     await user.type(screen.getByRole('searchbox', { name: 'Cerca' }), '  weeknd  ');
-    const [comarca, municipality] = await screen.findAllByRole('combobox');
-    await user.selectOptions(comarca, 'Barcelones');
-    await user.selectOptions(municipality, 'Barcelona');
-    await apply(user);
+    await screen.findByRole('option', { name: 'Barcelones' });
+    await user.selectOptions(screen.getByLabelText('Comarca'), 'Barcelones');
+    const municipality = screen.getByPlaceholderText('Busca qualsevol municipi');
+    await user.type(municipality, 'Barcelona');
+    await user.click(await screen.findByRole('option', { name: /Barcelona · Barcelones · Barcelona/ }));
     await waitFor(() => {
       const url = screen.getByTestId('current-location').textContent;
       expect(url).toContain('q=weeknd');
@@ -153,23 +154,21 @@ describe('PlansPage', () => {
     renderPlans('/plans?q=weeknd&date=2026-09-01&category=musica&free=true');
     expect(await screen.findByRole('searchbox', { name: 'Cerca' })).toHaveValue('weeknd');
     expect(screen.getByLabelText('Data')).toHaveValue('2026-09-01');
-    expect(await screen.findByRole('button', { name: /sica$/i })).toHaveAttribute('aria-pressed', 'true');
+    expect((await screen.findAllByRole('button', { name: /sica$/i }))[0]).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('checkbox')).toBeChecked();
 
-    await user.click(screen.getByRole('button', { name: 'Esborrar filtres' }));
-    await apply(user);
+    await user.click(screen.getAllByRole('button', { name: 'Esborrar filtres' })[0]);
     await waitFor(() => expect(screen.getByTestId('current-location')).toHaveTextContent(/^\/plans$/));
   });
 
-  it('submits with Enter and closes an open filter panel on mobile', async () => {
+  it('debounces text input while keeping the mobile filter panel stable', async () => {
     vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: true })));
     const user = userEvent.setup();
     const { container } = renderPlans({ pathname: '/plans', state: { openFilters: true } });
     const panel = container.querySelector('.results-filters');
-    await user.click(screen.getByText('Filtres de cerca'));
-    expect(panel).toHaveAttribute('open');
-    await user.type(await screen.findByRole('searchbox', { name: 'Cerca' }), 'weeknd{Enter}');
+    await waitFor(() => expect(panel).toHaveAttribute('open'));
+    await user.type(await screen.findByRole('searchbox', { name: 'Cerca' }), 'weeknd');
     await waitFor(() => expect(screen.getByTestId('current-location')).toHaveTextContent('/plans?q=weeknd'));
-    expect(panel).not.toHaveAttribute('open');
+    expect(panel).toHaveAttribute('open');
   });
 });

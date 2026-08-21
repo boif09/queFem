@@ -108,7 +108,22 @@ img, svg { display: block; max-width: 100%; }
 input[type="date"], select { width: 100%; min-height: 48px; border: 1px solid var(--line); background: white; border-radius: 11px; padding: 0 13px; color: var(--ink); }
 select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%), linear-gradient(135deg, var(--ink) 50%, transparent 50%); background-position: calc(100% - 17px) 21px, calc(100% - 12px) 21px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 35px; }
 select:disabled { opacity: .55; cursor: not-allowed; }
-.location-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.location-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.municipality-combobox { position: relative; min-width: 0; }
+.municipality-control { min-height: 48px; display: flex; align-items: center; border: 1px solid var(--line); border-radius: 11px; background: white; }
+.municipality-control:focus-within { outline: 3px solid rgba(151, 73, 48, .2); border-color: var(--accent); }
+.municipality-control input { min-width: 0; width: 100%; min-height: 46px; border: 0; padding: 0 42px 0 13px; background: transparent; color: var(--ink); font: inherit; }
+.municipality-control input:focus { outline: 0; }
+.municipality-clear { position: absolute; right: 34px; width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--ink-soft); cursor: pointer; font-size: 1.15rem; }
+.municipality-clear:hover, .municipality-clear:focus-visible { background: var(--mint); color: var(--ink); outline: 2px solid var(--accent); outline-offset: 1px; }
+.municipality-chevron { position: absolute; right: 14px; width: 8px; height: 8px; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: translateY(-2px) rotate(45deg); pointer-events: none; }
+.municipality-options { position: absolute; z-index: 20; top: calc(100% + 6px); right: 0; width: min(520px, calc(100vw - 48px)); max-height: 19rem; overflow-y: auto; overscroll-behavior: contain; background: white; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+.municipality-options button { display: grid; gap: 3px; width: 100%; padding: 12px 14px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
+.municipality-options button strong { font-size: .92rem; line-height: 1.25; }
+.municipality-options button small { color: var(--ink-soft); font-size: .75rem; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.municipality-options button:hover, .municipality-options button.is-active, .municipality-options button[aria-selected="true"] { background: var(--mint); }
+.municipality-options button:focus-visible { position: relative; outline: 3px solid var(--accent); outline-offset: -3px; }
+.municipality-options p { padding: 11px; margin: 0; }
 .field-hint { color: var(--ink-soft); font-size: .82rem; margin: 10px 0 0; }
 .category-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .category-choice { min-height: 92px; display: grid; place-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 15px; background: white; cursor: pointer; padding: 12px 8px; font-size: .78rem; font-weight: 700; }
@@ -140,7 +155,15 @@ select:disabled { opacity: .55; cursor: not-allowed; }
 .active-filters { padding: 18px 20px; display: flex; align-items: center; gap: 18px; border-block: 1px solid var(--line); margin-bottom: 28px; }
 .active-filters > strong { white-space: nowrap; font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; }
 .active-filters > div { display: flex; flex-wrap: wrap; gap: 7px; }
-.active-filters span { padding: 7px 10px; border-radius: 999px; background: white; color: var(--ink-soft); font-size: .78rem; }
+.no-active-filters { padding: 7px 10px; color: var(--ink-soft); font-size: .78rem; }
+.filter-chip { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 6px 10px 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--ink-soft); cursor: pointer; font: inherit; font-size: .78rem; line-height: 1.2; }
+.filter-chip:hover { border-color: var(--accent); background: var(--mint); color: var(--ink); }
+.filter-chip:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.filter-chip-label, .filter-chip-remove { padding: 0; border: 0; border-radius: 0; background: transparent; color: inherit; }
+.filter-chip-remove { font-size: 1rem; line-height: 1; opacity: .65; }
+.filter-chip:hover .filter-chip-remove { opacity: 1; }
+.clear-active-filters { margin-left: auto; border: 0; background: transparent; text-decoration: underline; cursor: pointer; }
+.filtered-empty { text-align: center; }
 .result-count { margin: 0 0 18px; font-family: var(--font-display); font-size: 1.3rem; }
 .plan-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .plan-card { min-width: 0; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--paper); overflow: hidden; box-shadow: var(--shadow-soft); transition: transform .2s ease, box-shadow .2s ease; }
@@ -288,11 +311,14 @@ select:disabled { opacity: .55; cursor: not-allowed; }
   .filter-actions { padding: 22px 20px; align-items: stretch; flex-direction: column; }
   .action-buttons { display: grid; grid-template-columns: 1fr 1.4fr; }
   .location-fields, .date-range { grid-template-columns: 1fr; }
+  .municipality-options { left: 0; right: auto; width: 100%; max-height: 15rem; }
   .category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .category-choice { min-height: 84px; }
   .page-section { padding: 48px 0 70px; }
   .results-header { align-items: start; flex-direction: column; }
   .active-filters { align-items: start; flex-direction: column; }
+  .active-filters > div { width: 100%; }
+  .clear-active-filters { margin-left: 0; }
   .plan-grid { grid-template-columns: 1fr; }
   .plan-card-link { grid-template-rows: 145px 1fr; }
   .pagination { justify-content: space-between; gap: 8px; }

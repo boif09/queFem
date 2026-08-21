@@ -24,12 +24,11 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - Sistema de backup de SQLite configurado, probado y automatizado, incluida copia externa con `rclone`.
 - Logrotate ejecutado y verificado con rotación diaria, 14 rotaciones y compresión.
 - Hardening del backend: escucha local segura por defecto y límites de paginación/consultas.
+- Discovery & Filters V2: fechas rápidas y rango, filtros territoriales independientes, municipio buscable con contexto, categorías OR múltiples, aplicación inmediata, URL compartible, chips eliminables y estado vacío accionable. Véase [`DISCOVERY_FILTERS_V2.md`](DISCOVERY_FILTERS_V2.md).
 
 ## AUTONOMOUS WORK
 
 No autonomous product work currently defined.
-
-El propietario debe definir el siguiente bloque funcional antes de iniciar desarrollo autónomo. La deuda técnica documentada más abajo no equivale por sí sola a una tarea autorizada ni suficientemente definida.
 
 ## PRODUCT DECISIONS
 

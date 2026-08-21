@@ -14,10 +14,12 @@ export function CategorySelector({ categories, selected, onChange, loading = fal
         return (
           <button
             type="button"
-            className={`category-choice${selected === category.slug ? ' is-selected' : ''}`}
-            aria-pressed={selected === category.slug}
+            className={`category-choice${selected.includes(category.slug) ? ' is-selected' : ''}`}
+            aria-pressed={selected.includes(category.slug)}
             key={category.slug}
-            onClick={() => onChange(selected === category.slug ? '' : category.slug)}
+            onClick={() => onChange(selected.includes(category.slug)
+              ? selected.filter((slug) => slug !== category.slug)
+              : [...selected, category.slug])}
           >
             <CategoryIcon icon={category.icon} />
             <span>{name}</span>

@@ -17,12 +17,13 @@ Todo vive en un único paquete npm. El backend usa Node.js, Express 5 y `better-
 `backend/src/server.js` carga la configuración, aplica migraciones y arranca Express. `HOST` vale `127.0.0.1` por defecto y `PORT`, `3000`. `backend/src/app.js` compone estas rutas GET:
 
 - `/api/plans` y `/api/plans/:id`
-- `/api/categories`, `/api/sources` y `/api/comarques`
-- `/api/municipalities?comarca=...`
+- `/api/categories`, `/api/sources` y `/api/provinces`
+- `/api/comarques?province=...`
+- `/api/municipalities?province=...&comarca=...`
 - `/api/media/ticketmaster/:imageId`
 - `/api/sitemap.xml`
 
-La API no ofrece escritura. La consulta de planes limita `page` a 200, `limit` a 100, `q` a 100 caracteres y los filtros textuales a 120 caracteres.
+La API no ofrece escritura. La consulta de planes limita `page` a 200, `limit` a 100, `q` a 100 caracteres y los filtros textuales a 120 caracteres. `category` acepta uno o varios slugs separados por comas y los combina con semántica OR.
 
 ## SQLite
 
@@ -54,7 +55,7 @@ Las imágenes de categorías son assets locales. Gencat no aporta imágenes reut
 
 `frontend/src/` contiene páginas, componentes, hooks, cliente API, i18n, SEO y estilos. Las rutas públicas incluyen home, resultados, detalle, fuentes y páginas legales/contacto CA/ES. El cliente usa `/api` same-origin salvo `VITE_API_URL`. El minimapa carga OpenStreetMap solo tras una acción voluntaria.
 
-El frontend guarda únicamente la preferencia de idioma en `localStorage` (`quefem.language`); no integra analítica ni seguimiento según la implementación actual.
+La búsqueda combina texto, fechas, provincia, comarca, municipio, categorías múltiples y gratuidad con aplicación inmediata; los filtros compartibles viven en la URL. El municipio usa un selector buscable con contexto territorial. El frontend guarda únicamente la preferencia de idioma en `localStorage` (`quefem.language`); no integra analítica ni seguimiento según la implementación actual. Los detalles y las decisiones de cobertura están en [`DISCOVERY_FILTERS_V2.md`](DISCOVERY_FILTERS_V2.md).
 
 ## Tests, build y producción
 

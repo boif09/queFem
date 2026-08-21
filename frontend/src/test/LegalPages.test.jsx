@@ -9,7 +9,7 @@ import { api } from '../services/api.js';
 vi.mock('../services/api.js', () => ({
   api: {
     getSources: vi.fn(), getPlans: vi.fn(), getPlan: vi.fn(),
-    getComarques: vi.fn(), getMunicipalities: vi.fn(), getCategories: vi.fn(),
+    getProvinces: vi.fn(), getComarques: vi.fn(), getMunicipalities: vi.fn(), getCategories: vi.fn(),
   },
 }));
 

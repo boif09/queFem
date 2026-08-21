@@ -105,9 +105,10 @@ export function validatePlansQuery(query, defaultLanguage = 'ca') {
   if (!SORTS.has(sort)) {
     throw new ValidationError('El paràmetre sort ha de ser date, quality o title.');
   }
-  const category = singleString(query.category, 'category');
-  if (category && !/^[a-z0-9-]+$/.test(category)) {
-    throw new ValidationError('El paràmetre category ha de ser un slug vàlid.');
+  const categoryValue = singleString(query.category, 'category');
+  const categories = categoryValue?.split(',').map((value) => value.trim()).filter(Boolean);
+  if (categories?.some((category) => !/^[a-z0-9-]+$/.test(category))) {
+    throw new ValidationError('El paràmetre category ha de contenir slugs vàlids separats per comes.');
   }
 
   return {
@@ -118,7 +119,7 @@ export function validatePlansQuery(query, defaultLanguage = 'ca') {
     province: singleString(query.province, 'province'),
     comarca: singleString(query.comarca, 'comarca'),
     municipality: singleString(query.municipality, 'municipality'),
-    category,
+    categories: categories ? [...new Set(categories)] : undefined,
     free: boolean(query.free, 'free'),
     family: boolean(query.family, 'family'),
     indoor: boolean(query.indoor, 'indoor'),
@@ -141,8 +142,16 @@ export function validatePlanId(value) {
 }
 
 export function validateMunicipalitiesQuery(query) {
-  rejectUnknownParameters(query, new Set(['comarca']));
-  return { comarca: singleString(query.comarca, 'comarca') };
+  rejectUnknownParameters(query, new Set(['province', 'comarca']));
+  return {
+    province: singleString(query.province, 'province'),
+    comarca: singleString(query.comarca, 'comarca'),
+  };
+}
+
+export function validateComarquesQuery(query) {
+  rejectUnknownParameters(query, new Set(['province']));
+  return { province: singleString(query.province, 'province') };
 }
 
 export function validateNoQueryParameters(query) {

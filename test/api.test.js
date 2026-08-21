@@ -218,10 +218,11 @@ test('Milestone 2 REST API', async (context) => {
         assert.equal(body.data[0].id, ids.event);
       });
 
-      await context.test('el municipio prevalece sobre comarca para fuentes sin comarca', async () => {
+      await context.test('provincia, comarca y municipio aplican conjuntamente', async () => {
         const { body } = await apiRequest('/api/plans?comarca=Comarca%20incorrecta&municipality=Palafrugell');
-        assert.equal(body.pagination.total, 1);
-        assert.equal(body.data[0].id, ids.event);
+        assert.equal(body.pagination.total, 0);
+        const compatible = await apiRequest('/api/plans?province=Girona&comarca=Baix%20Emporda&municipality=Palafrugell');
+        assert.deepEqual(compatible.body.data.map(({ id }) => id), [ids.event]);
       });
 
       await context.test('normaliza acentos al filtrar por municipio', async () => {
@@ -278,6 +279,12 @@ test('Milestone 2 REST API', async (context) => {
         assert.deepEqual(body.pagination, { page: 2, limit: 1, total: 3, pages: 3 });
       });
 
+      await context.test('combina múltiples categorías con semántica OR', async () => {
+        const { body } = await apiRequest('/api/plans?category=musica,cultura');
+        assert.deepEqual(new Set(body.data.map(({ id }) => id)), new Set([ids.event, ids.translatedEvent]));
+        assert.equal((await apiRequest('/api/plans?category=musica,%20slug%20incorrecto')).response.status, 400);
+      });
+
       await context.test('limita la página máxima a 200', async () => {
         assert.equal((await apiRequest('/api/plans?page=200')).response.status, 200);
         const invalid = await apiRequest('/api/plans?page=201');
@@ -321,10 +328,20 @@ test('Milestone 2 REST API', async (context) => {
       });
 
       await context.test('lista comarcas, municipios filtrados y categorías', async () => {
+        const provinces = await apiRequest('/api/provinces');
+        assert.deepEqual(provinces.body.data, ['Barcelona', 'Girona']);
         const comarques = await apiRequest('/api/comarques');
-        assert.deepEqual(comarques.body.data, ['Baix Emporda', 'Barcelones']);
-        const municipalities = await apiRequest('/api/municipalities?comarca=Baix%20Emporda');
-        assert.deepEqual(municipalities.body.data, ['Begur', 'Palafrugell']);
+        assert.deepEqual(comarques.body.data, [
+          { comarca: 'Baix Emporda', province: 'Girona' },
+          { comarca: 'Barcelones', province: 'Barcelona' },
+        ]);
+        const filteredComarques = await apiRequest('/api/comarques?province=Barcelona');
+        assert.deepEqual(filteredComarques.body.data, [{ comarca: 'Barcelones', province: 'Barcelona' }]);
+        const municipalities = await apiRequest('/api/municipalities?province=Girona&comarca=Baix%20Emporda');
+        assert.deepEqual(municipalities.body.data, [
+          { municipality: 'Begur', comarca: 'Baix Emporda', province: 'Girona' },
+          { municipality: 'Palafrugell', comarca: 'Baix Emporda', province: 'Girona' },
+        ]);
         const categories = await apiRequest('/api/categories');
         assert.ok(categories.body.data.some((category) => (
           category.slug === 'musica'
