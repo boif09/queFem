@@ -57,11 +57,12 @@ export function PrivacyPage() {
         <h3>{t('legal.privacy.logsTitle')}</h3><p>{t('legal.privacy.logsBody')}</p>
         <h3>{t('legal.privacy.emailTitle')}</h3><p>{t('legal.privacy.emailBody')}</p>
         <h3>{t('legal.privacy.languageTitle')}</h3><p>{t('legal.privacy.languageBody')}</p>
+        <h3>{t('legal.privacy.locationTitle')}</h3><p>{t('legal.privacy.locationBody')}</p>
       </Section>
       <Section title={t('legal.privacy.dataNatureTitle')}><p>{t('legal.privacy.dataNatureBody')}</p></Section>
       <Section title={t('legal.privacy.purposesTitle')}><p>{t('legal.privacy.purposesBody')}</p></Section>
       <Section title={t('legal.privacy.basisTitle')}><p>{t('legal.privacy.basisBody')}</p></Section>
-      <Section title={t('legal.privacy.retentionTitle')}><ul><li>{t('legal.privacy.retentionLogs')}</li><li>{t('legal.privacy.retentionLanguage')}</li><li>{t('legal.privacy.retentionEmail')}</li></ul></Section>
+      <Section title={t('legal.privacy.retentionTitle')}><ul><li>{t('legal.privacy.retentionLogs')}</li><li>{t('legal.privacy.retentionLanguage')}</li><li>{t('legal.privacy.retentionLocation')}</li><li>{t('legal.privacy.retentionEmail')}</li></ul></Section>
       <Section title={t('legal.privacy.providersTitle')}><h3>Hetzner Online GmbH</h3><p>{t('legal.privacy.hetznerBody')}</p><h3>OVHcloud</h3><p>{t('legal.privacy.ovhBody')}</p><p>{t('legal.privacy.sharingBody')}</p></Section>
       <Section title={t('legal.privacy.externalTitle')}><ul><li>{t('legal.privacy.osmBody')}</li><li>{t('legal.privacy.mapsBody')}</li><li>{t('legal.privacy.ticketmasterBody')}</li><li>{t('legal.privacy.sourcesBody')}</li></ul><p>{t('legal.common.externalPolicies')}</p></Section>
       <Section title={t('legal.privacy.rightsTitle')}><p>{t('legal.privacy.rightsBody')}</p><p><EmailLink /></p><p><a href="https://www.aepd.es" target="_blank" rel="noreferrer">{t('legal.privacy.aepdLink')} <span aria-hidden="true">↗</span></a></p></Section>
@@ -76,6 +77,7 @@ export function StoragePage() {
     <LegalPage pageKey="storage">
       <Section title={t('legal.storage.cookiesTitle')}><p>{t('legal.storage.cookiesBody')}</p></Section>
       <Section title={t('legal.storage.languageTitle')}><p>{t('legal.storage.languageBody')}</p><p>{t('legal.storage.sharingBody')}</p></Section>
+      <Section title={t('legal.storage.locationTitle')}><p>{t('legal.storage.locationBody')}</p></Section>
       <Section title={t('legal.storage.deleteTitle')}><p>{t('legal.storage.deleteBody')}</p></Section>
       <Section title={t('legal.storage.mapTitle')}><p>{t('legal.storage.mapBody')}</p></Section>
     </LegalPage>

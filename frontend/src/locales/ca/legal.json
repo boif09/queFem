@@ -1,7 +1,7 @@
 {
   "common": {
     "eyebrow": "Informació legal i transparència",
-    "updated": "Darrera actualització: 19/08/2026",
+    "updated": "Darrera actualització: 21/08/2026",
     "emailLabel": "Escriure a contacte@tenspla.cat",
     "externalPolicies": "Quan accedeixes a un servei extern, s'hi apliquen les seves pròpies condicions i política de privacitat."
   },
@@ -33,6 +33,8 @@
     "emailBody": "Si escrius a contacte@tenspla.cat, es poden tractar la teva adreça de correu, el nom si el facilites, el contingut del missatge i altres dades que hi incloguis voluntàriament.",
     "languageTitle": "Preferència local d'idioma",
     "languageBody": "El navegador conserva quefem.language amb el valor ca o es per recordar l'idioma escollit. No és un sistema d'identificació, seguiment ni perfilat.",
+    "locationTitle": "Preferència local d'ubicació",
+    "locationBody": "Quan selecciones explícitament filtres territorials, el navegador pot conservar la província, la comarca i/o el municipi escollits per contextualitzar la portada. No s'infereix cap nivell, no s'utilitza GPS ni compte, i aquesta preferència no comporta seguiment ni comunicació a tercers.",
     "dataNatureTitle": "Caràcter de les dades",
     "dataNatureBody": "No cal facilitar dades personals per navegar per Tens pla?. Escriure a contacte@tenspla.cat és voluntari, però requereix les dades mínimes necessàries per poder respondre. Les dades tècniques de connexió es generen automàticament en utilitzar el servei.",
     "purposesTitle": "Finalitats",
@@ -42,6 +44,7 @@
     "retentionTitle": "Conservació",
     "retentionLogs": "Els logs tècnics roten diàriament i es conserven aproximadament 14 dies.",
     "retentionLanguage": "La preferència d'idioma es conserva fins que la canvies o elimines les dades locals del navegador.",
+    "retentionLocation": "La preferència d'ubicació es conserva fins que la canvies, la treus des de la portada o els filtres, o elimines les dades locals del navegador.",
     "retentionEmail": "Els correus es conserven només durant el temps necessari per atendre la sol·licitud i, quan correspongui, durant els terminis necessaris per acreditar-ne la gestió o atendre possibles responsabilitats legals.",
     "providersTitle": "Proveïdors",
     "hetznerBody": "Hetzner Online GmbH presta l'allotjament del frontend, backend, SQLite, infraestructura web i logs tècnics. El servidor és a Falkenstein, Alemanya, zona eu-central. Existeix un acord d'encàrrec del tractament conforme a l'article 28 del RGPD.",
@@ -60,14 +63,16 @@
   },
   "storage": {
     "title": "Emmagatzematge local",
-    "intro": "Informació sobre l'única preferència que Tens pla? desa actualment al navegador.",
+    "intro": "Informació sobre les preferències funcionals que Tens pla? desa al navegador.",
     "cookiesTitle": "Sense cookies pròpies",
     "cookiesBody": "Tens pla? no utilitza actualment cookies pròpies, cookies publicitàries, analítica, seguiment, fingerprinting, sessions ni login.",
     "languageTitle": "Preferència d'idioma",
     "languageBody": "S'utilitza exclusivament localStorage amb la clau quefem.language i els valors ca o es per recordar l'idioma seleccionat.",
-    "sharingBody": "Aquesta preferència no identifica persones, no s'utilitza per a publicitat o perfilat i no es comparteix amb tercers.",
+    "locationTitle": "Preferència d'ubicació",
+    "locationBody": "localStorage pot desar amb la clau quefem.location només la província, la comarca i/o el municipi que hagis seleccionat explícitament. Serveix per mostrar plans contextualitzats a la portada; no utilitza GPS, identificadors ni compte.",
+    "sharingBody": "Aquestes preferències no identifiquen persones, no s'utilitzen per a publicitat, analítica, seguiment o perfilat i no es comparteixen amb tercers.",
     "deleteTitle": "Com esborrar-la",
-    "deleteBody": "Pots canviar l'idioma des del selector de Tens pla? o eliminar la preferència des de la configuració de dades del navegador.",
+    "deleteBody": "Pots canviar l'idioma des del selector de Tens pla?, treure la ubicació des de la portada o els filtres, o eliminar les preferències des de la configuració de dades del navegador.",
     "mapTitle": "Mapa sota petició",
     "mapBody": "OpenStreetMap no es carrega en obrir una fitxa. Només es crea la connexió després de prémer «Veure mapa», i aquesta decisió no es desa per a futures pàgines."
   },

@@ -25,15 +25,15 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - Logrotate ejecutado y verificado con rotación diaria, 14 rotaciones y compresión.
 - Hardening del backend: escucha local segura por defecto y límites de paginación/consultas.
 - Discovery & Filters V2: fechas rápidas y rango, filtros territoriales independientes, municipio buscable con contexto, categorías OR múltiples, aplicación inmediata, URL compartible, chips eliminables y estado vacío accionable. Véase [`DISCOVERY_FILTERS_V2.md`](DISCOVERY_FILTERS_V2.md).
+- Home & Discovery V2 completado el 2026-08-21: home focalizada en accesos rápidos por fecha, bloques separados de planes temporales y permanentes con relevancia temporal editorial aplicada en backend antes de paginar, categorías contextualizadas y persistencia local explícita de la ubicación territorial seleccionada, con cobertura CA/ES y tests frontend/backend. Revisión independiente satisfactoria, sin bloqueos.
 
 ## AUTONOMOUS WORK
 
-No autonomous product work currently defined.
+- No hay trabajo autónomo actualmente definido.
 
 ## PRODUCT DECISIONS
 
 - Decidir si se quiere automatizar la purga de planes inactivos y aprobar su política operativa antes de preparar cualquier activación.
-- Definir y acotar el siguiente bloque funcional de producto. No hay actualmente una funcionalidad pendiente seleccionada para implementación autónoma.
 
 ## OPERATOR / PRODUCTION
 

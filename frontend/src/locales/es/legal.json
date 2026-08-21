@@ -1,7 +1,7 @@
 {
   "common": {
     "eyebrow": "Información legal y transparencia",
-    "updated": "Última actualización: 19/08/2026",
+    "updated": "Última actualización: 21/08/2026",
     "emailLabel": "Escribir a contacte@tenspla.cat",
     "externalPolicies": "Cuando accedes a un servicio externo, se aplican sus propias condiciones y política de privacidad."
   },
@@ -33,6 +33,8 @@
     "emailBody": "Si escribes a contacte@tenspla.cat, pueden tratarse tu dirección de correo, el nombre si lo facilitas, el contenido del mensaje y otros datos que incluyas voluntariamente.",
     "languageTitle": "Preferencia local de idioma",
     "languageBody": "El navegador conserva quefem.language con el valor ca o es para recordar el idioma elegido. No es un sistema de identificación, seguimiento ni perfilado.",
+    "locationTitle": "Preferencia local de ubicación",
+    "locationBody": "Cuando seleccionas explícitamente filtros territoriales, el navegador puede conservar la provincia, la comarca y/o el municipio elegidos para contextualizar la portada. No se infiere ningún nivel, no se utiliza GPS ni cuenta, y esta preferencia no implica seguimiento ni comunicación a terceros.",
     "dataNatureTitle": "Carácter de los datos",
     "dataNatureBody": "No es necesario facilitar datos personales para navegar por Tens pla?. Escribir a contacte@tenspla.cat es voluntario, pero requiere los datos mínimos necesarios para poder responder. Los datos técnicos de conexión se generan automáticamente al utilizar el servicio.",
     "purposesTitle": "Finalidades",
@@ -42,6 +44,7 @@
     "retentionTitle": "Conservación",
     "retentionLogs": "Los logs técnicos rotan diariamente y se conservan aproximadamente 14 días.",
     "retentionLanguage": "La preferencia de idioma se conserva hasta que la cambies o elimines los datos locales del navegador.",
+    "retentionLocation": "La preferencia de ubicación se conserva hasta que la cambias, la quitas desde la portada o los filtros, o eliminas los datos locales del navegador.",
     "retentionEmail": "Los correos se conservan solo durante el tiempo necesario para atender la solicitud y, cuando corresponda, durante los plazos necesarios para acreditar su gestión o atender posibles responsabilidades legales.",
     "providersTitle": "Proveedores",
     "hetznerBody": "Hetzner Online GmbH presta el alojamiento del frontend, backend, SQLite, infraestructura web y logs técnicos. El servidor está en Falkenstein, Alemania, zona eu-central. Existe un acuerdo de encargo del tratamiento conforme al artículo 28 del RGPD.",
@@ -60,14 +63,16 @@
   },
   "storage": {
     "title": "Almacenamiento local",
-    "intro": "Información sobre la única preferencia que Tens pla? guarda actualmente en el navegador.",
+    "intro": "Información sobre las preferencias funcionales que Tens pla? guarda en el navegador.",
     "cookiesTitle": "Sin cookies propias",
     "cookiesBody": "Tens pla? no utiliza actualmente cookies propias, cookies publicitarias, analítica, seguimiento, fingerprinting, sesiones ni login.",
     "languageTitle": "Preferencia de idioma",
     "languageBody": "Se utiliza exclusivamente localStorage con la clave quefem.language y los valores ca o es para recordar el idioma seleccionado.",
-    "sharingBody": "Esta preferencia no identifica personas, no se utiliza para publicidad o perfilado y no se comparte con terceros.",
+    "locationTitle": "Preferencia de ubicación",
+    "locationBody": "localStorage puede guardar con la clave quefem.location solo la provincia, la comarca y/o el municipio que hayas seleccionado explícitamente. Sirve para mostrar planes contextualizados en la portada; no utiliza GPS, identificadores ni cuenta.",
+    "sharingBody": "Estas preferencias no identifican personas, no se utilizan para publicidad, analítica, seguimiento o perfilado y no se comparten con terceros.",
     "deleteTitle": "Cómo eliminarla",
-    "deleteBody": "Puedes cambiar el idioma desde el selector de Tens pla? o eliminar la preferencia desde la configuración de datos del navegador.",
+    "deleteBody": "Puedes cambiar el idioma desde el selector de Tens pla?, quitar la ubicación desde la portada o los filtros, o eliminar las preferencias desde la configuración de datos del navegador.",
     "mapTitle": "Mapa bajo petición",
     "mapBody": "OpenStreetMap no se carga al abrir una ficha. Solo se crea la conexión después de pulsar «Ver mapa», y esta decisión no se guarda para futuras páginas."
   },

@@ -279,6 +279,13 @@ test('Milestone 2 REST API', async (context) => {
         assert.deepEqual(body.pagination, { page: 2, limit: 1, total: 3, pages: 3 });
       });
 
+      await context.test('separa planes temporales y permanentes', async () => {
+        const temporary = await apiRequest('/api/plans?permanent=false');
+        assert.ok(temporary.body.data.every(({ permanent }) => permanent === false));
+        const permanent = await apiRequest('/api/plans?permanent=true');
+        assert.deepEqual(permanent.body.data.map(({ id }) => id), [ids.permanent]);
+      });
+
       await context.test('combina múltiples categorías con semántica OR', async () => {
         const { body } = await apiRequest('/api/plans?category=musica,cultura');
         assert.deepEqual(new Set(body.data.map(({ id }) => id)), new Set([ids.event, ids.translatedEvent]));

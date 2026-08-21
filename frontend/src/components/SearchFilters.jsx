@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../services/api.js';
 import { getQuickDateRange, toISODate } from '../utils/dates.js';
+import { readLocationPreference, saveLocationPreference } from '../utils/locationPreference.js';
 import { CategorySelector } from './CategorySelector.jsx';
 
 const EMPTY_FILTERS = { q: '', date: '', dateFrom: '', dateTo: '', province: '', comarca: '', municipality: '', category: '', free: false };
@@ -95,9 +96,17 @@ export function SearchFilters({ initialFilters = {}, onSearch }) {
       setComarques(c.data); setMunicipalities(m.data); setLoadError(false);
     } catch { setLoadError(true); }
   };
+  const setExplicitLocation = (values, changedKey) => {
+    const next = { ...filters, ...values };
+    const preference = { ...readLocationPreference(), [changedKey]: next[changedKey] };
+    if (changedKey === 'province' && !next.comarca) preference.comarca = '';
+    if (changedKey !== 'municipality' && !next.municipality) preference.municipality = '';
+    saveLocationPreference(preference);
+    setFilters(next);
+  };
   const chooseQuickDate = (type) => { const selected = getQuickDateRange(type); setShowRange(Boolean(selected.dateFrom)); setFilters((current) => ({ ...current, date: selected.date || '', dateFrom: selected.dateFrom || '', dateTo: selected.dateTo || '' })); };
   const chooseCustomRange = () => { setShowRange(true); setFilters((current) => ({ ...current, date: '', dateFrom: current.dateFrom || toISODate(new Date()), dateTo: current.dateTo || toISODate(new Date()) })); };
-  const clear = () => { setFilters(EMPTY_FILTERS); setShowRange(false); reloadLocations('', ''); };
+  const clear = () => { saveLocationPreference({}); setFilters(EMPTY_FILTERS); setShowRange(false); reloadLocations('', ''); };
 
   return <form className="search-panel" onSubmit={(event) => event.preventDefault()}>
     <div className="text-search-section"><label htmlFor="plan-text-search">{t('filters.textSearch')}</label><div className="text-search-control"><span aria-hidden="true">⌕</span><input id="plan-text-search" type="search" maxLength="100" value={filters.q} placeholder={t('filters.textSearchPlaceholder')} onChange={(event) => setFilters((current) => ({ ...current, q: event.target.value }))} /></div></div>
@@ -109,9 +118,9 @@ export function SearchFilters({ initialFilters = {}, onSearch }) {
     <div className="filter-section">
       <div className="section-heading"><span className="section-number" aria-hidden="true">02</span><div><span>{t('filters.where')}</span><strong>{t('filters.municipality')}</strong></div></div>
       <div className="location-fields">
-        <label><span>{t('filters.province')}</span><select value={filters.province} disabled={loading} onChange={(event) => { const province = event.target.value; const comarca = !filters.comarca || comarques.some((item) => item.comarca === filters.comarca && (!province || item.province === province)) ? filters.comarca : ''; const municipality = !filters.municipality || municipalities.some((item) => item.municipality === filters.municipality && (!province || item.province === province) && (!comarca || item.comarca === comarca)) ? filters.municipality : ''; setFilters((current) => ({ ...current, province, comarca, municipality })); reloadLocations(province, comarca); }}><option value="">{t('filters.allProvinces')}</option>{provinces.map((province) => <option key={province} value={province}>{province}</option>)}</select></label>
-        <label><span>{t('filters.comarca')}</span><select value={filters.comarca} disabled={loading} onChange={(event) => { const comarca = event.target.value; const municipality = !filters.municipality || municipalities.some((item) => item.municipality === filters.municipality && (!comarca || item.comarca === comarca)) ? filters.municipality : ''; setFilters((current) => ({ ...current, comarca, municipality })); reloadLocations(filters.province, comarca); }}><option value="">{t('filters.allComarques')}</option>{comarques.map((item) => <option key={`${item.comarca}-${item.province}`} value={item.comarca}>{item.comarca}</option>)}</select></label>
-        <label><span>{t('filters.municipality')}</span><MunicipalityCombobox items={municipalities} value={filters.municipality} loading={loading} onChange={(municipality) => setFilters((current) => ({ ...current, municipality }))} /></label>
+        <label><span>{t('filters.province')}</span><select value={filters.province} disabled={loading} onChange={(event) => { const province = event.target.value; const comarca = !filters.comarca || comarques.some((item) => item.comarca === filters.comarca && (!province || item.province === province)) ? filters.comarca : ''; const municipality = !filters.municipality || municipalities.some((item) => item.municipality === filters.municipality && (!province || item.province === province) && (!comarca || item.comarca === comarca)) ? filters.municipality : ''; setExplicitLocation({ province, comarca, municipality }, 'province'); reloadLocations(province, comarca); }}><option value="">{t('filters.allProvinces')}</option>{provinces.map((province) => <option key={province} value={province}>{province}</option>)}</select></label>
+        <label><span>{t('filters.comarca')}</span><select value={filters.comarca} disabled={loading} onChange={(event) => { const comarca = event.target.value; const municipality = !filters.municipality || municipalities.some((item) => item.municipality === filters.municipality && (!comarca || item.comarca === comarca)) ? filters.municipality : ''; setExplicitLocation({ comarca, municipality }, 'comarca'); reloadLocations(filters.province, comarca); }}><option value="">{t('filters.allComarques')}</option>{comarques.map((item) => <option key={`${item.comarca}-${item.province}`} value={item.comarca}>{item.comarca}</option>)}</select></label>
+        <label><span>{t('filters.municipality')}</span><MunicipalityCombobox items={municipalities} value={filters.municipality} loading={loading} onChange={(municipality) => setExplicitLocation({ municipality }, 'municipality')} /></label>
       </div>
     </div>
     <div className="filter-section"><div className="section-heading"><span className="section-number" aria-hidden="true">03</span><div><span>{t('filters.category')}</span><strong>{t('filters.allCategories')}</strong></div></div><CategorySelector categories={categories} selected={filters.category ? filters.category.split(',') : []} onChange={(values) => setFilters((current) => ({ ...current, category: values.join(',') }))} loading={loading} /></div>

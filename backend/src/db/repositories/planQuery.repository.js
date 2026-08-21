@@ -105,6 +105,7 @@ export class PlanQueryRepository {
       ['family', 'p.family_friendly'],
       ['indoor', 'p.indoor'],
       ['outdoor', 'p.outdoor'],
+      ['permanent', 'p.permanent'],
     ];
     for (const [key, column] of booleanFilters) {
       if (filters[key] !== undefined) {
@@ -122,7 +123,10 @@ export class PlanQueryRepository {
       parameters.push(...filters.categories);
     }
 
-    if (filters.date) {
+    if (filters.editorial === 'home-upcoming') {
+      clauses.push('p.start_date IS NOT NULL AND p.start_date >= ?');
+      parameters.push(filters.dateFrom);
+    } else if (filters.date) {
       clauses.push(`(
         p.permanent = 1 OR
         (p.start_date IS NOT NULL AND p.end_date IS NOT NULL AND p.start_date <= ? AND p.end_date >= ?)
@@ -148,18 +152,37 @@ export class PlanQueryRepository {
   findMany(filters) {
     const text = localizedExpressions(filters.lang);
     const where = this.buildWhere(filters);
-    const dateOrder = filters.date
-      ? `CASE
-          WHEN p.permanent = 0 AND p.start_date = '${filters.date}' THEN 0
-          WHEN p.permanent = 0 THEN 1
-          ELSE 2
-        END, p.start_date DESC, p.id ASC`
-      : 'p.permanent ASC, p.start_date IS NULL ASC, p.start_date ASC, p.id ASC';
-    const orderBy = {
-      date: dateOrder,
-      quality: 'p.quality_score DESC, p.start_date IS NULL ASC, p.start_date ASC, p.id ASC',
-      title: `${text.title} COLLATE NOCASE ASC, p.id ASC`,
-    }[filters.sort];
+    let orderBy;
+    let orderParameters = [];
+    if (filters.editorial === 'home-weekend') {
+      orderBy = `
+        CASE WHEN p.start_date BETWEEN ? AND ? THEN 0 ELSE 1 END ASC,
+        CASE WHEN p.start_date BETWEEN ? AND ? THEN p.start_date END ASC,
+        CASE WHEN p.start_date < ? THEN p.start_date END DESC,
+        p.id ASC
+      `;
+      orderParameters = [
+        filters.dateFrom, filters.dateTo,
+        filters.dateFrom, filters.dateTo,
+        filters.dateFrom,
+      ];
+    } else if (filters.editorial === 'home-upcoming') {
+      orderBy = 'p.start_date ASC, p.id ASC';
+    } else {
+      const dateOrder = filters.date
+        ? `CASE
+            WHEN p.permanent = 0 AND p.start_date = ? THEN 0
+            WHEN p.permanent = 0 THEN 1
+            ELSE 2
+          END, p.start_date DESC, p.id ASC`
+        : 'p.permanent ASC, p.start_date IS NULL ASC, p.start_date ASC, p.id ASC';
+      orderBy = {
+        date: dateOrder,
+        quality: 'p.quality_score DESC, p.start_date IS NULL ASC, p.start_date ASC, p.id ASC',
+        title: `${text.title} COLLATE NOCASE ASC, p.id ASC`,
+      }[filters.sort];
+      if (filters.date && filters.sort === 'date') orderParameters = [filters.date];
+    }
 
     const total = this.db.prepare(`SELECT COUNT(*) AS total FROM plans p WHERE ${where.sql}`)
       .get(...where.parameters).total;
@@ -180,7 +203,7 @@ export class PlanQueryRepository {
       WHERE ${where.sql}
       ORDER BY ${orderBy}
       LIMIT ? OFFSET ?
-    `).all(...where.parameters, filters.limit, offset);
+    `).all(...where.parameters, ...orderParameters, filters.limit, offset);
 
     const plans = rows.map(mapPlan);
     this.attachCategories(plans, filters.lang);

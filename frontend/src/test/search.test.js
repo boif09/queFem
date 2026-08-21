@@ -12,6 +12,7 @@ describe('search URL utilities', () => {
       municipality: 'Begur',
       category: 'cultura',
       free: true,
+      kind: 'event',
     });
     const parsed = filtersFromSearchParams(new URLSearchParams(query));
 
@@ -23,6 +24,7 @@ describe('search URL utilities', () => {
       municipality: 'Begur',
       category: 'cultura',
       free: 'true',
+      kind: 'event',
     });
   });
 
@@ -35,6 +37,12 @@ describe('search URL utilities', () => {
 });
 
 describe('quick date ranges', () => {
+  it('uses today and tomorrow as single-date filters', () => {
+    const monday = new Date(2026, 7, 17, 15);
+    expect(getQuickDateRange('today', monday)).toEqual({ date: '2026-08-17' });
+    expect(getQuickDateRange('tomorrow', monday)).toEqual({ date: '2026-08-18' });
+  });
+
   it('uses Friday through Sunday and shortens an in-progress weekend', () => {
     expect(getQuickDateRange('weekend', new Date(2026, 7, 20))).toEqual({ dateFrom: '2026-08-21', dateTo: '2026-08-23' });
     expect(getQuickDateRange('weekend', new Date(2026, 7, 21))).toEqual({ dateFrom: '2026-08-21', dateTo: '2026-08-23' });

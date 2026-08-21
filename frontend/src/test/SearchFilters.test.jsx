@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import i18n from '../i18n.js';
 import { SearchFilters } from '../components/SearchFilters.jsx';
 import { api } from '../services/api.js';
+import { LOCATION_PREFERENCE_KEY } from '../utils/locationPreference.js';
 
 vi.mock('../services/api.js', () => ({
   api: {
@@ -17,6 +18,7 @@ vi.mock('../services/api.js', () => ({
 describe('SearchFilters', () => {
   beforeEach(async () => {
     vi.resetAllMocks();
+    localStorage.clear();
     await i18n.changeLanguage('ca');
     api.getProvinces.mockResolvedValue({ data: ['Barcelona', 'Girona'] });
     api.getComarques.mockResolvedValue({ data: [{ comarca: 'Baix Empordà', province: 'Girona' }, { comarca: 'Barcelonès', province: 'Barcelona' }] });
@@ -46,6 +48,7 @@ describe('SearchFilters', () => {
     await user.clear(municipality);
     await user.type(municipality, 'palafrugell');
     await user.click(await screen.findByRole('option', { name: 'Palafrugell · Baix Empordà · Girona' }));
+    expect(JSON.parse(localStorage.getItem(LOCATION_PREFERENCE_KEY))).toEqual({ version: 1, location: { comarca: 'Baix Empordà', municipality: 'Palafrugell' } });
     await user.click(screen.getByRole('button', { name: 'Música' }));
     await user.click(screen.getByRole('checkbox', { name: 'Només plans gratuïts' }));
     await waitFor(() => expect(onSearch).toHaveBeenCalledWith(expect.objectContaining({
@@ -89,5 +92,19 @@ describe('SearchFilters', () => {
     await user.click(clear);
     expect(municipality).toHaveValue('');
     expect(municipality).toHaveFocus();
+    expect(localStorage.getItem(LOCATION_PREFERENCE_KEY)).toBeNull();
+  });
+
+  it('persists only explicit location changes, including dependent removals and global clearing', async () => {
+    const user = userEvent.setup();
+    render(<SearchFilters initialFilters={{ comarca: 'Baix Empordà', municipality: 'Begur' }} onSearch={vi.fn()} />);
+    await screen.findByRole('option', { name: 'Girona' });
+    expect(localStorage.getItem(LOCATION_PREFERENCE_KEY)).toBeNull();
+
+    await user.selectOptions(screen.getByLabelText('Província'), 'Girona');
+    expect(JSON.parse(localStorage.getItem(LOCATION_PREFERENCE_KEY))).toEqual({ version: 1, location: { province: 'Girona' } });
+    expect(screen.getByLabelText('Comarca')).toHaveValue('Baix Empordà');
+    await user.click(screen.getByRole('button', { name: 'Esborrar filtres' }));
+    expect(localStorage.getItem(LOCATION_PREFERENCE_KEY)).toBeNull();
   });
 });

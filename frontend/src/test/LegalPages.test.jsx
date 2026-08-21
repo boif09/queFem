@@ -31,7 +31,7 @@ describe('legal and privacy pages', () => {
   ])('renders the Catalan route %s', (route, heading) => {
     renderRoute(route);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
-    expect(screen.getByText('Darrera actualització: 19/08/2026')).toBeInTheDocument();
+    expect(screen.getByText('Darrera actualització: 21/08/2026')).toBeInTheDocument();
     expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
     expect(document.head.querySelector('link[rel="canonical"]')).not.toBeInTheDocument();
   });
@@ -44,7 +44,7 @@ describe('legal and privacy pages', () => {
     await i18n.changeLanguage('es');
     renderRoute(route);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
-    expect(screen.getByText('Última actualización: 19/08/2026')).toBeInTheDocument();
+    expect(screen.getByText('Última actualización: 21/08/2026')).toBeInTheDocument();
   });
 
   it('states the controller, hosting, minimized logs and retention accurately', async () => {
@@ -63,11 +63,13 @@ describe('legal and privacy pages', () => {
     expect(privacyEmailLinks[0]).toHaveAttribute('href', 'mailto:contacte@tenspla.cat');
   });
 
-  it('describes language storage without claiming tracking cookies', async () => {
+  it('describes language and explicit location storage without claiming tracking cookies', async () => {
     await i18n.changeLanguage('es');
     renderRoute('/almacenamiento');
     expect(screen.getByText(/localStorage con la clave quefem.language/)).toBeInTheDocument();
-    expect(screen.getByText(/no se utiliza para publicidad o perfilado/)).toBeInTheDocument();
+    expect(screen.getByText(/clave quefem.location solo la provincia, la comarca y\/o el municipio/)).toBeInTheDocument();
+    expect(screen.getByText(/no se utilizan para publicidad, analítica, seguimiento o perfilado/)).toBeInTheDocument();
+    expect(screen.getByText(/no utiliza GPS, identificadores ni cuenta/)).toBeInTheDocument();
     expect(screen.getByText(/no utiliza actualmente cookies propias/)).toBeInTheDocument();
     expect(screen.getByText(/OpenStreetMap no se carga al abrir una ficha/)).toBeInTheDocument();
   });

@@ -8,6 +8,7 @@ import { Seo } from '../components/Seo.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
 import { formatDate } from '../utils/dates.js';
+import { readLocationPreference, saveLocationPreference } from '../utils/locationPreference.js';
 import { createPlansSearch, filtersFromSearchParams } from '../utils/search.js';
 
 function ActiveFilters({ filters, onRemove, onClear }) {
@@ -74,6 +75,11 @@ export function PlansPage() {
       const category = key.slice('category:'.length);
       next.category = (next.category || '').split(',').filter((value) => value !== category).join(',');
     } else delete next[key];
+    if (['province', 'comarca', 'municipality'].includes(key)) {
+      const preference = readLocationPreference();
+      delete preference[key];
+      saveLocationPreference(preference);
+    }
     applyFilters(next);
   };
   return (
@@ -93,7 +99,7 @@ export function PlansPage() {
           <summary>{t('results.filtersToggle')}</summary>
           <SearchFilters initialFilters={filters} onSearch={applyFilters} />
         </details>
-        <ActiveFilters filters={filters} onRemove={removeFilter} onClear={() => applyFilters({})} />
+        <ActiveFilters filters={filters} onRemove={removeFilter} onClear={() => { saveLocationPreference({}); applyFilters({}); }} />
         {state.status === 'loading' && <LoadingState />}
         {state.status === 'error' && <ErrorState onRetry={() => setReloadKey((value) => value + 1)} />}
         {state.status === 'success' && (

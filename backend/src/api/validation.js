@@ -1,10 +1,11 @@
 const PLAN_QUERY_PARAMETERS = new Set([
   'q', 'date', 'dateFrom', 'dateTo', 'province', 'comarca', 'municipality',
-  'category', 'free', 'family', 'indoor', 'outdoor', 'kind',
-  'page', 'limit', 'sort', 'lang',
+  'category', 'free', 'family', 'indoor', 'outdoor', 'permanent', 'kind',
+  'editorial', 'page', 'limit', 'sort', 'lang',
 ]);
 const KINDS = new Set(['event', 'place', 'route', 'beach', 'nature', 'activity']);
 const SORTS = new Set(['date', 'quality', 'title']);
+const EDITORIAL_MODES = new Set(['home-weekend', 'home-upcoming']);
 const LANGUAGES = new Set(['ca', 'es']);
 export const MAX_PLANS_PAGE = 200;
 
@@ -105,10 +106,28 @@ export function validatePlansQuery(query, defaultLanguage = 'ca') {
   if (!SORTS.has(sort)) {
     throw new ValidationError('El paràmetre sort ha de ser date, quality o title.');
   }
+  const editorial = singleString(query.editorial, 'editorial');
+  if (editorial && !EDITORIAL_MODES.has(editorial)) {
+    throw new ValidationError('El paràmetre editorial no és vàlid.');
+  }
+  if (editorial === 'home-weekend' && (!dateFrom || !dateTo)) {
+    throw new ValidationError('home-weekend requereix dateFrom i dateTo.');
+  }
+  if (editorial === 'home-upcoming' && (!dateFrom || dateTo)) {
+    throw new ValidationError('home-upcoming requereix només dateFrom.');
+  }
+  if (editorial && (date || sort !== 'date')) {
+    throw new ValidationError('El mode editorial requereix sort=date i no admet date.');
+  }
   const categoryValue = singleString(query.category, 'category');
   const categories = categoryValue?.split(',').map((value) => value.trim()).filter(Boolean);
   if (categories?.some((category) => !/^[a-z0-9-]+$/.test(category))) {
     throw new ValidationError('El paràmetre category ha de contenir slugs vàlids separats per comes.');
+  }
+
+  const permanent = boolean(query.permanent, 'permanent');
+  if (editorial && permanent === 1) {
+    throw new ValidationError('El mode editorial només admet plans temporals.');
   }
 
   return {
@@ -124,7 +143,9 @@ export function validatePlansQuery(query, defaultLanguage = 'ca') {
     family: boolean(query.family, 'family'),
     indoor: boolean(query.indoor, 'indoor'),
     outdoor: boolean(query.outdoor, 'outdoor'),
+    permanent: editorial ? 0 : permanent,
     kind,
+    editorial,
     page: integer(query.page, 'page', 1, 1, MAX_PLANS_PAGE),
     limit: integer(query.limit, 'limit', 20, 1, 100),
     sort,

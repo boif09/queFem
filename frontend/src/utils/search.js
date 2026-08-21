@@ -1,5 +1,5 @@
 export const SEARCH_FILTER_KEYS = [
-  'q', 'date', 'dateFrom', 'dateTo', 'province', 'comarca', 'municipality', 'category', 'free',
+  'q', 'date', 'dateFrom', 'dateTo', 'province', 'comarca', 'municipality', 'category', 'free', 'kind',
 ];
 
 export function filtersFromSearchParams(searchParams) {
