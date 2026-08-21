@@ -1,5 +1,7 @@
 # Tens pla? — Especificació tècnica inicial
 
+> **Abast del document:** aquesta és la base inicial de producte i arquitectura. Inclou objectius i fases futures, i no acredita per si sola l'estat d'implementació actual. Per al que existeix avui, consulteu [`PROJECT_STATUS.md`](PROJECT_STATUS.md) i [`ARCHITECTURE.md`](ARCHITECTURE.md); davant d'una divergència, cal verificar el codi real.
+
 > **Marca pública actual:** Tens pla?
 > **Nom intern legacy:** Què Fem? / `quefem`; es manté per compatibilitat tècnica
 > **Objectiu:** aplicació web per descobrir plans, activitats, esdeveniments i llocs per visitar a Catalunya.  

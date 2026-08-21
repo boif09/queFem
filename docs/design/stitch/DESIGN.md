@@ -1,4 +1,6 @@
 ---
+> **Referència històrica:** aquest lliurable de Stitch correspon a una proposta visual anterior. No és la font de veritat del sistema Pop Editorial ni del branding vigent; per a canvis actuals cal inspeccionar `frontend/src/` i els assets implementats.
+
 name: Modern Catalan Horizon
 colors:
   surface: '#fbf9f0'

@@ -1,148 +1,83 @@
-# Tens pla? - Project Status
+# Tens Pla? — Estado del proyecto
 
-Last updated: 2026-08-19
+Última revisión documental: 2026-08-21.
+
+Este es el inventario de estado. La arquitectura está en [`ARCHITECTURE.md`](ARCHITECTURE.md), las fuentes en [`DATA_SOURCES.md`](DATA_SOURCES.md) y la operación en [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
 ## Completado
 
-### Milestone 1
+### Milestone 1 — Datos Gencat
 
-- Gencat Agenda importer
-- normalización
-- SQLite
-- source/licence registry
-- filtrado de registros fuera de Catalunya
-- filtrado de eventos caducados
-- validación de fechas anómalas o incoherentes
+- Importer de la Agenda Cultural de Catalunya, normalización, registro de licencia/procedencia y persistencia SQLite.
+- Filtros de Catalunya, caducidad y fechas incoherentes; soporte real de planes permanentes.
+- Importaciones idempotentes, payload auditable, purga de caducados y métricas en `import_runs`.
 
-### Milestone 2
+### Milestone 2 — Backend
 
-- Express REST API
-- filtros
-- paginación
-- detalle de plan
-- atribución de fuentes
-- tests
+- API Express de solo lectura para listado/detalle, categorías, fuentes, comarcas y municipios.
+- Filtros, búsqueda textual y paginación sin cambiar el contrato de respuesta.
+- Hardening local: `HOST=127.0.0.1` por defecto y máximo de 200 páginas; tests de validación.
+- Sitemap dinámico y proxy/cache same-origin para imágenes Ticketmaster.
 
-### Milestone 3
+### Milestone 3 — Frontend
 
-- frontend React
-- interfaz en catalán y castellano
-- catalán por defecto
-- buscador
-- filtros
-- resultados
-- detalle
-- página de fuentes
-- minimapa de ubicación en el detalle para planes con coordenadas, enlazado a Google Maps
-- búsqueda textual por títulos y recinto, parcial y sin distinguir mayúsculas o acentos
+- React/Vite bilingüe: catalán predeterminado y castellano completo.
+- Home, búsqueda, filtros, resultados, detalle, atribución, fuentes, estados y páginas legales/contacto.
+- MiniMap voluntario para coordenadas, con enlace a Google Maps y carga de OpenStreetMap tras consentimiento.
+- Branding público **Tens Pla?**, sistema Pop Editorial, Montserrat local, logo y favicon actuales.
+- SEO V1 preparado: metadata por ruta, Open Graph/Twitter inicial, canonical, robots, Event JSON-LD conservador y sitemap API.
 
-### Rebranding Pop Editorial
+### Milestone 4A — Ticketmaster local
 
-- Marca pública cambiada de Què Fem? a **Tens pla?**.
-- Sistema visual **Pop Editorial / Mediterranean Pop** aplicado a home, resultados, detalle, estados y páginas informativas.
-- Montserrat Variable autoalojada mediante Fontsource, sin Google Fonts ni iconos remotos.
-- Home conectada a datos reales con búsqueda `q`, accesos rápidos, “Passa avui” y categorías reales.
-- Cards y heroes sin fotografías basados en patrones gráficos por slug de categoría, con fallback genérico.
-- Dominio público principal activo: `https://tenspla.cat`; `https://www.tenspla.cat` redirige al dominio principal.
-- `https://quefem.jusboif.es` permanece como dominio legacy y redirige 301 al dominio principal conservando path y query. Los identificadores internos `quefem` se mantienen por compatibilidad técnica.
+- Discovery Feed 2.0 ES implementado con allowlist conjunta de fuente, marca y vendedor oficial.
+- Pipeline completo con horizonte, Catalunya, exclusiones, sesiones, normalización, idempotencia y reconciliación conservadora.
+- Dry-run sin escrituras, importación real e idempotencia validados localmente.
+- API y frontend comprobados manualmente con planes Ticketmaster y Gencat integrados.
+- Retirada por event ID, `--purge` controlado y purga posterior de huérfanos inactivos documentadas y probadas.
 
-### Milestone 4A — Ticketmaster
+### Imágenes Ticketmaster preparadas
 
-- Ticketmaster Discovery Feed 2.0 de España implementado como segunda fuente.
-- Pipeline validado mediante dry-run sin escrituras.
-- Primera importación real completada y validada en SQLite local.
-- Idempotencia comprobada con una segunda ejecución: 0 inserciones, 0 actualizaciones y 71 planes sin cambios.
-- API REST y frontend comprobados manualmente en navegador, incluyendo resultados, filtros, detalle y atribución.
-- Integración técnicamente cerrada en local.
-- Producción, cron y activación automática continúan **bloqueados hasta completar la revisión legal, de términos y privacidad**.
+- Metadata vinculada a `plan_sources`, variantes card/detail y entrega exclusivamente same-origin.
+- Caché temporal configurable con allowlist, TTL, límite de disco, timeout/tamaño y lock recuperable contra ejecuciones simultáneas.
+- Feature flag único `TICKETMASTER_IMAGES_ENABLED`, seguro y desactivado por defecto.
+- Fallback del frontend a patrones cuando no hay imagen autorizada/disponible.
 
-### Páginas legales y preparación de privacidad
+## Producción actual
 
-- Montserrat Variable se empaqueta como WOFF2 local mediante Fontsource y licencia OFL; el frontend no necesita Google Fonts.
-- OpenStreetMap solo se carga después de que el visitante pulse “Veure mapa”/“Ver mapa”.
-- La retirada manual por Ticketmaster event ID dispone de dry-run, transacción e idempotencia y reutiliza la lógica de desactivación de reconciliation.
-- Las solicitudes expresas disponen además de `--purge`: elimina físicamente un plan exclusivamente Ticketmaster en la misma transacción, pero conserva cualquier plan que mantenga otra fuente.
-- El runbook operativo fija `contacte@tenspla.cat` como canal y un objetivo inferior a 24 horas.
-- La configuración Nginx minimizada está aplicada: registra IP, fecha/hora, método, path sin query, protocolo, estado, bytes y User-Agent; omite query strings y `Referer`. Los logs rotan a diario y se conservan aproximadamente 14 días.
-- Los planes sin fuentes pasan a `inactive` con un `inactive_at` explícito. Una purga independiente puede eliminarlos físicamente al cumplir 7 días, previa validación de estado, antigüedad y ausencia de fuentes.
-- La purga dispone de dry-run, transacción, rollback e idempotencia. Su futura automatización diaria está documentada, pero no se ha añadido ningún cron.
-- Aviso legal, privacidad, almacenamiento local y contacto están implementados en catalán y castellano, con enlaces permanentes desde el footer.
-- Xavier Delgado Garcia consta como responsable y `contacte@tenspla.cat` como único canal público; no se publican datos privados adicionales.
-- La documentación refleja Hetzner en Falkenstein (Alemania, `eu-central`) con acuerdo de encargo del tratamiento, OVHcloud para el correo, ausencia de cookies/analítica/seguimiento y carga voluntaria de servicios externos.
-- Ticketmaster no se ha activado en producción.
+- Aplicación pública en `https://tenspla.cat`; `www` y `https://quefem.jusboif.es` redirigen al dominio principal.
+- Nginx sirve el build estático y hace proxy a Express; PM2 gestiona `quefem-api` en el puerto 3014; SQLite es la persistencia.
+- Gencat se sincroniza cada dos horas mediante cron externo. El despliegue de código usa `deploy.sh` y es independiente de la sincronización.
+- Las páginas legales CA/ES están publicadas. No hay analítica, seguimiento ni cookies según la implementación actual; el idioma se guarda en localStorage.
+- Ticketmaster, su cron y sus imágenes permanecen desactivados en producción.
 
-### Producción
+La configuración real de Nginx, PM2 y cron vive fuera del repositorio y debe verificarse en el servidor antes de cualquier operación.
 
-- aplicación desplegada y funcionando en `https://tenspla.cat`
-- backend Node.js/Express gestionado por PM2 como `quefem-api`, puerto 3014
-- SQLite
-- frontend estático servido por Nginx
-- sincronización de Gencat cada dos horas mediante cron externo
-- despliegue de código mediante `./deploy.sh`
+## En desarrollo o bloqueado
 
-### SEO V1 preparado en local
+- **Ticketmaster en producción:** bloqueado hasta aprobación final de términos/licencia y decisión explícita de activación. No existe cron activo de importación.
+- **Imágenes Ticketmaster:** técnicamente preparadas, pero flag y cron siguen sin activar en producción.
+- **SEO público:** tras desplegar la versión preparada faltan proxy Nginx de `/sitemap.xml`, validación pública y Google Search Console.
+- **CSP:** política restrictiva investigada, pero pendiente de prueba Report-Only y activación en Nginx; Nginx no se configura desde este repositorio.
 
-- Metadata centralizada por ruta con dominio canónico `https://tenspla.cat`.
-- Home, exploración sin filtros, fuentes y fichas de eventos públicos configuradas como indexables.
-- Búsquedas, filtros, legales, contacto y Not Found configurados como `noindex,follow`.
-- Open Graph, Twitter/X, favicon e imagen social de marca servidos localmente.
-- Event JSON-LD limitado a campos estructurados reales, sin imágenes, organizadores u ofertas inferidas.
-- `robots.txt` preparado y sitemap XML dinámico implementado en `/api/sitemap.xml` sin `lastmod` engañoso.
-- Pendiente después del deploy: proxy Nginx de `/sitemap.xml`, validación pública y alta en Google Search Console.
+## Problemas conocidos y deuda técnica
 
-### Imágenes Ticketmaster preparadas técnicamente para producción
+- La búsqueda `q` usa normalización/`instr` en SQLite y puede hacer escaneos; sus entradas están acotadas, pero no hay FTS ni paginación por cursor.
+- La SPA puede responder el HTML de fallback en rutas inexistentes; el estado visual es Not Found, pero el status HTTP depende de Nginx.
+- Nginx, PM2 y crons no están versionados aquí; existe riesgo de divergencia entre documentación y servidor. No hay `ecosystem.config.*` en el repositorio.
+- El procedimiento exacto y verificado de backups de producción no está documentado completamente en el repositorio.
+- Parte de `SPECIFICATION.md` y `docs/design/stitch/` es histórica o futura; está marcada como referencia, no como estado implementado.
 
-- La fase visual local ha sido validada y se ha eliminado el hotlink directo del navegador.
-- Las variantes `card` y `detail` se seleccionan desde el endpoint oficial de imágenes y se
-  almacenan vinculadas a `plan_sources`, nunca como una imagen sin procedencia del plan canónico.
-- La sincronización es un comando independiente y no forma parte del importer ni del cron.
-- La API expone rutas same-origin y el backend utiliza una caché temporal configurable, con
-  allowlist estricta de host, tipo/tamaño máximo y timeout.
-- `TICKETMASTER_IMAGES_ENABLED=false` sigue siendo el valor seguro por defecto.
-- Gencat continúa sin reutilizar imágenes y el patrón Pop Editorial sigue siendo el fallback.
-- Las imágenes Ticketmaster no se incorporan a Event JSON-LD, Open Graph, Twitter ni sitemap.
-- El sync de metadata es incremental a 24 horas, dispone de `--force` y limpia caché expirada o huérfana.
-- Retirada y purge invalidan la caché asociada; reconciliation deja de servirla inmediatamente
-  por ausencia de provenance y el siguiente sync elimina el fichero huérfano.
-- El despliegue y cron siguen pendientes de aprobación final de términos.
+## Siguiente trabajo previsto
 
-## Fuentes activas en local
+1. Completar la aprobación legal/contractual de Ticketmaster.
+2. Solo con aprobación explícita: preparar backup y dry-run de producción, activar importación y después evaluar imágenes/cron.
+3. Completar la publicación SEO pendiente (sitemap público y Search Console).
+4. Probar CSP en modo Report-Only antes de hacerla obligatoria.
 
-- Agenda Cultural de Catalunya
-- Ticketmaster Discovery Feed España
+No existe en el repositorio una definición de prioridades `P1`, `P2`, etc.; no deben interpretarse ni asignarse hasta documentar su escala.
 
-## Estado de Ticketmaster en producción
+## No iniciar sin una petición explícita
 
-- La única fuente sincronizada automáticamente en producción sigue siendo Agenda Cultural de Catalunya.
-- Ticketmaster no tiene cron ni activación en producción.
-- Las páginas legales y de privacidad ya están implementadas. Su activación pública requiere todavía la aprobación final de los términos aplicables.
-
-## Próximas fuentes evaluadas
-
-- Fever: solo se integrará si se obtiene acceso autorizado a una API, feed o acuerdo de partner.
-
-## Decisiones vigentes
-
-- Catalán como idioma principal y castellano completamente soportado en la interfaz.
-- Solo se publican planes de Catalunya.
-- `EVENT_RETENTION_DAYS=0`: no se conservan eventos finalizados antes de hoy.
-- `INACTIVE_PLAN_RETENTION_DAYS=7`: política interna para planes inactivos sin fuentes, medida desde `inactive_at`.
-- Los planes permanentes no se eliminan por antigüedad.
-- No se hace scraping ni se incorporan fuentes sin aprobación legal previa.
-- No se reutilizan imágenes externas sin derechos claros.
-- Siempre se conserva la atribución y procedencia de los datos.
-- Antes de introducir monetización o actividad económica debe revisarse el aviso legal.
-- Antes de introducir analítica, publicidad, cookies, seguimiento, cuentas o formularios debe revisarse privacidad y almacenamiento e implementar el consentimiento que corresponda antes del despliegue.
-
-## No implementar todavía
-
-- Viator
-- Civitatis
-- Tiqets
-- planes permanentes
-- mapas avanzados y búsqueda por proximidad
-- favoritos
-- IA
-- monetización
-- scraping
-- nuevas fuentes no aprobadas
+- Nuevas fuentes como Fever, Viator, Civitatis o Tiqets.
+- Scraping, mapas avanzados/proximidad, favoritos, cuentas, analítica, publicidad, IA o monetización.
+- Cambios en producción, deploy, SSH, PM2, Nginx, cron, importaciones reales, commits o push.

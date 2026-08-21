@@ -17,7 +17,9 @@ Hetzner aloja el frontend, backend, SQLite, infraestructura web y logs técnicos
 
 ## Backend
 
-El backend utiliza Node.js y Express, escucha en el puerto `3014` y está gestionado por PM2 con el nombre `quefem-api`.
+El backend utiliza Node.js y Express, escucha en `127.0.0.1:3014` y está gestionado por PM2 con el nombre `quefem-api`. `HOST` tiene el valor seguro `127.0.0.1` por defecto; no debe cambiarse a `0.0.0.0` en producción porque Nginx conecta mediante loopback.
+
+No existe un archivo `ecosystem.config.*` versionado. La definición y el entorno efectivos de PM2 son estado externo al repositorio y deben comprobarse antes de operar o desplegar.
 
 Node.js está instalado mediante NVM. La ruta actual es:
 
@@ -157,6 +159,12 @@ sudo systemctl reload nginx
 ```
 
 No modificar la política actual de logrotate: rotación diaria, 14 rotaciones y compresión.
+
+## Cabeceras de seguridad de Nginx
+
+La configuración externa aplicada incluye HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy` y `server_tokens off`. La CSP todavía no está aplicada: debe probarse primero como `Content-Security-Policy-Report-Only` y validarse manualmente antes de hacerla obligatoria.
+
+Estas cabeceras no están gestionadas por Git ni por `deploy.sh`; verificar siempre la configuración efectiva del servidor y ejecutar `nginx -t` antes de recargar.
 
 ## Revisión legal previa a cambios de producto
 
