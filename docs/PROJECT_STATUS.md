@@ -2,82 +2,79 @@
 
 Última revisión documental: 2026-08-21.
 
-Este es el inventario de estado. La arquitectura está en [`ARCHITECTURE.md`](ARCHITECTURE.md), las fuentes en [`DATA_SOURCES.md`](DATA_SOURCES.md) y la operación en [`DEPLOYMENT.md`](DEPLOYMENT.md).
+Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mismo y qué toca hacer?». La arquitectura está en [`ARCHITECTURE.md`](ARCHITECTURE.md), las fuentes en [`DATA_SOURCES.md`](DATA_SOURCES.md) y la operación en [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
-## Completado
+## Current production state
 
-### Milestone 1 — Datos Gencat
+- **Tens Pla?** está publicada y funcionando en `https://tenspla.cat`; `www.tenspla.cat` y el host legacy redirigen al dominio principal.
+- Nginx sirve el frontend React/Vite y hace proxy a la API Express de solo lectura; PM2 gestiona `quefem-api` y SQLite es la persistencia.
+- Gencat se sincroniza cada dos horas mediante cron externo. Búsqueda, filtros, fichas bilingües, planes permanentes, deduplicación multi-source y purgas están implementados.
+- El SEO público está desplegado: metadata por ruta, canonical, Open Graph/Twitter, Event JSON-LD conservador, `robots.txt` y sitemap público. Google Search Console ya está verificado.
+- Hay backups automáticos y probados de SQLite, con comprobaciones y copia externa mediante `rclone` al destino de Google Drive `TensPla/backups`.
+- La rotación de logs de Nginx está configurada y verificada.
+- Ticketmaster está implementado y validado localmente. Su importación, cron e imágenes no están activados en producción según el último estado confirmado; la configuración efectiva debe verificarse en el servidor antes de operar.
 
-- Importer de la Agenda Cultural de Catalunya, normalización, registro de licencia/procedencia y persistencia SQLite.
-- Filtros de Catalunya, caducidad y fechas incoherentes; soporte real de planes permanentes.
-- Importaciones idempotentes, payload auditable, purga de caducados y métricas en `import_runs`.
+La infraestructura de producción es parcialmente externa a Git. «Confirmado» describe el estado conocido a fecha de esta revisión, no sustituye la comprobación previa a una operación.
 
-### Milestone 2 — Backend
+## Recently completed
 
-- API Express de solo lectura para listado/detalle, categorías, fuentes, comarcas y municipios.
-- Filtros, búsqueda textual y paginación sin cambiar el contrato de respuesta.
-- Hardening local: `HOST=127.0.0.1` por defecto y máximo de 200 páginas; tests de validación.
-- Sitemap dinámico y proxy/cache same-origin para imágenes Ticketmaster.
+- Puesta en producción y consolidación del dominio y branding público **Tens Pla?**, incluido el logo y los recursos gráficos actuales.
+- Integración Ticketmaster completa en local: importación real, idempotencia, reconciliación, retirada y entrega same-origin opcional de imágenes.
+- SEO V1 desplegado y validado públicamente; sitemap publicado y propiedad de Google Search Console verificada.
+- Sistema de backup de SQLite configurado, probado y automatizado, incluida copia externa con `rclone`.
+- Logrotate ejecutado y verificado con rotación diaria, 14 rotaciones y compresión.
+- Hardening del backend: escucha local segura por defecto y límites de paginación/consultas.
 
-### Milestone 3 — Frontend
+## AUTONOMOUS WORK
 
-- React/Vite bilingüe: catalán predeterminado y castellano completo.
-- Home, búsqueda, filtros, resultados, detalle, atribución, fuentes, estados y páginas legales/contacto.
-- MiniMap voluntario para coordenadas, con enlace a Google Maps y carga de OpenStreetMap tras consentimiento.
-- Branding público **Tens Pla?**, sistema Pop Editorial, Montserrat local, logo y favicon actuales.
-- SEO V1 preparado: metadata por ruta, Open Graph/Twitter inicial, canonical, robots, Event JSON-LD conservador y sitemap API.
+No autonomous product work currently defined.
 
-### Milestone 4A — Ticketmaster local
+El propietario debe definir el siguiente bloque funcional antes de iniciar desarrollo autónomo. La deuda técnica documentada más abajo no equivale por sí sola a una tarea autorizada ni suficientemente definida.
 
-- Discovery Feed 2.0 ES implementado con allowlist conjunta de fuente, marca y vendedor oficial.
-- Pipeline completo con horizonte, Catalunya, exclusiones, sesiones, normalización, idempotencia y reconciliación conservadora.
-- Dry-run sin escrituras, importación real e idempotencia validados localmente.
-- API y frontend comprobados manualmente con planes Ticketmaster y Gencat integrados.
-- Retirada por event ID, `--purge` controlado y purga posterior de huérfanos inactivos documentadas y probadas.
+## PRODUCT DECISIONS
 
-### Imágenes Ticketmaster preparadas
+- Decidir si se quiere automatizar la purga de planes inactivos y aprobar su política operativa antes de preparar cualquier activación.
+- Definir y acotar el siguiente bloque funcional de producto. No hay actualmente una funcionalidad pendiente seleccionada para implementación autónoma.
 
-- Metadata vinculada a `plan_sources`, variantes card/detail y entrega exclusivamente same-origin.
-- Caché temporal configurable con allowlist, TTL, límite de disco, timeout/tamaño y lock recuperable contra ejecuciones simultáneas.
-- Feature flag único `TICKETMASTER_IMAGES_ENABLED`, seguro y desactivado por defecto.
-- Fallback del frontend a patrones cuando no hay imagen autorizada/disponible.
+## OPERATOR / PRODUCTION
 
-## Producción actual
+- Preparar y probar una CSP en modo `Content-Security-Policy-Report-Only`, revisar los reportes y decidir posteriormente si se activa como obligatoria. Requiere autorización e intervención sobre Nginx.
+- Verificar la configuración efectiva de Nginx, PM2 y cron antes de cualquier operación que dependa de ella.
+- Verificar las últimas ejecuciones y la restaurabilidad de los backups, la copia externa mediante `rclone` y las rotaciones de logs cuando una intervención operativa lo requiera.
+- Revisar periódicamente cobertura, indexación y errores concretos en Google Search Console.
+- Si el propietario aprueba automatizar la purga de inactivos, validar primero el dry-run, backup y monitorización en producción y después configurar el cron autorizado.
 
-- Aplicación pública en `https://tenspla.cat`; `www` y `https://quefem.jusboif.es` redirigen al dominio principal.
-- Nginx sirve el build estático y hace proxy a Express; PM2 gestiona `quefem-api` en el puerto 3014; SQLite es la persistencia.
-- Gencat se sincroniza cada dos horas mediante cron externo. El despliegue de código usa `deploy.sh` y es independiente de la sincronización.
-- Las páginas legales CA/ES están publicadas. No hay analítica, seguimiento ni cookies según la implementación actual; el idioma se guarda en localStorage.
-- Ticketmaster, su cron y sus imágenes permanecen desactivados en producción.
+## BLOCKED
 
-La configuración real de Nginx, PM2 y cron vive fuera del repositorio y debe verificarse en el servidor antes de cualquier operación.
+- **Activación de Ticketmaster en producción:** depende de aprobación final legal/contractual y de una decisión explícita de activación. Solo después procede verificar configuración, preparar backup, ejecutar dry-run y decidir importación, imágenes y cron.
 
-## En desarrollo o bloqueado
+## LATER / TECHNICAL DEBT
 
-- **Ticketmaster en producción:** bloqueado hasta aprobación final de términos/licencia y decisión explícita de activación. No existe cron activo de importación.
-- **Imágenes Ticketmaster:** técnicamente preparadas, pero flag y cron siguen sin activar en producción.
-- **SEO público:** tras desplegar la versión preparada faltan proxy Nginx de `/sitemap.xml`, validación pública y Google Search Console.
-- **CSP:** política restrictiva investigada, pero pendiente de prueba Report-Only y activación en Nginx; Nginx no se configura desde este repositorio.
+- La búsqueda `q` usa normalización/`instr` en SQLite y puede hacer escaneos; no hay FTS ni paginación por cursor.
+- La SPA puede mostrar Not Found con respuesta HTTP 200 por el fallback de Nginx.
+- Nginx, PM2, cron, backups, `rclone` y logrotate no están versionados; existe riesgo de divergencia entre documentación y servidor.
+- No hay `ecosystem.config.*` versionado.
+- El repositorio documenta el estado y los requisitos del backup, pero no contiene la configuración externa ni un runbook reproducible completo de backup/restauración.
+- Parte de `SPECIFICATION.md` y `docs/design/stitch/` es histórica o futura y no representa por sí sola el estado implementado.
+- Nuevas fuentes o funciones de producto solo pueden evaluarse tras una petición, licencia y alcance explícitos; no constituyen trabajo pendiente autorizado.
 
-## Problemas conocidos y deuda técnica
+## External production configuration
 
-- La búsqueda `q` usa normalización/`instr` en SQLite y puede hacer escaneos; sus entradas están acotadas, pero no hay FTS ni paginación por cursor.
-- La SPA puede responder el HTML de fallback en rutas inexistentes; el estado visual es Not Found, pero el status HTTP depende de Nginx.
-- Nginx, PM2 y crons no están versionados aquí; existe riesgo de divergencia entre documentación y servidor. No hay `ecosystem.config.*` en el repositorio.
-- El procedimiento exacto y verificado de backups de producción no está documentado completamente en el repositorio.
-- Parte de `SPECIFICATION.md` y `docs/design/stitch/` es histórica o futura; está marcada como referencia, no como estado implementado.
+| Área | Estado documental | Comprobación antes de operar |
+| --- | --- | --- |
+| Dominio, HTTPS, Nginx y PM2 | Confirmado externamente | Verificar configuración efectiva en el servidor |
+| Cron de Gencat | Confirmado externamente | Revisar crontab y último resultado |
+| Sitemap público y Search Console | Confirmado externamente | Revisar disponibilidad/cobertura si la tarea depende de ello |
+| Backup SQLite y automatización | Confirmado externamente y probado | Revisar última ejecución y restaurabilidad |
+| Copia `rclone` a `TensPla/backups` | Confirmado externamente | Revisar último envío sin exponer credenciales ni IDs |
+| Logrotate | Confirmado externamente y verificado | Revisar configuración efectiva y rotaciones si se va a modificar |
+| Ticketmaster en producción | Último estado confirmado: desactivado | Requiere verificación en servidor y aprobación previa |
+| CSP | No aplicada según el último estado confirmado | Requiere prueba Report-Only y autorización |
 
-## Siguiente trabajo previsto
-
-1. Completar la aprobación legal/contractual de Ticketmaster.
-2. Solo con aprobación explícita: preparar backup y dry-run de producción, activar importación y después evaluar imágenes/cron.
-3. Completar la publicación SEO pendiente (sitemap público y Search Console).
-4. Probar CSP en modo Report-Only antes de hacerla obligatoria.
-
-No existe en el repositorio una definición de prioridades `P1`, `P2`, etc.; no deben interpretarse ni asignarse hasta documentar su escala.
+El roadmap operativo separa AUTONOMOUS WORK, PRODUCT DECISIONS, OPERATOR / PRODUCTION, BLOCKED y LATER / TECHNICAL DEBT. No existe una definición fiable de prioridades `P1`, `P2`, etc.; no deben usarse para decidir trabajo actual.
 
 ## No iniciar sin una petición explícita
 
-- Nuevas fuentes como Fever, Viator, Civitatis o Tiqets.
-- Scraping, mapas avanzados/proximidad, favoritos, cuentas, analítica, publicidad, IA o monetización.
+- Nuevas fuentes como Fever, Viator, Civitatis o Tiqets, ni scraping.
+- Mapas avanzados/proximidad, favoritos, cuentas, analítica, publicidad, IA o monetización.
 - Cambios en producción, deploy, SSH, PM2, Nginx, cron, importaciones reales, commits o push.

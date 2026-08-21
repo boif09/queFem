@@ -4,7 +4,7 @@ Ruta recomendada para una tarea: [`../AGENTS.md`](../AGENTS.md) → documento de
 
 ## Fuentes de verdad activas
 
-- [`PROJECT_STATUS.md`](PROJECT_STATUS.md): qué está terminado, bloqueado o pendiente y cuál es el siguiente trabajo.
+- [`PROJECT_STATUS.md`](PROJECT_STATUS.md): estado actual y roadmap operativo NOW/NEXT/LATER/BLOCKED; fuente principal para saber qué hacer a continuación.
 - [`ARCHITECTURE.md`](ARCHITECTURE.md): componentes implementados, flujo de datos, API, SQLite, jobs y despliegue a alto nivel.
 - [`../README.md`](../README.md): instalación, desarrollo local y comandos reales.
 - [`DATA_SOURCES.md`](DATA_SOURCES.md): fuentes implementadas/evaluadas, licencias y políticas específicas.
@@ -21,4 +21,4 @@ Ruta recomendada para una tarea: [`../AGENTS.md`](../AGENTS.md) → documento de
 
 - [`design/stitch/DESIGN.md`](design/stitch/DESIGN.md) y el resto de `design/stitch/`: referencia de una propuesta visual anterior. No representa por sí sola el sistema visual vigente; el frontend implementado es la referencia actual.
 
-No existe un significado documentado para prioridades `P1`, `P2`, etc. Si aparecen en planificación futura, debe definirse su escala antes de usarlas como criterio operativo.
+No existe un significado documentado para prioridades `P1`, `P2`, etc. El roadmap operativo vigente usa NOW/NEXT/LATER/BLOCKED; cualquier P1/P2 que aparezca en material histórico no debe usarse como criterio actual.

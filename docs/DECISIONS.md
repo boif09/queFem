@@ -21,7 +21,8 @@ Registro ligero de decisiones demostrables en documentación, configuración o c
 - El backend escucha en `127.0.0.1` por defecto; Nginx es la capa pública en producción.
 - El frontend usa recursos locales/same-origin cuando es posible. Montserrat se empaqueta localmente.
 - OpenStreetMap no se carga hasta que el usuario activa el minimapa. La implementación no incorpora analítica ni seguimiento; la preferencia de idioma se guarda localmente.
-- Sincronización de datos y despliegue son procesos separados. Gencat usa cron externo; Ticketmaster y sus imágenes no se activan en producción sin aprobación específica.
+- Sincronización de datos y despliegue son procesos separados. Gencat usa cron externo. El estado actual de Ticketmaster y sus imágenes es temporal y operativo: cualquier activación en producción requiere aprobación específica, pero no se define aquí como una prohibición arquitectónica permanente.
+- La configuración de producción que vive fuera de Git se documenta separando lo versionado, lo confirmado externamente y lo que debe verificarse en servidor antes de operar.
 - Deploy, SSH, PM2, Nginx, cron, importaciones reales, commits y push requieren autorización explícita.
 
 Detalles: [`DATA_SOURCES.md`](DATA_SOURCES.md), [`DEPLOYMENT.md`](DEPLOYMENT.md) y [`TICKETMASTER_REMOVAL.md`](TICKETMASTER_REMOVAL.md).

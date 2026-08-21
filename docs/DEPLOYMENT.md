@@ -82,13 +82,13 @@ Cron definitivo propuesto, todavía no aplicado, cada dos horas después del imp
 52 */2 * * * cd /var/www/queFem && npm run ticketmaster:images:sync >> /var/log/quefem-ticketmaster-images.log 2>&1
 ```
 
-## SEO V1 y sitemap público
+## SEO V1, sitemap público y Search Console
 
 El dominio canónico de toda la metadata es `https://tenspla.cat`. Home, `/plans` sin parámetros, `/fonts` y las fichas públicas de eventos activos son indexables. Las búsquedas, filtros, páginas legales, privacidad, almacenamiento, contacto y rutas no encontradas utilizan `noindex,follow`. La metadata por ruta, Open Graph, Twitter/X y Event JSON-LD se generan localmente, sin analytics, cookies ni scripts externos.
 
 `frontend/public/robots.txt` anuncia `https://tenspla.cat/sitemap.xml`. El sitemap se genera dinámicamente desde SQLite en `/api/sitemap.xml`, reutilizando las mismas condiciones de visibilidad pública de la API. No incluye `lastmod`, porque `plans.updated_at` también puede cambiar por procesos técnicos y no representa de forma fiable un cambio visible de contenido.
 
-Para publicar la URL anunciada por robots después del despliegue, Nginx necesitará este bloque exacto dentro del `server` canónico de `tenspla.cat`, antes del fallback de la SPA:
+La URL anunciada por robots ya está publicada mediante una regla Nginx externa al repositorio. El bloque esperado dentro del `server` canónico de `tenspla.cat`, antes del fallback de la SPA, es:
 
 ```nginx
 location = /sitemap.xml {
@@ -99,7 +99,7 @@ location = /sitemap.xml {
 }
 ```
 
-Este repositorio no aplica el cambio de Nginx. Tras desplegar y validar metadata, structured data, `robots.txt` y el sitemap público, queda pendiente verificar la propiedad de dominio `tenspla.cat` mediante DNS en Google Search Console, enviar `https://tenspla.cat/sitemap.xml`, inspeccionar home y varias fichas y solo entonces solicitar indexación.
+Este repositorio no aplica el cambio de Nginx. La publicación del sitemap, la validación pública asociada y la verificación de la propiedad de dominio `tenspla.cat` en Google Search Console están confirmadas externamente. Antes de modificar esta configuración hay que comprobar el bloque efectivo en el servidor. El seguimiento posterior consiste en revisar cobertura, indexación y errores concretos; no queda pendiente el alta inicial de Search Console.
 
 La SPA continúa sirviendo `index.html` mediante fallback para rutas desconocidas. Aunque React muestra una vista noindex, el estado HTTP puede seguir siendo 200: **SPA soft-404 HTTP status remains a possible SEO limitation**.
 
@@ -131,7 +131,7 @@ tail -100 /var/log/quefem-import.log
 
 ## Logging de Nginx y retención
 
-La configuración real actual escribe `access_log` en `/var/log/nginx/quefem-access.log` y `error_log` en `/var/log/nginx/quefem-error.log`. Logrotate se ejecuta diariamente con `rotate 14` y compresión, por lo que ambos logs se conservan aproximadamente 14 días.
+La configuración externa confirmada escribe `access_log` en `/var/log/nginx/quefem-access.log` y `error_log` en `/var/log/nginx/quefem-error.log`. Logrotate fue ejecutado y verificado satisfactoriamente; se ejecuta diariamente con `rotate 14` y compresión, por lo que ambos logs se conservan aproximadamente 14 días. No hay una configuración logrotate versionada en este repositorio.
 
 - Access logs: seguridad y diagnóstico técnico.
 - Error logs: diagnóstico técnico.
@@ -159,6 +159,12 @@ sudo systemctl reload nginx
 ```
 
 No modificar la política actual de logrotate: rotación diaria, 14 rotaciones y compresión.
+
+## Backups de producción
+
+El sistema externo de backup de Tens Pla? está configurado, automatizado y probado. Crea una copia consistente de SQLite, ejecuta comprobaciones sobre el resultado y replica los backups mediante `rclone` a un remote de Google Drive cuyo destino funcional es `TensPla/backups`.
+
+La automatización, la configuración de `rclone` y sus credenciales viven fuera del repositorio. No deben copiarse aquí ni mostrarse en salidas. Antes de una operación destructiva o de recuperación hay que verificar en el servidor la última ejecución correcta, la presencia de la copia externa y la restaurabilidad del backup aplicable. El estado confirmado no permite inferir desde Git comandos, horarios, rutas locales, retención o identificadores privados que no estén documentados.
 
 ## Cabeceras de seguridad de Nginx
 
@@ -195,4 +201,4 @@ En el futuro puede ejecutarse una vez al día mediante cron:
 cd /var/www/queFem && npm run purge:inactive >> /var/log/quefem-import.log 2>&1
 ```
 
-Este ejemplo no está activo. No añadir al crontab hasta aprobar el horario, verificar el dry-run de producción y completar el procedimiento de backup y monitorización.
+Este ejemplo no está activo. No añadirlo al crontab hasta aprobar el horario, verificar el dry-run de producción y confirmar que el backup y la monitorización externos vigentes cubren esta operación.
