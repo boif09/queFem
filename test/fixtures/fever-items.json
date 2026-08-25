@@ -1,0 +1,56 @@
+[
+  {
+    "CatalogItemId": "fever-1",
+    "CatalogId": "15532",
+    "CampaignId": "16345",
+    "ParentName": "Catalonia",
+    "Name": "Concert de prova",
+    "SubCategory": "Music",
+    "Category": "Tier 1",
+    "ExpirationDate": "2027-09-01T00:00:00Z",
+    "ImageUrl": "https://applications-media.feverup.com/image.jpg",
+    "Pattern": "(41.4779657; 2.0462265)",
+    "Url": "https://fever.pxf.io/example",
+    "Manufacturer": "2026-08-26T18:00:00+02:00, 2026-09-01T20:00:00+02:00"
+  },
+  {
+    "CatalogItemId": "fever-gift",
+    "CatalogId": "15532",
+    "CampaignId": "16345",
+    "ParentName": "Catalonia",
+    "Name": "Tarjeta de regalo Fever",
+    "SubCategory": "Gift Cards",
+    "Category": "Tier 4 Non-commissionable",
+    "ExpirationDate": "2027-09-01",
+    "Pattern": "invalid",
+    "Url": "https://example.test/not-affiliate",
+    "Manufacturer": "not-a-session"
+  },
+  {
+    "CatalogItemId": "fever-expired",
+    "CatalogId": "15532",
+    "CampaignId": "16345",
+    "ParentName": "Catalonia",
+    "Name": "Experiència antiga",
+    "SubCategory": "Culture",
+    "Category": "Tier 3 Limited Commission",
+    "ExpirationDate": "2026-08-24",
+    "Pattern": "(41.38; 2.17)",
+    "Url": "https://fever.pxf.io/old",
+    "Manufacturer": "2024-01-01"
+  },
+  {
+    "CatalogItemId": "other-campaign",
+    "CatalogId": "15532",
+    "CampaignId": "999",
+    "ParentName": "Catalonia",
+    "Name": "Outside campaign"
+  },
+  {
+    "CatalogItemId": "outside-catalonia",
+    "CatalogId": "15532",
+    "CampaignId": "16345",
+    "ParentName": "Madrid",
+    "Name": "Outside Catalunya"
+  }
+]

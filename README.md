@@ -35,6 +35,12 @@ Ticketmaster requiere credenciales y permanece bloqueado para producción. Su pi
 npm run import:ticketmaster -- --dry-run
 ```
 
+El discovery de Fever/Impact se puede auditar sin abrir ni modificar SQLite mediante:
+
+```bash
+npm run fever:discovery:dry-run
+```
+
 No ejecutes la variante con escritura ni jobs de producción sin autorización. Consulta [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md) para las reglas completas.
 
 ## Comandos
@@ -46,6 +52,7 @@ No ejecutes la variante con escritura ni jobs de producción sin autorización. 
 | `npm run purge:inactive -- --dry-run` | Inspeccionar la purga de huérfanos inactivos |
 | `npm run import:gencat` | Sincronizar Agenda Cultural de Catalunya |
 | `npm run import:ticketmaster -- --dry-run` | Validar Ticketmaster sin escribir |
+| `npm run fever:discovery:dry-run` | Auditar el catálogo Fever/Impact sin abrir SQLite |
 | `npm run ticketmaster:images:sync` | Sincronizar metadata/caché de imágenes si el feature flag lo permite |
 | `npm run ticketmaster:remove -- EVENT_ID --dry-run` | Inspeccionar una retirada por ID |
 | `npm run test:backend` | Tests backend |

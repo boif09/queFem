@@ -13,6 +13,7 @@
     "purge:inactive": "node backend/src/jobs/purgeInactivePlans.js",
     "import:gencat": "node backend/src/jobs/importGencat.js",
     "import:ticketmaster": "node backend/src/jobs/importTicketmaster.js",
+    "fever:discovery:dry-run": "node backend/src/jobs/dryRunFeverDiscovery.js",
     "ticketmaster:images:sync": "node backend/src/jobs/syncTicketmasterImages.js",
     "ticketmaster:remove": "node backend/src/jobs/removeTicketmasterEvent.js",
     "start": "node backend/src/server.js",
