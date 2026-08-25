@@ -62,6 +62,11 @@ export class PlanQueryRepository {
     return {
       clauses: [
         `${alias}.status = 'active'`,
+        `EXISTS (
+          SELECT 1 FROM plan_sources visibility_ps
+          JOIN sources visibility_s ON visibility_s.id = visibility_ps.source_id
+          WHERE visibility_ps.plan_id = ${alias}.id AND visibility_s.enabled = 1
+        )`,
         `(${activeOccurrenceExists(alias)} OR NOT (${anyOccurrenceExists(alias)}))`,
         `${alias}.quality_score >= ?`,
         retainedPlanWhere(alias),

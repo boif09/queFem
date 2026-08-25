@@ -45,6 +45,13 @@ function occurrence(key, localDate, localTime = '10:00', overrides = {}) {
 }
 
 function appFor(db) {
+  const sourceId = db.prepare("SELECT id FROM sources WHERE key='gencat-agenda'").get().id;
+  const unlinked = db.prepare(`SELECT p.id FROM plans p
+    WHERE NOT EXISTS (SELECT 1 FROM plan_sources ps WHERE ps.plan_id=p.id)`).all();
+  const link = db.prepare(`INSERT INTO plan_sources
+    (plan_id,source_id,source_record_id,source_payload_json,imported_at,last_seen_at)
+    VALUES (?,?,?,'{}',?,?)`);
+  for (const { id } of unlinked) link.run(id, sourceId, `public-fixture-${id}`, IMPORTED_AT, IMPORTED_AT);
   return createApp({
     db, defaultLanguage: 'ca', eventRetentionDays: 0, now: () => NOW,
     logger: { error() {} },

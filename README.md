@@ -58,6 +58,7 @@ No ejecutes la variante con escritura ni jobs de producción sin autorización. 
 | `npm run fever:normalize:dry-run` | Normalizar Fever y analizar sesiones en memoria, sin abrir SQLite |
 | `npm run geography:icgc:update` | Actualizar explícitamente el snapshot administrativo oficial ICGC |
 | `npm run fever:geography:dry-run` | Resolver geografía Fever con el snapshot ICGC local, sin abrir SQLite |
+| `npm run fever:import:temp -- --database <ruta>` | Importar Fever únicamente en una SQLite temporal protegida (M4B) |
 | `npm run ticketmaster:images:sync` | Sincronizar metadata/caché de imágenes si el feature flag lo permite |
 | `npm run ticketmaster:remove -- EVENT_ID --dry-run` | Inspeccionar una retirada por ID |
 | `npm run test:backend` | Tests backend |

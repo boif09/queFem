@@ -6,7 +6,7 @@ import { withTestDatabase } from './helpers.js';
 
 function insertPlan(db, fingerprint, title, startDate, endDate, permanent = 0) {
   const now = '2026-08-21T10:00:00.000Z';
-  return Number(db.prepare(`
+  const planId = Number(db.prepare(`
     INSERT INTO plans (
       kind, fingerprint, original_language, original_title, title_ca,
       start_date, end_date, permanent, province, comarca, municipality,
@@ -16,6 +16,11 @@ function insertPlan(db, fingerprint, title, startDate, endDate, permanent = 0) {
     permanent ? 'place' : 'event', fingerprint, title, title,
     startDate, endDate, permanent, now, now,
   ).lastInsertRowid);
+  db.prepare(`INSERT INTO plan_sources
+    (plan_id,source_id,source_record_id,source_payload_json,imported_at,last_seen_at)
+    SELECT ?,id,?,'{}',?,? FROM sources WHERE key='gencat-agenda'`
+  ).run(planId, `editorial-${planId}`, now, now);
+  return planId;
 }
 
 test('modos editoriales temporales de Home', async () => {

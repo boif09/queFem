@@ -111,7 +111,7 @@ test('API exposes only controlled Ticketmaster images with card/detail roles and
 
     db.prepare("UPDATE sources SET enabled = 0 WHERE key = 'ticketmaster-discovery-feed'").run();
     const disabled = await request(app).get(`/api/plans/${ticketmasterPlan}`);
-    assert.equal(disabled.body.data.image, null);
+    assert.equal(disabled.status, 404);
 
     db.prepare("UPDATE sources SET enabled = 1 WHERE key = 'ticketmaster-discovery-feed'").run();
     db.prepare('DELETE FROM plan_sources WHERE id = ?').run(ticketmasterSource);

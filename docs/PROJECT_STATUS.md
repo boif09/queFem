@@ -29,6 +29,7 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - Soporte genérico de ocurrencias discretas vinculado a procedencias: un plan con cualquier historial de occurrences es occurrence-aware y solo sus occurrences activas participan en visibilidad, filtros y orden; el fallback legacy se reserva a planes sin ninguna occurrence histórica. Admite sesiones date-only sin inventar hora. No incluye importación, composición temporal multi-source avanzada ni UI específica de sesiones.
 - Fever M3 preparado sin persistencia: normalización de productos elegibles y parser determinista de sesiones `Manufacturer`, con semántica `Europe/Madrid`, horizonte inclusivo y dry-run real enteramente en memoria. No activa Fever ni escribe productos u occurrences en SQLite.
 - Fever M4A preparado sin persistencia: resolución administrativa local por point-in-polygon sobre cartografía oficial ICGC 1:5.000, con códigos/nombres de municipio, comarca y provincia, updater explícito y dry-run read-only. No crea fuentes ni planes Fever y no modifica SQLite.
+- Fever M4B validado únicamente en SQLite temporal: persistencia Fever standalone por `CatalogItemId`, geography source-specific, occurrences, idempotencia, reconciliación y guards de feed completo/conteo. No está activado ni publicado y la SQLite real no ha sido migrada.
 
 ## AUTONOMOUS WORK
 

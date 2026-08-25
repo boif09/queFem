@@ -70,9 +70,6 @@ export class PlanOccurrenceRepository {
         last_seen_at = @last_seen_at, updated_at = @updated_at
       WHERE id = @id
     `);
-    this.touch = db.prepare(`
-      UPDATE plan_occurrences SET last_seen_at = ?, updated_at = ? WHERE id = ?
-    `);
     this.retire = db.prepare(`
       UPDATE plan_occurrences SET status = 'inactive', updated_at = ? WHERE id = ? AND status = 'active'
     `);
@@ -135,7 +132,6 @@ export class PlanOccurrenceRepository {
     const unchanged = ['starts_at', 'ends_at', 'local_date', 'local_time', 'timezone', 'status']
       .every((field) => existing[field] === occurrence[field]);
     if (unchanged) {
-      this.touch.run(seenAt, seenAt, existing.id);
       return 'unchanged';
     }
     this.update.run({ ...values, id: existing.id });

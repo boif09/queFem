@@ -27,7 +27,7 @@ La API no ofrece escritura. La consulta de planes limita `page` a 200, `limit` a
 
 ## SQLite
 
-La conexión está en `backend/src/db/`, con claves foráneas, WAL, `busy_timeout` y migraciones incrementales. Las tablas principales son `plans`, `sources`, `plan_sources`, `plan_occurrences`, `categories`, `plan_categories`, `import_runs` y `plan_source_images`. Los repositorios encapsulan consultas y escrituras transaccionales. No se debe editar manualmente una base real ni alterar una migración ya aplicada.
+La conexión está en `backend/src/db/`, con claves foráneas, WAL, `busy_timeout` y migraciones incrementales. Las tablas principales son `plans`, `sources`, `plan_sources`, `plan_source_geography`, `plan_occurrences`, `categories`, `plan_categories`, `import_runs` y `plan_source_images`. Los repositorios encapsulan consultas y escrituras transaccionales. No se debe editar manualmente una base real ni alterar una migración ya aplicada.
 
 `plan_occurrences` representa sesiones discretas vinculadas a una procedencia concreta mediante
 `plan_source_id`. Un plan que conserva cualquier occurrence histórica es *occurrence-aware*: solo
@@ -65,6 +65,8 @@ El importer usa Discovery Feed 2.0 y una política centralizada: solo acepta los
 M1 implementa el cliente Impact y el discovery de solo lectura. M3 normaliza en memoria los productos elegibles y convierte `Manufacturer` en occurrences deterministas, conservando las horas sin offset como hora civil `Europe/Madrid` y sin inventar un instante. El dry-run no abre SQLite ni persiste datos. El contrato y sus límites están en [`FEVER_NORMALIZATION.md`](FEVER_NORMALIZATION.md).
 
 M4A añade un resolver geográfico genérico basado en point-in-polygon y un snapshot local versionado de municipios ICGC 1:5.000 en EPSG:4326. Devuelve códigos y nombres oficiales de municipio, comarca y provincia, con estados explícitos `match`, `unresolved` y `ambiguous`. La actualización del dataset es remota y ocasional; la resolución de productos es siempre local y sigue sin persistencia. Véase [`ICGC_GEOGRAPHY.md`](ICGC_GEOGRAPHY.md).
+
+M4B añade un importador de laboratorio protegido para SQLite temporal. Persiste cada `CatalogItemId` como plan Fever independiente, geography source-specific y occurrences dentro del horizonte, con reconciliación global solo tras validar el feed completo. No está conectado a producción ni usa deduplicación cross-source. Véase [`FEVER_PERSISTENCE.md`](FEVER_PERSISTENCE.md).
 
 ## Deduplicación y reconciliación
 

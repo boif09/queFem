@@ -84,8 +84,8 @@ Importer:
 
 ## Fever
 
-Status: IMPACT DISCOVERY AND IN-MEMORY NORMALIZATION IMPLEMENTED; NO PERSISTENCE OR PRODUCTION ACTIVATION
-Integration only through the approved Impact API/feed. M1 downloads and audits the catalogue read-only. M3 filters Catalunya, excludes Gift Cards, normalizes product fields and parses `Manufacturer` sessions only in memory. It does not write SQLite, deduplicate against other sources, import images or expose Fever publicly. See [`FEVER_NORMALIZATION.md`](FEVER_NORMALIZATION.md).
+Status: TEMPORARY SQLITE REHEARSAL IMPLEMENTED; NO PRODUCTION ACTIVATION
+Integration only through the approved Impact API/feed. M1 downloads the catalogue, M3 normalizes products/sessions and M4A resolves official geography. M4B can persist and reconcile exclusively in a path-guarded temporary SQLite. It does not deduplicate against other sources, import images or expose Fever publicly. See [`FEVER_NORMALIZATION.md`](FEVER_NORMALIZATION.md) and [`FEVER_PERSISTENCE.md`](FEVER_PERSISTENCE.md).
 
 DO NOT SCRAPE.
 

@@ -6,7 +6,7 @@ import { withTestDatabase } from './helpers.js';
 
 function insertPlan(db, values) {
   const now = '2026-08-17T10:00:00.000Z';
-  return Number(db.prepare(`
+  const planId = Number(db.prepare(`
     INSERT INTO plans (
       kind, fingerprint, original_language, original_title, original_description,
       title_ca, title_es, description_ca, description_es,
@@ -42,6 +42,11 @@ function insertPlan(db, values) {
     updated_at: now,
     ...values,
   }).lastInsertRowid);
+  db.prepare(`INSERT INTO plan_sources
+    (plan_id,source_id,source_record_id,source_payload_json,imported_at,last_seen_at)
+    SELECT ?,id,?,'{}',?,? FROM sources WHERE key='gencat-agenda'`
+  ).run(planId, `api-${planId}`, now, now);
+  return planId;
 }
 
 function linkCategory(db, planId, slug) {
@@ -439,6 +444,7 @@ test('Milestone 2 REST API', async (context) => {
           assert.equal(paginated.body.data.length, 1);
         } finally {
           db.prepare(`DELETE FROM plan_categories WHERE plan_id IN (${searchIds.map(() => '?').join(',')})`).run(...searchIds);
+          db.prepare(`DELETE FROM plan_sources WHERE plan_id IN (${searchIds.map(() => '?').join(',')})`).run(...searchIds);
           db.prepare(`DELETE FROM plans WHERE id IN (${searchIds.map(() => '?').join(',')})`).run(...searchIds);
         }
       });
