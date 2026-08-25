@@ -1,6 +1,6 @@
 # Tens Pla? — Estado del proyecto
 
-Última revisión documental: 2026-08-21.
+Última revisión documental: 2026-08-25.
 
 Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mismo y qué toca hacer?». La arquitectura está en [`ARCHITECTURE.md`](ARCHITECTURE.md), las fuentes en [`DATA_SOURCES.md`](DATA_SOURCES.md) y la operación en [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
@@ -26,6 +26,7 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - Hardening del backend: escucha local segura por defecto y límites de paginación/consultas.
 - Discovery & Filters V2: fechas rápidas y rango, filtros territoriales independientes, municipio buscable con contexto, categorías OR múltiples, aplicación inmediata, URL compartible, chips eliminables y estado vacío accionable. Véase [`DISCOVERY_FILTERS_V2.md`](DISCOVERY_FILTERS_V2.md).
 - Home & Discovery V2 completado el 2026-08-21: home focalizada en accesos rápidos por fecha, bloques separados de planes temporales y permanentes con relevancia temporal editorial aplicada en backend antes de paginar, categorías contextualizadas y persistencia local explícita de la ubicación territorial seleccionada, con cobertura CA/ES y tests frontend/backend. Revisión independiente satisfactoria, sin bloqueos.
+- Soporte genérico de ocurrencias discretas vinculado a procedencias: un plan con cualquier historial de occurrences es occurrence-aware y solo sus occurrences activas participan en visibilidad, filtros y orden; el fallback legacy se reserva a planes sin ninguna occurrence histórica. Admite sesiones date-only sin inventar hora. No incluye importación, composición temporal multi-source avanzada ni UI específica de sesiones.
 
 ## AUTONOMOUS WORK
 

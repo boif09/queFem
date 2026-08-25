@@ -4,6 +4,11 @@ import {
   temporallyInvalidWhere,
 } from '../../quality/temporalCoherence.js';
 import { retainedPlanWhere, retentionCutoff } from '../../retention/eventRetention.js';
+import {
+  activeOccurrenceDate,
+  activeOccurrenceExists,
+  anyOccurrenceExists,
+} from '../../occurrences/occurrenceSql.js';
 
 const QUALITY_THRESHOLD = 35;
 
@@ -57,6 +62,7 @@ export class PlanQueryRepository {
     return {
       clauses: [
         `${alias}.status = 'active'`,
+        `(${activeOccurrenceExists(alias)} OR NOT (${anyOccurrenceExists(alias)}))`,
         `${alias}.quality_score >= ?`,
         retainedPlanWhere(alias),
         `NOT (${outsideCataloniaWhere(alias)})`,
@@ -123,27 +129,43 @@ export class PlanQueryRepository {
       parameters.push(...filters.categories);
     }
 
+    const hasAnyOccurrences = anyOccurrenceExists('p');
     if (filters.editorial === 'home-upcoming') {
-      clauses.push('p.start_date IS NOT NULL AND p.start_date >= ?');
-      parameters.push(filters.dateFrom);
+      clauses.push(`(
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date >= ?')}
+        OR (NOT (${hasAnyOccurrences}) AND p.start_date IS NOT NULL AND p.start_date >= ?)
+      )`);
+      parameters.push(filters.dateFrom, filters.dateFrom);
     } else if (filters.date) {
       clauses.push(`(
-        p.permanent = 1 OR
-        (p.start_date IS NOT NULL AND p.end_date IS NOT NULL AND p.start_date <= ? AND p.end_date >= ?)
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date = ?')}
+        OR (NOT (${hasAnyOccurrences}) AND (
+          p.permanent = 1 OR
+          (p.start_date IS NOT NULL AND p.end_date IS NOT NULL AND p.start_date <= ? AND p.end_date >= ?)
+        ))
       )`);
-      parameters.push(filters.date, filters.date);
+      parameters.push(filters.date, filters.date, filters.date);
     } else if (filters.dateFrom && filters.dateTo) {
       clauses.push(`(
-        p.permanent = 1 OR
-        (p.start_date IS NOT NULL AND p.end_date IS NOT NULL AND p.start_date <= ? AND p.end_date >= ?)
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date BETWEEN ? AND ?')}
+        OR (NOT (${hasAnyOccurrences}) AND (
+          p.permanent = 1 OR
+          (p.start_date IS NOT NULL AND p.end_date IS NOT NULL AND p.start_date <= ? AND p.end_date >= ?)
+        ))
       )`);
-      parameters.push(filters.dateTo, filters.dateFrom);
+      parameters.push(filters.dateFrom, filters.dateTo, filters.dateTo, filters.dateFrom);
     } else if (filters.dateFrom) {
-      clauses.push('(p.permanent = 1 OR (p.end_date IS NOT NULL AND p.end_date >= ?))');
-      parameters.push(filters.dateFrom);
+      clauses.push(`(
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date >= ?')}
+        OR (NOT (${hasAnyOccurrences}) AND (p.permanent = 1 OR (p.end_date IS NOT NULL AND p.end_date >= ?)))
+      )`);
+      parameters.push(filters.dateFrom, filters.dateFrom);
     } else if (filters.dateTo) {
-      clauses.push('(p.permanent = 1 OR (p.start_date IS NOT NULL AND p.start_date <= ?))');
-      parameters.push(filters.dateTo);
+      clauses.push(`(
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date <= ?')}
+        OR (NOT (${hasAnyOccurrences}) AND (p.permanent = 1 OR (p.start_date IS NOT NULL AND p.start_date <= ?)))
+      )`);
+      parameters.push(filters.dateTo, filters.dateTo);
     }
 
     return { sql: clauses.join(' AND '), parameters };
@@ -154,34 +176,63 @@ export class PlanQueryRepository {
     const where = this.buildWhere(filters);
     let orderBy;
     let orderParameters = [];
+    const hasAnyOccurrences = anyOccurrenceExists('p');
     if (filters.editorial === 'home-weekend') {
       orderBy = `
-        CASE WHEN p.start_date BETWEEN ? AND ? THEN 0 ELSE 1 END ASC,
-        CASE WHEN p.start_date BETWEEN ? AND ? THEN p.start_date END ASC,
-        CASE WHEN p.start_date < ? THEN p.start_date END DESC,
+        CASE WHEN ${hasAnyOccurrences} THEN 0 WHEN p.start_date BETWEEN ? AND ? THEN 0 ELSE 1 END ASC,
+        CASE
+          WHEN ${hasAnyOccurrences} THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date BETWEEN ? AND ?')}
+          WHEN p.start_date BETWEEN ? AND ? THEN p.start_date
+        END ASC,
+        CASE WHEN NOT (${hasAnyOccurrences}) AND p.start_date < ? THEN p.start_date END DESC,
         p.id ASC
       `;
       orderParameters = [
         filters.dateFrom, filters.dateTo,
         filters.dateFrom, filters.dateTo,
-        filters.dateFrom,
+        filters.dateFrom, filters.dateTo, filters.dateFrom,
       ];
     } else if (filters.editorial === 'home-upcoming') {
-      orderBy = 'p.start_date ASC, p.id ASC';
+      orderBy = `CASE WHEN ${hasAnyOccurrences}
+        THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?')}
+        ELSE p.start_date END ASC, p.id ASC`;
+      orderParameters = [filters.dateFrom];
     } else {
       const dateOrder = filters.date
         ? `CASE
+            WHEN ${hasAnyOccurrences} THEN 0
             WHEN p.permanent = 0 AND p.start_date = ? THEN 0
             WHEN p.permanent = 0 THEN 1
             ELSE 2
-          END, p.start_date DESC, p.id ASC`
-        : 'p.permanent ASC, p.start_date IS NULL ASC, p.start_date ASC, p.id ASC';
+          END,
+          CASE WHEN ${hasAnyOccurrences}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date = ?')}
+            ELSE p.start_date END DESC,
+          p.id ASC`
+        : `p.permanent ASC,
+          CASE WHEN ${hasAnyOccurrences}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?')}
+            ELSE p.start_date END IS NULL ASC,
+          CASE WHEN ${hasAnyOccurrences}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?')}
+            ELSE p.start_date END ASC,
+          p.id ASC`;
+      const today = retentionCutoff(0, this.now());
       orderBy = {
         date: dateOrder,
-        quality: 'p.quality_score DESC, p.start_date IS NULL ASC, p.start_date ASC, p.id ASC',
+        quality: `p.quality_score DESC,
+          CASE WHEN ${hasAnyOccurrences}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?')}
+            ELSE p.start_date END IS NULL ASC,
+          CASE WHEN ${hasAnyOccurrences}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?')}
+            ELSE p.start_date END ASC,
+          p.id ASC`,
         title: `${text.title} COLLATE NOCASE ASC, p.id ASC`,
       }[filters.sort];
-      if (filters.date && filters.sort === 'date') orderParameters = [filters.date];
+      if (filters.sort === 'date') {
+        orderParameters = filters.date ? [filters.date, filters.date] : [today, today];
+      } else if (filters.sort === 'quality') orderParameters = [today, today];
     }
 
     const total = this.db.prepare(`SELECT COUNT(*) AS total FROM plans p WHERE ${where.sql}`)

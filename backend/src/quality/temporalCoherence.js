@@ -1,3 +1,5 @@
+import { anyOccurrenceExists } from '../occurrences/occurrenceSql.js';
+
 const CATALONIA_TIME_ZONE = 'Europe/Madrid';
 const MAX_FUTURE_YEARS = 10;
 const MAX_EVENT_DURATION_YEARS = 10;
@@ -88,7 +90,8 @@ export function temporallyInvalidWhere(alias = '') {
     throw new TypeError('Àlies SQL no vàlid.');
   }
   const prefix = alias ? `${alias}.` : '';
-  return `is_temporally_invalid(
+  const planReference = alias || 'plans';
+  return `NOT (${anyOccurrenceExists(planReference)}) AND is_temporally_invalid(
     ${prefix}kind, ${prefix}permanent, ${prefix}start_date, ${prefix}end_date, ?
   ) = 1`;
 }

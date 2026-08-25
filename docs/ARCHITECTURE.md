@@ -27,7 +27,26 @@ La API no ofrece escritura. La consulta de planes limita `page` a 200, `limit` a
 
 ## SQLite
 
-La conexión está en `backend/src/db/`, con claves foráneas, WAL, `busy_timeout` y migraciones incrementales. Las tablas principales son `plans`, `sources`, `plan_sources`, `categories`, `plan_categories`, `import_runs` y `plan_source_images`. Los repositorios encapsulan consultas y escrituras transaccionales. No se debe editar manualmente una base real ni alterar una migración ya aplicada.
+La conexión está en `backend/src/db/`, con claves foráneas, WAL, `busy_timeout` y migraciones incrementales. Las tablas principales son `plans`, `sources`, `plan_sources`, `plan_occurrences`, `categories`, `plan_categories`, `import_runs` y `plan_source_images`. Los repositorios encapsulan consultas y escrituras transaccionales. No se debe editar manualmente una base real ni alterar una migración ya aplicada.
+
+`plan_occurrences` representa sesiones discretas vinculadas a una procedencia concreta mediante
+`plan_source_id`. Un plan que conserva cualquier occurrence histórica es *occurrence-aware*: solo
+sus occurrences activas participan en la visibilidad, los filtros y el orden temporal. Si no queda
+ninguna activa, el plan no se expone, aunque su historial se conserve para retención. El fallback basado en
+`plans.start_date` y `plans.end_date` se aplica exclusivamente cuando el plan no tiene ninguna
+occurrence, activa ni inactiva. `local_date` es el día civil en la zona indicada por `timezone`.
+`starts_at` es nullable para representar sesiones de fecha conocida y hora desconocida; cuando
+existe, igual que `ends_at`, es un instante ISO-8601 con offset o `Z`. Nunca se inventa medianoche.
+
+`occurrence_key` es opaca para el repositorio y estable dentro de una `plan_source`. Un importador
+debe preferir un ID nativo de sesión; si no existe, debe construir una identidad determinista con
+datos suficientemente estables. No tiene que depender de `starts_at`: corregir fecha, hora u otro
+campo no identitario debe actualizar la misma occurrence. La eliminación de una procedencia elimina
+sus occurrences mediante foreign key cascade.
+
+Esta awareness por existencia resuelve la infraestructura M2 y una integración conservadora. Una
+futura composición canónica avanzada entre fuentes occurrence-aware y fuentes legacy deberá definir
+explícitamente cómo componer sus calendarios; ese compositor multi-source no forma parte de M2.
 
 ## Ingestión y normalización
 
@@ -47,7 +66,13 @@ La deduplicación inicial usa una huella normalizada de título, municipio y fec
 
 ## Retención, retirada e imágenes
 
-Los planes caducados se purgan según `EVENT_RETENTION_DAYS`; los permanentes se conservan. Una procedencia desaparecida puede dejar el plan `inactive`; los huérfanos inactivos tienen una purga separada, con dry-run, tras el plazo configurado. La retirada expresa está en [`TICKETMASTER_REMOVAL.md`](TICKETMASTER_REMOVAL.md).
+Los planes caducados se purgan según `EVENT_RETENTION_DAYS`; los permanentes se conservan. Un plan
+que nunca ha tenido occurrences usa el cálculo legacy. Un plan occurrence-aware con occurrences
+activas usa la última `local_date` activa; si todas están inactivas, la retención usa la última
+`local_date` histórica para decidir cuándo es seguro limpiar, sin hacerla visible. Una procedencia
+desaparecida puede dejar el plan `inactive`; los huérfanos inactivos tienen una purga separada, con
+dry-run, tras el plazo configurado. La retirada expresa está en
+[`TICKETMASTER_REMOVAL.md`](TICKETMASTER_REMOVAL.md).
 
 Las imágenes de categorías son assets locales. Gencat no aporta imágenes reutilizadas. Las imágenes Ticketmaster se vinculan a su procedencia, se sirven same-origin y usan una caché local limitada. Con `TICKETMASTER_IMAGES_ENABLED=false` no hay sincronización remota ni selección en API, y el frontend mantiene patrones gráficos.
 

@@ -1,3 +1,5 @@
+import { effectiveOccurrenceEndDate } from '../occurrences/occurrenceSql.js';
+
 const CATALONIA_TIME_ZONE = 'Europe/Madrid';
 const DATE_FORMATTER = new Intl.DateTimeFormat('en-CA', {
   timeZone: CATALONIA_TIME_ZONE,
@@ -11,10 +13,12 @@ export function expiredPlanWhere(alias = '') {
     throw new TypeError('Àlies SQL no vàlid.');
   }
   const prefix = alias ? `${alias}.` : '';
+  const planReference = alias || 'plans';
+  const effectiveEndDate = effectiveOccurrenceEndDate(planReference);
   return `
     ${prefix}permanent = 0
-    AND COALESCE(${prefix}end_date, ${prefix}start_date) IS NOT NULL
-    AND COALESCE(${prefix}end_date, ${prefix}start_date) < ?
+    AND ${effectiveEndDate} IS NOT NULL
+    AND ${effectiveEndDate} < ?
   `;
 }
 
@@ -23,10 +27,12 @@ export function retainedPlanWhere(alias = '') {
     throw new TypeError('Àlies SQL no vàlid.');
   }
   const prefix = alias ? `${alias}.` : '';
+  const planReference = alias || 'plans';
+  const effectiveEndDate = effectiveOccurrenceEndDate(planReference);
   return `(
     ${prefix}permanent = 1
-    OR COALESCE(${prefix}end_date, ${prefix}start_date) IS NULL
-    OR COALESCE(${prefix}end_date, ${prefix}start_date) >= ?
+    OR ${effectiveEndDate} IS NULL
+    OR ${effectiveEndDate} >= ?
   )`;
 }
 
@@ -62,6 +68,8 @@ export function countExpiredPlans(db, cutoff) {
 export function purgeExpiredPlans(db, { retentionDays, now = new Date() }) {
   const cutoff = retentionCutoff(retentionDays, now);
   const stalePlanWhere = expiredPlanWhere();
+  const expiredPlanIds = db.prepare(`SELECT id FROM plans WHERE ${stalePlanWhere} ORDER BY id`)
+    .all(cutoff).map(({ id }) => id);
   const countLinks = (table) => db.prepare(`
     SELECT COUNT(*) AS count FROM ${table}
     WHERE plan_id IN (SELECT id FROM plans WHERE ${stalePlanWhere})
@@ -76,15 +84,14 @@ export function purgeExpiredPlans(db, { retentionDays, now = new Date() }) {
   if (summary.plans === 0) return summary;
 
   db.transaction(() => {
-    db.prepare(`
-      DELETE FROM plan_categories
-      WHERE plan_id IN (SELECT id FROM plans WHERE ${stalePlanWhere})
-    `).run(cutoff);
-    db.prepare(`
-      DELETE FROM plan_sources
-      WHERE plan_id IN (SELECT id FROM plans WHERE ${stalePlanWhere})
-    `).run(cutoff);
-    db.prepare(`DELETE FROM plans WHERE ${stalePlanWhere}`).run(cutoff);
+    const deleteCategories = db.prepare('DELETE FROM plan_categories WHERE plan_id = ?');
+    const deleteSources = db.prepare('DELETE FROM plan_sources WHERE plan_id = ?');
+    const deletePlan = db.prepare('DELETE FROM plans WHERE id = ?');
+    for (const planId of expiredPlanIds) {
+      deleteCategories.run(planId);
+      deleteSources.run(planId);
+      deletePlan.run(planId);
+    }
   })();
 
   return summary;
