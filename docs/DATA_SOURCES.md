@@ -89,6 +89,14 @@ Integration only through the approved Impact API/feed. M1 downloads and audits t
 
 DO NOT SCRAPE.
 
+## ICGC — Divisions administratives
+
+Status: LOCAL OFFICIAL SNAPSHOT ENABLED FOR READ-ONLY GEOGRAPHY RESOLUTION
+Type: official administrative cartography; data date 20/01/2026; source CRS EPSG:25831; local snapshot EPSG:4326.
+License: Creative Commons Attribution 4.0 International (CC BY 4.0).
+Required attribution: Institut Cartogràfic i Geològic de Catalunya (ICGC).
+Scope: municipality point-in-polygon resolution, carrying official municipality, comarca and province codes/names from each municipal feature. The snapshot is updated explicitly from the official ICGC WFS and runtime resolution is fully local. See [`ICGC_GEOGRAPHY.md`](ICGC_GEOGRAPHY.md).
+
 
 ## Surtdecasa
 

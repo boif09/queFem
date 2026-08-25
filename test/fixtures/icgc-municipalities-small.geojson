@@ -1,0 +1,56 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "CODIMUNI": "001234",
+        "NOMMUNI": "Municipi d'Àccent",
+        "CODICOMAR": "01",
+        "NOMCOMAR": "Comarca Àmplia",
+        "CODIPROV": "08",
+        "NOMPROV": "Barcelona"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [[1, 41], [2, 41], [2, 42], [1, 42], [1, 41]],
+          [[1.2, 41.2], [1.4, 41.2], [1.4, 41.4], [1.2, 41.4], [1.2, 41.2]]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "CODIMUNI": "002345",
+        "NOMMUNI": "Municipi Multi",
+        "CODICOMAR": "02",
+        "NOMCOMAR": "Segona Comarca",
+        "CODIPROV": "17",
+        "NOMPROV": "Girona"
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [[[3, 41], [3.5, 41], [3.5, 41.5], [3, 41.5], [3, 41]]],
+          [[[3, 42], [3.5, 42], [3.5, 42.5], [3, 42.5], [3, 42]]]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "CODIMUNI": "003456",
+        "NOMMUNI": "Municipi Frontera",
+        "CODICOMAR": "01",
+        "NOMCOMAR": "Comarca Àmplia",
+        "CODIPROV": "08",
+        "NOMPROV": "Barcelona"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[2, 41], [2.5, 41], [2.5, 42], [2, 42], [2, 41]]]
+      }
+    }
+  ]
+}

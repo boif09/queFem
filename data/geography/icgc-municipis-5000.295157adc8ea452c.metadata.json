@@ -1,0 +1,25 @@
+{
+  "provider": "Institut Cartogràfic i Geològic de Catalunya (ICGC)",
+  "dataset": "Divisions administratives",
+  "layer": "divisions_administratives_municipis_5000",
+  "datasetDate": "2026-01-20",
+  "retrievalDate": "2026-08-25",
+  "sourceCrs": "EPSG:25831",
+  "snapshotCrs": "EPSG:4326",
+  "coordinateOrder": "[longitude, latitude]",
+  "coordinatePrecisionDecimals": 6,
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "attribution": "Institut Cartogràfic i Geològic de Catalunya (ICGC)",
+  "modifications": [
+    "Requested official WFS transformation to EPSG:4326",
+    "Selected CODIMUNI/NOMMUNI/CODICOMAR/NOMCOMAR/CODIPROV/NOMPROV",
+    "Sorted features deterministically by CODIMUNI",
+    "Added per-feature and collection bounding boxes",
+    "Rounded coordinates to 6 decimal places"
+  ],
+  "sourceUrl": "https://geoserveis.icgc.cat/servei/catalunya/divisions-administratives/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=divisions_administratives_wfs%3Adivisions_administratives_municipis_5000&outputFormat=GEOJSON&srsName=EPSG%3A4326",
+  "servicePage": "https://www.icgc.cat/ca/Geoinformacio-i-mapes/Geoinformacio-en-linia-Geoserveis/WMS-i-WFS-Limits-administratius/WMS-i-WFS-Divisions-administratives",
+  "featureCount": 947,
+  "snapshotSha256": "5a5dceebcdc7ad9abef88006d50c944d885f2cc155bf5391b02cc2be1637c282"
+}

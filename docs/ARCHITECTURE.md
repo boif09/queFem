@@ -64,6 +64,8 @@ El importer usa Discovery Feed 2.0 y una política centralizada: solo acepta los
 
 M1 implementa el cliente Impact y el discovery de solo lectura. M3 normaliza en memoria los productos elegibles y convierte `Manufacturer` en occurrences deterministas, conservando las horas sin offset como hora civil `Europe/Madrid` y sin inventar un instante. El dry-run no abre SQLite ni persiste datos. El contrato y sus límites están en [`FEVER_NORMALIZATION.md`](FEVER_NORMALIZATION.md).
 
+M4A añade un resolver geográfico genérico basado en point-in-polygon y un snapshot local versionado de municipios ICGC 1:5.000 en EPSG:4326. Devuelve códigos y nombres oficiales de municipio, comarca y provincia, con estados explícitos `match`, `unresolved` y `ambiguous`. La actualización del dataset es remota y ocasional; la resolución de productos es siempre local y sigue sin persistencia. Véase [`ICGC_GEOGRAPHY.md`](ICGC_GEOGRAPHY.md).
+
 ## Deduplicación y reconciliación
 
 La deduplicación inicial usa una huella normalizada de título, municipio y fecha. Para Ticketmaster frente a Gencat, el matcher busca candidatos en la misma fecha y municipio. Solo confirma coincidencias con título exacto normalizado y señales de lugar compatibles; las coincidencias insuficientes se reportan como posibles y no se fusionan automáticamente. Un plan puede mantener varias procedencias, de modo que retirar una no elimina las demás.
