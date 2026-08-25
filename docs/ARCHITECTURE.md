@@ -60,6 +60,10 @@ Los comandos de `backend/src/jobs/` invocan importadores y servicios; no existe 
 
 El importer usa Discovery Feed 2.0 y una política centralizada: solo acepta los identificadores observados `trium` y `mfx-es` cuando `brandName` es Ticketmaster y `officialSeller` es `true`. Aplica horizonte temporal, territorio, exclusiones conservadoras, agrupación de sesiones y reconciliación multi-source. Su activación pública está bloqueada; ver [`DATA_SOURCES.md`](DATA_SOURCES.md).
 
+### Fever
+
+M1 implementa el cliente Impact y el discovery de solo lectura. M3 normaliza en memoria los productos elegibles y convierte `Manufacturer` en occurrences deterministas, conservando las horas sin offset como hora civil `Europe/Madrid` y sin inventar un instante. El dry-run no abre SQLite ni persiste datos. El contrato y sus límites están en [`FEVER_NORMALIZATION.md`](FEVER_NORMALIZATION.md).
+
 ## Deduplicación y reconciliación
 
 La deduplicación inicial usa una huella normalizada de título, municipio y fecha. Para Ticketmaster frente a Gencat, el matcher busca candidatos en la misma fecha y municipio. Solo confirma coincidencias con título exacto normalizado y señales de lugar compatibles; las coincidencias insuficientes se reportan como posibles y no se fusionan automáticamente. Un plan puede mantener varias procedencias, de modo que retirar una no elimina las demás.

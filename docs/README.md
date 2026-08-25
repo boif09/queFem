@@ -15,6 +15,7 @@ Ruta recomendada para una tarea: [`../AGENTS.md`](../AGENTS.md) → documento de
 
 - [`DISCOVERY_FILTERS_V2.md`](DISCOVERY_FILTERS_V2.md): comportamiento implementado de búsqueda, fechas, territorio, categorías y decisión basada en datos sobre filtros no publicados.
 - [`TICKETMASTER_REMOVAL.md`](TICKETMASTER_REMOVAL.md): retirada, dry-run, backup y purga de una procedencia Ticketmaster.
+- [`FEVER_NORMALIZATION.md`](FEVER_NORMALIZATION.md): contrato M3 de normalización Fever, parser de `Manufacturer`, zona horaria y dry-run sin persistencia.
 - [`IMAGE_CREDITS.md`](IMAGE_CREDITS.md): procedencia y licencia de assets visuales.
 - [`SPECIFICATION.md`](SPECIFICATION.md): especificación técnica inicial y visión de producto. Contiene alcance histórico/futuro; no usarla para inferir que algo ya está implementado.
 

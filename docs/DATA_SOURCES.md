@@ -84,8 +84,8 @@ Importer:
 
 ## Fever
 
-Status: PENDING PARTNER APPROVAL
-Integration only through approved API/feed.
+Status: IMPACT DISCOVERY AND IN-MEMORY NORMALIZATION IMPLEMENTED; NO PERSISTENCE OR PRODUCTION ACTIVATION
+Integration only through the approved Impact API/feed. M1 downloads and audits the catalogue read-only. M3 filters Catalunya, excludes Gift Cards, normalizes product fields and parses `Manufacturer` sessions only in memory. It does not write SQLite, deduplicate against other sources, import images or expose Fever publicly. See [`FEVER_NORMALIZATION.md`](FEVER_NORMALIZATION.md).
 
 DO NOT SCRAPE.
 

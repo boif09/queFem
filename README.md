@@ -6,7 +6,7 @@ El producto público se llama **Tens Pla?**. El repositorio conserva nombres leg
 
 ## Requisitos
 
-- Node.js 20 o superior
+- Node.js 20.19.0 o superior
 - npm
 
 ## Desarrollo local
@@ -39,6 +39,7 @@ El discovery de Fever/Impact se puede auditar sin abrir ni modificar SQLite medi
 
 ```bash
 npm run fever:discovery:dry-run
+npm run fever:normalize:dry-run
 ```
 
 No ejecutes la variante con escritura ni jobs de producción sin autorización. Consulta [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md) para las reglas completas.
@@ -53,6 +54,7 @@ No ejecutes la variante con escritura ni jobs de producción sin autorización. 
 | `npm run import:gencat` | Sincronizar Agenda Cultural de Catalunya |
 | `npm run import:ticketmaster -- --dry-run` | Validar Ticketmaster sin escribir |
 | `npm run fever:discovery:dry-run` | Auditar el catálogo Fever/Impact sin abrir SQLite |
+| `npm run fever:normalize:dry-run` | Normalizar Fever y analizar sesiones en memoria, sin abrir SQLite |
 | `npm run ticketmaster:images:sync` | Sincronizar metadata/caché de imágenes si el feature flag lo permite |
 | `npm run ticketmaster:remove -- EVENT_ID --dry-run` | Inspeccionar una retirada por ID |
 | `npm run test:backend` | Tests backend |

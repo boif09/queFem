@@ -94,6 +94,39 @@ test('Fever policy recognizes gifts, coordinates, affiliate URLs and sessions co
   });
 });
 
+test('Gift Card policy requires complete English or Spanish phrases', () => {
+  for (const name of [
+    'Gift Card', 'Gift Cards', 'gift card', 'Tarjeta regalo', 'Tarjetas regalo',
+    'Tarjeta de regalo', 'Tarjetas de regalo',
+  ]) assert.equal(isGiftCard({ Name: name }), true, name);
+  assert.equal(isGiftCard({ SubCategory: 'Gift Cards', Name: 'Concert' }), true);
+  for (const name of ['Gift Cardigan Workshop', 'Gift Cardiology', 'regalopolis', 'tarjetaregalo']) {
+    assert.equal(isGiftCard({ Name: name }), false, name);
+  }
+});
+
+test('affiliate validation rejects deceptive hosts, insecure URLs and credentials', () => {
+  const valid = 'https://fever.pxf.io/a/path?irclickid=abc&utm_source=impact#session';
+  assert.equal(isValidAffiliateUrl(valid), true);
+  assert.equal(new URL(valid).pathname, '/a/path');
+  assert.equal(new URL(valid).search, '?irclickid=abc&utm_source=impact');
+  for (const value of [
+    'https://fever.pxf.io.evil.example/path',
+    'https://evilfever.pxf.io/path',
+    'http://fever.pxf.io/path',
+    'https://user:password@fever.pxf.io/path',
+  ]) assert.equal(isValidAffiliateUrl(value), false, value);
+});
+
+test('coordinate parsing accepts mathematical boundaries and rejects out-of-range or non-numeric data', () => {
+  assert.deepEqual(parsePattern(' ( -90 ; -180 ) '), { latitude: -90, longitude: -180 });
+  assert.deepEqual(parsePattern('(90; 180)'), { latitude: 90, longitude: 180 });
+  assert.deepEqual(parsePattern('(0; 0)'), { latitude: 0, longitude: 0 });
+  for (const value of ['(-90.01; 0)', '(90.01; 0)', '(0; -180.01)', '(0; 180.01)', '(NaN; 2)', '(text; 2)']) {
+    assert.equal(parsePattern(value), null, value);
+  }
+});
+
 test('Fever discovery analysis applies catalog, campaign, Catalunya and horizon policy without using Text2', () => {
   const items = fixture.map((item) => ({ ...item, Text2: 'Barcelona' }));
   const summary = analyzeFeverDiscovery({ pages: 2, items }, {

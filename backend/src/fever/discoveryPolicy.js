@@ -29,7 +29,7 @@ function addDays(date, days) {
 export function isGiftCard(item) {
   const value = `${text(item?.SubCategory)} ${text(item?.Name)}`
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  return /gift\s*cards?/.test(value) || /tarjeta\s+(?:de\s+)?regalo/.test(value);
+  return /(?:^|[^a-z0-9])(?:gift\s+cards?|tarjetas?\s+(?:de\s+)?regalo)(?=$|[^a-z0-9])/i.test(value);
 }
 
 export function parsePattern(value) {
