@@ -4,7 +4,7 @@ import request from 'supertest';
 import { createApp } from '../backend/src/app.js';
 import { PlanOccurrenceRepository } from '../backend/src/db/repositories/planOccurrence.repository.js';
 import { PlanQueryRepository } from '../backend/src/db/repositories/planQuery.repository.js';
-import { activeOccurrencePlanIds } from '../backend/src/occurrences/occurrenceSql.js';
+import { activeOccurrenceDate, activeOccurrenceExists, activeOccurrencePlanIds } from '../backend/src/occurrences/occurrenceSql.js';
 import { purgeExpiredPlans } from '../backend/src/retention/eventRetention.js';
 import { countTemporallyInvalidPlans, purgeTemporallyInvalidPlans } from '../backend/src/quality/temporalCoherence.js';
 import { withTestDatabase } from './helpers.js';
@@ -476,6 +476,69 @@ test('representative plan range query keeps occurrence subqueries indexed', () =
     assert.ok(details.some((detail) => detail.includes('idx_plan_sources_plan')));
     assert.ok(details.some((detail) => detail.includes('idx_plan_occurrences_source_status_date_time')));
     assert.equal(details.some((detail) => /SCAN (?:occurrence_o|plan_occurrences)/.test(detail)), false);
+  });
+});
+
+test('bounded ranges rank new plans, matching occurrences and legacy overlaps in temporal tiers', async () => {
+  await withTestDatabase(async (db) => {
+    const ids = {
+      longRunning: insertPlan(db, 'range-long-running', '2024-11-29', '2026-12-31'),
+      weekend: insertPlan(db, 'range-weekend', '2026-08-28', '2026-08-30'),
+      saturday: insertPlan(db, 'range-saturday', '2026-08-29', '2026-08-29'),
+      continuesAfter: insertPlan(db, 'range-continues-after', '2026-08-28', '2026-09-02'),
+      recurringMatch: insertPlan(db, 'range-recurring-match', '2026-01-01', '2026-12-31'),
+      recurringNoMatch: insertPlan(db, 'range-recurring-no-match', '2026-08-01', '2026-09-30'),
+    };
+    const occurrences = new PlanOccurrenceRepository(db);
+    occurrences.upsert(insertSource(db, ids.recurringMatch, 'range-recurring-match-source'),
+      occurrence('range-match', '2026-08-29'));
+    occurrences.upsert(insertSource(db, ids.recurringNoMatch, 'range-recurring-no-match-source'),
+      occurrence('range-no-match', '2026-08-29', '10:00', { status: 'inactive' }));
+    const app = appFor(db);
+    const get = (query) => request(app).get(`/api/plans?${query}`);
+
+    const fullRange = await get('dateFrom=2026-08-28&dateTo=2026-08-30&sort=date&limit=20');
+    assert.equal(fullRange.status, 200);
+    assert.deepEqual(fullRange.body.data.map(({ id }) => id), [
+      ids.weekend, ids.continuesAfter, ids.saturday,
+      ids.recurringMatch, ids.longRunning,
+    ]);
+    assert.equal(fullRange.body.data.some(({ id }) => id === ids.recurringNoMatch), false);
+
+    const firstPage = await get('dateFrom=2026-08-28&dateTo=2026-08-30&sort=date&limit=2&page=1');
+    const secondPage = await get('dateFrom=2026-08-28&dateTo=2026-08-30&sort=date&limit=2&page=2');
+    assert.deepEqual(firstPage.body.data.map(({ id }) => id), [ids.weekend, ids.continuesAfter]);
+    assert.deepEqual(secondPage.body.data.map(({ id }) => id), [ids.saturday, ids.recurringMatch]);
+
+    const today = await get('date=2026-08-28&sort=date&limit=20');
+    const tomorrow = await get('date=2026-08-29&sort=date&limit=20');
+    assert.deepEqual(new Set(today.body.data.map(({ id }) => id)), new Set([
+      ids.longRunning, ids.weekend, ids.continuesAfter,
+    ]));
+    assert.deepEqual(new Set(tomorrow.body.data.map(({ id }) => id)), new Set([
+      ids.longRunning, ids.weekend, ids.saturday, ids.continuesAfter, ids.recurringMatch,
+    ]));
+  });
+});
+
+test('range-ordering occurrence subqueries use the source/status/date index', () => {
+  withTestDatabase((db) => {
+    const planId = insertPlan(db, 'range-order-index', '2026-01-01', '2026-12-31');
+    new PlanOccurrenceRepository(db).upsert(insertSource(db, planId, 'range-order-index-source'),
+      occurrence('range-order-index-occurrence', '2026-08-29'));
+    const rangeExists = activeOccurrenceExists(
+      'p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: true },
+    );
+    const rangeDate = activeOccurrenceDate(
+      'p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: true },
+    );
+    const details = db.prepare(`EXPLAIN QUERY PLAN
+      SELECT p.id FROM plans p
+      ORDER BY CASE WHEN ${rangeExists} THEN ${rangeDate} ELSE p.start_date END ASC`
+    ).all('2026-08-28', '2026-08-30', '2026-08-28', '2026-08-30')
+      .map(({ detail }) => detail).join('\n');
+    assert.match(details, /idx_plan_occurrences_source_status_date_time/);
+    assert.doesNotMatch(details, /SCAN (?:occurrence_o|plan_occurrences)/);
   });
 });
 

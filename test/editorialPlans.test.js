@@ -81,12 +81,12 @@ test('modos editoriales temporales de Home', async () => {
 
     const discoveryRange = await get('/api/plans?dateFrom=2026-08-22&dateTo=2026-08-23&sort=date&limit=20');
     assert.deepEqual(discoveryRange.body.data.map(({ id }) => id), [
-      ids.yearBefore,
-      ids.monthsBefore,
-      ids.immediatelyBefore,
       ids.insideFirst,
       ids.insideTie,
       ids.insideSunday,
+      ids.yearBefore,
+      ids.monthsBefore,
+      ids.immediatelyBefore,
       ids.permanent,
     ]);
 

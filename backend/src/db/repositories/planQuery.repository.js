@@ -212,6 +212,35 @@ export class PlanQueryRepository {
         THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
         ELSE p.start_date END ASC, p.id ASC`;
       orderParameters = [filters.dateFrom];
+    } else if (filters.dateFrom && filters.dateTo) {
+      const rangeOccurrenceExists = activeOccurrenceExists(
+        'p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: true },
+      );
+      const rangeOccurrenceDate = activeOccurrenceDate(
+        'p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: true },
+      );
+      const rangeTier = `CASE
+        WHEN p.start_date BETWEEN ? AND ? THEN 0
+        WHEN ${rangeOccurrenceExists} THEN 1
+        ELSE 2
+      END ASC`;
+      const rangeTemporalOrder = `CASE
+        WHEN p.start_date BETWEEN ? AND ? THEN p.start_date
+        WHEN ${rangeOccurrenceExists} THEN ${rangeOccurrenceDate}
+        ELSE p.start_date
+      END ASC`;
+      orderBy = {
+        date: `${rangeTier}, p.permanent ASC, ${rangeTemporalOrder}, p.id ASC`,
+        quality: `${rangeTier}, p.quality_score DESC, p.permanent ASC, ${rangeTemporalOrder}, p.id ASC`,
+        title: `${rangeTier}, ${text.title} COLLATE NOCASE ASC, p.id ASC`,
+      }[filters.sort];
+      orderParameters = filters.sort === 'title'
+        ? [filters.dateFrom, filters.dateTo, filters.dateFrom, filters.dateTo]
+        : [
+          filters.dateFrom, filters.dateTo, filters.dateFrom, filters.dateTo,
+          filters.dateFrom, filters.dateTo, filters.dateFrom, filters.dateTo,
+          filters.dateFrom, filters.dateTo,
+        ];
     } else {
       const dateOrder = filters.date
         ? `CASE

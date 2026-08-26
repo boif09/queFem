@@ -23,7 +23,7 @@ Todo vive en un único paquete npm. El backend usa Node.js, Express 5 y `better-
 - `/api/media/ticketmaster/:imageId`
 - `/api/sitemap.xml`
 
-La API no ofrece escritura. La consulta de planes limita `page` a 200, `limit` a 100, `q` a 100 caracteres y los filtros textuales a 120 caracteres. `category` acepta uno o varios slugs separados por comas y los combina con semántica OR; el filtro booleano `permanent` permite separar los bloques temporales y permanentes de la home. Los modos técnicos explícitos `editorial=home-weekend|home-upcoming`, usados solo por la home, priorizan antes de paginar los inicios dentro del fin de semana o exigen inicios desde hoy, respectivamente; las búsquedas generales conservan la semántica y el orden de `date`, `dateFrom` y `dateTo`.
+La API no ofrece escritura. La consulta de planes limita `page` a 200, `limit` a 100, `q` a 100 caracteres y los filtros textuales a 120 caracteres. `category` acepta uno o varios slugs separados por comas y los combina con semántica OR; el filtro booleano `permanent` permite separar los bloques temporales y permanentes de la home. Los modos técnicos explícitos `editorial=home-weekend|home-upcoming`, usados solo por la home, priorizan antes de paginar los inicios dentro del fin de semana o exigen inicios desde hoy, respectivamente. En una búsqueda general con rango cerrado, el orden temporal prioriza los inicios del plan dentro del rango, después las occurrences activas dentro del rango y finalmente los solapamientos legacy que comenzaron antes; la inclusión occurrence-aware no cambia.
 
 ## SQLite
 
