@@ -68,12 +68,13 @@ test('production preflight rejects synthetic integrity failure without exposing 
   assert.throws(() => preflightFeverProductionImport(config, { openDatabaseImpl: () => fakeDb }), /integrity_check/);
 });
 
-test('production command fixes database, migration and removal controls in the shared runner', async () => {
+test('confirmed production CLI flow runs its real preflight and reaches the runner without forwarding a preflight option', async () => {
   await withDatabase(async ({ db, config }) => {
     const logs = [];
     let options;
+    const args = parseArguments(['--confirm-production-import']);
     const summary = await importFeverProduction(config, {
-      confirmProductionImport: true, logger: { log: (message) => logs.push(message) },
+      ...args, logger: { log: (message) => logs.push(message) },
       runImport: async (_config, value) => {
         options = value;
         value.beforeTransaction({ db });
@@ -102,13 +103,12 @@ test('production command rejects programmatic database, migration and mass-remov
 });
 
 test('production CLI parser permits one explicit operation and rejects duplicates and unsafe flags', () => {
-  assert.deepEqual(parseArguments(['--preflight']), { preflight: true, confirmProductionImport: false });
-  assert.deepEqual(parseArguments(['--confirm-production-import']), { preflight: false, confirmProductionImport: true });
+  assert.deepEqual(parseArguments(['--confirm-production-import']), { confirmProductionImport: true });
   for (const args of [
     [],
     ['--preflight', '--preflight'], ['--confirm-production-import', '--confirm-production-import'],
-    ['--preflight', '--confirm-production-import'], ['--database', 'other.sqlite'], ['--allow-mass-removal'],
-  ]) assert.throws(() => parseArguments(args), /Usage|exactly one/);
+    ['--preflight', '--confirm-production-import'], ['--preflight'], ['--database', 'other.sqlite'], ['--allow-mass-removal'],
+  ]) assert.throws(() => parseArguments(args), /Usage/);
 });
 
 test('pre-write production gate aborts before persistence when integrity is bad', async () => {

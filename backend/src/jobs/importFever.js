@@ -78,16 +78,16 @@ export async function importFeverProduction(config = loadConfig(), options = {})
 }
 
 export function parseArguments(argv) {
-  const allowed = new Set(['--confirm-production-import', '--preflight']);
-  if (argv.some((argument) => !allowed.has(argument))) throw new Error('Usage: npm run fever:import -- [--preflight|--confirm-production-import]');
-  if (argv.length !== 1) throw new Error('Choose exactly one of --preflight or --confirm-production-import');
-  return { preflight: argv.includes('--preflight'), confirmProductionImport: argv.includes('--confirm-production-import') };
+  if (argv.length !== 1 || argv[0] !== '--confirm-production-import') {
+    throw new Error('Usage: npm run fever:import -- --confirm-production-import');
+  }
+  return { confirmProductionImport: true };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     const args = parseArguments(process.argv.slice(2));
-    const result = args.preflight ? preflightFeverProductionImport() : await importFeverProduction(loadConfig(), args);
+    const result = await importFeverProduction(loadConfig(), args);
     console.log(JSON.stringify(result));
   } catch (error) { console.error(`Fever production import failed: ${error.message}`); process.exitCode = 1; }
 }

@@ -6,7 +6,7 @@ M5C prepara el comando manual `npm run fever:import`; no despliega, no importa d
 
 Antes de escribir, exige credenciales Impact presentes sin imprimirlas, `FEVER_IMAGES_ENABLED=false`, las migrations exactas `009_add_fever_source_geography.sql` y `010_add_active_occurrence_lookup_index.sql`, `PRAGMA integrity_check=ok` y la source `fever` existente con `enabled=0`. Repite source e integridad dentro del importador, tras preparar el feed y los guards de conjunto deseado, inmediatamente antes de su transacción. Tras el commit vuelve a verificar source disabled e integridad. Un fallo de los gates posteriores a la escritura es crítico.
 
-`npm run fever:import -- --preflight` solo abre la DB configurada readonly y verifica esos gates; no descarga feed ni persiste. La ausencia de `FEVER_IMAGES_ENABLED` equivale a `false`.
+El preflight es una fase interna readonly del comando confirmado; no existe un flag CLI de preflight. La ausencia de `FEVER_IMAGES_ENABLED` equivale a `false`.
 
 ## Pre-flight futuro, read-only
 
