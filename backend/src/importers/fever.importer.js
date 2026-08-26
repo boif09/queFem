@@ -3,6 +3,7 @@ import { FeverPersistenceRepository } from '../db/repositories/feverPersistence.
 import { analyzeFeverNormalization } from '../fever/normalizationAnalysis.js';
 import { FEVER_CAMPAIGN_ID, FEVER_CATALOG_ID } from '../fever/itemNormalizer.js';
 import { SourceRegistry } from '../legal/sourceRegistry.js';
+import { feverCategorySlugs, normalizeFeverPrice, validFeverImageUrl } from '../fever/publicationPolicy.js';
 
 const RAW_FIELDS = [
   'CatalogItemId', 'Name', 'Description', 'Url', 'ImageUrl', 'CurrentPrice', 'Currency', 'Labels',
@@ -25,7 +26,7 @@ function sourcePayload(raw, product) {
   return payload;
 }
 
-function planFor(product, geography) {
+function planFor(product, geography, price) {
   const dates = product.publishableOccurrences.map(({ localDate }) => localDate).sort();
   const resolved = geography.status === 'match';
   return {
@@ -34,7 +35,8 @@ function planFor(product, geography) {
     title_ca: null, title_es: null, subtitle_ca: null, subtitle_es: null,
     description_ca: null, description_es: null,
     start_date: dates[0], end_date: dates.at(-1), schedule_text: null, permanent: 0,
-    price_text: null, is_free: null,
+    price_text: price.type === 'fixed' ? `${price.amount} €` : null,
+    is_free: price.type === 'free' ? 1 : null,
     province: resolved ? geography.province.name : null,
     comarca: resolved ? geography.comarca.name : null,
     municipality: resolved ? geography.municipality.name : null,
@@ -120,6 +122,7 @@ export class FeverImporter {
       const raw = rawById.get(product.productId);
       const geography = geographyFor(product, resolution, this.resolver, this.snapshotChecksum);
       const payload = sourcePayload(raw, product);
+      const price = normalizeFeverPrice(raw?.CurrentPrice, raw?.Currency, raw?.Labels);
       manufacturerRawBytes += Buffer.byteLength(JSON.stringify(raw?.Manufacturer ?? null));
       sourcePayloadBytes += Buffer.byteLength(JSON.stringify(payload));
       candidates.push({
@@ -128,7 +131,9 @@ export class FeverImporter {
         sourcePayload: payload,
         occurrences: product.publishableOccurrences,
         geography,
-        plan: planFor(product, resolution),
+        plan: planFor(product, resolution, price),
+        categorySlugs: feverCategorySlugs(product.subCategory),
+        imageUrl: validFeverImageUrl(product.imageUrl),
       });
     }
     return {

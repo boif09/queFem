@@ -23,6 +23,15 @@ export class FeverPersistenceRepository {
   constructor(db) {
     this.db = db;
     this.occurrences = new PlanOccurrenceRepository(db);
+    this.categoryId = db.prepare('SELECT id FROM categories WHERE slug=?');
+    this.insertCategory = db.prepare('INSERT OR IGNORE INTO plan_categories (plan_id,category_id) VALUES (?,?)');
+    this.deleteCategories = db.prepare('DELETE FROM plan_categories WHERE plan_id=?');
+    this.upsertImage = db.prepare(`INSERT INTO plan_source_images
+      (plan_source_id,role,url,ratio,width,height,is_fallback,attribution,last_seen_at,created_at,updated_at)
+      VALUES (?,?,?,'unknown',1,1,0,NULL,?,?,?)
+      ON CONFLICT(plan_source_id,role) DO UPDATE SET url=excluded.url,last_seen_at=excluded.last_seen_at,
+        updated_at=CASE WHEN url<>excluded.url THEN excluded.updated_at ELSE updated_at END`);
+    this.deleteImages = db.prepare('DELETE FROM plan_source_images WHERE plan_source_id=?');
     this.findSource = db.prepare(`SELECT ps.*, p.fingerprint FROM plan_sources ps
       JOIN plans p ON p.id=ps.plan_id WHERE ps.source_id=? AND ps.source_record_id=?`);
     this.findPlanByFingerprint = db.prepare('SELECT * FROM plans WHERE fingerprint=?');
@@ -123,6 +132,22 @@ export class FeverPersistenceRepository {
     const inactiveKeys = new Set(this.db.prepare(`SELECT occurrence_key FROM plan_occurrences
       WHERE plan_source_id=? AND status='inactive'`).all(source.id).map(({ occurrence_key: key }) => key));
     const occurrenceStats = this.occurrences.reconcile(source.id, candidate.occurrences, { seenAt: now });
+    const sourceCount = this.db.prepare('SELECT COUNT(*) count FROM plan_sources WHERE plan_id=?').get(planId).count;
+    const desiredCategories = new Set(candidate.categorySlugs || []);
+    const currentCategories = new Set(this.db.prepare(`SELECT c.slug FROM plan_categories pc
+      JOIN categories c ON c.id=pc.category_id WHERE pc.plan_id=?`).all(planId).map(({ slug }) => slug));
+    if (sourceCount === 1 && (currentCategories.size !== desiredCategories.size
+      || [...desiredCategories].some((slug) => !currentCategories.has(slug)))) this.deleteCategories.run(planId);
+    for (const slug of desiredCategories) {
+      const category = this.categoryId.get(slug);
+      if (category) this.insertCategory.run(planId, category.id);
+    }
+    if (candidate.imageUrl) {
+      for (const role of ['card', 'detail']) {
+        const existingImage = this.db.prepare('SELECT url FROM plan_source_images WHERE plan_source_id=? AND role=?').get(source.id, role);
+        if (!existingImage || existingImage.url !== candidate.imageUrl) this.upsertImage.run(source.id, role, candidate.imageUrl, now, now, now);
+      }
+    } else this.deleteImages.run(source.id);
     occurrenceStats.reactivated = candidate.occurrences
       .filter(({ occurrenceKey }) => inactiveKeys.has(occurrenceKey)).length;
     occurrenceStats.updated -= occurrenceStats.reactivated;

@@ -9,7 +9,7 @@ import { ValidationError } from './api/validation.js';
 import { PlanQueryRepository } from './db/repositories/planQuery.repository.js';
 import { PlanSourceImageRepository } from './db/repositories/planSourceImage.repository.js';
 import { TicketmasterImageCache } from './ticketmaster/imageCache.js';
-import { TicketmasterImageProxy } from './ticketmaster/imageProxy.js';
+import { TicketmasterImageProxy, validateFeverImageUrl } from './ticketmaster/imageProxy.js';
 
 export function createApp({
   db,
@@ -22,12 +22,15 @@ export function createApp({
   ticketmasterImageRequestTimeoutMs = 15_000,
   ticketmasterImageMaximumBytes = 10 * 1024 * 1024,
   ticketmasterImageFetchImpl,
+  feverImagesEnabled = false, feverImageCachePath, feverImageCacheTtlHours = 6,
+  feverImageCacheMaxMb = 512, feverImageRequestTimeoutMs = 15_000,
+  feverImageMaximumBytes = 10 * 1024 * 1024, feverImageFetchImpl,
   now = () => new Date(),
   logger = console,
 }) {
   const app = express();
   const repository = new PlanQueryRepository(db, {
-    eventRetentionDays, now, ticketmasterImagesEnabled,
+    eventRetentionDays, now, ticketmasterImagesEnabled, feverImagesEnabled,
   });
   const imageRepository = new PlanSourceImageRepository(db);
   const imageCache = new TicketmasterImageCache({
@@ -43,11 +46,14 @@ export function createApp({
     maximumBytes: ticketmasterImageMaximumBytes,
     validImageIds: () => imageRepository.findAllImageIds(),
   });
+  const feverCache = new TicketmasterImageCache({ directory: feverImageCachePath || `${process.cwd()}/data/cache/fever-images`, ttlHours: feverImageCacheTtlHours, maximumMb: feverImageCacheMaxMb, now });
+  const feverProxy = new TicketmasterImageProxy({ cache: feverCache, fetchImpl: feverImageFetchImpl, timeoutMs: feverImageRequestTimeoutMs, maximumBytes: feverImageMaximumBytes, validImageIds: () => imageRepository.findAllImageIds(), validateUrl: validateFeverImageUrl });
 
   app.disable('x-powered-by');
   app.use('/api/sitemap.xml', createSitemapRouter(repository));
   app.use('/api/media', createMediaRouter({
     repository: imageRepository, proxy: imageProxy, enabled: ticketmasterImagesEnabled,
+    feverProxy, feverEnabled: feverImagesEnabled,
   }));
   app.use('/api/plans', createPlansRouter(repository, defaultLanguage));
   app.use('/api/categories', createCategoriesRouter(repository));

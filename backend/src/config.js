@@ -17,6 +17,7 @@ export function loadConfig(env = process.env) {
   const configuredDatabasePath = env.DATABASE_PATH || './data/quefem.sqlite';
   const configuredTicketmasterImageCachePath = env.TICKETMASTER_IMAGE_CACHE_PATH
     || './data/cache/ticketmaster-images';
+  const configuredFeverImageCachePath = env.FEVER_IMAGE_CACHE_PATH || './data/cache/fever-images';
 
   return {
     projectRoot,
@@ -41,6 +42,12 @@ export function loadConfig(env = process.env) {
     impactAccountSid: env.IMPACT_ACCOUNT_SID || '',
     impactAuthToken: env.IMPACT_AUTH_TOKEN || '',
     feverLookaheadDays: positiveInteger(env.FEVER_LOOKAHEAD_DAYS, 365),
+    feverImagesEnabled: env.FEVER_IMAGES_ENABLED === 'true',
+    feverImageCachePath: path.isAbsolute(configuredFeverImageCachePath) ? configuredFeverImageCachePath : path.resolve(projectRoot, configuredFeverImageCachePath),
+    feverImageCacheTtlHours: positiveInteger(env.FEVER_IMAGE_CACHE_TTL_HOURS, 6),
+    feverImageCacheMaxMb: positiveInteger(env.FEVER_IMAGE_CACHE_MAX_MB, 512),
+    feverImageRequestTimeoutMs: positiveInteger(env.FEVER_IMAGE_REQUEST_TIMEOUT_MS, 15000),
+    feverImageMaximumBytes: positiveInteger(env.FEVER_IMAGE_MAX_BYTES, 10485760),
     eventRetentionDays: nonNegativeInteger(env.EVENT_RETENTION_DAYS, 0),
     inactivePlanRetentionDays: positiveInteger(env.INACTIVE_PLAN_RETENTION_DAYS, 7),
     defaultLanguage: env.DEFAULT_LANGUAGE || 'ca',

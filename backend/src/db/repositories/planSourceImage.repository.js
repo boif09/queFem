@@ -47,6 +47,10 @@ export class PlanSourceImageRepository {
   }
 
   findServableTicketmasterImage(imageId) {
+    return this.findServableImage(imageId, 'ticketmaster-discovery-feed');
+  }
+
+  findServableImage(imageId, sourceKey) {
     return this.db.prepare(`
       SELECT psi.id, psi.url
       FROM plan_source_images psi
@@ -54,10 +58,10 @@ export class PlanSourceImageRepository {
       JOIN sources s ON s.id = ps.source_id
       JOIN plans p ON p.id = ps.plan_id
       WHERE psi.id = ?
-        AND s.key = 'ticketmaster-discovery-feed'
+        AND s.key = ?
         AND s.enabled = 1
         AND p.status = 'active'
-    `).get(imageId);
+    `).get(imageId, sourceKey);
   }
 
   findAllImageIds() {

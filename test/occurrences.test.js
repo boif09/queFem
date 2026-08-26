@@ -341,6 +341,32 @@ test('occurrences from two sources are combined without cross-source reconciliat
   });
 });
 
+test('public occurrence semantics and detail sources ignore disabled shared provenance', async () => {
+  await withTestDatabase(async (db) => {
+    const planId = insertPlan(db, 'shared-disabled-fever', '2026-01-01', '2026-12-31');
+    const gencat = insertSource(db, planId, 'shared-gencat');
+    const fever = insertSource(db, planId, 'shared-fever', 'fever');
+    const occurrences = new PlanOccurrenceRepository(db);
+    occurrences.upsert(gencat, occurrence('gencat-next', '2026-09-10', '19:00'));
+    occurrences.upsert(fever, occurrence('fever-next', '2026-09-01', '18:00'));
+    const app = appFor(db);
+    let detail = await request(app).get(`/api/plans/${planId}`);
+    assert.equal(detail.status, 200);
+    assert.deepEqual(detail.body.data.nextOccurrence, { localDate: '2026-09-10', localTime: '19:00' });
+    assert.equal(detail.body.data.sources.length, 1);
+    assert.equal((await request(app).get('/api/plans?date=2026-09-01&limit=100')).body.data.some(({ id }) => id === planId), false);
+    assert.equal((await request(app).get('/api/plans?editorial=home-upcoming&dateFrom=2026-08-25&permanent=false&limit=100')).body.data.find(({ id }) => id === planId).nextOccurrence.localDate, '2026-09-10');
+    db.prepare("UPDATE sources SET enabled=1 WHERE key='fever'").run();
+    detail = await request(app).get(`/api/plans/${planId}`);
+    assert.deepEqual(detail.body.data.nextOccurrence, { localDate: '2026-09-01', localTime: '18:00' });
+    assert.equal(detail.body.data.sources.length, 2);
+    assert.equal((await request(app).get('/api/plans?date=2026-09-01&limit=100')).body.data.some(({ id }) => id === planId), true);
+    db.prepare("UPDATE sources SET enabled=0 WHERE key='fever'").run();
+    detail = await request(app).get(`/api/plans/${planId}`);
+    assert.deepEqual(detail.body.data.nextOccurrence, { localDate: '2026-09-10', localTime: '19:00' });
+  });
+});
+
 test('retention uses active occurrence dates and protects a recurrent plan with a future session', () => {
   withTestDatabase((db) => {
     const futurePlan = insertPlan(db, 'retention-future', '2024-01-01', '2024-01-02');

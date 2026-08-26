@@ -9,6 +9,7 @@ import {
   activeOccurrenceExists,
   anyOccurrenceExists,
 } from '../../occurrences/occurrenceSql.js';
+import { normalizeFeverPrice } from '../../fever/publicationPolicy.js';
 
 const QUALITY_THRESHOLD = 35;
 
@@ -32,7 +33,7 @@ function toNullableBoolean(value) {
 }
 
 function mapPlan(row) {
-  return {
+  const plan = {
     ...row,
     permanent: row.permanent === 1,
     free: toNullableBoolean(row.is_free),
@@ -43,6 +44,10 @@ function mapPlan(row) {
     image_reuse_allowed: row.image_reuse_allowed === 1,
     image_url: row.image_reuse_allowed === 1 ? row.image_url : null,
   };
+  if (row.next_occurrence_date) plan.nextOccurrence = { localDate: row.next_occurrence_date, localTime: row.next_occurrence_time };
+  delete plan.next_occurrence_date;
+  delete plan.next_occurrence_time;
+  return plan;
 }
 
 export class PlanQueryRepository {
@@ -50,11 +55,13 @@ export class PlanQueryRepository {
     eventRetentionDays = 0,
     now = () => new Date(),
     ticketmasterImagesEnabled = false,
+    feverImagesEnabled = false,
   } = {}) {
     this.db = db;
     this.eventRetentionDays = eventRetentionDays;
     this.now = now;
     this.ticketmasterImagesEnabled = ticketmasterImagesEnabled;
+    this.feverImagesEnabled = feverImagesEnabled;
   }
 
   visiblePlanConditions(alias = 'p') {
@@ -67,7 +74,7 @@ export class PlanQueryRepository {
           JOIN sources visibility_s ON visibility_s.id = visibility_ps.source_id
           WHERE visibility_ps.plan_id = ${alias}.id AND visibility_s.enabled = 1
         )`,
-        `(${activeOccurrenceExists(alias)} OR NOT (${anyOccurrenceExists(alias)}))`,
+        `(${activeOccurrenceExists(alias, '', { enabledOnly: true })} OR NOT (${anyOccurrenceExists(alias, { enabledOnly: true })}))`,
         `${alias}.quality_score >= ?`,
         retainedPlanWhere(alias),
         `NOT (${outsideCataloniaWhere(alias)})`,
@@ -134,16 +141,16 @@ export class PlanQueryRepository {
       parameters.push(...filters.categories);
     }
 
-    const hasAnyOccurrences = anyOccurrenceExists('p');
+    const hasAnyOccurrences = anyOccurrenceExists('p', { enabledOnly: true });
     if (filters.editorial === 'home-upcoming') {
       clauses.push(`(
-        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date >= ?')}
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
         OR (NOT (${hasAnyOccurrences}) AND p.start_date IS NOT NULL AND p.start_date >= ?)
       )`);
       parameters.push(filters.dateFrom, filters.dateFrom);
     } else if (filters.date) {
       clauses.push(`(
-        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date = ?')}
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date = ?', { enabledOnly: true })}
         OR (NOT (${hasAnyOccurrences}) AND (
           p.permanent = 1 OR
           (p.start_date IS NOT NULL AND p.end_date IS NOT NULL AND p.start_date <= ? AND p.end_date >= ?)
@@ -152,7 +159,7 @@ export class PlanQueryRepository {
       parameters.push(filters.date, filters.date, filters.date);
     } else if (filters.dateFrom && filters.dateTo) {
       clauses.push(`(
-        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date BETWEEN ? AND ?')}
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: true })}
         OR (NOT (${hasAnyOccurrences}) AND (
           p.permanent = 1 OR
           (p.start_date IS NOT NULL AND p.end_date IS NOT NULL AND p.start_date <= ? AND p.end_date >= ?)
@@ -161,13 +168,13 @@ export class PlanQueryRepository {
       parameters.push(filters.dateFrom, filters.dateTo, filters.dateTo, filters.dateFrom);
     } else if (filters.dateFrom) {
       clauses.push(`(
-        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date >= ?')}
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
         OR (NOT (${hasAnyOccurrences}) AND (p.permanent = 1 OR (p.end_date IS NOT NULL AND p.end_date >= ?)))
       )`);
       parameters.push(filters.dateFrom, filters.dateFrom);
     } else if (filters.dateTo) {
       clauses.push(`(
-        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date <= ?')}
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date <= ?', { enabledOnly: true })}
         OR (NOT (${hasAnyOccurrences}) AND (p.permanent = 1 OR (p.start_date IS NOT NULL AND p.start_date <= ?)))
       )`);
       parameters.push(filters.dateTo, filters.dateTo);
@@ -181,12 +188,12 @@ export class PlanQueryRepository {
     const where = this.buildWhere(filters);
     let orderBy;
     let orderParameters = [];
-    const hasAnyOccurrences = anyOccurrenceExists('p');
+    const hasAnyOccurrences = anyOccurrenceExists('p', { enabledOnly: true });
     if (filters.editorial === 'home-weekend') {
       orderBy = `
         CASE WHEN ${hasAnyOccurrences} THEN 0 WHEN p.start_date BETWEEN ? AND ? THEN 0 ELSE 1 END ASC,
         CASE
-          WHEN ${hasAnyOccurrences} THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date BETWEEN ? AND ?')}
+          WHEN ${hasAnyOccurrences} THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: true })}
           WHEN p.start_date BETWEEN ? AND ? THEN p.start_date
         END ASC,
         CASE WHEN NOT (${hasAnyOccurrences}) AND p.start_date < ? THEN p.start_date END DESC,
@@ -199,7 +206,7 @@ export class PlanQueryRepository {
       ];
     } else if (filters.editorial === 'home-upcoming') {
       orderBy = `CASE WHEN ${hasAnyOccurrences}
-        THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?')}
+        THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
         ELSE p.start_date END ASC, p.id ASC`;
       orderParameters = [filters.dateFrom];
     } else {
@@ -211,15 +218,15 @@ export class PlanQueryRepository {
             ELSE 2
           END,
           CASE WHEN ${hasAnyOccurrences}
-            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date = ?')}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date = ?', { enabledOnly: true })}
             ELSE p.start_date END DESC,
           p.id ASC`
         : `p.permanent ASC,
           CASE WHEN ${hasAnyOccurrences}
-            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?')}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
             ELSE p.start_date END IS NULL ASC,
           CASE WHEN ${hasAnyOccurrences}
-            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?')}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
             ELSE p.start_date END ASC,
           p.id ASC`;
       const today = retentionCutoff(0, this.now());
@@ -227,10 +234,10 @@ export class PlanQueryRepository {
         date: dateOrder,
         quality: `p.quality_score DESC,
           CASE WHEN ${hasAnyOccurrences}
-            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?')}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
             ELSE p.start_date END IS NULL ASC,
           CASE WHEN ${hasAnyOccurrences}
-            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?')}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
             ELSE p.start_date END ASC,
           p.id ASC`,
         title: `${text.title} COLLATE NOCASE ASC, p.id ASC`,
@@ -254,28 +261,51 @@ export class PlanQueryRepository {
         p.locality, p.address, p.postal_code, p.venue_name,
         p.latitude, p.longitude, p.website_url, p.ticket_url,
         p.image_url, p.image_reuse_allowed, p.family_friendly,
-        p.indoor, p.outdoor, p.featured, p.quality_score
+        p.indoor, p.outdoor, p.featured, p.quality_score,
+        (SELECT o.local_date FROM plan_occurrences o JOIN plan_sources ops ON ops.id=o.plan_source_id JOIN sources os ON os.id=ops.source_id
+          WHERE ops.plan_id=p.id AND os.enabled=1 AND o.status='active' AND o.local_date>=? ORDER BY o.local_date,o.local_time LIMIT 1) next_occurrence_date,
+        (SELECT o.local_time FROM plan_occurrences o JOIN plan_sources ops ON ops.id=o.plan_source_id JOIN sources os ON os.id=ops.source_id
+          WHERE ops.plan_id=p.id AND os.enabled=1 AND o.status='active' AND o.local_date>=? ORDER BY o.local_date,o.local_time LIMIT 1) next_occurrence_time
       FROM plans p
       WHERE ${where.sql}
       ORDER BY ${orderBy}
       LIMIT ? OFFSET ?
-    `).all(...where.parameters, ...orderParameters, filters.limit, offset);
+    `).all(retentionCutoff(0, this.now()), retentionCutoff(0, this.now()), ...where.parameters, ...orderParameters, filters.limit, offset);
 
     const plans = rows.map(mapPlan);
     this.attachCategories(plans, filters.lang);
     this.attachImages(plans, 'card');
+    this.attachCommerce(plans);
     return { plans, total };
+  }
+
+  attachCommerce(plans) {
+    if (!plans.length) return;
+    const placeholders = plans.map(() => '?').join(',');
+    const rows = this.db.prepare(`SELECT ps.plan_id,ps.source_url,ps.source_payload_json
+      FROM plan_sources ps JOIN sources s ON s.id=ps.source_id
+      WHERE ps.plan_id IN (${placeholders}) AND s.key='fever' AND s.enabled=1`).all(...plans.map(({ id }) => id));
+    const byPlan = new Map(rows.map((row) => {
+      const payload = JSON.parse(row.source_payload_json);
+      return [row.plan_id, { provider: 'fever', affiliateUrl: row.source_url,
+        price: normalizeFeverPrice(payload.CurrentPrice, payload.Currency, payload.Labels) }];
+    }));
+    for (const plan of plans) if (byPlan.has(plan.id)) plan.commerce = byPlan.get(plan.id);
   }
 
   attachImages(plans, role) {
     for (const plan of plans) plan.image = null;
-    if (!this.ticketmasterImagesEnabled || plans.length === 0) return;
+    if ((!this.ticketmasterImagesEnabled && !this.feverImagesEnabled) || plans.length === 0) return;
     const placeholders = plans.map(() => '?').join(', ');
     const rows = this.db.prepare(`
-      SELECT plan_id, image_id, width, height, attribution
+      SELECT plan_id, image_id, width, height, attribution, source_key
       FROM (
         SELECT
-          ps.plan_id, psi.id image_id, psi.width, psi.height, psi.attribution,
+          ps.plan_id, psi.id image_id,
+          CASE WHEN psi.ratio='unknown' THEN NULL ELSE psi.width END width,
+          CASE WHEN psi.ratio='unknown' THEN NULL ELSE psi.height END height,
+          psi.attribution,
+          CASE WHEN s.key='fever' THEN 'fever' ELSE 'ticketmaster' END source_key,
           ROW_NUMBER() OVER (
             PARTITION BY ps.plan_id
             ORDER BY psi.is_fallback ASC, psi.last_seen_at DESC, psi.id ASC
@@ -285,17 +315,17 @@ export class PlanQueryRepository {
         JOIN sources s ON s.id = ps.source_id
         WHERE ps.plan_id IN (${placeholders})
           AND psi.role = ?
-          AND s.key = 'ticketmaster-discovery-feed'
+          AND ((s.key = 'ticketmaster-discovery-feed' AND ? = 1) OR (s.key = 'fever' AND ? = 1))
           AND s.enabled = 1
       ) ranked
       WHERE image_rank = 1
-    `).all(...plans.map(({ id }) => id), role);
+    `).all(...plans.map(({ id }) => id), role, Number(this.ticketmasterImagesEnabled), Number(this.feverImagesEnabled));
     const byPlan = new Map(rows.map((row) => [row.plan_id, {
-      url: `/api/media/ticketmaster/${row.image_id}`,
+      url: `/api/media/${row.source_key || 'ticketmaster'}/${row.image_id}`,
       width: row.width,
       height: row.height,
       ...(row.attribution ? { attribution: row.attribution } : {}),
-      source: 'ticketmaster',
+      source: row.source_key || 'ticketmaster',
     }]));
     for (const plan of plans) plan.image = byPlan.get(plan.id) || null;
   }
@@ -340,13 +370,28 @@ export class PlanQueryRepository {
     delete plan.family_friendly;
     this.attachCategories([plan], language);
     this.attachImages([plan], 'detail');
+    const today = retentionCutoff(0, this.now());
+    plan.nextOccurrences = this.db.prepare(`SELECT o.local_date localDate,o.local_time localTime
+      FROM plan_occurrences o JOIN plan_sources ps ON ps.id=o.plan_source_id JOIN sources s ON s.id=ps.source_id
+      WHERE ps.plan_id=? AND s.enabled=1 AND o.status='active' AND o.local_date>=?
+      ORDER BY o.local_date,o.local_time LIMIT 11`).all(id, today);
+    plan.hasMoreOccurrences = plan.nextOccurrences.length > 10;
+    if (plan.hasMoreOccurrences) plan.nextOccurrences.pop();
+    plan.nextOccurrence = plan.nextOccurrences[0] || null;
+    const fever = this.db.prepare(`SELECT ps.source_url,ps.source_payload_json FROM plan_sources ps
+      JOIN sources s ON s.id=ps.source_id WHERE ps.plan_id=? AND s.key='fever' AND s.enabled=1`).get(id);
+    if (fever) {
+      const payload = JSON.parse(fever.source_payload_json);
+      plan.commerce = { provider: 'fever', affiliateUrl: fever.source_url,
+        price: normalizeFeverPrice(payload.CurrentPrice, payload.Currency, payload.Labels) };
+    }
     plan.sources = this.db.prepare(`
       SELECT
         s.name, s.publisher, ps.source_url, s.attribution_text,
         s.license_name, s.license_url, ps.source_updated_at, ps.imported_at
       FROM plan_sources ps
       JOIN sources s ON s.id = ps.source_id
-      WHERE ps.plan_id = ?
+      WHERE ps.plan_id = ? AND s.enabled = 1
       ORDER BY s.name, ps.source_updated_at DESC, ps.imported_at DESC
     `).all(id);
     return plan;

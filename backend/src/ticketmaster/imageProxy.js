@@ -23,6 +23,14 @@ export function validateTicketmasterImageUrl(value) {
   }
 }
 
+export function validateFeverImageUrl(value) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || url.hostname !== 'applications-media.feverup.com' || url.username || url.password) throw new Error();
+    return url;
+  } catch { throw new TicketmasterMediaError(404, 'MEDIA_NOT_AVAILABLE', 'La imatge no està disponible.'); }
+}
+
 async function responseBuffer(response, maximumBytes) {
   const declaredLength = Number(response.headers.get('content-length'));
   if (Number.isFinite(declaredLength) && declaredLength > maximumBytes) {
@@ -52,18 +60,19 @@ async function responseBuffer(response, maximumBytes) {
 export class TicketmasterImageProxy {
   constructor({
     cache, fetchImpl = globalThis.fetch, timeoutMs = 15_000,
-    maximumBytes = 10 * 1024 * 1024, validImageIds,
+    maximumBytes = 10 * 1024 * 1024, validImageIds, validateUrl = validateTicketmasterImageUrl,
   }) {
     this.cache = cache;
     this.fetchImpl = fetchImpl;
     this.timeoutMs = timeoutMs;
     this.maximumBytes = maximumBytes;
     this.validImageIds = validImageIds;
+    this.validateUrl = validateUrl;
     this.inFlight = new Map();
   }
 
   async get(image) {
-    const sourceUrl = validateTicketmasterImageUrl(image.url);
+    const sourceUrl = this.validateUrl(image.url);
     const cached = await this.cache.read(image);
     if (cached) return cached;
     if (!this.inFlight.has(image.id)) {

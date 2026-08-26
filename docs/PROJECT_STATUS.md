@@ -30,6 +30,7 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - Fever M3 preparado sin persistencia: normalización de productos elegibles y parser determinista de sesiones `Manufacturer`, con semántica `Europe/Madrid`, horizonte inclusivo y dry-run real enteramente en memoria. No activa Fever ni escribe productos u occurrences en SQLite.
 - Fever M4A preparado sin persistencia: resolución administrativa local por point-in-polygon sobre cartografía oficial ICGC 1:5.000, con códigos/nombres de municipio, comarca y provincia, updater explícito y dry-run read-only. No crea fuentes ni planes Fever y no modifica SQLite.
 - Fever M4B validado únicamente en SQLite temporal: persistencia Fever standalone por `CatalogItemId`, geography source-specific, occurrences, idempotencia, reconciliación y guards de feed completo/conteo. No está activado ni publicado y la SQLite real no ha sido migrada.
+- Fever M5A prepara categorías, precio estructurado, occurrences públicas, CTA/disclosure afiliado, imágenes same-origin opcionales y atribución ICGC. Fever continúa deshabilitado y no publicado; la activación queda fuera de alcance.
 
 ## AUTONOMOUS WORK
 

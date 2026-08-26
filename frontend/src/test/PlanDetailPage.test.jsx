@@ -99,6 +99,24 @@ describe('PlanDetailPage', () => {
     }, 'https://tenspla.cat/plans/9', 'Informació factual.')).toBeNull();
   });
 
+  it('uses the next occurrence in recurring JSON-LD without an annual end date', () => {
+    const jsonLd = buildEventJsonLd({
+      kind: 'event', title: 'Recurrent', start_date: '2026-08-01', end_date: '2027-08-01',
+      nextOccurrence: { localDate: '2026-09-10', localTime: '18:30' }, venue_name: 'Sala', address: 'Carrer 1',
+    }, 'https://tenspla.cat/plans/12', 'Sessió recurrent.');
+    expect(jsonLd).toMatchObject({ startDate: '2026-09-10T18:30:00' });
+    expect(jsonLd).not.toHaveProperty('endDate');
+  });
+
+  it('keeps date-only recurring JSON-LD date-only', () => {
+    const jsonLd = buildEventJsonLd({
+      kind: 'event', title: 'Data única', start_date: '2026-08-01', end_date: '2027-08-01',
+      nextOccurrence: { localDate: '2026-09-10', localTime: null }, venue_name: 'Sala', address: 'Carrer 1',
+    }, 'https://tenspla.cat/plans/13', 'Sessió sense hora.');
+    expect(jsonLd).toMatchObject({ startDate: '2026-09-10' });
+    expect(jsonLd).not.toHaveProperty('endDate');
+  });
+
   it('shows a prominent detail image and literal attribution only when provided', async () => {
     api.getPlan.mockResolvedValue({ data: {
       id: 10, kind: 'event', title: 'Concert Ticketmaster', start_date: '2026-09-01',

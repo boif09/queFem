@@ -3,36 +3,50 @@ function planAlias(alias) {
   return alias;
 }
 
-export function activeOccurrenceExists(alias = 'p', dateCondition = '') {
+function enabledSourceJoin(enabledOnly) {
+  return enabledOnly ? 'JOIN sources occurrence_s ON occurrence_s.id = occurrence_ps.source_id' : '';
+}
+
+function enabledSourceCondition(enabledOnly) {
+  return enabledOnly ? 'AND occurrence_s.enabled = 1' : '';
+}
+
+export function activeOccurrenceExists(alias = 'p', dateCondition = '', { enabledOnly = false } = {}) {
   const safeAlias = planAlias(alias);
   return `EXISTS (
     SELECT 1
     FROM plan_sources occurrence_ps
     JOIN plan_occurrences occurrence_o ON occurrence_o.plan_source_id = occurrence_ps.id
+    ${enabledSourceJoin(enabledOnly)}
     WHERE occurrence_ps.plan_id = ${safeAlias}.id
       AND occurrence_o.status = 'active'
+      ${enabledSourceCondition(enabledOnly)}
       ${dateCondition}
   )`;
 }
 
-export function anyOccurrenceExists(alias = 'p') {
+export function anyOccurrenceExists(alias = 'p', { enabledOnly = false } = {}) {
   const safeAlias = planAlias(alias);
   return `EXISTS (
     SELECT 1
     FROM plan_sources occurrence_ps
     JOIN plan_occurrences occurrence_o ON occurrence_o.plan_source_id = occurrence_ps.id
+    ${enabledSourceJoin(enabledOnly)}
     WHERE occurrence_ps.plan_id = ${safeAlias}.id
+      ${enabledSourceCondition(enabledOnly)}
   )`;
 }
 
-export function activeOccurrenceDate(alias = 'p', dateCondition = '') {
+export function activeOccurrenceDate(alias = 'p', dateCondition = '', { enabledOnly = false } = {}) {
   const safeAlias = planAlias(alias);
   return `(
     SELECT MIN(occurrence_o.local_date)
     FROM plan_sources occurrence_ps
     JOIN plan_occurrences occurrence_o ON occurrence_o.plan_source_id = occurrence_ps.id
+    ${enabledSourceJoin(enabledOnly)}
     WHERE occurrence_ps.plan_id = ${safeAlias}.id
       AND occurrence_o.status = 'active'
+      ${enabledSourceCondition(enabledOnly)}
       ${dateCondition}
   )`;
 }

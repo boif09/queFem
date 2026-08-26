@@ -18,6 +18,12 @@ const app = createApp({
   ticketmasterImageCacheMaxMb: config.ticketmasterImageCacheMaxMb,
   ticketmasterImageRequestTimeoutMs: config.ticketmasterImageRequestTimeoutMs,
   ticketmasterImageMaximumBytes: config.ticketmasterImageMaximumBytes,
+  feverImagesEnabled: config.feverImagesEnabled,
+  feverImageCachePath: config.feverImageCachePath,
+  feverImageCacheTtlHours: config.feverImageCacheTtlHours,
+  feverImageCacheMaxMb: config.feverImageCacheMaxMb,
+  feverImageRequestTimeoutMs: config.feverImageRequestTimeoutMs,
+  feverImageMaximumBytes: config.feverImageMaximumBytes,
 });
 const server = app.listen(config.port, config.host, () => {
   console.log(`API de Què Fem? disponible a http://${config.host}:${config.port}`);

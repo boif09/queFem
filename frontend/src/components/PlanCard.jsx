@@ -8,12 +8,17 @@ export function PlanCard({ plan }) {
   const location = useLocation();
   const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
   const primaryCategory = plan.categories?.[0];
-  const dateLabel = plan.permanent
+  const occurrenceDate = plan.nextOccurrence && `${formatDate(plan.nextOccurrence.localDate, language)}${plan.nextOccurrence.localTime ? ` · ${plan.nextOccurrence.localTime}` : ''}`;
+  const dateLabel = occurrenceDate || (plan.permanent
     ? t('plan.permanent')
     : !plan.end_date || plan.start_date === plan.end_date
       ? formatDate(plan.start_date, language)
-      : t('date.range', { start: formatDate(plan.start_date, language), end: formatDate(plan.end_date, language) });
-  const price = plan.free ? t('plan.free') : (plan.price_text || t('plan.priceUnknown'));
+      : t('date.range', { start: formatDate(plan.start_date, language), end: formatDate(plan.end_date, language) }));
+  const commercePrice = plan.commerce?.price;
+  const price = commercePrice?.type === 'free' ? t('plan.free')
+    : commercePrice?.type === 'from' ? t('plan.priceFrom', { amount: commercePrice.amount })
+      : commercePrice?.type === 'fixed' ? t('plan.priceFixed', { amount: commercePrice.amount })
+        : plan.free ? t('plan.free') : (plan.price_text || t('plan.priceUnknown'));
   const place = plan.venue_name
     ? [plan.venue_name, plan.municipality].filter(Boolean).join(' · ')
     : [plan.municipality, plan.comarca].filter(Boolean).join(' · ') || t('plan.locationUnknown');

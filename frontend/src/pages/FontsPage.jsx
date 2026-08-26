@@ -42,8 +42,10 @@ export function FontsPage() {
               {source.license_url && <a href={source.license_url} target="_blank" rel="noreferrer">{t('sources.licenseLink')} <span aria-hidden="true">↗</span></a>}
             </div>
             {source.key === 'ticketmaster-discovery-feed' && <p className="source-policy-note">{t('fonts.ticketmaster')}</p>}
+            {source.key === 'fever' && <p className="source-policy-note">{t('fonts.fever')}</p>}
           </article>
         ))}
+        <article className="legal-source-card"><h2>Institut Cartogràfic i Geològic de Catalunya (ICGC)</h2><p>{t('fonts.icgc')}</p><div className="legal-links"><a href="https://www.icgc.cat/ca/Descarregues/Cartografia-vectorial/Divisions-administratives" target="_blank" rel="noreferrer">Divisions administratives ↗</a><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0 ↗</a></div></article>
         </div>
         <p className="source-corrections">{t('fonts.corrections')} <a href="mailto:contacte@tenspla.cat">contacte@tenspla.cat</a></p>
       </div>

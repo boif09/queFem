@@ -23,7 +23,9 @@ function compactDescription(value, limit = 160) {
 }
 
 export function buildEventJsonLd(plan, url, description) {
-  const hasStartDate = /^\d{4}-\d{2}-\d{2}$/.test(plan.start_date || '');
+  const occurrenceDate = plan.nextOccurrence?.localDate;
+  const hasOccurrence = /^\d{4}-\d{2}-\d{2}$/.test(occurrenceDate || '');
+  const hasStartDate = hasOccurrence || /^\d{4}-\d{2}-\d{2}$/.test(plan.start_date || '');
   const hasCoordinates = hasValidCoordinates(plan.latitude, plan.longitude);
   const address = [plan.address, plan.postal_code, plan.locality, plan.municipality, plan.province]
     .filter(Boolean).join(', ');
@@ -39,8 +41,14 @@ export function buildEventJsonLd(plan, url, description) {
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     eventStatus: 'https://schema.org/EventScheduled',
   };
-  event.startDate = plan.start_date;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(plan.end_date || '')) event.endDate = plan.end_date;
+  if (hasOccurrence) {
+    event.startDate = plan.nextOccurrence.localTime
+      ? `${occurrenceDate}T${plan.nextOccurrence.localTime}:00`
+      : occurrenceDate;
+  } else {
+    event.startDate = plan.start_date;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(plan.end_date || '')) event.endDate = plan.end_date;
+  }
   if (description) event.description = description;
 
   event.location = {
@@ -84,12 +92,17 @@ export function PlanDetailPage() {
 
   const plan = state.plan;
   const primaryCategory = plan.categories?.[0];
-  const date = plan.permanent
+  const occurrenceDate = plan.nextOccurrence && `${formatDate(plan.nextOccurrence.localDate, language)}${plan.nextOccurrence.localTime ? ` · ${plan.nextOccurrence.localTime}` : ''}`;
+  const date = occurrenceDate || (plan.permanent
     ? t('plan.permanent')
     : !plan.end_date || plan.start_date === plan.end_date
       ? formatDate(plan.start_date, language)
-      : t('date.range', { start: formatDate(plan.start_date, language), end: formatDate(plan.end_date, language) });
-  const price = plan.free ? t('plan.free') : (plan.price_text || t('plan.priceUnknown'));
+      : t('date.range', { start: formatDate(plan.start_date, language), end: formatDate(plan.end_date, language) }));
+  const commercePrice = plan.commerce?.price;
+  const price = commercePrice?.type === 'free' ? t('plan.free') : commercePrice?.type === 'from'
+    ? t('plan.priceFrom', { amount: commercePrice.amount }) : commercePrice?.type === 'fixed'
+      ? t('plan.priceFixed', { amount: commercePrice.amount }) : plan.commerce ? t('plan.priceProvider')
+        : plan.free ? t('plan.free') : (plan.price_text || t('plan.priceUnknown'));
   const back = location.state?.from || '/plans';
   const hasCoordinates = hasValidCoordinates(plan.latitude, plan.longitude);
   const locationLabel = plan.municipality ? `${language === 'es' ? ' en ' : ' a '}${plan.municipality}` : '';
@@ -141,6 +154,7 @@ export function PlanDetailPage() {
       <div className="container detail-layout">
         <div className="detail-main">
           {plan.description && <section className="content-section"><p className="section-kicker">{t('detail.about')}</p><div className="prose">{plan.description}</div></section>}
+          {plan.nextOccurrences?.length > 0 && <section className="content-section"><p className="section-kicker">{t('detail.nextDates')}</p><ul>{plan.nextOccurrences.map((occurrence, index) => <li key={`${occurrence.localDate}-${occurrence.localTime}-${index}`}>{formatDate(occurrence.localDate, language)}{occurrence.localTime ? ` · ${occurrence.localTime}` : ''}</li>)}</ul>{plan.hasMoreOccurrences && <p>{t('detail.moreDates')}</p>}</section>}
           <SourceAttribution sources={plan.sources} />
         </div>
         <aside className="practical-card">
@@ -162,6 +176,7 @@ export function PlanDetailPage() {
             )}
           </dl>
           <div className="official-links">
+            {plan.commerce?.provider === 'fever' && <><a className="button button-primary" href={plan.commerce.affiliateUrl} target="_blank" rel="noopener noreferrer">{t('detail.feverTickets')} <span aria-hidden="true">↗</span></a><p className="affiliate-disclosure">{t('detail.affiliateDisclosure')}</p></>}
             {plan.website_url && <a className="button button-primary" href={plan.website_url} target="_blank" rel="noreferrer">{t('detail.officialWeb')} <span aria-hidden="true">↗</span></a>}
             {plan.ticket_url && <a className="button button-secondary" href={plan.ticket_url} target="_blank" rel="noreferrer">{t('detail.tickets')} <span aria-hidden="true">↗</span></a>}
           </div>
