@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import 'dotenv/config';
 import { loadConfig } from '../config.js';
 import { openDatabase } from '../db/database.js';
+import { FeverImportLock } from '../fever/importLock.js';
 import { runFeverImport } from './feverImportRunner.js';
 
 export const REQUIRED_FEVER_MIGRATIONS = [
@@ -55,26 +56,32 @@ export async function importFeverProduction(config = loadConfig(), options = {})
     fetchImpl, now, manifestPath,
   } = options;
   if (!confirmProductionImport) throw new Error('Refusing production Fever import without --confirm-production-import');
-  const preflight = preflightFeverProductionImport(config);
-  logger.log(`PRODUCTION FEVER IMPORT\ndatabase: ${preflight.databasePath}\nsource enabled: false\nimages enabled: false\nmigrations: ok\nintegrity: ok\nProduction import requires a verified pre-import backup.`);
-  const summary = await runImport(config, {
-    databasePath: config.databasePath,
-    migrateDatabase: false,
-    allowMassRemoval: false,
-    ...(fetchImpl === undefined ? {} : { fetchImpl }),
-    ...(now === undefined ? {} : { now }),
-    ...(manifestPath === undefined ? {} : { manifestPath }),
-    beforeTransaction: ({ db }) => {
-      assertFeverDisabled(db);
-      assertIntegrity(db, 'immediately before persistence');
-    },
-    afterPersist: (db, result) => {
-      assertFeverDisabled(db);
-      if (result.integrityCheck !== 'ok') throw new Error('SQLite integrity_check failed after import; stop and follow the rollback runbook');
-    },
-  });
-  logger.log(`PRODUCTION FEVER IMPORT COMPLETE: ${JSON.stringify(summary)}`);
-  return summary;
+  const lock = new FeverImportLock(config.databasePath);
+  if (!await lock.acquire()) throw new Error('Another Fever import is already active; manual import refused');
+  try {
+    const preflight = preflightFeverProductionImport(config);
+    logger.log(`PRODUCTION FEVER IMPORT\ndatabase: ${preflight.databasePath}\nsource enabled: false\nimages enabled: false\nmigrations: ok\nintegrity: ok\nProduction import requires a verified pre-import backup.`);
+    const summary = await runImport(config, {
+      databasePath: config.databasePath,
+      migrateDatabase: false,
+      allowMassRemoval: false,
+      ...(fetchImpl === undefined ? {} : { fetchImpl }),
+      ...(now === undefined ? {} : { now }),
+      ...(manifestPath === undefined ? {} : { manifestPath }),
+      beforeTransaction: ({ db }) => {
+        assertFeverDisabled(db);
+        assertIntegrity(db, 'immediately before persistence');
+      },
+      afterPersist: (db, result) => {
+        assertFeverDisabled(db);
+        if (result.integrityCheck !== 'ok') throw new Error('SQLite integrity_check failed after import; stop and follow the rollback runbook');
+      },
+    });
+    logger.log(`PRODUCTION FEVER IMPORT COMPLETE: ${JSON.stringify(summary)}`);
+    return summary;
+  } finally {
+    await lock.release();
+  }
 }
 
 export function parseArguments(argv) {

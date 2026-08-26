@@ -32,21 +32,26 @@ export async function runFeverImport(config, {
       db, resolver, snapshotChecksum: loaded.manifest.snapshotSha256,
       lookaheadDays: config.feverLookaheadDays, ...(now ? { now } : {}),
     });
-    const summary = await importer.run(download, { allowMassRemoval, beforeTransaction });
-    summary.performance.downloadMs = downloadMs;
-    summary.performance.snapshotLoadMs = snapshotLoadMs;
-    for (const key of Object.keys(summary.performance)) summary.performance[key] = Number(summary.performance[key].toFixed(1));
-    summary.integrityCheck = db.pragma('integrity_check', { simple: true });
-    summary.databaseBytesBefore = databaseBytesBefore;
-    summary.databaseBytesAfter = fs.statSync(resolvedPath).size;
-    summary.walBytes = fs.existsSync(`${resolvedPath}-wal`) ? fs.statSync(`${resolvedPath}-wal`).size : 0;
-    summary.persistedCounts = db.prepare(`SELECT
-      COUNT(DISTINCT p.id) plans, COUNT(DISTINCT ps.id) plan_sources,
-      COUNT(DISTINCT CASE WHEN o.status='active' THEN o.id END) active_occurrences,
-      COUNT(DISTINCT CASE WHEN o.status='inactive' THEN o.id END) inactive_occurrences
-      FROM plans p JOIN plan_sources ps ON ps.plan_id=p.id JOIN sources s ON s.id=ps.source_id
-      LEFT JOIN plan_occurrences o ON o.plan_source_id=ps.id WHERE s.key='fever'`).get();
-    afterPersist?.(db, summary);
+    const summary = await importer.run(download, {
+      allowMassRemoval,
+      beforeTransaction,
+      afterTransaction: ({ summary: result }) => {
+        result.performance.downloadMs = downloadMs;
+        result.performance.snapshotLoadMs = snapshotLoadMs;
+        for (const key of Object.keys(result.performance)) result.performance[key] = Number(result.performance[key].toFixed(1));
+        result.integrityCheck = db.pragma('integrity_check', { simple: true });
+        result.databaseBytesBefore = databaseBytesBefore;
+        result.databaseBytesAfter = fs.statSync(resolvedPath).size;
+        result.walBytes = fs.existsSync(`${resolvedPath}-wal`) ? fs.statSync(`${resolvedPath}-wal`).size : 0;
+        result.persistedCounts = db.prepare(`SELECT
+          COUNT(DISTINCT p.id) plans, COUNT(DISTINCT ps.id) plan_sources,
+          COUNT(DISTINCT CASE WHEN o.status='active' THEN o.id END) active_occurrences,
+          COUNT(DISTINCT CASE WHEN o.status='inactive' THEN o.id END) inactive_occurrences
+          FROM plans p JOIN plan_sources ps ON ps.plan_id=p.id JOIN sources s ON s.id=ps.source_id
+          LEFT JOIN plan_occurrences o ON o.plan_source_id=ps.id WHERE s.key='fever'`).get();
+        afterPersist?.(db, result);
+      },
+    });
     logger.log(`Fever import: ${JSON.stringify(summary)}`);
     return summary;
   } finally { db.close(); }

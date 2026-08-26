@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { openDatabase } from '../backend/src/db/database.js';
 import { migrate } from '../backend/src/db/migrate.js';
+import { FeverImportLock } from '../backend/src/fever/importLock.js';
 import {
   importFeverProduction, parseArguments, preflightFeverProductionImport,
 } from '../backend/src/jobs/importFever.js';
@@ -99,6 +100,20 @@ test('production command rejects programmatic database, migration and mass-remov
     ]) {
       await assert.rejects(importFeverProduction(config, { confirmProductionImport: true, ...options }), /Unsafe or unsupported/);
     }
+  });
+});
+
+test('manual Fever import shares the lock with scheduled executions', async () => {
+  await withDatabase(async ({ config }) => {
+    const lock = new FeverImportLock(config.databasePath);
+    assert.equal(await lock.acquire(), true);
+    let runnerCalled = false;
+    await assert.rejects(importFeverProduction(config, {
+      confirmProductionImport: true,
+      runImport: async () => { runnerCalled = true; },
+    }), /already active/);
+    assert.equal(runnerCalled, false);
+    await lock.release();
   });
 });
 

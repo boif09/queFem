@@ -158,7 +158,9 @@ export class FeverImporter {
     return value;
   }
 
-  async run(download, { allowMassRemoval = false, failAfterProduct = null, beforeTransaction = null } = {}) {
+  async run(download, {
+    allowMassRemoval = false, failAfterProduct = null, beforeTransaction = null, afterTransaction = null,
+  } = {}) {
     const source = this.sources.find('fever');
     if (!source) throw new Error('Fever source is not registered');
     const prepared = this.prepare(download);
@@ -181,6 +183,7 @@ export class FeverImporter {
         unmapped: prepared.candidates.filter(({ categorySlugs }) => categorySlugs.length === 0).length,
       },
       imagesMetadata: prepared.candidates.filter(({ imageUrl }) => Boolean(imageUrl)).length,
+      catalogCommitted: false,
     };
     try {
       const finish = this.db.prepare(`UPDATE import_runs SET finished_at=?,status=?,fetched=?,inserted=?,
@@ -225,15 +228,22 @@ export class FeverImporter {
         summary.sharedPreserved += retired.sharedPlansPreserved;
         summary.writes.sources += retired.sourcesRemoved;
         summary.writes.plans += retired.plansInactivated;
-        finish.run(this.now().toISOString(), 'completed', download.items.length, summary.inserted,
-          summary.updated + summary.reactivated, summary.ambiguous + summary.invalidAffiliate,
-          0, 0, null, JSON.stringify(summary), runId);
       })();
       summary.performance.transactionMs = performance.now() - transactionStarted;
-      summary.importRun = { id: runId, status: 'completed' };
+      summary.catalogCommitted = true;
+      try {
+        afterTransaction?.({ db: this.db, source, summary, runId });
+      } catch (error) {
+        throw new Error(`Post-persistence check failed after catalog commit: ${error.message}`, { cause: error });
+      }
+      summary.importRun = { id: runId, status: 'completed', catalogCommitted: true };
+      finish.run(this.now().toISOString(), 'completed', download.items.length, summary.inserted,
+        summary.updated + summary.reactivated, summary.ambiguous + summary.invalidAffiliate,
+        0, 0, null, JSON.stringify(summary), runId);
       return summary;
     } catch (error) {
       try {
+        summary.importRun = { id: runId, status: 'failed', catalogCommitted: summary.catalogCommitted };
         this.db.prepare(`UPDATE import_runs SET finished_at=?,status=?,fetched=?,inserted=?,
           updated=?,skipped=?,invalid=?,errors=?,error_message=?,summary_json=? WHERE id=?`
         ).run(this.now().toISOString(), 'failed', download.items.length, 0, 0, 0, 0, 1,

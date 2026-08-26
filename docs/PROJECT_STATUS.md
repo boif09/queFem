@@ -1,6 +1,6 @@
 # Tens Pla? — Estado del proyecto
 
-Última revisión documental: 2026-08-25.
+Última revisión documental: 2026-08-26.
 
 Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mismo y qué toca hacer?». La arquitectura está en [`ARCHITECTURE.md`](ARCHITECTURE.md), las fuentes en [`DATA_SOURCES.md`](DATA_SOURCES.md) y la operación en [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
@@ -12,7 +12,7 @@ Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mism
 - El SEO público está desplegado: metadata por ruta, canonical, Open Graph/Twitter, Event JSON-LD conservador, `robots.txt` y sitemap público. Google Search Console ya está verificado.
 - Hay backups automáticos y probados de SQLite, con comprobaciones y copia externa mediante `rclone` al destino de Google Drive `TensPla/backups`.
 - La rotación de logs de Nginx está configurada y verificada.
-- Ticketmaster está implementado y validado localmente. Su importación, cron e imágenes no están activados en producción según el último estado confirmado; la configuración efectiva debe verificarse en el servidor antes de operar.
+- Gencat, Ticketmaster y Fever están activos en producción. Fever tiene source habilitada, imágenes same-origin activadas y una primera importación real completada; la configuración efectiva de cron debe verificarse en el servidor antes de operar.
 
 La infraestructura de producción es parcialmente externa a Git. «Confirmado» describe el estado conocido a fecha de esta revisión, no sustituye la comprobación previa a una operación.
 
@@ -29,10 +29,9 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - Soporte genérico de ocurrencias discretas vinculado a procedencias: un plan con cualquier historial de occurrences es occurrence-aware y solo sus occurrences activas participan en visibilidad, filtros y orden; el fallback legacy se reserva a planes sin ninguna occurrence histórica. Admite sesiones date-only sin inventar hora. No incluye importación, composición temporal multi-source avanzada ni UI específica de sesiones.
 - Fever M3 preparado sin persistencia: normalización de productos elegibles y parser determinista de sesiones `Manufacturer`, con semántica `Europe/Madrid`, horizonte inclusivo y dry-run real enteramente en memoria. No activa Fever ni escribe productos u occurrences en SQLite.
 - Fever M4A preparado sin persistencia: resolución administrativa local por point-in-polygon sobre cartografía oficial ICGC 1:5.000, con códigos/nombres de municipio, comarca y provincia, updater explícito y dry-run read-only. No crea fuentes ni planes Fever y no modifica SQLite.
-- Fever M4B validado únicamente en SQLite temporal: persistencia Fever standalone por `CatalogItemId`, geography source-specific, occurrences, idempotencia, reconciliación y guards de feed completo/conteo. No está activado ni publicado y la SQLite real no ha sido migrada.
-- Fever M5A prepara categorías, precio estructurado, occurrences públicas, CTA/disclosure afiliado, imágenes same-origin opcionales y atribución ICGC. Fever continúa deshabilitado y no publicado; la activación queda fuera de alcance.
-- Fever M5B valida rendimiento y rehearsal operativo solo en un clon temporal: la query exact-day se optimizó con cobertura M2, el catálogo actual pasó el enable/disable reversible y la SQLite real no se tocó. Fever continúa disabled; M5C requerirá preparación operativa autorizada, no publicación automática.
-- M5C prepara y prueba localmente `fever:import`, un entrypoint separado con confirmación explícita, gates de migrations/integridad/source/images y sin override de mass removal. No está desplegado ni se ha importado Fever en producción; Fever e imágenes continúan disabled y no hay cron.
+- Fever M4B/M5A/M5B prepararon persistencia por `CatalogItemId`, geography source-specific, occurrences, idempotencia, guards, categorías, precio, CTA e imágenes; su validación local antecedió la primera importación real.
+- M5C aportó el entrypoint manual protegido para la primera importación. Fever está ahora live, con source e imágenes habilitadas, y la primera importación terminó con integridad correcta.
+- La automatización recurrente Fever prepara `fever:import:scheduled`: preflight de migrations/source/integridad, lock compartido con el modo manual, guards sin bypass e imágenes Fever soportadas. El cron queda pendiente de validación manual del segundo import y de instalación explícita por el operador.
 
 ## AUTONOMOUS WORK
 
@@ -52,7 +51,7 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## BLOCKED
 
-- **Activación de Ticketmaster en producción:** depende de aprobación final legal/contractual y de una decisión explícita de activación. Solo después procede verificar configuración, preparar backup, ejecutar dry-run y decidir importación, imágenes y cron.
+- No hay bloqueos técnicos activos documentados; las intervenciones de producción siguen requiriendo verificación operativa previa.
 
 ## LATER / TECHNICAL DEBT
 
@@ -74,7 +73,7 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 | Backup SQLite y automatización | Confirmado externamente y probado | Revisar última ejecución y restaurabilidad |
 | Copia `rclone` a `TensPla/backups` | Confirmado externamente | Revisar último envío sin exponer credenciales ni IDs |
 | Logrotate | Confirmado externamente y verificado | Revisar configuración efectiva y rotaciones si se va a modificar |
-| Ticketmaster en producción | Último estado confirmado: desactivado | Requiere verificación en servidor y aprobación previa |
+| Ticketmaster en producción | Activo según el estado confirmado | Verificar cron y configuración efectiva antes de operar |
 | CSP | No aplicada según el último estado confirmado | Requiere prueba Report-Only y autorización |
 
 El roadmap operativo separa AUTONOMOUS WORK, PRODUCT DECISIONS, OPERATOR / PRODUCTION, BLOCKED y LATER / TECHNICAL DEBT. No existe una definición fiable de prioridades `P1`, `P2`, etc.; no deben usarse para decidir trabajo actual.
