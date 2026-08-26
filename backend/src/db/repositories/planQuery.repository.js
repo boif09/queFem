@@ -7,6 +7,7 @@ import { retainedPlanWhere, retentionCutoff } from '../../retention/eventRetenti
 import {
   activeOccurrenceDate,
   activeOccurrenceExists,
+  activeOccurrencePlanIds,
   anyOccurrenceExists,
 } from '../../occurrences/occurrenceSql.js';
 import { normalizeFeverPrice } from '../../fever/publicationPolicy.js';
@@ -44,9 +45,11 @@ function mapPlan(row) {
     image_reuse_allowed: row.image_reuse_allowed === 1,
     image_url: row.image_reuse_allowed === 1 ? row.image_url : null,
   };
-  if (row.next_occurrence_date) plan.nextOccurrence = { localDate: row.next_occurrence_date, localTime: row.next_occurrence_time };
-  delete plan.next_occurrence_date;
-  delete plan.next_occurrence_time;
+  if (row.next_occurrence) {
+    const [localDate, localTime] = row.next_occurrence.split('\u001f');
+    plan.nextOccurrence = { localDate, localTime: localTime || null };
+  }
+  delete plan.next_occurrence;
   return plan;
 }
 
@@ -76,9 +79,9 @@ export class PlanQueryRepository {
         )`,
         `(${activeOccurrenceExists(alias, '', { enabledOnly: true })} OR NOT (${anyOccurrenceExists(alias, { enabledOnly: true })}))`,
         `${alias}.quality_score >= ?`,
-        retainedPlanWhere(alias),
+        retainedPlanWhere(alias, { enabledOnly: true }),
         `NOT (${outsideCataloniaWhere(alias)})`,
-        `NOT (${temporallyInvalidWhere(alias)})`,
+        `NOT (${temporallyInvalidWhere(alias, { enabledOnly: true })})`,
       ],
       parameters: [
         QUALITY_THRESHOLD,
@@ -150,7 +153,7 @@ export class PlanQueryRepository {
       parameters.push(filters.dateFrom, filters.dateFrom);
     } else if (filters.date) {
       clauses.push(`(
-        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date = ?', { enabledOnly: true })}
+        ${activeOccurrencePlanIds('AND occurrence_o.local_date = ?', { enabledOnly: true })}
         OR (NOT (${hasAnyOccurrences}) AND (
           p.permanent = 1 OR
           (p.start_date IS NOT NULL AND p.end_date IS NOT NULL AND p.start_date <= ? AND p.end_date >= ?)
@@ -217,9 +220,7 @@ export class PlanQueryRepository {
             WHEN p.permanent = 0 THEN 1
             ELSE 2
           END,
-          CASE WHEN ${hasAnyOccurrences}
-            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date = ?', { enabledOnly: true })}
-            ELSE p.start_date END DESC,
+          CASE WHEN ${hasAnyOccurrences} THEN ? ELSE p.start_date END DESC,
           p.id ASC`
         : `p.permanent ASC,
           CASE WHEN ${hasAnyOccurrences}
@@ -262,15 +263,14 @@ export class PlanQueryRepository {
         p.latitude, p.longitude, p.website_url, p.ticket_url,
         p.image_url, p.image_reuse_allowed, p.family_friendly,
         p.indoor, p.outdoor, p.featured, p.quality_score,
-        (SELECT o.local_date FROM plan_occurrences o JOIN plan_sources ops ON ops.id=o.plan_source_id JOIN sources os ON os.id=ops.source_id
-          WHERE ops.plan_id=p.id AND os.enabled=1 AND o.status='active' AND o.local_date>=? ORDER BY o.local_date,o.local_time LIMIT 1) next_occurrence_date,
-        (SELECT o.local_time FROM plan_occurrences o JOIN plan_sources ops ON ops.id=o.plan_source_id JOIN sources os ON os.id=ops.source_id
-          WHERE ops.plan_id=p.id AND os.enabled=1 AND o.status='active' AND o.local_date>=? ORDER BY o.local_date,o.local_time LIMIT 1) next_occurrence_time
+        (SELECT o.local_date || char(31) || COALESCE(o.local_time, '')
+          FROM plan_occurrences o JOIN plan_sources ops ON ops.id=o.plan_source_id JOIN sources os ON os.id=ops.source_id
+          WHERE ops.plan_id=p.id AND os.enabled=1 AND o.status='active' AND o.local_date>=? ORDER BY o.local_date,o.local_time LIMIT 1) next_occurrence
       FROM plans p
       WHERE ${where.sql}
       ORDER BY ${orderBy}
       LIMIT ? OFFSET ?
-    `).all(retentionCutoff(0, this.now()), retentionCutoff(0, this.now()), ...where.parameters, ...orderParameters, filters.limit, offset);
+    `).all(retentionCutoff(0, this.now()), ...where.parameters, ...orderParameters, filters.limit, offset);
 
     const plans = rows.map(mapPlan);
     this.attachCategories(plans, filters.lang);

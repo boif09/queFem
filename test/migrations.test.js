@@ -54,6 +54,7 @@ test('creates the current schema including occurrences and seeds approved source
     const occurrenceIndexes = new Set(db.pragma('index_list(plan_occurrences)').map(({ name }) => name));
     assert.ok(occurrenceIndexes.has('idx_plan_occurrences_source_date'));
     assert.ok(occurrenceIndexes.has('idx_plan_occurrences_date_source'));
+    assert.ok(occurrenceIndexes.has('idx_plan_occurrences_source_status_date_time'));
     assert.ok([...occurrenceIndexes].some((name) => name.startsWith('sqlite_autoindex_plan_occurrences')));
     const geographyColumns = new Set(db.pragma('table_info(plan_source_geography)').map(({ name }) => name));
     for (const column of ['plan_source_id', 'resolution_status', 'latitude', 'longitude',

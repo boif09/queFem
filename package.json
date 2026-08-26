@@ -18,6 +18,7 @@
     "geography:icgc:update": "node backend/src/jobs/updateIcgcGeography.js",
     "fever:geography:dry-run": "node backend/src/jobs/dryRunFeverGeography.js",
     "fever:import:temp": "node backend/src/jobs/importFeverTemp.js",
+    "fever:benchmark:temp": "node backend/src/jobs/benchmarkFeverM5b.js",
     "ticketmaster:images:sync": "node backend/src/jobs/syncTicketmasterImages.js",
     "ticketmaster:remove": "node backend/src/jobs/removeTicketmasterEvent.js",
     "start": "node backend/src/server.js",

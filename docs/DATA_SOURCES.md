@@ -84,7 +84,7 @@ Importer:
 
 ## Fever
 
-Status: TEMPORARY SQLITE REHEARSAL IMPLEMENTED; NO PRODUCTION ACTIVATION
+Status: TEMPORARY SQLITE REHEARSAL IMPLEMENTED; M5B PERFORMANCE VALIDATED; NO PRODUCTION ACTIVATION
 Integration only through the approved Impact API/feed. M1 downloads the catalogue, M3 normalizes products/sessions and M4A resolves official geography. M4B can persist and reconcile exclusively in a path-guarded temporary SQLite. M5A prepares primary `ImageUrl` metadata and a same-origin proxy/cache, but `FEVER_IMAGES_ENABLED=false` remains the safe default and activation requires prior confirmation of rights and conditions. Fever does not deduplicate against other sources or expose publicly by default. Public occurrence queries only consider enabled sources; category ownership remains unresolved for exceptional shared plans because `plan_categories` has no provenance. Occurrence-aware performance requires a production benchmark before activation. See [`FEVER_NORMALIZATION.md`](FEVER_NORMALIZATION.md), [`FEVER_PERSISTENCE.md`](FEVER_PERSISTENCE.md) and [`FEVER_PUBLICATION_READINESS.md`](FEVER_PUBLICATION_READINESS.md).
 
 DO NOT SCRAPE.

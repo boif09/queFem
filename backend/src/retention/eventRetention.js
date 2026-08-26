@@ -8,13 +8,13 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('en-CA', {
   day: '2-digit',
 });
 
-export function expiredPlanWhere(alias = '') {
+export function expiredPlanWhere(alias = '', { enabledOnly = false } = {}) {
   if (alias && !/^[a-z][a-z0-9_]*$/i.test(alias)) {
     throw new TypeError('Àlies SQL no vàlid.');
   }
   const prefix = alias ? `${alias}.` : '';
   const planReference = alias || 'plans';
-  const effectiveEndDate = effectiveOccurrenceEndDate(planReference);
+  const effectiveEndDate = effectiveOccurrenceEndDate(planReference, { enabledOnly });
   return `
     ${prefix}permanent = 0
     AND ${effectiveEndDate} IS NOT NULL
@@ -22,13 +22,13 @@ export function expiredPlanWhere(alias = '') {
   `;
 }
 
-export function retainedPlanWhere(alias = '') {
+export function retainedPlanWhere(alias = '', { enabledOnly = false } = {}) {
   if (alias && !/^[a-z][a-z0-9_]*$/i.test(alias)) {
     throw new TypeError('Àlies SQL no vàlid.');
   }
   const prefix = alias ? `${alias}.` : '';
   const planReference = alias || 'plans';
-  const effectiveEndDate = effectiveOccurrenceEndDate(planReference);
+  const effectiveEndDate = effectiveOccurrenceEndDate(planReference, { enabledOnly });
   return `(
     ${prefix}permanent = 1
     OR ${effectiveEndDate} IS NULL

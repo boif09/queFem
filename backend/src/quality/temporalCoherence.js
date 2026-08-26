@@ -85,13 +85,13 @@ export function isTemporallyInvalid(plan, options) {
   return temporalCoherenceIssue(plan, options) !== null;
 }
 
-export function temporallyInvalidWhere(alias = '') {
+export function temporallyInvalidWhere(alias = '', { enabledOnly = false } = {}) {
   if (alias && !/^[a-z][a-z0-9_]*$/i.test(alias)) {
     throw new TypeError('Àlies SQL no vàlid.');
   }
   const prefix = alias ? `${alias}.` : '';
   const planReference = alias || 'plans';
-  return `NOT (${anyOccurrenceExists(planReference)}) AND is_temporally_invalid(
+  return `NOT (${anyOccurrenceExists(planReference, { enabledOnly })}) AND is_temporally_invalid(
     ${prefix}kind, ${prefix}permanent, ${prefix}start_date, ${prefix}end_date, ?
   ) = 1`;
 }

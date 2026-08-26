@@ -14,9 +14,9 @@ import { withTestDatabase } from './helpers.js';
 
 const NOW = new Date('2026-08-20T12:00:00.000Z');
 
-function seedImage(db, url = 'https://s1.ticketm.net/served.jpg') {
+function seedImage(db, url = 'https://s1.ticketm.net/served.jpg', sourceKey = 'ticketmaster-discovery-feed') {
   const now = NOW.toISOString();
-  const source = db.prepare("SELECT id FROM sources WHERE key='ticketmaster-discovery-feed'").get();
+  const source = db.prepare('SELECT id FROM sources WHERE key=?').get(sourceKey);
   const planId = Number(db.prepare(`INSERT INTO plans (
     kind, fingerprint, original_title, title_ca, start_date, end_date, permanent,
     image_reuse_allowed, featured, quality_score, status, created_at, updated_at
@@ -32,6 +32,33 @@ function seedImage(db, url = 'https://s1.ticketm.net/served.jpg') {
     .run(planSourceId, url, now, now, now).lastInsertRowid);
   return { planId, planSourceId, imageId };
 }
+
+test('Fever media remains off independently, then serves a controlled miss, hit and no-image fallback', async () => {
+  await withTestDatabase(async (db) => {
+    const cacheDirectory = temporaryDirectory('tenspla-fever-media-');
+    try {
+      db.prepare("UPDATE sources SET enabled=1 WHERE key='fever'").run();
+      const { imageId } = seedImage(db, 'https://applications-media.feverup.com/served.jpg', 'fever');
+      let fetches = 0;
+      const disabled = createApp({ db, now: () => NOW, feverImagesEnabled: false, feverImageCachePath: cacheDirectory });
+      assert.equal((await request(disabled).get(`/api/media/fever/${imageId}`)).status, 404);
+      const enabled = createApp({
+        db, now: () => NOW, feverImagesEnabled: true, feverImageCachePath: cacheDirectory,
+        feverImageFetchImpl: async (input) => {
+          fetches += 1;
+          assert.equal(String(input), 'https://applications-media.feverup.com/served.jpg');
+          return new Response(Buffer.from([0xff, 0xd8, 0xff]), { status: 200, headers: { 'content-type': 'image/jpeg' } });
+        },
+      });
+      assert.equal((await request(enabled).get(`/api/media/fever/${imageId}`)).headers['x-tenspla-cache'], 'MISS');
+      assert.equal((await request(enabled).get(`/api/media/fever/${imageId}`)).headers['x-tenspla-cache'], 'HIT');
+      assert.equal(fetches, 1);
+      assert.equal((await request(enabled).get('/api/media/fever/999999')).status, 404);
+    } finally {
+      fs.rmSync(cacheDirectory, { recursive: true, force: true });
+    }
+  });
+});
 
 function temporaryDirectory(prefix) {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));

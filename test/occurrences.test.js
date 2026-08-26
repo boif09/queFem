@@ -4,8 +4,9 @@ import request from 'supertest';
 import { createApp } from '../backend/src/app.js';
 import { PlanOccurrenceRepository } from '../backend/src/db/repositories/planOccurrence.repository.js';
 import { PlanQueryRepository } from '../backend/src/db/repositories/planQuery.repository.js';
+import { activeOccurrencePlanIds } from '../backend/src/occurrences/occurrenceSql.js';
 import { purgeExpiredPlans } from '../backend/src/retention/eventRetention.js';
-import { purgeTemporallyInvalidPlans } from '../backend/src/quality/temporalCoherence.js';
+import { countTemporallyInvalidPlans, purgeTemporallyInvalidPlans } from '../backend/src/quality/temporalCoherence.js';
 import { withTestDatabase } from './helpers.js';
 
 const NOW = new Date('2026-08-25T10:00:00.000Z');
@@ -367,6 +368,40 @@ test('public occurrence semantics and detail sources ignore disabled shared prov
   });
 });
 
+test('public retention ignores a disabled shared source while internal retention keeps M2 history', async () => {
+  await withTestDatabase(async (db) => {
+    const planId = insertPlan(db, 'shared-retention-disabled', '2026-08-20', '2026-08-20');
+    insertSource(db, planId, 'shared-retention-gencat');
+    const fever = insertSource(db, planId, 'shared-retention-fever', 'fever');
+    new PlanOccurrenceRepository(db).upsert(fever, occurrence('future-disabled', '2026-09-10'));
+    const app = appFor(db);
+    const isVisible = async () => (await request(app).get('/api/plans?limit=100')).body.data.some(({ id }) => id === planId);
+    assert.equal(await isVisible(), false);
+    assert.equal(purgeExpiredPlans(db, { retentionDays: 0, now: NOW }).plans, 0);
+    db.prepare("UPDATE sources SET enabled=1 WHERE key='fever'").run();
+    assert.equal(await isVisible(), true);
+    db.prepare("UPDATE sources SET enabled=0 WHERE key='fever'").run();
+    assert.equal(await isVisible(), false);
+  });
+});
+
+test('public temporal coherence ignores disabled shared occurrence history while internal checks retain M2 semantics', async () => {
+  await withTestDatabase(async (db) => {
+    const planId = insertPlan(db, 'shared-coherence-disabled', '2026-08-25', '2924-01-01');
+    insertSource(db, planId, 'shared-coherence-gencat');
+    const fever = insertSource(db, planId, 'shared-coherence-fever', 'fever');
+    new PlanOccurrenceRepository(db).upsert(fever, occurrence('future-disabled', '2026-09-10'));
+    const app = appFor(db);
+    const isVisible = async () => (await request(app).get('/api/plans?limit=100')).body.data.some(({ id }) => id === planId);
+    assert.equal(await isVisible(), false);
+    assert.equal(countTemporallyInvalidPlans(db, { now: NOW }), 0);
+    db.prepare("UPDATE sources SET enabled=1 WHERE key='fever'").run();
+    assert.equal(await isVisible(), true);
+    db.prepare("UPDATE sources SET enabled=0 WHERE key='fever'").run();
+    assert.equal(await isVisible(), false);
+  });
+});
+
 test('retention uses active occurrence dates and protects a recurrent plan with a future session', () => {
   withTestDatabase((db) => {
     const futurePlan = insertPlan(db, 'retention-future', '2024-01-01', '2024-01-02');
@@ -418,7 +453,7 @@ test('critical occurrence lookup uses the source/date index', () => {
       SELECT 1 FROM plan_occurrences
       WHERE plan_source_id = ? AND status = 'active' AND local_date >= ? LIMIT 1
     `).all(sourceId, '2026-08-25').map(({ detail: value }) => value).join('\n');
-    assert.match(detail, /idx_plan_occurrences_source_date/);
+    assert.match(detail, /idx_plan_occurrences_source_status_date_time/);
   });
 });
 
@@ -439,7 +474,18 @@ test('representative plan range query keeps occurrence subqueries indexed', () =
       .all(...where.parameters).map(({ detail }) => detail);
     assert.ok(details.some((detail) => /(?:SCAN|SEARCH) p\b/.test(detail)));
     assert.ok(details.some((detail) => detail.includes('idx_plan_sources_plan')));
-    assert.ok(details.some((detail) => detail.includes('idx_plan_occurrences_source_date')));
+    assert.ok(details.some((detail) => detail.includes('idx_plan_occurrences_source_status_date_time')));
     assert.equal(details.some((detail) => /SCAN (?:occurrence_o|plan_occurrences)/.test(detail)), false);
+  });
+});
+
+test('exact-day occurrence selection scans the date index once instead of correlating per plan', () => {
+  withTestDatabase((db) => {
+    const planId = insertPlan(db, 'exact-day-plan', '2026-01-01', '2026-01-02');
+    const sourceId = insertSource(db, planId, 'exact-day-source');
+    new PlanOccurrenceRepository(db).upsert(sourceId, occurrence('exact-day', '2026-08-26'));
+    const details = db.prepare(`EXPLAIN QUERY PLAN SELECT p.id FROM plans p WHERE ${activeOccurrencePlanIds('AND occurrence_o.local_date = ?', { enabledOnly: true })}`)
+      .all('2026-08-26').map(({ detail }) => detail).join('\n');
+    assert.match(details, /idx_plan_occurrences_date_source/);
   });
 });
