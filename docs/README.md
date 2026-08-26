@@ -19,6 +19,7 @@ Ruta recomendada para una tarea: [`../AGENTS.md`](../AGENTS.md) → documento de
 - [`ICGC_GEOGRAPHY.md`](ICGC_GEOGRAPHY.md): snapshot oficial ICGC, contrato del resolver territorial y dry-run geográfico Fever M4A.
 - [`FEVER_PERSISTENCE.md`](FEVER_PERSISTENCE.md): arquitectura M4B, reconciliación y barrera obligatoria de SQLite temporal.
 - [`FEVER_M5B_REHEARSAL.md`](FEVER_M5B_REHEARSAL.md): benchmark occurrence-aware, EXPLAIN, rehearsal temporal y runbook futuro; Fever sigue disabled.
+- [`FEVER_M5C_PRODUCTION_RUNBOOK.md`](FEVER_M5C_PRODUCTION_RUNBOOK.md): gates y procedimiento manual futuro para la primera importación Fever disabled.
 - [`IMAGE_CREDITS.md`](IMAGE_CREDITS.md): procedencia y licencia de assets visuales.
 - [`SPECIFICATION.md`](SPECIFICATION.md): especificación técnica inicial y visión de producto. Contiene alcance histórico/futuro; no usarla para inferir que algo ya está implementado.
 

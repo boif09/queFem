@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { FeverImporter } from '../backend/src/importers/fever.importer.js';
+import { analyzeFeverNormalization } from '../backend/src/fever/normalizationAnalysis.js';
 import { PlanQueryRepository } from '../backend/src/db/repositories/planQuery.repository.js';
 import { assertTemporaryDatabasePath, importFeverTemp } from '../backend/src/jobs/importFeverTemp.js';
 import { withTestDatabase } from './helpers.js';
@@ -277,6 +278,32 @@ test('fatal preparation and transaction errors never leave partial Fever changes
     const fatalResolver = importer(db, { resolver: { ...resolver, resolve: () => { throw new Error('resolver fatal'); } } });
     await assert.rejects(fatalResolver.run(download([item('resolver')])), /resolver fatal/);
     assert.deepEqual(db.prepare('SELECT COUNT(*) plans,(SELECT COUNT(*) FROM plan_sources) sources FROM plans').get(), before);
+  });
+});
+
+test('pre-transaction hook sees a Fever source change made during preparation and blocks persistence', async () => {
+  await withTestDatabase(async (db) => {
+    const service = importer(db, {
+      analyzeImpl: (...args) => {
+        const result = analyzeFeverNormalization(...args);
+        db.prepare("UPDATE sources SET enabled=1 WHERE key='fever'").run();
+        return result;
+      },
+    });
+    const before = db.prepare(`SELECT
+      (SELECT COUNT(*) FROM plans) plans,
+      (SELECT COUNT(*) FROM plan_sources) sources,
+      (SELECT COUNT(*) FROM plan_occurrences) occurrences`).get();
+    await assert.rejects(service.run(download([item('race')]), {
+      beforeTransaction: ({ db: hookDb }) => {
+        assert.equal(hookDb.prepare("SELECT enabled FROM sources WHERE key='fever'").get().enabled, 1);
+        throw new Error('Fever source changed during preparation');
+      },
+    }), /changed during preparation/);
+    assert.deepEqual(db.prepare(`SELECT
+      (SELECT COUNT(*) FROM plans) plans,
+      (SELECT COUNT(*) FROM plan_sources) sources,
+      (SELECT COUNT(*) FROM plan_occurrences) occurrences`).get(), before);
   });
 });
 

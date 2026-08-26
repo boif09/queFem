@@ -4,11 +4,7 @@ import { fileURLToPath } from 'node:url';
 import 'dotenv/config';
 import { loadConfig } from '../config.js';
 import { openDatabase } from '../db/database.js';
-import { migrate } from '../db/migrate.js';
-import { ImpactCatalogClient } from '../fever/impactClient.js';
-import { readAndVerifyIcgcSnapshot } from '../geography/icgcSnapshot.js';
-import { CataloniaAdministrativeResolver } from '../geography/cataloniaAdministrativeResolver.js';
-import { FeverImporter } from '../importers/fever.importer.js';
+import { runFeverImport } from './feverImportRunner.js';
 import { DEFAULT_ICGC_MANIFEST_PATH } from './updateIcgcGeography.js';
 
 function comparablePath(value) {
@@ -58,46 +54,9 @@ export async function importFeverTemp(config = loadConfig(), {
 } = {}) {
   assertTemporaryDatabasePath(databasePath, config.databasePath);
   if (cloneReal) await cloneDatabaseReadonly(config.databasePath, databasePath);
-  const client = new ImpactCatalogClient({
-    accountSid: config.impactAccountSid, authToken: config.impactAuthToken, fetchImpl,
+  return runFeverImport(config, {
+    databasePath, migrateDatabase: true, allowMassRemoval, fetchImpl, now, manifestPath, logger,
   });
-  const downloadStarted = performance.now();
-  const download = await client.discoverSpain();
-  const downloadMs = performance.now() - downloadStarted;
-  const snapshotStarted = performance.now();
-  const loaded = await readAndVerifyIcgcSnapshot(manifestPath);
-  const resolver = new CataloniaAdministrativeResolver(loaded.snapshot, loaded.metadata);
-  const snapshotLoadMs = performance.now() - snapshotStarted;
-  const db = openDatabase(path.resolve(databasePath));
-  try {
-    const databaseBytesBefore = fs.statSync(path.resolve(databasePath)).size;
-    migrate(db);
-    const importer = new FeverImporter({
-      db, resolver, snapshotChecksum: loaded.manifest.snapshotSha256,
-      lookaheadDays: config.feverLookaheadDays, ...(now ? { now } : {}),
-    });
-    const summary = await importer.run(download, { allowMassRemoval });
-    summary.performance.downloadMs = downloadMs;
-    summary.performance.snapshotLoadMs = snapshotLoadMs;
-    for (const key of Object.keys(summary.performance)) {
-      summary.performance[key] = Number(summary.performance[key].toFixed(1));
-    }
-    summary.integrityCheck = db.pragma('integrity_check', { simple: true });
-    summary.databaseBytesBefore = databaseBytesBefore;
-    summary.databaseBytesAfter = fs.statSync(path.resolve(databasePath)).size;
-    summary.walBytes = fs.existsSync(`${path.resolve(databasePath)}-wal`)
-      ? fs.statSync(`${path.resolve(databasePath)}-wal`).size : 0;
-    summary.persistedCounts = db.prepare(`SELECT
-      COUNT(DISTINCT p.id) plans,
-      COUNT(DISTINCT ps.id) plan_sources,
-      COUNT(DISTINCT CASE WHEN o.status='active' THEN o.id END) active_occurrences,
-      COUNT(DISTINCT CASE WHEN o.status='inactive' THEN o.id END) inactive_occurrences
-      FROM plans p JOIN plan_sources ps ON ps.plan_id=p.id
-      JOIN sources s ON s.id=ps.source_id
-      LEFT JOIN plan_occurrences o ON o.plan_source_id=ps.id WHERE s.key='fever'`).get();
-    logger.log(`Fever M4B temporary import: ${JSON.stringify(summary)}`);
-    return summary;
-  } finally { db.close(); }
 }
 
 function parseArguments(argv) {

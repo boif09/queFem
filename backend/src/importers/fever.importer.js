@@ -158,7 +158,7 @@ export class FeverImporter {
     return value;
   }
 
-  async run(download, { allowMassRemoval = false, failAfterProduct = null } = {}) {
+  async run(download, { allowMassRemoval = false, failAfterProduct = null, beforeTransaction = null } = {}) {
     const source = this.sources.find('fever');
     if (!source) throw new Error('Fever source is not registered');
     const prepared = this.prepare(download);
@@ -176,6 +176,11 @@ export class FeverImporter {
       allowMassRemovalUsed: allowMassRemoval,
       writes: { plans: 0, sources: 0, geography: 0, occurrences: 0 },
       occurrences: { inserted: 0, updated: 0, unchanged: 0, reactivated: 0, inactivated: 0 },
+      categories: {
+        mapped: prepared.candidates.filter(({ categorySlugs }) => categorySlugs.length > 0).length,
+        unmapped: prepared.candidates.filter(({ categorySlugs }) => categorySlugs.length === 0).length,
+      },
+      imagesMetadata: prepared.candidates.filter(({ imageUrl }) => Boolean(imageUrl)).length,
     };
     try {
       const finish = this.db.prepare(`UPDATE import_runs SET finished_at=?,status=?,fetched=?,inserted=?,
@@ -199,6 +204,7 @@ export class FeverImporter {
         && !allowMassRemoval) {
         throw new Error(`Fever desired-set guard rejected removal ${plannedRemovalCount}/${existingIds.size}`);
       }
+      beforeTransaction?.({ db: this.db, source, prepared, summary, desiredIds, existingIds });
       const transactionStarted = performance.now();
       this.db.transaction(() => {
         for (const [index, candidate] of prepared.candidates.entries()) {
@@ -224,6 +230,7 @@ export class FeverImporter {
           0, 0, null, JSON.stringify(summary), runId);
       })();
       summary.performance.transactionMs = performance.now() - transactionStarted;
+      summary.importRun = { id: runId, status: 'completed' };
       return summary;
     } catch (error) {
       try {

@@ -32,6 +32,7 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - Fever M4B validado únicamente en SQLite temporal: persistencia Fever standalone por `CatalogItemId`, geography source-specific, occurrences, idempotencia, reconciliación y guards de feed completo/conteo. No está activado ni publicado y la SQLite real no ha sido migrada.
 - Fever M5A prepara categorías, precio estructurado, occurrences públicas, CTA/disclosure afiliado, imágenes same-origin opcionales y atribución ICGC. Fever continúa deshabilitado y no publicado; la activación queda fuera de alcance.
 - Fever M5B valida rendimiento y rehearsal operativo solo en un clon temporal: la query exact-day se optimizó con cobertura M2, el catálogo actual pasó el enable/disable reversible y la SQLite real no se tocó. Fever continúa disabled; M5C requerirá preparación operativa autorizada, no publicación automática.
+- M5C prepara y prueba localmente `fever:import`, un entrypoint separado con confirmación explícita, gates de migrations/integridad/source/images y sin override de mass removal. No está desplegado ni se ha importado Fever en producción; Fever e imágenes continúan disabled y no hay cron.
 
 ## AUTONOMOUS WORK
 
