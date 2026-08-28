@@ -92,6 +92,24 @@ describe('legal and privacy pages', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Política de privacitat' })).toBeInTheDocument();
   });
 
+  it('exposes the official social profiles with safe external-link attributes and localized labels', async () => {
+    renderRoute('/legal');
+    const instagram = screen.getByRole('link', { name: 'Tens Pla? a Instagram' });
+    const tiktok = screen.getByRole('link', { name: 'Tens Pla? a TikTok' });
+    expect(instagram).toHaveAttribute('href', 'https://www.instagram.com/tenspla.cat');
+    expect(tiktok).toHaveAttribute('href', 'https://www.tiktok.com/@tenspla.cat');
+    expect(instagram).toHaveAttribute('target', '_blank');
+    expect(tiktok).toHaveAttribute('target', '_blank');
+    expect(instagram).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(tiktok).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(screen.getByText('Segueix-nos')).toBeInTheDocument();
+
+    await i18n.changeLanguage('es');
+    expect(screen.getByRole('link', { name: 'Tens Pla? en Instagram' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Tens Pla? en TikTok' })).toBeInTheDocument();
+    expect(screen.getByText('Síguenos')).toBeInTheDocument();
+  });
+
   it('uses the horizontal Stitch logo in the header and footer', () => {
     const { container } = renderRoute('/legal');
     const headerBrand = container.querySelector('.site-header .header-brand-logo');
@@ -113,6 +131,9 @@ describe('legal and privacy pages', () => {
 
     const home = renderRoute('/');
     expect(home.container.querySelector('.mobile-nav')).toBeInTheDocument();
+    expect(home.container.querySelector('.mobile-social-links')).toBeInTheDocument();
+    expect(home.container.querySelector('.mobile-social-links a[href="https://www.instagram.com/tenspla.cat"]')).toHaveAttribute('target', '_blank');
+    expect(home.container.querySelector('.mobile-social-links a[href="https://www.tiktok.com/@tenspla.cat"]')).toHaveAttribute('rel', 'noopener noreferrer');
     expect(home.container.querySelector('.site-shell')).toHaveClass('has-mobile-nav');
     home.unmount();
 
