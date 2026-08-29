@@ -9,6 +9,7 @@ import { parseImageSyncArguments, syncTicketmasterImages } from '../backend/src/
 import { TicketmasterImageClient } from '../backend/src/ticketmaster/imageClient.js';
 import { TicketmasterImageSyncLock } from '../backend/src/ticketmaster/imageSyncLock.js';
 import { selectTicketmasterImage, selectTicketmasterImages } from '../backend/src/ticketmaster/imageSelector.js';
+import { DEFAULT_FALLBACK_ASSET_ROOT, loadFallbackImageLibrary } from '../backend/src/images/fallbackImageLibrary.js';
 import { withTestDatabase } from './helpers.js';
 
 const NOW = new Date('2026-08-20T12:00:00.000Z');
@@ -80,6 +81,7 @@ test('API exposes only controlled Ticketmaster images with card/detail roles and
     const gencatPlan = insertPlan(db, 'gencat-image');
     const gencatSource = insertSource(db, gencatPlan, 'gencat-agenda', 'gencat-image');
     insertImage(db, gencatSource, 'card', 'https://example.test/gencat.jpg', 640, 360);
+    db.prepare("UPDATE plans SET image_url='https://example.test/gencat-raw.jpg', image_reuse_allowed=1 WHERE id=?").run(gencatPlan);
 
     const noImagePlan = insertPlan(db, 'without-image');
     insertSource(db, noImagePlan, 'gencat-agenda', 'without-image');
@@ -90,22 +92,30 @@ test('API exposes only controlled Ticketmaster images with card/detail roles and
     insertImage(db, sharedTicketmaster, 'card', 'https://s1.ticketm.net/shared-card.jpg', 640, 360);
     insertImage(db, sharedTicketmaster, 'detail', 'https://s1.ticketm.net/shared-detail.jpg', 1136, 639);
 
-    const app = createApp({ db, now: () => NOW, ticketmasterImagesEnabled: true });
+    const fallbackImageLibrary = loadFallbackImageLibrary({
+      assetRoot: DEFAULT_FALLBACK_ASSET_ROOT,
+      assetExists: () => true,
+    });
+    const app = createApp({ db, now: () => NOW, ticketmasterImagesEnabled: true, fallbackImageLibrary });
     const list = await request(app).get('/api/plans?limit=100');
     assert.equal(list.status, 200);
     const byId = new Map(list.body.data.map((plan) => [plan.id, plan]));
     assert.deepEqual(byId.get(ticketmasterPlan).image, {
       url: `/api/media/ticketmaster/${db.prepare("SELECT id FROM plan_source_images WHERE plan_source_id=? AND role='card'").get(ticketmasterSource).id}`,
-      width: 640, height: 360, source: 'ticketmaster',
+      kind: 'official', width: 640, height: 360, source: 'ticketmaster',
     });
-    assert.equal(byId.get(gencatPlan).image, null);
-    assert.equal(byId.get(noImagePlan).image, null);
+    assert.equal(byId.get(gencatPlan).image.kind, 'generic');
+    assert.equal(byId.get(gencatPlan).image.source, 'tenspla-fallback');
+    assert.equal(byId.get(gencatPlan).image_url, 'https://example.test/gencat-raw.jpg');
+    assert.equal(byId.get(noImagePlan).image.kind, 'generic');
+    assert.match(byId.get(noImagePlan).image.url, /^\/media\/fallbacks\/card\//);
     assert.match(byId.get(sharedPlan).image.url, /^\/api\/media\/ticketmaster\/\d+$/);
+    assert.equal(byId.get(sharedPlan).image.kind, 'official');
 
     const detail = await request(app).get(`/api/plans/${ticketmasterPlan}`);
     assert.deepEqual(detail.body.data.image, {
       url: `/api/media/ticketmaster/${db.prepare("SELECT id FROM plan_source_images WHERE plan_source_id=? AND role='detail'").get(ticketmasterSource).id}`,
-      width: 1136, height: 639,
+      kind: 'official', width: 1136, height: 639,
       attribution: 'Exact credit', source: 'ticketmaster',
     });
 
@@ -116,6 +126,23 @@ test('API exposes only controlled Ticketmaster images with card/detail roles and
     db.prepare("UPDATE sources SET enabled = 1 WHERE key = 'ticketmaster-discovery-feed'").run();
     db.prepare('DELETE FROM plan_sources WHERE id = ?').run(ticketmasterSource);
     assert.equal(db.prepare('SELECT COUNT(*) count FROM plan_source_images WHERE plan_source_id = ?').get(ticketmasterSource).count, 0);
+  });
+});
+
+test('Fever official image beats the generic fallback when Fever images are enabled', async () => {
+  await withTestDatabase(async (db) => {
+    const planId = insertPlan(db, 'fever-image');
+    db.prepare("UPDATE sources SET enabled=1 WHERE key='fever'").run();
+    const feverSource = insertSource(db, planId, 'fever', 'fever-image');
+    insertImage(db, feverSource, 'card', 'https://applications-media.feverup.com/card.jpg', 640, 360);
+    const fallbackImageLibrary = loadFallbackImageLibrary({ assetRoot: DEFAULT_FALLBACK_ASSET_ROOT, assetExists: () => true });
+    const app = createApp({ db, now: () => NOW, feverImagesEnabled: true, fallbackImageLibrary });
+    const list = await request(app).get('/api/plans?limit=100');
+    const plan = list.body.data.find(({ id }) => id === planId);
+    assert.deepEqual(plan.image, {
+      url: `/api/media/fever/${db.prepare("SELECT id FROM plan_source_images WHERE plan_source_id=? AND role='card'").get(feverSource).id}`,
+      kind: 'official', width: 640, height: 360, source: 'fever',
+    });
   });
 });
 

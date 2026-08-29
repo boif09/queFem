@@ -141,6 +141,8 @@
   "detail.moreDates": "Hay más sesiones disponibles en Fever.",
   "detail.feverTickets": "Ver entradas en Fever",
   "detail.affiliateDisclosure": "Enlace de afiliado: si reservas a través de este enlace, Tens pla? puede recibir una comisión sin coste adicional para ti.",
+  "detail.genericImageDisclosure": "Imagen orientativa",
+  "detail.genericImageCredit": "Foto de {{photographer}} en Pexels",
   "detail.errorTitle": "No hemos podido cargar el plan",
   "detail.notFound": "Este plan no está disponible.",
   "sources.sectionTitle": "Fuente de la información",

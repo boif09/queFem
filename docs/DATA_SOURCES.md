@@ -6,7 +6,9 @@ Status: ACTIVE
 Type: Official Open Data
 Commercial reuse: allowed
 Attribution: required
-Images: do not reuse automatically
+Images: do not reuse automatically. Mientras no exista confirmación explícita sobre derechos de
+terceros, cualquier metadata de imagen se conserva como procedencia y no se usa como imagen de
+visualización; el resolver local usa la librería genérica de Tens Pla? cuando tiene binario.
 
 Importer:
 gencatAgenda.importer.js

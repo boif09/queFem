@@ -10,6 +10,7 @@ import { PlanQueryRepository } from './db/repositories/planQuery.repository.js';
 import { PlanSourceImageRepository } from './db/repositories/planSourceImage.repository.js';
 import { TicketmasterImageCache } from './ticketmaster/imageCache.js';
 import { TicketmasterImageProxy, validateFeverImageUrl } from './ticketmaster/imageProxy.js';
+import { loadFallbackImageLibrary } from './images/fallbackImageLibrary.js';
 
 export function createApp({
   db,
@@ -25,12 +26,23 @@ export function createApp({
   feverImagesEnabled = false, feverImageCachePath, feverImageCacheTtlHours = 6,
   feverImageCacheMaxMb = 512, feverImageRequestTimeoutMs = 15_000,
   feverImageMaximumBytes = 10 * 1024 * 1024, feverImageFetchImpl,
+  fallbackImageLibrary,
   now = () => new Date(),
   logger = console,
 }) {
   const app = express();
+  let resolvedFallbackImageLibrary = fallbackImageLibrary;
+  if (resolvedFallbackImageLibrary === undefined) {
+    try {
+      resolvedFallbackImageLibrary = loadFallbackImageLibrary();
+    } catch (error) {
+      resolvedFallbackImageLibrary = null;
+      logger.warn?.(`No s’ha pogut carregar la llibreria local d’imatges genèriques: ${error.message}`);
+    }
+  }
   const repository = new PlanQueryRepository(db, {
     eventRetentionDays, now, ticketmasterImagesEnabled, feverImagesEnabled,
+    fallbackImageLibrary: resolvedFallbackImageLibrary,
   });
   const imageRepository = new PlanSourceImageRepository(db);
   const imageCache = new TicketmasterImageCache({

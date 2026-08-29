@@ -82,7 +82,16 @@ desaparecida puede dejar el plan `inactive`; los huérfanos inactivos tienen una
 dry-run, tras el plazo configurado. La retirada expresa está en
 [`TICKETMASTER_REMOVAL.md`](TICKETMASTER_REMOVAL.md).
 
-Las imágenes de categorías son assets locales. Gencat no aporta imágenes reutilizadas. Las imágenes Ticketmaster se vinculan a su procedencia, se sirven same-origin y usan una caché local limitada. Con `TICKETMASTER_IMAGES_ENABLED=false` no hay sincronización remota ni selección en API, y el frontend mantiene patrones gráficos.
+Las imágenes de categorías son assets locales. Gencat no aporta imágenes reutilizadas. Las imágenes Ticketmaster se vinculan a su procedencia, se sirven same-origin y usan una caché local limitada. Con `TICKETMASTER_IMAGES_ENABLED=false` no hay sincronización remota ni selección en API.
+
+La librería permanente **Generic Image Library V1** resuelve la imagen de visualización una vez en
+el repositorio de planes: oficial controlada de Fever/Ticketmaster, genérica local por `fingerprint`
+y categoría, o el patrón gráfico existente si falta el WebP. Las genéricas no sobrescriben
+`plans.image_url`, se distinguen mediante `image.kind='generic'`, usan alt CA/ES del manifiesto,
+muestran una breve indicación en el detalle y se excluyen siempre de `Event.image` JSON-LD. Gencat
+permanece deliberadamente en el segundo paso aunque conserve metadata de imagen. El manifiesto,
+el mapeo editorial, la preparación de binarios y la política de procedencia están en
+[`FALLBACK_IMAGES.md`](FALLBACK_IMAGES.md).
 
 ## Frontend
 

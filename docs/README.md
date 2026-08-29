@@ -21,6 +21,8 @@ Ruta recomendada para una tarea: [`../AGENTS.md`](../AGENTS.md) → documento de
 - [`FEVER_M5B_REHEARSAL.md`](FEVER_M5B_REHEARSAL.md): benchmark occurrence-aware, EXPLAIN, rehearsal temporal y runbook futuro; Fever sigue disabled.
 - [`FEVER_M5C_PRODUCTION_RUNBOOK.md`](FEVER_M5C_PRODUCTION_RUNBOOK.md): gates y procedimiento manual futuro para la primera importación Fever disabled.
 - [`IMAGE_CREDITS.md`](IMAGE_CREDITS.md): procedencia y licencia de assets visuales.
+- [`FALLBACK_IMAGES.md`](FALLBACK_IMAGES.md): librería genérica permanente, prioridad de fuentes,
+  manifiesto Pexels, preparación local y reglas de accesibilidad/SEO.
 - [`SPECIFICATION.md`](SPECIFICATION.md): especificación técnica inicial y visión de producto. Contiene alcance histórico/futuro; no usarla para inferir que algo ya está implementado.
 
 ## Material histórico

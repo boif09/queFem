@@ -50,6 +50,9 @@ export function buildEventJsonLd(plan, url, description) {
     if (/^\d{4}-\d{2}-\d{2}$/.test(plan.end_date || '')) event.endDate = plan.end_date;
   }
   if (description) event.description = description;
+  if (plan.image?.kind === 'official' && plan.image.jsonld_event_image_eligible === true) {
+    event.image = new URL(plan.image.url, PUBLIC_ORIGIN).href;
+  }
 
   event.location = {
     '@type': 'Place',
@@ -133,6 +136,11 @@ export function PlanDetailPage() {
           />
           {plan.image?.attribution && !detailImageFailed && (
             <figcaption className="image-attribution">{plan.image.attribution}</figcaption>
+          )}
+          {plan.image?.kind === 'generic' && !detailImageFailed && (
+            <figcaption className="generic-image-disclosure">
+              {t('detail.genericImageDisclosure')} · <a href={plan.image.sourcePage} target="_blank" rel="noreferrer">{t('detail.genericImageCredit', { photographer: plan.image.photographer })}</a>
+            </figcaption>
           )}
         </figure>
       </div>

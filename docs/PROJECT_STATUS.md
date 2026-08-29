@@ -18,6 +18,12 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
+- Generic Image Library V1 preparada: manifiesto curado y auditable de 100 fotografías Pexels,
+  resolver determinista local por categoría/fingerprint, prioridad de imágenes oficiales controladas,
+  adquisición manual puntual por API oficial y pipeline offline para WebP. Los binarios no acompañan
+  el manifiesto y requieren adquisición
+  manual antes de que la librería pueda mostrar fotografías en producción.
+
 - Puesta en producción y consolidación del dominio y branding público **Tens Pla?**, incluido el logo y los recursos gráficos actuales.
 - Integración Ticketmaster completa en local: importación real, idempotencia, reconciliación, retirada y entrega same-origin opcional de imágenes.
 - SEO V1 desplegado y validado públicamente; sitemap publicado y propiedad de Google Search Console verificada.

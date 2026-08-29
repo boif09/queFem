@@ -141,6 +141,8 @@
   "detail.moreDates": "Hi ha més sessions disponibles a Fever.",
   "detail.feverTickets": "Veure entrades a Fever",
   "detail.affiliateDisclosure": "Enllaç d’afiliat: si reserves a través d’aquest enllaç, Tens pla? pot rebre una comissió sense cost addicional per a tu.",
+  "detail.genericImageDisclosure": "Imatge orientativa",
+  "detail.genericImageCredit": "Foto de {{photographer}} a Pexels",
   "detail.errorTitle": "No hem pogut carregar el pla",
   "detail.notFound": "Aquest pla no està disponible.",
   "sources.sectionTitle": "Font de la informació",

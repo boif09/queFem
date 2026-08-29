@@ -453,6 +453,8 @@ input[type="date"], select { border-color: var(--line); background-color: #fbf9f
 .detail-header .back-link { margin-bottom: 24px; }
 .detail-visual { border-radius: var(--radius-lg); aspect-ratio: 16 / 6.5; box-shadow: var(--shadow-soft); }
 .detail-visual .category-icon-large { width: 106px; height: 106px; font-size: 3rem; }
+.image-attribution, .generic-image-disclosure { margin: 9px 2px 0; color: var(--ink-soft); font-size: .76rem; line-height: 1.35; }
+.generic-image-disclosure a { text-underline-offset: 2px; }
 .detail-hero { padding: 40px 0 50px; background: transparent !important; }
 .detail-hero::after { display: none; }
 .detail-title-row { grid-template-columns: 74px 1fr; gap: 22px; }

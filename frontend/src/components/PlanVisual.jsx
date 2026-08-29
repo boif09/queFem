@@ -12,11 +12,7 @@ export function PlanVisual({
   const { t } = useTranslation();
   const primaryCategory = plan.categories?.[0];
   const category = primaryCategory?.slug || plan.kind;
-  const controlledImage = plan.image?.url ? plan.image : null;
-  const legacyImage = plan.image_reuse_allowed === true && plan.image_url
-    ? { url: plan.image_url }
-    : null;
-  const image = controlledImage || legacyImage;
+  const image = plan.image?.url ? plan.image : null;
   const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => setImageFailed(false), [image?.url]);
@@ -32,7 +28,7 @@ export function PlanVisual({
       {canShowImage ? (
         <img
           src={image.url}
-          alt=""
+          alt={image.alt || ''}
           width={image.width}
           height={image.height}
           loading={loading}

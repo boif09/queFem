@@ -60,6 +60,9 @@ No ejecutes la variante con escritura ni jobs de producción sin autorización. 
 | `npm run fever:geography:dry-run` | Resolver geografía Fever con el snapshot ICGC local, sin abrir SQLite |
 | `npm run fever:import:temp -- --database <ruta>` | Importar Fever únicamente en una SQLite temporal protegida (M4B) |
 | `npm run ticketmaster:images:sync` | Sincronizar metadata/caché de imágenes si el feature flag lo permite |
+| `npm run fallback-images:fetch` | Adquirir una vez los 100 originales curados mediante Pexels API y `PEXELS_API_KEY` local |
+| `npm run fallback-images:prepare -- --input <ruta>` | Convertir los 100 originales curados a WebP locales, sin red |
+| `npm run fallback-images:validate` | Comprobar que los 100 masters y 100 variantes de tarjeta estén presentes |
 | `npm run ticketmaster:remove -- EVENT_ID --dry-run` | Inspeccionar una retirada por ID |
 | `npm run test:backend` | Tests backend |
 | `npm run test:frontend` | Tests frontend |

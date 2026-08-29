@@ -71,6 +71,7 @@ describe('PlanDetailPage', () => {
     expect(api.getPlan).toHaveBeenCalledWith('7', 'ca');
     await waitFor(() => expect(document.title).toBe('Festival de prova a Begur | Tens pla?'));
     expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute('href', 'https://tenspla.cat/plans/7');
+    await waitFor(() => expect(document.head.querySelector('script[data-tenspla-jsonld]')).toBeInTheDocument());
     const structuredData = JSON.parse(document.head.querySelector('script[data-tenspla-jsonld]').textContent);
     expect(structuredData).toMatchObject({
       '@context': 'https://schema.org', '@type': 'Event', name: 'Festival de prova',
@@ -123,8 +124,8 @@ describe('PlanDetailPage', () => {
       end_date: '2026-09-01', permanent: false, free: false,
       venue_name: 'Sala Example', municipality: 'Barcelona',
       image: {
-        url: '/api/media/ticketmaster/10', width: 1136, height: 639,
-        attribution: 'Crèdit literal Ticketmaster', source: 'ticketmaster',
+          url: '/api/media/ticketmaster/10', width: 1136, height: 639,
+        kind: 'official', attribution: 'Crèdit literal Ticketmaster', source: 'ticketmaster',
       },
       categories: [{ slug: 'musica', name: 'Música', icon: 'music' }], sources: [],
     } });
@@ -154,5 +155,48 @@ describe('PlanDetailPage', () => {
     expect(document.querySelector('.detail-visual img')).not.toBeInTheDocument();
     expect(document.querySelector('[data-pattern="cultura"]')).toBeInTheDocument();
     expect(document.querySelector('.image-attribution')).not.toBeInTheDocument();
+  });
+
+  it('shows a localized generic disclosure and alt text without emitting Event.image', async () => {
+    api.getPlan.mockResolvedValue({ data: {
+      id: 12, kind: 'event', title: 'Taller de prova', start_date: '2026-09-01', end_date: '2026-09-01',
+      permanent: false, free: false, venue_name: 'Ateneu', address: 'Carrer Major, 1', municipality: 'Girona',
+      image: {
+        url: '/media/fallbacks/card/cultura/cultura-01.webp', kind: 'generic', source: 'tenspla-fallback',
+        alt: 'Imatge orientativa: Un taller artístic.', photographer: 'Fotògrafa de prova',
+        sourcePage: 'https://www.pexels.com/photo/prova-1/',
+      },
+      categories: [{ slug: 'cultura', name: 'Cultura', icon: 'book-open' }], sources: [],
+    } });
+    render(<MemoryRouter initialEntries={['/plans/12']}><Routes><Route path="/plans/:id" element={<PlanDetailPage />} /></Routes></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'Taller de prova' });
+    expect(document.querySelector('.detail-visual img')).toHaveAttribute('alt', 'Imatge orientativa: Un taller artístic.');
+    expect(document.querySelector('.generic-image-disclosure')).toHaveTextContent('Imatge orientativa');
+    expect(screen.getByRole('link', { name: 'Foto de Fotògrafa de prova a Pexels' })).toHaveAttribute('href', 'https://www.pexels.com/photo/prova-1/');
+    await waitFor(() => expect(document.head.querySelector('script[data-tenspla-jsonld]')).toBeInTheDocument());
+    const structuredData = JSON.parse(document.head.querySelector('script[data-tenspla-jsonld]').textContent);
+    expect(structuredData).not.toHaveProperty('image');
+  });
+
+  it('keeps an explicitly eligible official image in JSON-LD', () => {
+    const jsonLd = buildEventJsonLd({
+      title: 'Concert oficial', start_date: '2026-09-01', venue_name: 'Sala', address: 'Carrer 1',
+      image: { kind: 'official', url: '/api/media/fever/1', jsonld_event_image_eligible: true },
+    }, 'https://tenspla.cat/plans/14', 'Sessió oficial.');
+    expect(jsonLd.image).toBe('https://tenspla.cat/api/media/fever/1');
+  });
+
+  it('translates the generic disclosure into Spanish', async () => {
+    await i18n.changeLanguage('es');
+    api.getPlan.mockResolvedValue({ data: {
+      id: 15, kind: 'event', title: 'Taller', start_date: '2026-09-01', end_date: '2026-09-01',
+      permanent: false, free: false, venue_name: 'Ateneo', address: 'Calle Mayor, 1', municipality: 'Girona',
+      image: { url: '/media/fallbacks/cultura/cultura-01.webp', kind: 'generic', alt: 'Imagen orientativa: Un taller.', photographer: 'Fotógrafo de prueba', sourcePage: 'https://www.pexels.com/photo/prueba-1/' },
+      categories: [{ slug: 'cultura', name: 'Cultura', icon: 'book-open' }], sources: [],
+    } });
+    render(<MemoryRouter initialEntries={['/plans/15']}><Routes><Route path="/plans/:id" element={<PlanDetailPage />} /></Routes></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'Taller' });
+    expect(document.querySelector('.generic-image-disclosure')).toHaveTextContent('Imagen orientativa');
+    expect(screen.getByRole('link', { name: 'Foto de Fotógrafo de prueba en Pexels' })).toHaveAttribute('href', 'https://www.pexels.com/photo/prueba-1/');
   });
 });

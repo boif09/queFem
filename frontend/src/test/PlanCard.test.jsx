@@ -42,7 +42,7 @@ describe('PlanCard', () => {
     expect(document.querySelector('[data-pattern="activity"]')).toBeInTheDocument();
   });
 
-  it('uses an external image only when its reuse is explicitly allowed', () => {
+  it('uses only the canonical API display image, never a raw source URL', () => {
     render(
       <MemoryRouter>
         <PlanCard plan={{
@@ -60,10 +60,8 @@ describe('PlanCard', () => {
       </MemoryRouter>,
     );
 
-    expect(document.querySelector('.plan-visual img')).toHaveAttribute(
-      'src',
-      'https://example.test/allowed.jpg',
-    );
+    expect(document.querySelector('.plan-visual img')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-pattern="cultura"]')).toBeInTheDocument();
   });
 
   it('renders the controlled card image lazily and falls back to the category pattern on error', () => {
@@ -79,7 +77,7 @@ describe('PlanCard', () => {
           free: false,
           image: {
             url: '/api/media/ticketmaster/45', width: 640, height: 360,
-            source: 'ticketmaster',
+            kind: 'official', source: 'ticketmaster',
           },
           categories: [{ slug: 'musica', name: 'Música', icon: 'music' }],
         }} />

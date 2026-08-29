@@ -6,6 +6,11 @@ images are generic category illustrations and do not represent individual plans 
 All files were incorporated on **20/08/2026**, sourced from **Pexels** under the
 [Pexels License](https://www.pexels.com/license/).
 
+Las fotografías genéricas de planes usan un manifiesto separado y auditable de 100 selecciones,
+no las imágenes de esta tabla: [`FALLBACK_IMAGES.md`](FALLBACK_IMAGES.md). Su paquete de
+procedencia es `tenspla_pexels_fallback_library_v1.zip`; los binarios todavía solo se incorporan
+tras la preparación local documentada.
+
 | Local file | Category | Photographer | Original Pexels URL |
 | --- | --- | --- | --- |
 | `frontend/public/images/explore/bicicleta.webp` | Bicicleta | Egor Kunovsky | https://www.pexels.com/photo/parked-bicycles-on-a-public-place-10843246/ |
