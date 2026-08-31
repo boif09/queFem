@@ -35,12 +35,57 @@ const REQUIRED_ITEM_FIELDS = [
   'detail_disclosure_ca', 'detail_disclosure_es',
 ];
 
+const EXPECTED_FALLBACK_IMAGE_COUNT = 105;
+const EXPECTED_CATEGORY_COUNTS = Object.freeze({
+  festes: 10,
+  musica: 10,
+  'fires-mercats': 10,
+  gastronomia: 10,
+  familia: 10,
+  espectacles: 10,
+  cultura: 15,
+  museus: 10,
+  patrimoni: 10,
+  natura: 10,
+});
+const CULTURE_CRAFT_SUBTYPE = 'craft-workshop';
+const CULTURE_VISUAL_RULES = [
+  {
+    subtype: CULTURE_CRAFT_SUBTYPE,
+    keywords: ['taller', 'workshop', 'ceràmica', 'cerámica', 'terrissa', 'artesania', 'artesanía', 'manualitats', 'manualidades'],
+  },
+  {
+    subtype: 'culture-exhibition',
+    keywords: ['exposició', 'exposición', 'museu', 'museo', 'galeria', 'galería', 'mostra', 'art'],
+  },
+  {
+    subtype: 'culture-guided-heritage',
+    keywords: ['visita guiada', 'visita', 'recorregut', 'recorrido', 'ruta cultural', 'patrimoni', 'patrimonio', 'monument'],
+  },
+];
+
 function assert(condition, message) {
   if (!condition) throw new Error(`Manifest d'imatges genèriques invàlid: ${message}`);
 }
 
 function normalizeText(value) {
   return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function planText(plan) {
+  return normalizeText([plan.title, plan.description, plan.original_title, plan.original_description].filter(Boolean).join(' '));
+}
+
+function textHasKeyword(text, keyword) {
+  const normalizedKeyword = normalizeText(keyword);
+  return normalizedKeyword.length <= 3
+    ? new RegExp(`\\b${normalizedKeyword}\\b`).test(text)
+    : text.includes(normalizedKeyword);
+}
+
+function cultureVisualSubtype(plan) {
+  const text = planText(plan);
+  return CULTURE_VISUAL_RULES.find(({ keywords }) => keywords.some((keyword) => textHasKeyword(text, keyword)))?.subtype || 'culture-neutral';
 }
 
 export function stableHash(value) {
@@ -90,7 +135,7 @@ function entryByBasename(entries, basename) {
 
 export function validateFallbackManifest(manifest, guidance) {
   assert(manifest?.schema_version === 1, 'schema_version ha de ser 1');
-  assert(manifest.count === 100 && Array.isArray(manifest.items) && manifest.items.length === 100, 'calen exactament 100 registres');
+  assert(manifest.count === EXPECTED_FALLBACK_IMAGE_COUNT && Array.isArray(manifest.items) && manifest.items.length === EXPECTED_FALLBACK_IMAGE_COUNT, 'calen exactament 105 registres');
   assert(guidance?.version === 1, 'resolver-guidance.json ha de ser versió 1');
   const expectedCategories = Object.keys(guidance.category_order.reduce((result, category) => ({ ...result, [category]: 10 }), {}));
   assert(expectedCategories.length === 10 && guidance.fallback_category === 'cultura', 'categories de resolució incorrectes');
@@ -114,8 +159,11 @@ export function validateFallbackManifest(manifest, guidance) {
     perCategory.set(item.category, perCategory.get(item.category) + 1);
   }
   for (const category of expectedCategories) {
-    assert(manifest.categories[category] === 10 && perCategory.get(category) === 10, `calen 10 imatges a ${category}`);
+    assert(manifest.categories[category] === EXPECTED_CATEGORY_COUNTS[category] && perCategory.get(category) === EXPECTED_CATEGORY_COUNTS[category], `nombre d’imatges incorrecte a ${category}`);
   }
+  const cultureItems = manifest.items.filter(({ category }) => category === 'cultura');
+  assert(cultureItems.filter(({ subtype }) => subtype === CULTURE_CRAFT_SUBTYPE).length === 5, 'calen 5 imatges craft-workshop a cultura');
+  assert(cultureItems.filter(({ subtype }) => subtype !== CULTURE_CRAFT_SUBTYPE).length === 10, 'calen 10 imatges neutrals a cultura');
   return true;
 }
 
@@ -125,7 +173,7 @@ function resolveCategory(plan, guidance) {
     const slug = typeof category === 'string' ? category : category?.slug;
     if (CATEGORY_POOL_BY_PLAN_CATEGORY[slug]) return CATEGORY_POOL_BY_PLAN_CATEGORY[slug];
   }
-  const text = normalizeText([plan.title, plan.description, plan.original_title, plan.original_description].filter(Boolean).join(' '));
+  const text = planText(plan);
   for (const category of guidance.category_order) {
     if ((guidance.keyword_hints?.[category] || []).some((hint) => text.includes(normalizeText(hint)))) return category;
   }
@@ -142,6 +190,10 @@ export class FallbackImageLibrary {
     this.assetRoot = assetRoot;
     this.byCategory = new Map(guidance.category_order.map((category) => [category, []]));
     for (const item of manifest.items) this.byCategory.get(item.category).push(Object.freeze({ ...item }));
+    this.culturePools = {
+      [CULTURE_CRAFT_SUBTYPE]: this.byCategory.get('cultura').filter(({ subtype }) => subtype === CULTURE_CRAFT_SUBTYPE),
+      'culture-neutral': this.byCategory.get('cultura').filter(({ subtype }) => subtype !== CULTURE_CRAFT_SUBTYPE),
+    };
     this.availableAssets = new Map();
     for (const item of manifest.items) {
       const detail = path.join(assetRoot, item.local_filename);
@@ -163,7 +215,10 @@ export class FallbackImageLibrary {
 
   resolve(plan, { role = 'card', language = 'ca' } = {}) {
     const category = resolveCategory(plan, this.guidance);
-    const pool = this.byCategory.get(category);
+    const visualSubtype = category === 'cultura' ? cultureVisualSubtype(plan) : null;
+    const pool = category === 'cultura'
+      ? (visualSubtype === CULTURE_CRAFT_SUBTYPE ? this.culturePools[CULTURE_CRAFT_SUBTYPE] : this.culturePools['culture-neutral'])
+      : this.byCategory.get(category);
     const item = pool[stableHash(plan.fingerprint || plan.id || plan.title || '') % pool.length];
     const available = this.availableAssets.get(item.id);
     const useCard = role === 'card' && available.card;

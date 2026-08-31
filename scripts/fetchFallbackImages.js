@@ -13,4 +13,14 @@ const options = parseArguments(process.argv.slice(2));
 const library = loadFallbackImageLibrary();
 const acquirer = new PexelsFallbackAcquirer({ apiKey: process.env.PEXELS_API_KEY, outputDirectory: options.outputDirectory });
 const result = await acquirer.acquireAll(library.items);
-console.log(`Pexels originals: ${result.downloaded} descarregats, ${result.skipped} ja presents (${result.total} en total).`);
+if (result.failed === 0) {
+  console.log(`Pexels fallback acquisition complete: ${result.validOriginals}/${result.total} valid originals (${result.downloaded} downloaded, ${result.skipped} already present).`);
+} else {
+  console.error(`Pexels fallback acquisition incomplete: ${result.validOriginals}/${result.total} valid originals.`);
+  console.error('\nUnavailable curated assets:\n');
+  for (const failed of result.failures) {
+    console.error(`- ${failed.id} | Pexels ${failed.pexelsPhotoId} | ${failed.category} | ${failed.reason}`);
+  }
+  console.error('\nNo substitutions were made.');
+  process.exitCode = 1;
+}

@@ -111,23 +111,92 @@ test('keeps a valid existing original without contacting Pexels again', async ()
   });
 });
 
-test('accounts for the exact 100 unique manifest IDs before any fetch', () => {
+test('accounts for the exact 105 unique manifest IDs before any fetch', () => {
   const items = loadFallbackImageLibrary({ assetExists: () => true }).items;
-  assert.equal(validateFetchManifest(items).length, 100);
-  assert.throws(() => validateFetchManifest([...items.slice(0, 99), { ...items[0], id: 'duplicate' }]), /IDs interns|100 imatges/);
+  assert.equal(validateFetchManifest(items).length, 105);
+  assert.throws(() => validateFetchManifest(items.slice(0, 104)), /105 imatges/);
   assert.throws(() => validateFetchManifest(items.map((entry, index) => index === 1 ? { ...entry, pexels_photo_id: items[0].pexels_photo_id } : entry)), /Pexels Photo IDs/);
 });
 
-test('acquires and records all 100 curated originals without using a search endpoint', async () => {
+test('acquires and records all 105 curated originals without using a search endpoint', async () => {
   await withAcquirer(async (directory, acquirer) => {
     const requests = [];
     acquirer.fetchImpl = successfulFetch(requests);
     const items = loadFallbackImageLibrary({ assetExists: () => true }).items;
     const result = await acquirer.acquireAll(items);
-    assert.deepEqual(result, { total: 100, downloaded: 100, skipped: 0, outputDirectory: directory });
-    assert.equal(requests.length, 200);
+    assert.deepEqual(result, {
+      total: 105, downloaded: 105, skipped: 0, failed: 0, validOriginals: 105,
+      failures: [], outputDirectory: directory,
+    });
+    assert.equal(requests.length, 210);
     assert.equal(requests.every(({ url }) => !url.includes('/search') && !url.includes('/curated')), true);
     const provenance = JSON.parse(await fs.readFile(path.join(directory, 'pexels-api-provenance.json'), 'utf8'));
-    assert.equal(Object.keys(provenance.photos).length, 100);
+    assert.equal(Object.keys(provenance.photos).length, 105);
   }, { delayMs: 0 });
+});
+
+test('reuses the existing 100 originals and acquires only the five new culture assets', async () => {
+  await withAcquirer(async (directory, acquirer) => {
+    const items = loadFallbackImageLibrary({ assetExists: () => true }).items;
+    const newCultureIds = new Set(['cultura-11', 'cultura-12', 'cultura-13', 'cultura-14', 'cultura-15']);
+    for (const entry of items.filter(({ id }) => !newCultureIds.has(id))) await fs.writeFile(path.join(directory, `${entry.id}.jpg`), JPEG);
+    const requests = [];
+    acquirer.fetchImpl = successfulFetch(requests);
+
+    const result = await acquirer.acquireAll(items);
+    assert.equal(result.skipped, 100);
+    assert.equal(result.downloaded, 5);
+    assert.equal(result.validOriginals, 105);
+    assert.equal(requests.length, 10);
+    assert.deepEqual(requests.filter(({ url }) => url.includes('/v1/photos/')).map(({ url }) => Number(url.split('/').at(-1))).sort((left, right) => left - right), [11905911, 26424659, 29844114, 35336016, 39007932]);
+  });
+});
+
+test('collects unavailable curated IDs, continues with later items, and never substitutes them', async () => {
+  await withAcquirer(async (directory, acquirer) => {
+    const items = loadFallbackImageLibrary({ assetExists: () => true }).items;
+    const unavailable = new Set([items[0].pexels_photo_id, items[42].pexels_photo_id]);
+    const requests = [];
+    acquirer.fetchImpl = async (url, options) => {
+      requests.push({ url: String(url), options });
+      if (String(url).startsWith('https://api.pexels.com/')) {
+        const id = Number(String(url).split('/').at(-1));
+        if (unavailable.has(id)) return response('', { status: 404 });
+      }
+      return successfulFetch(requests)(url, options);
+    };
+
+    const result = await acquirer.acquireAll(items);
+    assert.equal(result.downloaded, 103);
+    assert.equal(result.skipped, 0);
+    assert.equal(result.validOriginals, 103);
+    assert.equal(result.failed, 2);
+    assert.deepEqual(result.failures.map(({ id, pexelsPhotoId, category }) => ({ id, pexelsPhotoId, category })), [
+      { id: items[0].id, pexelsPhotoId: items[0].pexels_photo_id, category: items[0].category },
+      { id: items[42].id, pexelsPhotoId: items[42].pexels_photo_id, category: items[42].category },
+    ]);
+    assert.match(result.failures[0].reason, /HTTP 404/);
+    assert.equal(requests.some(({ url }) => url.includes(`/v1/photos/${items[43].pexels_photo_id}`)), true);
+    assert.equal((await fs.readdir(directory)).some((name) => name.startsWith(items[0].id)), false);
+    assert.equal((await fs.readdir(directory)).some((name) => name.startsWith(items[42].id)), false);
+  });
+});
+
+test('authentication failures include the curated IDs and fail fast', async () => {
+  for (const status of [401, 403]) {
+    await withAcquirer(async (_directory, acquirer) => {
+      const items = loadFallbackImageLibrary({ assetExists: () => true }).items;
+      let calls = 0;
+      acquirer.fetchImpl = async () => {
+        calls += 1;
+        return response('', { status });
+      };
+      await assert.rejects(acquirer.acquireAll(items), (error) => {
+        assert.match(error.message, new RegExp(`ID intern: ${items[0].id}`));
+        assert.match(error.message, new RegExp(`Pexels Photo ID: ${items[0].pexels_photo_id}`));
+        return true;
+      });
+      assert.equal(calls, 1);
+    });
+  }
 });

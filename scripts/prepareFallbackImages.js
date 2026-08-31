@@ -42,14 +42,15 @@ function validateAssets(library) {
     const state = library.availableAssets.get(item.id);
     return !state.detail || !state.card;
   });
-  if (missing.length) throw new Error(`Falten ${missing.length} de 100 imatges (master i/o card). Primera: ${missing[0].id}`);
-  return 100;
+  if (missing.length) throw new Error(`Falten ${missing.length} de ${library.items.length} imatges (master i/o card). Primera: ${missing[0].id}`);
+  return library.items.length;
 }
 
 const options = parseArguments(process.argv.slice(2));
 if (options.validate) {
-  const count = validateAssets(loadFallbackImageLibrary());
-  console.log(`Validació correcta: ${count}/100 imatges WebP locals.`);
+  const library = loadFallbackImageLibrary();
+  const count = validateAssets(library);
+  console.log(`Validació correcta: ${count}/${library.items.length} imatges WebP locals.`);
 } else {
   const library = loadFallbackImageLibrary();
   const originals = sourceFiles(library.items, options.input);
@@ -60,5 +61,5 @@ if (options.validate) {
     convert(source, path.join(DEFAULT_FALLBACK_ASSET_ROOT, 'card', item.local_filename), 800, 80);
   }
   const count = validateAssets(loadFallbackImageLibrary({ assetRoot: DEFAULT_FALLBACK_ASSET_ROOT, assetExists: (candidate) => fs.existsSync(candidate) }));
-  console.log(`Preparació correcta: ${count}/100 imatges WebP locals.`);
+  console.log(`Preparació correcta: ${count}/${library.items.length} imatges WebP locals.`);
 }

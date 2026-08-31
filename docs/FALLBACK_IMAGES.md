@@ -24,8 +24,8 @@ solo se usan antes de la librería cuando están habilitados y tienen una imagen
 
 ## Selección determinista y categorías
 
-El resolver carga el manifiesto una vez al iniciar el backend, valida sus 100 entradas y aplica
-FNV-1a sobre `plan.fingerprint`. Dentro del pool resuelto el índice es `hash % 10`; no hay azar,
+El resolver carga el manifiesto una vez al iniciar el backend, valida sus 105 entradas y aplica
+FNV-1a sobre `plan.fingerprint`. Dentro del pool resuelto el índice es `hash % tamaño_del_pool`; no hay azar,
 escrituras SQLite ni lecturas de ficheros por plan.
 
 | Categoría editorial Tens Pla? | Pool genérico |
@@ -45,10 +45,18 @@ Si no hay categoría editorial, las palabras clave curadas del paquete son una s
 continuación se considera `family_friendly` y `outdoor`. El último recurso es `cultura`. Esta
 elección no modifica la categoría editorial del plan.
 
+### Refinamiento visual de cultura
+
+Sin cambiar la categoría editorial `cultura`, el resolver aplica reglas explícitas y deterministas
+al título y las descripciones. `taller`, `workshop`, `ceràmica`/`cerámica`, `terrissa`,
+`artesania`/`artesanía` y `manualitats`/`manualidades` seleccionan el subtipo
+`craft-workshop`. Las señales de exposición, museo, visita guiada o patrimonio, y cualquier caso
+sin señal, usan únicamente el pool neutral de cultura. No se mezclan pools de otras categorías.
+
 ## Assets y procedencia
 
 El archivo versionado en la raíz `tenspla_pexels_fallback_library_v1.zip` es la fuente de verdad
-de selección y procedencia: contiene el manifiesto completo, 100 IDs de Pexels, página exacta,
+de selección y procedencia: contiene el manifiesto completo, 105 IDs de Pexels, página exacta,
 fotógrafo, licencia, fecha de selección, alt CA/ES y las banderas de uso. No contiene binarios y
 el servidor no hace ninguna petición a Pexels.
 
@@ -65,7 +73,12 @@ tu `.env` local (nunca en `.env.example`), y ejecuta:
 npm run fallback-images:fetch
 ```
 
-El script consulta exactamente los 100 IDs curados, secuencialmente con una pausa de 400 ms,
+If one or more curated IDs are unavailable or return invalid item-specific data, the fetch
+continues sequentially, then reports every affected internal ID, Pexels Photo ID, category and
+reason before exiting non-zero. It never substitutes a curated photo and never starts preparation.
+Authentication, rate-limit, network and manifest failures still stop the acquisition immediately.
+
+El script consulta exactamente los 105 IDs curados, secuencialmente con una pausa de 400 ms,
 valida ID/página/host de origen y usa `src.original`. Guarda los originales y un registro de la
 respuesta API sin credenciales en `data/fallback-image-originals/`, ignorado por Git. Es
 reiniciable: un original válido no se descarga de nuevo; los parciales usan `.part` y no cuentan
@@ -81,7 +94,7 @@ npm run fallback-images:validate
 El atajo `npm run fallback-images:build` ejecuta las tres etapas en orden. No debe usarse en CI ni
 en producción porque requiere explícitamente la clave local y acceso a la API.
 
-La preparación exige los 100 originales antes de escribir, genera ambos tamaños y valida las 200
+La preparación exige los 105 originales antes de escribir, genera ambos tamaños y valida las 210
 salidas. No descarga nada ni se ejecuta en producción. Para sustituir un binario, conserva el
 mismo ID y origen del manifiesto; para ampliar la librería, actualiza primero el manifiesto curado,
 su validador y sus tests, sin convertir una foto en específica de un evento.

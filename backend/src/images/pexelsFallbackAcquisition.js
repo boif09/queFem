@@ -5,9 +5,21 @@ export const DEFAULT_FALLBACK_ORIGINALS_PATH = path.resolve('data/fallback-image
 const API_ORIGIN = 'https://api.pexels.com';
 const IMAGE_ORIGIN = 'images.pexels.com';
 const MAX_ORIGINAL_BYTES = 40 * 1024 * 1024;
+const CURATED_FALLBACK_IMAGE_COUNT = 105;
 
 function failure(message) {
   return new Error(`No s’han pogut adquirir les imatges Pexels: ${message}`);
+}
+
+function isUnavailableCuratedAssetError(error) {
+  return /HTTP 404|no ha trobat|no correspon|no és JSON|no és una resposta|invàlida o incompleta|descàrrega és parcial|original supera/.test(error.message);
+}
+
+function itemFailure(item, error) {
+  const contextual = failure(`${error.message.replace(/^No s’han pogut adquirir les imatges Pexels: /, '')} [ID intern: ${item.id}; Pexels Photo ID: ${item.pexels_photo_id}]`);
+  contextual.unavailableCuratedAsset = isUnavailableCuratedAssetError(error);
+  contextual.cause = error;
+  return contextual;
 }
 
 function requireApiKey(apiKey) {
@@ -77,10 +89,10 @@ function delayFrom(response, fallbackMs) {
 }
 
 export function validateFetchManifest(items) {
-  if (!Array.isArray(items) || items.length !== 100) throw failure('el manifest ha de contenir exactament 100 imatges.');
+  if (!Array.isArray(items) || items.length !== CURATED_FALLBACK_IMAGE_COUNT) throw failure('el manifest ha de contenir exactament 105 imatges.');
   const ids = new Set(items.map(({ id }) => id));
   const photoIds = new Set(items.map(({ pexels_photo_id: id }) => id));
-  if (ids.size !== 100 || photoIds.size !== 100 || [...photoIds].some((id) => !Number.isInteger(id))) {
+  if (ids.size !== CURATED_FALLBACK_IMAGE_COUNT || photoIds.size !== CURATED_FALLBACK_IMAGE_COUNT || [...photoIds].some((id) => !Number.isInteger(id))) {
     throw failure('el manifest conté IDs interns o Pexels Photo IDs duplicats/invàlids.');
   }
   return items;
@@ -132,7 +144,7 @@ export class PexelsFallbackAcquirer {
         continue;
       }
       if (!response.ok) {
-        if (response.status === 404) throw failure('Pexels no ha trobat una de les fotos seleccionades.');
+        if (response.status === 404) throw failure('HTTP 404: Pexels no ha trobat una de les fotos seleccionades.');
         if (response.status === 401 || response.status === 403) throw failure('Pexels ha rebutjat l’autenticació.');
         if (response.status === 429) throw failure('Pexels ha aplicat el límit de peticions; torna-ho a provar més tard.');
         throw failure(`Pexels ha respost amb HTTP ${response.status}.`);
@@ -142,7 +154,7 @@ export class PexelsFallbackAcquirer {
     throw failure('no s’ha pogut completar la petició.');
   }
 
-  async acquireOne(item) {
+  async acquireOneUnsafe(item) {
     await fs.mkdir(this.outputDirectory, { recursive: true });
     const existing = await validExistingOriginal(item, this.outputDirectory);
     if (existing) return { status: 'skipped', item, filename: existing };
@@ -181,18 +193,37 @@ export class PexelsFallbackAcquirer {
     };
   }
 
+  async acquireOne(item) {
+    try {
+      return await this.acquireOneUnsafe(item);
+    } catch (error) {
+      throw itemFailure(item, error);
+    }
+  }
+
   async acquireAll(items) {
     validateFetchManifest(items);
     await fs.mkdir(this.outputDirectory, { recursive: true });
     const provenance = {};
     let downloaded = 0;
     let skipped = 0;
+    const failures = [];
     for (const item of items) {
-      const result = await this.acquireOne(item);
-      if (result.status === 'downloaded') {
-        downloaded += 1;
-        provenance[item.id] = result.provenance;
-      } else skipped += 1;
+      try {
+        const result = await this.acquireOne(item);
+        if (result.status === 'downloaded') {
+          downloaded += 1;
+          provenance[item.id] = result.provenance;
+        } else skipped += 1;
+      } catch (error) {
+        if (!error.unavailableCuratedAsset) throw error;
+        failures.push({
+          id: item.id,
+          pexelsPhotoId: item.pexels_photo_id,
+          category: item.category,
+          reason: error.message.replace(/^No s’han pogut adquirir les imatges Pexels: /, '').replace(/ \[ID intern:.*$/, ''),
+        });
+      }
       if (this.delayMs > 0 && item !== items.at(-1)) await this.sleep(this.delayMs);
     }
     if (downloaded > 0) {
@@ -203,6 +234,9 @@ export class PexelsFallbackAcquirer {
       await fs.writeFile(temporary, `${JSON.stringify({ schema_version: 1, photos: { ...existing.photos, ...provenance } }, null, 2)}\n`);
       await fs.rename(temporary, provenancePath);
     }
-    return { total: items.length, downloaded, skipped, outputDirectory: this.outputDirectory };
+    return {
+      total: items.length, downloaded, skipped, failed: failures.length,
+      validOriginals: downloaded + skipped, failures, outputDirectory: this.outputDirectory,
+    };
   }
 }

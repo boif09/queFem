@@ -22,9 +22,9 @@ function plan(overrides = {}) {
 }
 
 test('generic image manifest is complete, auditable and never event-specific', () => {
-  assert.equal(library.items.length, 100);
-  assert.equal(new Set(library.items.map(({ id }) => id)).size, 100);
-  assert.equal(new Set(library.items.map(({ local_filename: filename }) => filename)).size, 100);
+  assert.equal(library.items.length, 105);
+  assert.equal(new Set(library.items.map(({ id }) => id)).size, 105);
+  assert.equal(new Set(library.items.map(({ local_filename: filename }) => filename)).size, 105);
   assert.deepEqual(Object.keys(CATEGORY_POOL_BY_PLAN_CATEGORY).sort(), [
     'bicicleta', 'cultura', 'espectacles', 'familia', 'festes', 'fires-mercats',
     'gastronomia', 'miradors', 'monuments', 'muntanya', 'museus', 'natura',
@@ -57,6 +57,38 @@ test('generic resolver is deterministic, distributed and uses the explicit categ
   assert.equal(library.resolve(plan({ categories: [], title: 'Tast de vins locals' })).category, 'gastronomia');
   assert.equal(library.resolve(plan({ categories: [], title: 'Sense senyal conegut' })).category, 'cultura');
   assert.equal(stableHash('same-event'), stableHash('same-event'));
+});
+
+test('culture visual refinement reserves craft imagery for explicit workshops', () => {
+  const craftIds = new Set(library.items.filter(({ category, subtype }) => category === 'cultura' && subtype === 'craft-workshop').map(({ id }) => id));
+  const neutralIds = new Set(library.items.filter(({ category, subtype }) => category === 'cultura' && subtype !== 'craft-workshop').map(({ id }) => id));
+  assert.equal(craftIds.size, 5);
+  assert.equal(neutralIds.size, 10);
+  assert.deepEqual([...neutralIds].sort(), Array.from({ length: 10 }, (_, index) => `cultura-${String(index + 6).padStart(2, '0')}`));
+  assert.deepEqual(
+    library.items.filter(({ id }) => /^cultura-1[1-5]$/.test(id)).map(({ id, pexels_photo_id: photoId, subtype }) => ({ id, photoId, subtype })),
+    [
+      { id: 'cultura-11', photoId: 26424659, subtype: 'neutral-exhibition' },
+      { id: 'cultura-12', photoId: 11905911, subtype: 'neutral-exhibition' },
+      { id: 'cultura-13', photoId: 35336016, subtype: 'neutral-exhibition' },
+      { id: 'cultura-14', photoId: 39007932, subtype: 'neutral-exhibition' },
+      { id: 'cultura-15', photoId: 29844114, subtype: 'neutral-museum' },
+    ],
+  );
+
+  const guidedVisit = library.resolve(plan({ fingerprint: 'guided-visit', title: 'Visita guiada al patrimoni', categories: [{ slug: 'cultura' }] }));
+  const exhibition = library.resolve(plan({ fingerprint: 'exhibition', title: 'Exposició d’art contemporani', categories: [{ slug: 'cultura' }] }));
+  const ceramicWorkshop = library.resolve(plan({ fingerprint: 'ceramic-workshop', title: 'Taller de ceràmica', categories: [{ slug: 'cultura' }] }));
+  const genericCulture = library.resolve(plan({ fingerprint: 'generic-culture', title: 'Activitat cultural', categories: [{ slug: 'cultura' }] }));
+
+  assert.equal(craftIds.has(guidedVisit.id), false);
+  assert.equal(craftIds.has(exhibition.id), false);
+  assert.equal(craftIds.has(ceramicWorkshop.id), true);
+  assert.equal(neutralIds.has(genericCulture.id), true);
+  assert.deepEqual(
+    library.resolve(plan({ fingerprint: 'ceramic-workshop', title: 'Taller de ceràmica', categories: [{ slug: 'cultura' }] })),
+    ceramicWorkshop,
+  );
 });
 
 test('missing local generic binary returns no image so the graphical fallback remains safe', () => {
