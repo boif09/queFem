@@ -81,7 +81,10 @@ test('persists resolved and unresolved Fever-only plans with source geography an
     const base = { lang: 'ca', page: 1, limit: 20, sort: 'date', categories: [] };
     assert.equal(queries.findMany(base).plans.some(({ id }) => id === sea.id), false);
     db.prepare("UPDATE sources SET enabled=1 WHERE key='fever'").run();
-    assert.ok(queries.findById(sea.id, 'ca'));
+    const publicSea = queries.findById(sea.id, 'ca');
+    assert.ok(publicSea);
+    assert.equal(publicSea.commerce.sourceRecordId, 'sea');
+    assert.equal(publicSea.commerce.affiliateUrl, sea.source_url);
     for (const filters of [
       {}, { date: '2026-08-25' }, { date: '2026-08-26' },
       { dateFrom: '2026-08-28', dateTo: '2026-08-30' },

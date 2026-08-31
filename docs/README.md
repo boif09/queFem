@@ -16,6 +16,7 @@ Ruta recomendada para una tarea: [`../AGENTS.md`](../AGENTS.md) → documento de
 - [`DISCOVERY_FILTERS_V2.md`](DISCOVERY_FILTERS_V2.md): comportamiento implementado de búsqueda, fechas, territorio, categorías y decisión basada en datos sobre filtros no publicados.
 - [`TICKETMASTER_REMOVAL.md`](TICKETMASTER_REMOVAL.md): retirada, dry-run, backup y purga de una procedencia Ticketmaster.
 - [`FEVER_NORMALIZATION.md`](FEVER_NORMALIZATION.md): contrato M3 de normalización Fever, parser de `Manufacturer`, zona horaria y dry-run sin persistencia.
+- [`ANALYTICS.md`](ANALYTICS.md): eventos Umami propios para clics de afiliación.
 - [`ICGC_GEOGRAPHY.md`](ICGC_GEOGRAPHY.md): snapshot oficial ICGC, contrato del resolver territorial y dry-run geográfico Fever M4A.
 - [`FEVER_PERSISTENCE.md`](FEVER_PERSISTENCE.md): arquitectura M4B, reconciliación y barrera obligatoria de SQLite temporal.
 - [`FEVER_M5B_REHEARSAL.md`](FEVER_M5B_REHEARSAL.md): benchmark occurrence-aware, EXPLAIN, rehearsal temporal y runbook futuro; Fever sigue disabled.

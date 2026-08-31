@@ -8,6 +8,7 @@ import { SourceAttribution } from '../components/SourceAttribution.jsx';
 import { PUBLIC_ORIGIN, Seo } from '../components/Seo.jsx';
 import { ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
+import { trackAffiliateClick } from '../services/analytics.js';
 import { formatDate } from '../utils/dates.js';
 
 function InfoItem({ label, children }) {
@@ -116,6 +117,13 @@ export function PlanDetailPage() {
   const canonicalUrl = `${PUBLIC_ORIGIN}${canonicalPath}`;
   const indexableEvent = plan.kind === 'event';
   const jsonLd = indexableEvent ? buildEventJsonLd(plan, canonicalUrl, seoDescription) : null;
+  const trackFeverAffiliateClick = () => trackAffiliateClick({
+    source: 'fever',
+    planId: plan.id,
+    sourceRecordId: plan.commerce?.sourceRecordId,
+    placement: 'detail_cta',
+    language,
+  });
 
   return (
     <><Seo
@@ -184,7 +192,7 @@ export function PlanDetailPage() {
             )}
           </dl>
           <div className="official-links">
-            {plan.commerce?.provider === 'fever' && <><a className="button button-primary" href={plan.commerce.affiliateUrl} target="_blank" rel="noopener noreferrer">{t('detail.feverTickets')} <span aria-hidden="true">↗</span></a><p className="affiliate-disclosure">{t('detail.affiliateDisclosure')}</p></>}
+            {plan.commerce?.provider === 'fever' && <><a className="button button-primary" href={plan.commerce.affiliateUrl} target="_blank" rel="noopener noreferrer" onClick={trackFeverAffiliateClick}>{t('detail.feverTickets')} <span aria-hidden="true">↗</span></a><p className="affiliate-disclosure">{t('detail.affiliateDisclosure')}</p></>}
             {plan.website_url && <a className="button button-primary" href={plan.website_url} target="_blank" rel="noreferrer">{t('detail.officialWeb')} <span aria-hidden="true">↗</span></a>}
             {plan.ticket_url && <a className="button button-secondary" href={plan.ticket_url} target="_blank" rel="noreferrer">{t('detail.tickets')} <span aria-hidden="true">↗</span></a>}
           </div>

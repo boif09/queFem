@@ -413,11 +413,11 @@ export class PlanQueryRepository {
     plan.hasMoreOccurrences = plan.nextOccurrences.length > 10;
     if (plan.hasMoreOccurrences) plan.nextOccurrences.pop();
     plan.nextOccurrence = plan.nextOccurrences[0] || null;
-    const fever = this.db.prepare(`SELECT ps.source_url,ps.source_payload_json FROM plan_sources ps
+    const fever = this.db.prepare(`SELECT ps.source_url,ps.source_record_id,ps.source_payload_json FROM plan_sources ps
       JOIN sources s ON s.id=ps.source_id WHERE ps.plan_id=? AND s.key='fever' AND s.enabled=1`).get(id);
     if (fever) {
       const payload = JSON.parse(fever.source_payload_json);
-      plan.commerce = { provider: 'fever', affiliateUrl: fever.source_url,
+      plan.commerce = { provider: 'fever', affiliateUrl: fever.source_url, sourceRecordId: fever.source_record_id,
         price: normalizeFeverPrice(payload.CurrentPrice, payload.Currency, payload.Labels) };
     }
     plan.sources = this.db.prepare(`
