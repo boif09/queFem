@@ -62,6 +62,14 @@ npm run diba:import -- --allow-mass-removal
 
 Las fuentes siguen `enabled=0`. La activación futura exige revisión, dry-run local, importación local auditada, backup y dry-run de producción, seguidos de aprobación explícita. M1 no instala cron, no despliega ni activa fuentes públicas.
 
+## Auditoría preactivación M1.4A
+
+La comprobación local `npm run diba:quality:audit` abre la base SQLite con la opción de solo lectura, no consulta la API de DIBA y no usa el importador ni el dry-run. Genera `data/reports/diba-quality-audit.md` y `data/reports/diba-quality-audit.json`, con clústeres de posibles duplicados dentro de cada feed, reconciliación de ambigüedades de la primera importación, riesgo frente a planes de fuentes actualmente habilitadas y una clasificación analítica de municipios de Turismo sin INE mediante el snapshot local ICGC.
+
+M1.4A.1 separa los pares que el matcher actual confirmaría de los pares posibles que el matcher conserva como ambiguos; ambos son inventario de revisión, no instrucciones de fusión. Las cardinalidades distinguen pares, planes y componentes de conflicto bipartitos. La evidencia URL equivalente al matcher usa solo el `source_url` DIBA persistido; las URLs secundarias del payload son diagnósticas. Los clústeres muestran topología y evidencia de horario, y un candidato con procedencia habilitada pero plan inactivo se mantiene como diagnóstico sin declararlo una tarjeta pública garantizada.
+
+El informe no persiste decisiones, no fusiona planes y no resuelve municipios automáticamente. Su resultado es una entrada para diseñar y aprobar una política posterior; no habilita las fuentes DIBA.
+
 ## Limitaciones conocidas
 
 No se modelan recurrencias o sesiones mientras DIBA no publique fechas de sesión fiables. No se reutilizan imágenes DIBA y las relaciones municipales no resueltas quedan en procedencia, sin asignación territorial especulativa.
