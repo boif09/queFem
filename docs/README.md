@@ -19,6 +19,7 @@ Ruta recomendada para una tarea: [`../AGENTS.md`](../AGENTS.md) → documento de
 - [`ANALYTICS.md`](ANALYTICS.md): eventos Umami propios para clics de afiliación.
 - [`DIBA_M0_DISCOVERY.md`](DIBA_M0_DISCOVERY.md): análisis read-only de viabilidad y solapamiento de DIBA.
 - [`DIBA_INTEGRATION.md`](DIBA_INTEGRATION.md): contrato M1 de importación selectiva, seguridad y activación futura de DIBA.
+- [`DIBA_M1_4B_POLICY.md`](DIBA_M1_4B_POLICY.md): política preactivación para consolidación, enlaces, sesiones, geografía, revisión y gates de DIBA M1.4C.
 - [`ICGC_GEOGRAPHY.md`](ICGC_GEOGRAPHY.md): snapshot oficial ICGC, contrato del resolver territorial y dry-run geográfico Fever M4A.
 - [`FEVER_PERSISTENCE.md`](FEVER_PERSISTENCE.md): arquitectura M4B, reconciliación y barrera obligatoria de SQLite temporal.
 - [`FEVER_M5B_REHEARSAL.md`](FEVER_M5B_REHEARSAL.md): benchmark occurrence-aware, EXPLAIN, rehearsal temporal y runbook futuro; Fever sigue disabled.
