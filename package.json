@@ -17,6 +17,7 @@
     "diba:discovery": "node scripts/dibaDiscovery.js",
     "diba:import": "node backend/src/jobs/importDiba.js",
     "diba:quality:audit": "node scripts/dibaQualityAudit.js",
+    "diba:policy:dry-run": "node scripts/dibaPolicyDryRun.js",
     "fever:normalize:dry-run": "node backend/src/jobs/dryRunFeverNormalization.js",
     "geography:icgc:update": "node backend/src/jobs/updateIcgcGeography.js",
     "fever:geography:dry-run": "node backend/src/jobs/dryRunFeverGeography.js",

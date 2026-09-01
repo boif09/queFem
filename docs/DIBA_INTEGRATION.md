@@ -70,6 +70,10 @@ M1.4A.1 separa los pares que el matcher actual confirmaría de los pares posible
 
 El informe no persiste decisiones, no fusiona planes y no resuelve municipios automáticamente. Su resultado es una entrada para diseñar y aprobar una política posterior; no habilita las fuentes DIBA.
 
+M1.4C1.1 añade `npm run diba:policy:dry-run`: carga la política y los overrides versionados, abre SQLite exclusivamente en modo lectura y genera el plan analítico `data/reports/diba-policy-dry-run.{md,json}`. Expone un `mutationPlan` por fases, con destinos finales de procedencia ya compuestos, validaciones previas, geografía explícita contra el destino final y una recomputación transaccional futura de huérfanos; no aplica nada. La vista plana es solo explicativa y no es ejecutable por orden de array. Las identidades durables son siempre `source key + source_record_id`, no IDs locales de plan.
+
+Para una futura C2 no hace falta crear una tabla de mapeos persistente ni estado de override en el importador: el vínculo durable es la fila existente de `plan_sources`. Cuando C2 cambie su `plan_id`, el importador DIBA ya encuentra esa misma pareja `source_id + source_record_id` y actualiza la procedencia asociada sin recrear el antiguo plan DIBA. Un enlace DIBA a un plan público en C2 será inicialmente solo de procedencia: conserva íntegramente los campos canónicos públicos. La geografía aprobada es el único enriquecimiento separado, exclusivamente para completar valores compatibles ausentes y nunca para degradar o sobrescribir geografía válida.
+
 ## Limitaciones conocidas
 
 No se modelan recurrencias o sesiones mientras DIBA no publique fechas de sesión fiables. No se reutilizan imágenes DIBA y las relaciones municipales no resueltas quedan en procedencia, sin asignación territorial especulativa.
