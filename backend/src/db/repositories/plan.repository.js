@@ -105,8 +105,8 @@ export class PlanRepository {
     const sourcePayloadJson = canonicalJson(entry.sourcePayload);
     const existingSourceRecord = this.findSourceRecord.get(entry.sourceId, entry.sourceRecordId);
 
-    if (existingSourceRecord && existingSourceRecord.source_payload_json === sourcePayloadJson) {
-      if (entry.plan.status === 'active') this.reactivatePlan.run(now, existingSourceRecord.plan_id);
+    if (existingSourceRecord && existingSourceRecord.source_payload_json === sourcePayloadJson && !entry.refreshCanonical) {
+      if (!entry.provenanceOnly && entry.plan.status === 'active') this.reactivatePlan.run(now, existingSourceRecord.plan_id);
       this.touchSourceRecord.run(now, entry.sourceUpdatedAt, existingSourceRecord.id);
       return 'skipped';
     }
@@ -115,8 +115,10 @@ export class PlanRepository {
     let outcome;
     if (existingSourceRecord) {
       planId = existingSourceRecord.plan_id;
-      if (entry.preserveExistingPlan) this.fillPlan.run({ id: planId, ...entry.plan, updated_at: now });
-      else this.updatePlan.run({ id: planId, ...entry.plan, updated_at: now });
+      if (!entry.provenanceOnly) {
+        if (entry.preserveExistingPlan) this.fillPlan.run({ id: planId, ...entry.plan, updated_at: now });
+        else this.updatePlan.run({ id: planId, ...entry.plan, updated_at: now });
+      }
       this.updateSourceRecord.run({
         id: existingSourceRecord.id,
         source_url: entry.sourceUrl,
@@ -133,7 +135,7 @@ export class PlanRepository {
         : this.deduplicator.findByFingerprint(entry.plan.fingerprint);
       if (duplicate) {
         planId = duplicate.id;
-        this.fillPlan.run({ id: planId, ...entry.plan, updated_at: now });
+        if (!entry.provenanceOnly) this.fillPlan.run({ id: planId, ...entry.plan, updated_at: now });
         outcome = 'updated';
       } else {
         planId = Number(this.insertPlan.run({ ...entry.plan, created_at: now, updated_at: now }).lastInsertRowid);
@@ -152,9 +154,11 @@ export class PlanRepository {
       });
     }
 
-    for (const slug of entry.categorySlugs) {
-      const category = this.findCategory.get(slug);
-      if (category) this.linkCategory.run(planId, category.id);
+    if (!entry.provenanceOnly) {
+      for (const slug of entry.categorySlugs) {
+        const category = this.findCategory.get(slug);
+        if (category) this.linkCategory.run(planId, category.id);
+      }
     }
     return outcome;
   }

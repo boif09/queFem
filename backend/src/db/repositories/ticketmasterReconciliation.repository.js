@@ -40,6 +40,7 @@ export class TicketmasterReconciliationRepository {
     dryRun = false,
     removedAt = new Date().toISOString(),
     afterRemoval,
+    preservePlanStatus = false,
   } = {}) {
     if (dryRun || rows.length === 0) return rows;
     const remove = this.db.prepare('DELETE FROM plan_sources WHERE id = ?');
@@ -57,17 +58,20 @@ export class TicketmasterReconciliationRepository {
     this.db.transaction(() => {
       for (const row of rows) {
         remove.run(row.source_link_id);
-        if (sourceCount.get(row.plan_id).count === 0) deactivate.run(removedAt, removedAt, row.plan_id);
-        else keepActive.run(removedAt, row.plan_id);
+        const remaining = sourceCount.get(row.plan_id).count;
+        // A disabled staging source must never editorially reactivate/deactivate
+        // a shared plan, but a source-less plan must not remain active.
+        if (remaining === 0) deactivate.run(removedAt, removedAt, row.plan_id);
+        else if (!preservePlanStatus) keepActive.run(removedAt, row.plan_id);
       }
       if (afterRemoval) afterRemoval(rows);
     })();
     return rows;
   }
 
-  reconcile(sourceId, seenIds, today, horizonEnd, { dryRun = false, removedAt } = {}) {
+  reconcile(sourceId, seenIds, today, horizonEnd, { dryRun = false, removedAt, preservePlanStatus = false } = {}) {
     const missing = this.candidates(sourceId, today, horizonEnd)
       .filter((row) => !seenIds.has(String(row.source_record_id)));
-    return this.removeSourceLinks(missing, { dryRun, ...(removedAt ? { removedAt } : {}) });
+    return this.removeSourceLinks(missing, { dryRun, preservePlanStatus, ...(removedAt ? { removedAt } : {}) });
   }
 }

@@ -1,6 +1,6 @@
 # Tens Pla? — Estado del proyecto
 
-Última revisión documental: 2026-08-26.
+Última revisión documental: 2026-09-01.
 
 Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mismo y qué toca hacer?». La arquitectura está en [`ARCHITECTURE.md`](ARCHITECTURE.md), las fuentes en [`DATA_SOURCES.md`](DATA_SOURCES.md) y la operación en [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
@@ -17,6 +17,8 @@ Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mism
 La infraestructura de producción es parcialmente externa a Git. «Confirmado» describe el estado conocido a fecha de esta revisión, no sustituye la comprobación previa a una operación.
 
 ## Recently completed
+
+- DIBA M0 y M1/M1.1/M1.2/M1.3 completados localmente: integración selectiva de `actesturisme_ca`, `escenari` y `actesmuseus`, con procedencias operativas separadas `diba-tourisme`, `diba-escenari` y `diba-museus`. La primera importación local real terminó correctamente con fuentes desactivadas: 710 procedencias elegibles, 613 planes solo-DIBA, 74 planes públicos con procedencia DIBA añadida, 6 matches Turismo→Museos, 21 ambiguos, 28 municipios de Turismo sin resolver y cero retiradas. M1.3 hace fiel el overlay de repeat dry-run y protege la salud semántica del subconjunto accionable. No hay cron ni activación pública. Bibliotecas, agenda general, exposiciones, parques y agregaciones genéricas continúan excluidos.
 
 - Generic Image Library V1 preparada: manifiesto curado y auditable de 100 fotografías Pexels,
   resolver determinista local por categoría/fingerprint, prioridad de imágenes oficiales controladas,

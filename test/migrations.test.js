@@ -89,7 +89,7 @@ test('migration 009 upgrades an M4A-era database and remains idempotent', () => 
     assert.ok(db.prepare("SELECT 1 FROM sqlite_master WHERE name='plan_source_geography'").get());
     assert.equal(db.prepare("SELECT COUNT(*) count FROM schema_migrations WHERE filename='009_add_fever_source_geography.sql'").get().count, 1);
     assert.equal(db.prepare("SELECT enabled FROM sources WHERE key='fever'").get().enabled, 0);
-    assert.deepEqual(db.prepare("SELECT key,enabled FROM sources WHERE key<>'fever' ORDER BY key").all(), otherSources);
+    assert.deepEqual(db.prepare("SELECT key,enabled FROM sources WHERE key IN ('gencat-agenda','ticketmaster-discovery-feed') ORDER BY key").all(), otherSources);
   } finally {
     db.close();
     fs.rmSync(directory, { recursive: true, force: true });
