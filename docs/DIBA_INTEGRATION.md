@@ -74,6 +74,8 @@ M1.4C1.1 añade `npm run diba:policy:dry-run`: carga la política y los override
 
 Para una futura C2 no hace falta crear una tabla de mapeos persistente ni estado de override en el importador: el vínculo durable es la fila existente de `plan_sources`. Cuando C2 cambie su `plan_id`, el importador DIBA ya encuentra esa misma pareja `source_id + source_record_id` y actualiza la procedencia asociada sin recrear el antiguo plan DIBA. Un enlace DIBA a un plan público en C2 será inicialmente solo de procedencia: conserva íntegramente los campos canónicos públicos. La geografía aprobada es el único enriquecimiento separado, exclusivamente para completar valores compatibles ausentes y nunca para degradar o sobrescribir geografía válida.
 
+M1.4C2 incorpora `npm run diba:policy:apply -- --database <rehearsal.sqlite> [--clone-real]`. El comando no tiene una base escribible por defecto: rechaza la ruta configurada real tras resolverla y comparar tambien la identidad del fichero cuando es posible. `--clone-real` crea una copia byte-identica solo si el destino no existe. Sobre esa copia, C2 recompone la politica, valida identidades estables y ejecuta una sola transaccion: relink directo de procedencia al destino final, geografia explicita no degradante, recálculo de huerfanos y validaciones finales. Nunca habilita fuentes DIBA ni imagenes; el informe ignorado queda en `data/reports/diba-c2-rehearsal.{md,json}`.
+
 ## Limitaciones conocidas
 
 No se modelan recurrencias o sesiones mientras DIBA no publique fechas de sesión fiables. No se reutilizan imágenes DIBA y las relaciones municipales no resueltas quedan en procedencia, sin asignación territorial especulativa.
