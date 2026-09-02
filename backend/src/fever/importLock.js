@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 
+const TRANSIENT_DIRECTORY_ERROR_CODES = new Set(['EBUSY', 'ENOTEMPTY', 'EPERM']);
+
 function processExists(pid) {
   if (!Number.isSafeInteger(pid) || pid <= 0) return false;
   try {
@@ -39,6 +41,8 @@ export class FeverImportLock {
     now = () => Date.now(),
     fileSystem = fs.promises,
     beforeOwnerRename = null,
+    cleanupRetryAttempts = 4,
+    cleanupRetryDelayMs = 20,
   } = {}) {
     this.directory = `${path.resolve(databasePath)}.fever-import.lock`;
     this.ownerFile = path.join(this.directory, 'owner.json');
@@ -50,6 +54,19 @@ export class FeverImportLock {
     this.now = now;
     this.fileSystem = fileSystem;
     this.beforeOwnerRename = beforeOwnerRename;
+    this.cleanupRetryAttempts = cleanupRetryAttempts;
+    this.cleanupRetryDelayMs = cleanupRetryDelayMs;
+  }
+
+  async retryTransientDirectoryOperation(operation) {
+    for (let attempt = 0; attempt < this.cleanupRetryAttempts; attempt += 1) {
+      try {
+        return await operation();
+      } catch (error) {
+        if (!TRANSIENT_DIRECTORY_ERROR_CODES.has(error.code) || attempt === this.cleanupRetryAttempts - 1) throw error;
+        await new Promise((resolve) => setTimeout(resolve, this.cleanupRetryDelayMs * (attempt + 1)));
+      }
+    }
   }
 
   ownerIsActive(owner) {
@@ -84,11 +101,11 @@ export class FeverImportLock {
 
   async cleanupUnpublishedLock(temporaryOwnerFile) {
     try {
-      await this.fileSystem.rm(temporaryOwnerFile, { force: true });
+      await this.retryTransientDirectoryOperation(() => this.fileSystem.rm(temporaryOwnerFile, { force: true }));
       // rmdir only succeeds when this still is the empty directory we acquired.
-      await this.fileSystem.rmdir(this.directory);
+      await this.retryTransientDirectoryOperation(() => this.fileSystem.rmdir(this.directory));
     } catch (error) {
-      if (!['ENOENT', 'ENOTEMPTY', 'EBUSY'].includes(error.code)) throw error;
+      if (!['ENOENT', ...TRANSIENT_DIRECTORY_ERROR_CODES].includes(error.code)) throw error;
     }
   }
 
@@ -118,7 +135,9 @@ export class FeverImportLock {
         const staleDirectory = `${this.directory}.stale-${randomUUID()}`;
         try {
           await this.fileSystem.rename(this.directory, staleDirectory);
-          await this.fileSystem.rm(staleDirectory, { recursive: true, force: true });
+          await this.retryTransientDirectoryOperation(() => this.fileSystem.rm(staleDirectory, {
+            recursive: true, force: true, maxRetries: this.cleanupRetryAttempts - 1, retryDelay: this.cleanupRetryDelayMs,
+          }));
         } catch (renameError) {
           if (renameError.code !== 'ENOENT') throw renameError;
         }
@@ -140,7 +159,11 @@ export class FeverImportLock {
   async release() {
     try {
       const owner = JSON.parse(await this.fileSystem.readFile(this.ownerFile, 'utf8'));
-      if (owner.token === this.token) await this.fileSystem.rm(this.directory, { recursive: true, force: true });
+      if (owner.token === this.token) {
+        await this.retryTransientDirectoryOperation(() => this.fileSystem.rm(this.directory, {
+          recursive: true, force: true, maxRetries: this.cleanupRetryAttempts - 1, retryDelay: this.cleanupRetryDelayMs,
+        }));
+      }
     } catch (error) {
       if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error;
     }

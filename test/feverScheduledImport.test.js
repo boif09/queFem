@@ -293,9 +293,13 @@ test('Fever lock publishes owner metadata atomically and recovers abandoned publ
     const abandoned = new FeverImportLock(config.databasePath, { malformedLockGraceMs: 1 });
     fs.mkdirSync(abandoned.directory);
     fs.writeFileSync(path.join(abandoned.directory, 'owner.crashed.tmp'), '{"pid":');
-    const staleTime = new Date(Date.now() - 100);
+    const staleNow = Date.now();
+    const staleTime = new Date(staleNow - 100);
     fs.utimesSync(abandoned.directory, staleTime, staleTime);
-    const recovered = new FeverImportLock(config.databasePath, { malformedLockGraceMs: 1 });
+    const recovered = new FeverImportLock(config.databasePath, {
+      malformedLockGraceMs: 1,
+      now: () => staleNow + 1000,
+    });
     assert.equal(await recovered.acquire(), true);
     await recovered.release();
 
@@ -324,6 +328,31 @@ test('Fever lock publishes owner metadata atomically and recovers abandoned publ
     });
     assert.equal(await renameFailure.acquire(), false);
     assert.equal(fs.existsSync(renameFailure.directory), false);
+
+    let transientRmdirAttempts = 0;
+    const transientCleanup = new FeverImportLock(config.databasePath, {
+      cleanupRetryDelayMs: 0,
+      fileSystem: {
+        ...fs.promises,
+        rename: async () => {
+          const error = new Error('owner rename failed');
+          error.code = 'EIO';
+          throw error;
+        },
+        rmdir: async (...args) => {
+          transientRmdirAttempts += 1;
+          if (transientRmdirAttempts === 1) {
+            const error = new Error('temporary Windows directory state');
+            error.code = 'ENOTEMPTY';
+            throw error;
+          }
+          return fs.promises.rmdir(...args);
+        },
+      },
+    });
+    assert.equal(await transientCleanup.acquire(), false);
+    assert.equal(transientRmdirAttempts, 2);
+    assert.equal(fs.existsSync(transientCleanup.directory), false);
   });
 });
 

@@ -72,6 +72,7 @@ export async function importFeverScheduled(config = loadConfig(), options = {}) 
     return skipped;
   }
 
+  let primaryError = null;
   try {
     const preflight = preflightFeverScheduledImport(config);
     const started = performance.now();
@@ -106,8 +107,16 @@ export async function importFeverScheduled(config = loadConfig(), options = {}) 
       ...summary,
     }));
     return summary;
+  } catch (error) {
+    primaryError = error;
+    throw error;
   } finally {
-    await lock.release();
+    try {
+      await lock.release();
+    } catch (cleanupError) {
+      if (!primaryError) throw cleanupError;
+      Object.defineProperty(primaryError, 'lockCleanupError', { value: cleanupError, enumerable: false });
+    }
   }
 }
 

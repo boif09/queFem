@@ -58,6 +58,15 @@ async function publish(directory, payload = rawFixture, options = {}) {
   return { manifestPath, result };
 }
 
+function removeTemporaryDirectory(directory) {
+  return rm(directory, {
+    recursive: true,
+    force: true,
+    maxRetries: 3,
+    retryDelay: 25,
+  });
+}
+
 test('resolves Polygon/MultiPolygon and preserves official codes and accented names', () => {
   const result = resolver.resolve({ latitude: 41.5, longitude: 1.5 });
   assert.equal(result.status, 'match');
@@ -188,7 +197,7 @@ test('accepts only credential-free HTTPS on the exact official ICGC host, includ
   ]) assert.throws(() => validateIcgcUrl(value), /credential-free HTTPS/);
 
   const directory = await mkdtemp(path.join(os.tmpdir(), 'icgc-redirects-'));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  t.after(() => removeTemporaryDirectory(directory));
   for (const location of [
     'https://user:password@geoserveis.icgc.cat/data',
     'https://evil.example/data',
@@ -215,7 +224,7 @@ function oversizedStreamResponse(contentLength) {
 
 test('enforces the 80 MiB limit on declarations and actual streamed bytes', async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'icgc-size-limit-'));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  t.after(() => removeTemporaryDirectory(directory));
   const manifestPath = path.join(directory, 'icgc-current.json');
   await assert.rejects(updateIcgcSnapshot({ manifestPath, minimumFeatures: 1, fetchImpl: async () => geoJsonResponse(rawFixture, 200, { 'content-length': String(90 * 1024 * 1024) }) }), /too large/);
   await assert.rejects(updateIcgcSnapshot({ manifestPath, minimumFeatures: 1, fetchImpl: async () => oversizedStreamResponse() }), /exceeded maximum size/);
@@ -224,7 +233,7 @@ test('enforces the 80 MiB limit on declarations and actual streamed bytes', asyn
 
 test('installed code set blocks 947→946 and same-count replacements unless explicitly approved', async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'icgc-administrative-change-'));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  t.after(() => removeTemporaryDirectory(directory));
   const initial = administrativePayload(947);
   const { manifestPath } = await publish(directory, initial, { minimumFeatures: 900 });
   await publish(directory, structuredClone(initial), { minimumFeatures: 900 });
@@ -249,7 +258,7 @@ test('installed code set blocks 947→946 and same-count replacements unless exp
 
 test('atomic manifest keeps the previous version usable across publication failures', async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'icgc-atomic-publication-'));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  t.after(() => removeTemporaryDirectory(directory));
   const { manifestPath } = await publish(directory);
   const previous = await readAndVerifyIcgcSnapshot(manifestPath);
   const changed = structuredClone(rawFixture);
@@ -269,7 +278,7 @@ test('atomic manifest keeps the previous version usable across publication failu
 
 test('immutable artifacts are promoted only after complete writes and inconsistent finals are rejected', async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'icgc-immutable-write-'));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  t.after(() => removeTemporaryDirectory(directory));
   const manifestPath = path.join(directory, 'icgc-current.json');
 
   await assert.rejects(updateIcgcSnapshot({
@@ -291,7 +300,7 @@ test('immutable artifacts are promoted only after complete writes and inconsiste
 
 test('reader rejects invalid current JSON and missing snapshot or metadata targets', async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'icgc-invalid-current-'));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  t.after(() => removeTemporaryDirectory(directory));
   const manifestPath = path.join(directory, 'icgc-current.json');
   await writeFile(manifestPath, '{invalid');
   await assert.rejects(readAndVerifyIcgcSnapshot(manifestPath), SyntaxError);
@@ -315,7 +324,7 @@ test('reader rejects invalid current JSON and missing snapshot or metadata targe
 test('reader rejects new/old pair mismatches and inconsistent checksums', async (t) => {
   const firstDirectory = await mkdtemp(path.join(os.tmpdir(), 'icgc-pair-first-'));
   const secondDirectory = await mkdtemp(path.join(os.tmpdir(), 'icgc-pair-second-'));
-  t.after(() => Promise.all([rm(firstDirectory, { recursive: true, force: true }), rm(secondDirectory, { recursive: true, force: true })]));
+  t.after(() => Promise.all([removeTemporaryDirectory(firstDirectory), removeTemporaryDirectory(secondDirectory)]));
   const first = await publish(firstDirectory);
   const changed = structuredClone(rawFixture);
   changed.features[0].properties.NOMMUNI = 'Updated official name';
@@ -338,7 +347,7 @@ test('reader rejects new/old pair mismatches and inconsistent checksums', async 
 
 test('updater output is deterministic and invalid updates preserve the published manifest', async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'icgc-update-deterministic-'));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  t.after(() => removeTemporaryDirectory(directory));
   const { manifestPath } = await publish(directory);
   const first = await readAndVerifyIcgcSnapshot(manifestPath);
   await publish(directory, structuredClone(rawFixture));
@@ -353,7 +362,7 @@ test('updater output is deterministic and invalid updates preserve the published
 
 test('Fever geography dry-run reports publicable geography and leaves DATABASE_PATH untouched', async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'fever-geography-readonly-'));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  t.after(() => removeTemporaryDirectory(directory));
   const { manifestPath } = await publish(directory);
   const databasePath = path.join(directory, 'sentinel.sqlite');
   await writeFile(databasePath, 'sentinel');
