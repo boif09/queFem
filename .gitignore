@@ -6,6 +6,7 @@ data/*.sqlite-wal
 data/cache/
 data/reports/
 data/rehearsal/
+data/backups/
 data/fallback-image-originals/
 coverage/
 frontend/dist/

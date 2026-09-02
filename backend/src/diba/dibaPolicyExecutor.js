@@ -5,6 +5,8 @@ import { openDatabase } from '../db/database.js';
 import { runDibaQualityAudit } from './dibaQualityAudit.js';
 import { loadPolicyIdentityIndex, planDibaPolicy } from './dibaPolicyPlanner.js';
 import { DibaImporter } from './dibaImporter.js';
+import * as primaryLocal from './dibaPolicyPrimaryLocal.js';
+import * as stageObserver from './dibaPolicyStageObserver.js';
 
 function comparablePath(value) {
   const absolute = path.resolve(value);
@@ -15,6 +17,10 @@ function comparablePath(value) {
     while (!fs.existsSync(existing)) { const parent = path.dirname(existing); if (parent === existing) return normalize(absolute); missing.unshift(path.basename(existing)); existing = parent; }
     return normalize(path.join(fs.realpathSync.native(existing), ...missing));
   }
+}
+function sameResolvedPath(left, right) {
+  const normalize = (candidate) => process.platform === 'win32' ? candidate.toLowerCase() : candidate;
+  return normalize(path.resolve(left)) === normalize(path.resolve(right));
 }
 function samePhysicalFile(left, right) {
   if (!fs.existsSync(left) || !fs.existsSync(right)) return false;
@@ -73,10 +79,10 @@ function prepareExecutionPlan(databasePath, overrides) {
     try { return { auditReport, policy: planDibaPolicy({ auditReport, overrides, identityIndex: loadPolicyIdentityIndex(db) }) }; } finally { db.close(); }
   });
 }
-export async function applyDibaPolicyRehearsal({ databasePath, realDatabasePath, overrides, preparePlan = prepareExecutionPlan }) {
-  const rehearsalPath = assertC2RehearsalPath(databasePath, realDatabasePath);
+async function executeDibaPolicyTransaction({ databasePath, overrides, preparePlan = prepareExecutionPlan }) {
+  const rehearsalPath = path.resolve(databasePath);
   if (!fs.existsSync(rehearsalPath)) throw new Error(`DIBA C2 rehearsal database does not exist: ${rehearsalPath}`);
-  const originalBefore = sha256File(realDatabasePath); const rehearsalBefore = sha256File(rehearsalPath);
+  const rehearsalBefore = sha256File(rehearsalPath);
   const { policy } = await preparePlan(rehearsalPath, overrides);
   const mappings = policy.mutationPlan.phases.finalSourceMappings;
   const db = openDatabase(rehearsalPath); let result;
@@ -141,8 +147,29 @@ export async function applyDibaPolicyRehearsal({ databasePath, realDatabasePath,
       return { finalRelinks: relinks, geography, candidateOrphanPlanIds, inactivatedOrphans: orphans, invariantResults: { provenance: 'pass', publicCanonical: 'pass', geography: 'pass', sourceConfiguration: 'pass', orphans: 'pass', integrity: 'ok', activationRemainsBlocked: policy.activation.publicActivationReady === false }, sourceStates: statesAfter, activation: policy.activation, summary: policy.summary };
     })();
   } finally { db.close(); }
+  return { rehearsalDatabasePath: rehearsalPath, rehearsalSha256Before: rehearsalBefore, rehearsalSha256After: sha256File(rehearsalPath), ...result };
+}
+export async function applyDibaPolicyRehearsal({ databasePath, realDatabasePath, overrides, preparePlan = prepareExecutionPlan }) {
+  const rehearsalPath = assertC2RehearsalPath(databasePath, realDatabasePath);
+  const originalBefore = sha256File(realDatabasePath);
+  const result = await executeDibaPolicyTransaction({ databasePath: rehearsalPath, overrides, preparePlan });
   const originalAfter = sha256File(realDatabasePath); if (originalBefore !== originalAfter) throw new Error('DIBA C2 detected a change to the original database.');
-  return { rehearsalDatabasePath: rehearsalPath, originalDatabasePath: path.resolve(realDatabasePath), originalSha256Before: originalBefore, originalSha256After: originalAfter, rehearsalSha256Before: rehearsalBefore, rehearsalSha256After: sha256File(rehearsalPath), ...result };
+  return { ...result, originalDatabasePath: path.resolve(realDatabasePath), originalSha256Before: originalBefore, originalSha256After: originalAfter };
+}
+export async function applyDibaPolicyPrimaryLocal({ args, config, overrides, backupPath }) {
+  // The primary path is derived here, at the writable boundary, rather than
+  // accepted from a helper result. This remains true under NODE_ENV=test.
+  const primary = path.resolve(config.projectRoot, 'data', 'quefem.sqlite');
+  stageObserver.notifyDibaPolicyStage('preflight');
+  const pre = await primaryLocal.preflightC3PrimaryLocal({ args, config, overrides });
+  if (!sameResolvedPath(pre.primary, primary)) throw new Error('C3 preflight returned a non-canonical primary database path.');
+  stageObserver.notifyDibaPolicyStage('backup');
+  const backup = await primaryLocal.createVerifiedC3Backup(primary, backupPath);
+  stageObserver.notifyDibaPolicyStage('before-transaction');
+  const apply = await executeDibaPolicyTransaction({ databasePath: primary, overrides });
+  stageObserver.notifyDibaPolicyStage('after-transaction');
+  const post = primaryLocal.readonlyC3State(primary);
+  return { pre, backup, apply, post, postSha256: sha256File(primary) };
 }
 
 // This exercises the exact existing-source lookup used before the importer

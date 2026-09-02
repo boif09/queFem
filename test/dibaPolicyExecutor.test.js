@@ -6,6 +6,7 @@ import test from 'node:test';
 import { openDatabase } from '../backend/src/db/database.js';
 import { migrate } from '../backend/src/db/migrate.js';
 import { applyDibaPolicyRehearsal, assertC2RehearsalPath, cloneDibaRehearsal, sha256File } from '../backend/src/diba/dibaPolicyExecutor.js';
+import * as executorExports from '../backend/src/diba/dibaPolicyExecutor.js';
 
 function temporaryPair() {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'quefem-diba-c2-')); const real = path.join(directory, 'real.sqlite');
@@ -19,6 +20,18 @@ test('C2 rejects missing, equivalent and real database paths', () => {
     assert.throws(() => assertC2RehearsalPath(path.relative(process.cwd(), pair.real), pair.real), /refuses/);
     assert.equal(assertC2RehearsalPath(pair.rehearsal, pair.real), path.resolve(pair.rehearsal));
   } finally { fs.rmSync(pair.directory, { recursive: true, force: true }); }
+});
+
+test('generic C2 executor always rejects the primary path even when passed obsolete bypass-shaped options', async () => {
+  const pair = temporaryPair();
+  try {
+    await assert.rejects(applyDibaPolicyRehearsal({ databasePath: pair.real, realDatabasePath: pair.real, overrides: { version: 1, decisions: [] }, allowPrimaryLocal: true, canonicalPrimaryPath: pair.real }), /refuses/);
+  } finally { fs.rmSync(pair.directory, { recursive: true, force: true }); }
+});
+
+test('raw writable transaction and arbitrary-path factory are not exported', () => {
+  assert.equal(typeof executorExports.executeDibaPolicyTransaction, 'undefined');
+  assert.equal(typeof executorExports.createPrimaryLocalTransactionRunner, 'undefined');
 });
 test('C2 only commits to an explicit rehearsal copy and preserves disabled source configuration', async () => {
   const pair = temporaryPair();
