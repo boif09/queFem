@@ -81,7 +81,12 @@ export function planDibaPolicy({ auditReport, overrides: rawOverrides, identityI
     .map((cluster) => ({ ...evaluateSameFeedComponent(cluster), cluster, planIds: cluster.planIds }));
   const sameFeedDecisions = new Map(sameFeed.map((item) => [item.clusterId, item]));
   const confirmedFindings = auditReport.currentPublicCandidates.confirmed;
-  const crossConfirmed = auditReport.currentPublicCandidates.confirmedSummary.conflictComponents.map((component) => evaluateCrossSourceComponent(component, confirmedFindings, sameFeedDecisions));
+  const crossConfirmed = auditReport.currentPublicCandidates.confirmedSummary.conflictComponents.map((component) => {
+    const automatic = evaluateCrossSourceComponent(component, confirmedFindings, sameFeedDecisions);
+    if (automatic.decision === CROSS_SOURCE_DECISIONS.AUTO_LINK_TO_EXISTING_PUBLIC_PLAN || automatic.decision === CROSS_SOURCE_DECISIONS.IGNORE_FOR_CURRENT_VISIBILITY_ONLY) return automatic;
+    const disposition = reviewedComponentDisposition(component, confirmedFindings, reviewed);
+    return { ...automatic, reviewedDecision: disposition.complete ? disposition.decision : null, review: disposition, activationBlocker: automatic.activePublicationConflict && !disposition.complete, decision: disposition.complete ? disposition.decision : automatic.decision };
+  });
   const possibleFindings = auditReport.currentPublicCandidates.possible;
   const possibleComponents = auditReport.currentPublicCandidates.possibleSummary.conflictComponents.map((component) => {
     const findings = possibleFindings.filter(({ dibaPlanId, candidatePublicPlanId }) => component.dibaPlanIds.includes(dibaPlanId) && component.candidatePlanIds.includes(candidatePublicPlanId));
@@ -91,11 +96,11 @@ export function planDibaPolicy({ auditReport, overrides: rawOverrides, identityI
   });
 
   const policyConsolidationEdges = []; const policyPublicLinkEdges = []; const directPublicTargets = new Map();
-  for (const decision of crossConfirmed.filter(({ decision }) => decision === CROSS_SOURCE_DECISIONS.AUTO_LINK_TO_EXISTING_PUBLIC_PLAN)) {
-    const target = publicTargetForPlan(identityIndex, decision.candidatePlanIds[0]);
+  for (const decision of crossConfirmed.filter(({ decision }) => decision === CROSS_SOURCE_DECISIONS.AUTO_LINK_TO_EXISTING_PUBLIC_PLAN || decision === 'LINK_TO_EXISTING')) {
+    const target = decision.decision === 'LINK_TO_EXISTING' ? decision.review.target : publicTargetForPlan(identityIndex, decision.candidatePlanIds[0]);
     for (const finding of decision.findings) {
       const source = resolveExactly(identityIndex, identity(finding.sourceKey, finding.sourceRecordId), 'Confirmed DIBA source');
-      directPublicTargets.set(identityKey(source.identity), target); policyPublicLinkEdges.push(policyEdge(source.identity, target.identity, 'AUTO_LINK_TO_EXISTING_PUBLIC_PLAN'));
+      directPublicTargets.set(identityKey(source.identity), target); policyPublicLinkEdges.push(policyEdge(source.identity, target.identity, decision.decision === 'LINK_TO_EXISTING' ? 'REVIEWED_LINK_TO_EXISTING' : 'AUTO_LINK_TO_EXISTING_PUBLIC_PLAN'));
     }
   }
   for (const item of possibleComponents.filter(({ reviewedDecision }) => reviewedDecision === 'LINK_TO_EXISTING')) for (const source of item.review.sources) {
@@ -157,10 +162,10 @@ export function planDibaPolicy({ auditReport, overrides: rawOverrides, identityI
     ...possibleComponents.filter(({ activationBlocker }) => activationBlocker).map(({ review }) => ({ reason: 'ACTIVE_POSSIBLE_COMPONENT_WITHOUT_COMPLETE_REVIEWED_DISPOSITION', detail: review.reason })),
     ...sameFeed.filter(({ decision, activationDisposition }) => decision === SAME_FEED_DECISIONS.KEEP_SEPARATE_SESSION && activationDisposition === SAME_FEED_DECISIONS.DEFER).map(() => ({ reason: 'DISTINCT_SESSION_NOT_PUBLICLY_DISTINGUISHABLE' })),
     ...sameFeed.filter(({ decision }) => decision === SAME_FEED_DECISIONS.NEEDS_HUMAN_REVIEW).map(() => ({ reason: 'SAME_FEED_COMPONENT_NEEDS_HUMAN_REVIEW' })),
-    ...crossConfirmed.filter(({ decision }) => decision !== CROSS_SOURCE_DECISIONS.AUTO_LINK_TO_EXISTING_PUBLIC_PLAN && decision !== CROSS_SOURCE_DECISIONS.IGNORE_FOR_CURRENT_VISIBILITY_ONLY).map(() => ({ reason: 'CONFIRMED_CROSS_SOURCE_COMPONENT_NEEDS_HUMAN_REVIEW' })),
+    ...crossConfirmed.filter(({ decision, review }) => decision !== CROSS_SOURCE_DECISIONS.AUTO_LINK_TO_EXISTING_PUBLIC_PLAN && decision !== CROSS_SOURCE_DECISIONS.IGNORE_FOR_CURRENT_VISIBILITY_ONLY && !review?.complete).map(() => ({ reason: 'CONFIRMED_CROSS_SOURCE_COMPONENT_NEEDS_HUMAN_REVIEW' })),
   ];
   return { readOnly: true, sameFeed, crossSource: { confirmed: crossConfirmed, possible: possibleComponents }, geography, mutationPlan, operations, activation: { publicActivationReady: false, blockers, blockerCounts: countBy(blockers, ({ reason }) => reason) }, summary: {
-    sameFeed: countBy(sameFeed, ({ decision }) => decision), crossConfirmed: countBy(crossConfirmed, ({ decision }) => decision),
+    sameFeed: countBy(sameFeed, ({ decision }) => decision), crossConfirmed: countBy(crossConfirmed, ({ decision }) => decision), reviewedConfirmedLink: crossConfirmed.filter(({ reviewedDecision }) => reviewedDecision === 'LINK_TO_EXISTING').length,
     possible: { totalComponents: possibleComponents.length, reviewedLink: possibleComponents.filter(({ reviewedDecision }) => reviewedDecision === 'LINK_TO_EXISTING').length, reviewedKeepSeparate: possibleComponents.filter(({ reviewedDecision }) => reviewedDecision === 'KEEP_SEPARATE').length, reviewedDefer: possibleComponents.filter(({ reviewedDecision }) => reviewedDecision === 'DEFER').length, unresolved: possibleComponents.filter(({ activationBlocker }) => activationBlocker).length },
     policyLevelConsolidationEdges: policyConsolidationEdges.length, policyLevelPublicLinkEdges: policyPublicLinkEdges.length, finalUniqueSourceRelinks: finalSourceMappings.length, geography: countBy(geography, ({ resolutionType }) => resolutionType), plannedOperations: countBy(operations, ({ type }) => type),
   } };
