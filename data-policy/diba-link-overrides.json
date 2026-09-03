@@ -2,91 +2,479 @@
   "version": 1,
   "decisions": [
     {
-      "source": { "sourceKey": "diba-escenari", "sourceRecordId": "escenari1313947136481213281111365172" },
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1313947136481213281111365172"
+      },
       "decision": "LINK_TO_EXISTING",
-      "target": { "sourceKey": "gencat-agenda", "sourceRecordId": "2026071400040@6f1cbd7f28ae845c" },
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071400040@6f1cbd7f28ae845c"
+      },
       "reason": "Human review confirmed the same real-world event.",
       "reviewedAt": "2026-09-02",
       "reviewer": "human-review"
     },
     {
-      "source": { "sourceKey": "diba-escenari", "sourceRecordId": "escenari76586167531201365181" },
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari76586167531201365181"
+      },
       "decision": "LINK_TO_EXISTING",
-      "target": { "sourceKey": "gencat-agenda", "sourceRecordId": "2026071400043@434186404d15ffa8" },
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071400043@434186404d15ffa8"
+      },
       "reason": "Human review confirmed the same real-world event.",
       "reviewedAt": "2026-09-02",
       "reviewer": "human-review"
     },
     {
-      "source": { "sourceKey": "diba-escenari", "sourceRecordId": "escenari1313931136484013581411365170" },
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1313931136484013581411365170"
+      },
       "decision": "LINK_TO_EXISTING",
-      "target": { "sourceKey": "gencat-agenda", "sourceRecordId": "2026071400045@0bb3fc1362cdb60f" },
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071400045@0bb3fc1362cdb60f"
+      },
       "reason": "Human review confirmed event identity despite schedule/location freshness differences; public canonical fields remain protected.",
       "reviewedAt": "2026-09-02",
       "reviewer": "human-review"
     },
     {
-      "source": { "sourceKey": "diba-escenari", "sourceRecordId": "escenari823227136472413577601365263" },
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari823227136472413577601365263"
+      },
       "decision": "LINK_TO_EXISTING",
-      "target": { "sourceKey": "gencat-agenda", "sourceRecordId": "2026071400032@5db54008ed67acc2" },
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071400032@5db54008ed67acc2"
+      },
       "reason": "Human review confirmed the same real-world event.",
       "reviewedAt": "2026-09-02",
       "reviewer": "human-review"
     },
     {
-      "source": { "sourceKey": "diba-escenari", "sourceRecordId": "escenari1097189136472410971921365179" },
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1097189136472410971921365179"
+      },
       "decision": "LINK_TO_EXISTING",
-      "target": { "sourceKey": "gencat-agenda", "sourceRecordId": "2026071400007@f84e8b9048d4a944" },
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071400007@f84e8b9048d4a944"
+      },
       "reason": "Human review confirmed the same real-world event.",
       "reviewedAt": "2026-09-02",
       "reviewer": "human-review"
     },
     {
-      "source": { "sourceKey": "diba-escenari", "sourceRecordId": "escenari385001136481212157901365176" },
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari385001136481212157901365176"
+      },
       "decision": "LINK_TO_EXISTING",
-      "target": { "sourceKey": "gencat-agenda", "sourceRecordId": "20260619016@3fd97e02577aaa79" },
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "20260619016@3fd97e02577aaa79"
+      },
       "reason": "Human review confirmed the same real-world event.",
       "reviewedAt": "2026-09-02",
       "reviewer": "human-review"
     },
     {
-      "source": { "sourceKey": "diba-escenari", "sourceRecordId": "escenari928999136639513666041366629" },
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari928999136639513666041366629"
+      },
       "decision": "LINK_TO_EXISTING",
-      "target": { "sourceKey": "gencat-agenda", "sourceRecordId": "2026072900006@166b0f4d80f42d1f" },
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072900006@166b0f4d80f42d1f"
+      },
       "reason": "Human review confirmed the same real-world event.",
       "reviewedAt": "2026-09-02",
       "reviewer": "human-review"
     },
     {
-      "source": { "sourceKey": "diba-escenari", "sourceRecordId": "escenari1082511136478210825141365185" },
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1082511136478210825141365185"
+      },
       "decision": "LINK_TO_EXISTING",
-      "target": { "sourceKey": "gencat-agenda", "sourceRecordId": "2026072400015@255f4338b5ca943e" },
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072400015@255f4338b5ca943e"
+      },
       "reason": "Human review confirmed the same real-world event.",
       "reviewedAt": "2026-09-02",
       "reviewer": "human-review"
     },
     {
-      "source": { "sourceKey": "diba-escenari", "sourceRecordId": "escenari222833838465731364578" },
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari222833838465731364578"
+      },
       "decision": "LINK_TO_EXISTING",
-      "target": { "sourceKey": "gencat-agenda", "sourceRecordId": "2026071400053@af8a76b2d26e04f0" },
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071400053@af8a76b2d26e04f0"
+      },
       "reason": "Human review confirmed venue/address naming differences do not represent a different event.",
       "reviewedAt": "2026-09-02",
       "reviewer": "human-review"
     },
     {
-      "source": { "sourceKey": "diba-escenari", "sourceRecordId": "escenari77463413965213143661364586" },
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari77463413965213143661364586"
+      },
       "decision": "LINK_TO_EXISTING",
-      "target": { "sourceKey": "gencat-agenda", "sourceRecordId": "2026071400052@7699b90a1c22b523" },
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071400052@7699b90a1c22b523"
+      },
       "reason": "Human review confirmed the Ateneu/Teatre Ateneu naming difference does not represent a different event.",
       "reviewedAt": "2026-09-02",
       "reviewer": "human-review"
     },
     {
-      "source": { "sourceKey": "diba-tourisme", "sourceRecordId": "agendaturisme455505989" },
+      "source": {
+        "sourceKey": "diba-tourisme",
+        "sourceRecordId": "agendaturisme455505989"
+      },
       "decision": "LINK_TO_EXISTING",
-      "target": { "sourceKey": "gencat-agenda", "sourceRecordId": "20251024021@2ebddbcd49c02f48" },
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "20251024021@2ebddbcd49c02f48"
+      },
       "reason": "Human review confirmed the same exhibition despite end-date freshness differences; public canonical dates remain protected.",
       "reviewedAt": "2026-09-02",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari136611834552013661211366159"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072700010@3d84022daa3ce860"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari120008434552012000881366008"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072700005@52c7bcaec1faf704"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1180435235913653671366035"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072400011@90d5368f687c346e"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari24989534552012188881366153"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072700006@c9b588eac5b160ee"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1256174235913653201366037"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072400012@34e7ac207a45299b"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari121577322713146771364695"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071400047@951a6f096da8bf31"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari18482609680322661365178"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071400035@63b3d555cc18e095"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari33484834552013661241366161"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072700012@565c01aacf969a56"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari7280235913658601366045"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071000001@69e7ce4a7f6c598f"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari5515231934305515261364687"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071300035@5af66be7d8599e31"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari7658221313021661365213"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071500002@3948a2a3d9276b96"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari14440235913660531366145"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072400017@b25d11de4a547f10"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari73152359118051366031"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071300005@8aae2dd8e2d76e16"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari91081668599210738291364655"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "20260619026@bd13944c0e3bdbc6"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari523200136475212600691365238"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "20260619015@012511266e45b3c4"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari136608634552013660891366095"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071000006@802802407d04f913"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari22184235913661071366151"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072700004@6b7c1847bc8b3528"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1218813235912188161366039"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072400016@f231bc945c6b7c10"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1039157235913660091366015"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072700009@6b56e500178e186b"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1313843235913641571366033"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071300006@f698b4b5ee83620a"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1174850235911748531366029"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071000008@4b3eca8b54a5d54e"
+      },
+      "reason": "Human external/manual review confirmed the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari112430068591411746191364560"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071400044@f3789cc34f003307"
+      },
+      "reason": "Human review verified this DIBA record is the 11:45 BubbleBike session represented by the Gencat canonical schedule “11.45 i 18 h”; automatic corroboration was insufficient.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari112430068591411746191364562"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026071400044@f3789cc34f003307"
+      },
+      "reason": "Human review verified this DIBA record is the 18:00 BubbleBike session represented by the Gencat canonical schedule “11.45 i 18 h”; automatic corroboration was insufficient.",
+      "reviewedAt": "2026-09-03",
       "reviewer": "human-review"
     }
   ]

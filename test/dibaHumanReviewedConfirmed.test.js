@@ -21,8 +21,9 @@ test('a complete human-reviewed CONFIRMED 1:1 component becomes one provenance-o
   assert.equal(result.crossSource.possible.length, 0);
 });
 
-test('the approved override file contains exactly eleven stable human LINK decisions without numeric targets', async () => {
+test('the approved override file retains eleven CONFIRMED decisions and adds twenty-three POSSIBLE stable human links without numeric targets', async () => {
   const payload = JSON.parse(await fs.readFile('data-policy/diba-link-overrides.json', 'utf8')); const overrides = validateDibaPolicyOverrides(payload);
-  assert.equal(overrides.decisions.length, 11); assert.ok(overrides.decisions.every(({ decision, source: itemSource, target: itemTarget, reviewedAt, reviewer }) => decision === 'LINK_TO_EXISTING' && itemSource.sourceKey.startsWith('diba-') && itemTarget.sourceKey === 'gencat-agenda' && reviewedAt === '2026-09-02' && reviewer === 'human-review'));
+  assert.equal(overrides.decisions.length, 34); assert.equal(overrides.decisions.filter(({ reviewedAt }) => reviewedAt === '2026-09-02').length, 11); assert.equal(overrides.decisions.filter(({ reviewedAt }) => reviewedAt === '2026-09-03').length, 23);
+  assert.ok(overrides.decisions.every(({ decision, source: itemSource, target: itemTarget, reviewer }) => decision === 'LINK_TO_EXISTING' && itemSource.sourceKey.startsWith('diba-') && itemTarget.sourceKey === 'gencat-agenda' && reviewer === 'human-review'));
   assert.ok(overrides.decisions.every((item) => !Object.hasOwn(item, 'planId') && !Object.hasOwn(item, 'targetPlanId')));
 });
