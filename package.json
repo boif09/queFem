@@ -30,6 +30,7 @@
     "diba:reviewed-possible:rehearsal": "node scripts/dibaHumanReviewedPossibleRehearsal.js",
     "diba:reviewed-confirmed:rehearsal": "node scripts/dibaHumanReviewedConfirmedRehearsal.js",
     "diba:reviewed-confirmed:apply:primary-local": "node scripts/dibaHumanReviewedConfirmedPrimaryLocalApply.js",
+    "diba:reviewed-possible:apply:primary-local": "node scripts/dibaHumanReviewedPossiblePrimaryLocalApply.js",
     "fever:normalize:dry-run": "node backend/src/jobs/dryRunFeverNormalization.js",
     "geography:icgc:update": "node backend/src/jobs/updateIcgcGeography.js",
     "fever:geography:dry-run": "node backend/src/jobs/dryRunFeverGeography.js",

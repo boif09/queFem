@@ -1,6 +1,6 @@
 # Tens Pla? — Estado del proyecto
 
-Última revisión documental: 2026-09-01.
+Última revisión documental: 2026-09-03.
 
 Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mismo y qué toca hacer?». La arquitectura está en [`ARCHITECTURE.md`](ARCHITECTURE.md), las fuentes en [`DATA_SOURCES.md`](DATA_SOURCES.md) y la operación en [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
@@ -23,7 +23,7 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - DIBA M1.4B completado como diseño de política offline y versionado: define consolidación misma fuente, enlaces DIBA↔público por componente, sesiones, aliases municipales, propiedad canónica, reconciliación, overrides y gates de activación para M1.4C. No implementa ningún comportamiento productivo ni cambia la activación.
 - DIBA M1.4C1.1 completado localmente como endurecimiento final del plan de mutaciones read-only: los overrides de enlace requieren revisión completa por componente y destino público candidato, la evidencia de sesión exige horario real (nunca solo duración) y el dry-run produce destinos finales por fases, no una lista ejecutable. La snapshot mantiene bloqueadores de activación y DIBA continúa desactivada; M1.4C2 requerirá aprobación separada para cualquier mutación.
 - DIBA M1.4C2 completado como ensayo temporal: el ejecutor rechaza la SQLite real, exige una ruta explícita de copia y aplica el plan por fases en una única transacción, protegiendo los campos públicos y recalculando huérfanos. El ensayo completo pasó con relinks e idempotencia estructural; cualquier autorización separada para modificar la base local real sigue pendiente. DIBA permanece desactivada y sin imágenes.
-- DIBA M1.4C3 aplicado una vez sobre la SQLite local con autorización explícita, SHA esperado, token y backup verificado. La mutación automática auditada completó sus relinks, geografía y huérfanos; DIBA sigue desactivada, sin imágenes y la activación pública continúa bloqueada por revisiones humanas pendientes.
+- DIBA M1.4C3/D1-D4/E1-E4 cerrado y checkpointed localmente: tras la reconciliación automática, la revisión humana CONFIRMED (11 procedencias) y la revisión humana POSSIBLE (23 procedencias en 22 componentes) se ensayaron y aplicaron con límites de autorización, SHA de base, backup SQLite verificado y protección canónica. E4 aplicó exactamente los 23 enlaces POSSIBLE revisados (21 x 1 DIBA→1 público y BubbleBike 2 DIBA→1 Gencat), sin enlaces inesperados/ausentes ni cambios en campos públicos protegidos; `plan_sources` permanece estable y 23 staging origins DIBA sin procedencias quedaron inactivos. BubbleBike preserva el horario canónico combinado y reduce los bloqueos same-feed de 4 a 3 exclusivamente por esa consolidación humana. La SQLite local actual tiene SHA `F2B9A4AD4C70C57C6B269644CCDFBEDAEA02A339D9574F5CD6D7CFFE38FA78B8`; el backup PRE-E4 es `data/backups/quefem_before_diba_m1_4e4_2026-09-03T08-31-52-630Z.sqlite` (SHA `278038712652A5C66F37DF80BBCE5694100167E2A9D0AC56CA6B0ABAF4255E4D`). Los 710 registros DIBA siguen con `enabled=0` y `allows_images=0`; no ha habido importación ni activación DIBA en producción.
 
 - Generic Image Library V1 preparada: manifiesto curado y auditable de 100 fotografías Pexels,
   resolver determinista local por categoría/fingerprint, prioridad de imágenes oficiales controladas,
@@ -45,6 +45,14 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - Fever M4B/M5A/M5B prepararon persistencia por `CatalogItemId`, geography source-specific, occurrences, idempotencia, guards, categorías, precio, CTA e imágenes; su validación local antecedió la primera importación real.
 - M5C aportó el entrypoint manual protegido para la primera importación. Fever está ahora live, con source e imágenes habilitadas, y la primera importación terminó con integridad correcta.
 - La automatización recurrente Fever prepara `fever:import:scheduled`: preflight de migrations/source/integridad, lock compartido con el modo manual, guards sin bypass e imágenes Fever soportadas. El cron queda pendiente de validación manual del segundo import y de instalación explícita por el operador.
+
+## NEXT DIBA STEP
+
+### FINAL DIBA HUMAN REVIEW BLOCK
+
+La política no tiene relinks automáticos, CONFIRMED revisados, POSSIBLE revisados ni transiciones de huérfano pendientes; geografía mantiene 0 mutaciones pendientes y 19 NOOP conocidos. Permanecen cinco bloqueos humanos: tres componentes same-feed ambiguos y dos componentes `session-DEFER`. La activación pública sigue en `false`.
+
+Tras decidir esos cinco casos se requerirá un único dry-run/rehearsal combinado, una única aplicación local, auditoría final, despliegue de código a producción manteniendo DIBA desactivada, backup de producción, primera importación DIBA de producción oculta, validación/idempotencia y una activación deliberada únicamente si todos los gates pasan. La activación no es automática.
 
 ## AUTONOMOUS WORK
 
