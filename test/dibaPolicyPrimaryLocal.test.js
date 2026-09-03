@@ -25,6 +25,7 @@ async function withTestSideExecutor(services, run) {
       .replace("from './dibaPolicyPlanner.js';", `from ${JSON.stringify(absoluteModuleUrl('backend/src/diba/dibaPolicyPlanner.js'))};`)
       .replace("from './dibaImporter.js';", `from ${JSON.stringify(absoluteModuleUrl('backend/src/diba/dibaImporter.js'))};`)
       .replace("from './dibaPolicyPrimaryLocal.js';", "from './primary-local.mjs';")
+      .replace("from './dibaPolicyD4PrimaryLocal.js';", `from ${JSON.stringify(absoluteModuleUrl('backend/src/diba/dibaPolicyD4PrimaryLocal.js'))};`)
       .replace("from './dibaPolicyStageObserver.js';", "from './stage-observer.mjs';");
     fs.writeFileSync(executorPath, source);
     fs.writeFileSync(path.join(directory, 'primary-local.mjs'), `

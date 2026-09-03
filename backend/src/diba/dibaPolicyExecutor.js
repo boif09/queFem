@@ -6,6 +6,7 @@ import { runDibaQualityAudit } from './dibaQualityAudit.js';
 import { loadPolicyIdentityIndex, planDibaPolicy } from './dibaPolicyPlanner.js';
 import { DibaImporter } from './dibaImporter.js';
 import * as primaryLocal from './dibaPolicyPrimaryLocal.js';
+import * as d4PrimaryLocal from './dibaPolicyD4PrimaryLocal.js';
 import * as stageObserver from './dibaPolicyStageObserver.js';
 
 function comparablePath(value) {
@@ -79,12 +80,18 @@ function prepareExecutionPlan(databasePath, overrides) {
     try { return { auditReport, policy: planDibaPolicy({ auditReport, overrides, identityIndex: loadPolicyIdentityIndex(db) }) }; } finally { db.close(); }
   });
 }
-async function executeDibaPolicyTransaction({ databasePath, overrides, preparePlan = prepareExecutionPlan }) {
+async function executeDibaPolicyTransaction({ databasePath, overrides, preparePlan = prepareExecutionPlan, d4Authorization }) {
   const rehearsalPath = path.resolve(databasePath);
   if (!fs.existsSync(rehearsalPath)) throw new Error(`DIBA C2 rehearsal database does not exist: ${rehearsalPath}`);
   const rehearsalBefore = sha256File(rehearsalPath);
   const { policy } = await preparePlan(rehearsalPath, overrides);
   const mappings = policy.mutationPlan.phases.finalSourceMappings;
+  if (d4Authorization) {
+    // Keep this after every read-only planning step and directly before the
+    // first writable open: an earlier repeat would leave the D4 TOCTOU open.
+    d4PrimaryLocal.assertD4WritableBaseline({ databasePath: rehearsalPath, ...d4Authorization });
+    stageObserver.notifyDibaPolicyStage('d4-before-transaction');
+  }
   const db = openDatabase(rehearsalPath); let result;
   try {
     result = db.transaction(() => {
@@ -169,6 +176,15 @@ export async function applyDibaPolicyPrimaryLocal({ args, config, overrides, bac
   const apply = await executeDibaPolicyTransaction({ databasePath: primary, overrides });
   stageObserver.notifyDibaPolicyStage('after-transaction');
   const post = primaryLocal.readonlyC3State(primary);
+  return { pre, backup, apply, post, postSha256: sha256File(primary) };
+}
+export async function applyDibaPolicyD4PrimaryLocal({ args, config, overrides, backupPath }) {
+  const primary = path.resolve(config.projectRoot, 'data', 'quefem.sqlite');
+  const pre = await d4PrimaryLocal.preflightD4PrimaryLocal({ args, config, overrides });
+  if (!sameResolvedPath(pre.primary, primary)) throw new Error('D4 preflight returned a non-canonical primary database path.');
+  const backup = await d4PrimaryLocal.createVerifiedD4Backup(primary, backupPath, config, args);
+  const apply = await executeDibaPolicyTransaction({ databasePath: primary, overrides, preparePlan: d4PrimaryLocal.prepareD4ExecutionPlan, d4Authorization: { args, config } });
+  const post = d4PrimaryLocal.readonlyD4State(primary);
   return { pre, backup, apply, post, postSha256: sha256File(primary) };
 }
 
