@@ -27,6 +27,7 @@
     "diba:review:possible": "node scripts/dibaHumanReviewPossible.js",
     "diba:reviewed-confirmed:dry-run": "node scripts/dibaHumanReviewedConfirmedDryRun.js",
     "diba:reviewed-possible:dry-run": "node scripts/dibaHumanReviewedPossibleDryRun.js",
+    "diba:reviewed-possible:rehearsal": "node scripts/dibaHumanReviewedPossibleRehearsal.js",
     "diba:reviewed-confirmed:rehearsal": "node scripts/dibaHumanReviewedConfirmedRehearsal.js",
     "diba:reviewed-confirmed:apply:primary-local": "node scripts/dibaHumanReviewedConfirmedPrimaryLocalApply.js",
     "fever:normalize:dry-run": "node backend/src/jobs/dryRunFeverNormalization.js",
