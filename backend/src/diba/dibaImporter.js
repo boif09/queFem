@@ -3,6 +3,7 @@ import { PlanRepository, canonicalJson } from '../db/repositories/plan.repositor
 import { TicketmasterReconciliationRepository } from '../db/repositories/ticketmasterReconciliation.repository.js';
 import { normalizeForFingerprint } from '../normalizers/text.normalizer.js';
 import { classifyDate, dateInCatalonia, normalizeDibaRecord } from './m0Discovery.js';
+import { deferredFinalReviewKeys, stableKey } from './dibaFinalReviewDecisions.js';
 
 export const DIBA_FEEDS = Object.freeze([
   { dataset: 'actesturisme_ca', sourceKey: 'diba-tourisme', label: 'Turisme: agenda d’activitats' },
@@ -143,7 +144,7 @@ function validateRegisteredSource(source) {
 }
 
 export class DibaImporter {
-  constructor({ db, client, now = () => new Date(), lookaheadDays = 365, municipalities = new Map(), maximumRemovalRatio = 0.5, minimumHealthRatio = 0.5, postCommitCheck, beforePersist, insideTransaction }) {
+  constructor({ db, client, now = () => new Date(), lookaheadDays = 365, municipalities = new Map(), maximumRemovalRatio = 0.5, minimumHealthRatio = 0.5, postCommitCheck, beforePersist, insideTransaction, finalDeferredKeys = deferredFinalReviewKeys() }) {
     this.db = db; this.client = client; this.now = now; this.lookaheadDays = lookaheadDays;
     this.municipalities = municipalities; this.maximumRemovalRatio = maximumRemovalRatio; this.minimumHealthRatio = minimumHealthRatio;
     this.plans = new PlanRepository(db); this.matcher = new MultiSourceMatcher(db);
@@ -159,6 +160,7 @@ export class DibaImporter {
     this.postCommitCheck = postCommitCheck || (() => this.db.pragma('integrity_check', { simple: true }));
     this.beforePersist = beforePersist;
     this.insideTransaction = insideTransaction;
+    this.finalDeferredKeys = finalDeferredKeys;
   }
 
   overlayPlan(planId) {
@@ -417,6 +419,11 @@ export class DibaImporter {
           : targetPlanId && Boolean(this.planHasEnabledSource.get(targetPlanId));
         candidate.provenanceOnly = source.enabled === 0 && targetPlanId && targetHasEnabledSource;
         candidate.refreshCanonical = source.enabled === 1 && Boolean(existingSource);
+        candidate.deferPublication = this.finalDeferredKeys.has(stableKey({ sourceKey: source.key, sourceRecordId: candidate.sourceRecordId }));
+        if (candidate.deferPublication) {
+          candidate.plan.status = 'inactive';
+          candidate.preserveExistingPlan = true;
+        }
         if (dryRun) {
           const existingPlanId = existingSource?.plan_id;
           const matchedPlanId = match.confirmed?.id;

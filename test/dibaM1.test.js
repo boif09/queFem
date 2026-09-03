@@ -50,6 +50,18 @@ test('M1 rejects ended, invalid and missing-end records and leaves unresolved IN
   assert.equal(unresolved.candidate.plan.municipality, null);
 });
 
+test('reviewed final DEFER preserves an existing DIBA source refresh while keeping its plan inactive', async () => {
+  await withTestDatabase(async (db) => {
+    const key = 'diba-tourisme:deferred-existing'; const now = () => new Date('2026-08-31T12:00:00Z');
+    await new DibaImporter({ db, client: client({ [FEED.dataset]: [raw('deferred-existing')] }), municipalities: MUNICIPALITIES, now, finalDeferredKeys: new Set([key]) }).run({ feeds: [FEED] });
+    const source = db.prepare("SELECT ps.plan_id AS planId, ps.source_payload_json AS payload FROM plan_sources ps JOIN sources s ON s.id=ps.source_id WHERE s.key='diba-tourisme' AND ps.source_record_id='deferred-existing'").get();
+    assert.equal(db.prepare('SELECT status FROM plans WHERE id=?').get(source.planId).status, 'inactive');
+    await new DibaImporter({ db, client: client({ [FEED.dataset]: [raw('deferred-existing', { titol: 'Provenance refreshed' })] }), municipalities: MUNICIPALITIES, now, finalDeferredKeys: new Set([key]) }).run({ feeds: [FEED] });
+    const after = db.prepare("SELECT p.status, ps.source_payload_json AS payload FROM plan_sources ps JOIN sources s ON s.id=ps.source_id JOIN plans p ON p.id=ps.plan_id WHERE s.key='diba-tourisme' AND ps.source_record_id='deferred-existing'").get();
+    assert.equal(after.status, 'inactive'); assert.match(after.payload, /Provenance refreshed/);
+  });
+});
+
 test('M1 client inherits pagination and duplicate-page protection', async () => {
   const response = (payload) => ({ ok: true, status: 200, headers: new Headers(), json: async () => payload });
   const records = [raw('1'), raw('2')];

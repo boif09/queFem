@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "decisions": [
+    {
+      "operation": "REVIEW_SAME_FEED_COMPONENT",
+      "sourceMembers": [
+        { "sourceKey": "diba-escenari", "sourceRecordId": "escenari6938685914453491364600" },
+        { "sourceKey": "diba-escenari", "sourceRecordId": "escenari6938685914453491364601" }
+      ],
+      "disposition": "DEFER",
+      "rationale": "Human review confirmed distinct real sessions; the current card/list model cannot safely distinguish them. Stored DIBA schedule fields contain duration only (1 h 30 min), not distinct start times.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "operation": "REVIEW_SAME_FEED_COMPONENT",
+      "sourceMembers": [
+        { "sourceKey": "diba-escenari", "sourceRecordId": "escenari1352779108226513635101364565" },
+        { "sourceKey": "diba-escenari", "sourceRecordId": "escenari135277968591413635101364563" }
+      ],
+      "disposition": "DEFER",
+      "rationale": "Human review confirmed distinct sessions with differing location evidence; preserving both source records without publishing duplicate-looking plans is required for DIBA v1.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "operation": "REVIEW_SAME_FEED_COMPONENT",
+      "sourceMembers": [
+        { "sourceKey": "diba-tourisme", "sourceRecordId": "agendaturisme456532369" },
+        { "sourceKey": "diba-tourisme", "sourceRecordId": "agendaturisme457405080" }
+      ],
+      "disposition": "CONSOLIDATE_TO_ONE_PLAN",
+      "canonicalSourceIdentity": { "sourceKey": "diba-tourisme", "sourceRecordId": "agendaturisme456532369" },
+      "rationale": "Human review confirmed one real-world activity; the first stable identity is the corroborated canonical DIBA public listing. Consolidation moves provenance only and preserves survivor fields.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "operation": "REVIEW_SESSION_COMPONENT",
+      "sourceMembers": [
+        { "sourceKey": "diba-museus", "sourceRecordId": "actesmuseus3364761" },
+        { "sourceKey": "diba-museus", "sourceRecordId": "actesmuseus3364765" },
+        { "sourceKey": "diba-museus", "sourceRecordId": "actesmuseus3364782" },
+        { "sourceKey": "diba-museus", "sourceRecordId": "actesmuseus3364786" }
+      ],
+      "disposition": "DEFER",
+      "rationale": "Human review confirmed four real sessions at 10:00, 10:30, 11:30 and 12:00. Current DIBA v1 presentation cannot distinguish them safely without losing session meaning.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    },
+    {
+      "operation": "REVIEW_SESSION_COMPONENT",
+      "sourceMembers": [
+        { "sourceKey": "diba-museus", "sourceRecordId": "actesmuseus3364940" },
+        { "sourceKey": "diba-museus", "sourceRecordId": "actesmuseus3365022" }
+      ],
+      "disposition": "CONSOLIDATE_TO_ONE_PLAN",
+      "canonicalSourceIdentity": { "sourceKey": "diba-museus", "sourceRecordId": "actesmuseus3364940" },
+      "rationale": "Human review confirmed duplicate representations. Identity, secondary official URL, venue, address, geography and description are materially equivalent; duration conflict alone does not decide the survivor, so lexical sourceRecordId ordering selects 3364940.",
+      "reviewedAt": "2026-09-03",
+      "reviewer": "human-review"
+    }
+  ]
+}
