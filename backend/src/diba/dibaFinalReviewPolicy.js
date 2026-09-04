@@ -1,9 +1,11 @@
+import path from 'node:path';
 import { openDatabase } from '../db/database.js';
 import { assertC2RehearsalPath, sha256File } from './dibaPolicyExecutor.js';
 import { runDibaQualityAudit } from './dibaQualityAudit.js';
 import { loadPolicyIdentityIndex, planDibaPolicy } from './dibaPolicyPlanner.js';
 import { componentKey, loadFinalReviewDecisions, stableKey } from './dibaFinalReviewDecisions.js';
 import { loadDibaPolicyOverrides } from './dibaPolicyOverrides.js';
+import * as f2Primary from './dibaFinalF2PrimaryLocal.js';
 
 const isDiba = (key) => String(key).startsWith('diba-');
 
@@ -75,9 +77,8 @@ export async function prepareFinalReviewPlan({ databasePath, overridePath, decis
   } finally { db.close(); }
 }
 
-export async function applyFinalReviewRehearsal({ databasePath, realDatabasePath, overridePath, decisionPath }) {
-  const rehearsalPath = assertC2RehearsalPath(databasePath, realDatabasePath); const realBefore = sha256File(realDatabasePath); const prepared = await prepareFinalReviewPlan({ databasePath: rehearsalPath, overridePath, decisionPath });
-  const db = openDatabase(rehearsalPath); let result;
+async function executeFinalReviewTransaction({ databasePath, prepared }) {
+  const db = openDatabase(databasePath); let result;
   try {
     result = db.transaction(() => {
       dibaStates(db); const relink = db.prepare('UPDATE plan_sources SET plan_id=? WHERE source_id=(SELECT id FROM sources WHERE key=?) AND source_record_id=? AND plan_id=?');
@@ -104,6 +105,21 @@ export async function applyFinalReviewRehearsal({ databasePath, realDatabasePath
       return { relinks, consolidationOrphans: orphans, deferredInactivePlans, integrity, sourceStates: dibaStates(db) };
     })();
   } finally { db.close(); }
+  return { ...result, prepared, databasePath: path.resolve(databasePath), databaseShaAfter: sha256File(databasePath) };
+}
+
+export async function applyFinalReviewRehearsal({ databasePath, realDatabasePath, overridePath, decisionPath }) {
+  const rehearsalPath = assertC2RehearsalPath(databasePath, realDatabasePath); const realBefore = sha256File(realDatabasePath); const prepared = await prepareFinalReviewPlan({ databasePath: rehearsalPath, overridePath, decisionPath }); const result = await executeFinalReviewTransaction({ databasePath: rehearsalPath, prepared });
   const realAfter = sha256File(realDatabasePath); if (realBefore !== realAfter) throw new Error('Final DIBA rehearsal changed the real database.');
-  return { ...result, prepared, rehearsalPath, realShaBefore: realBefore, realShaAfter: realAfter, rehearsalShaAfter: sha256File(rehearsalPath) };
+  return { ...result, rehearsalPath, realShaBefore: realBefore, realShaAfter: realAfter, rehearsalShaAfter: result.databaseShaAfter };
+}
+
+export async function applyFinalReviewPrimaryLocal({ config, overridePath, decisionPath, backupPath }) {
+  const primary = f2Primary.canonicalF2PrimaryLocalPath(config); const pre = f2Primary.preflightF2PrimaryLocal({ config }); const backup = await f2Primary.createVerifiedF2Backup({ primary, backupPath, config, token: pre.token });
+  const prepared = await prepareFinalReviewPlan({ databasePath: primary, overridePath, decisionPath });
+  // This boundary is synchronous by design: no await or caller-controlled work
+  // can intervene between its fresh SHA/path/token check and writable open.
+  f2Primary.assertF2WritableBoundary({ config, primary, token: pre.token, prepared });
+  const apply = await executeFinalReviewTransaction({ databasePath: primary, prepared });
+  return { pre, backup, apply, postSha256: sha256File(primary) };
 }
