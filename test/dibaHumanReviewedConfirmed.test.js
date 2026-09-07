@@ -21,9 +21,14 @@ test('a complete human-reviewed CONFIRMED 1:1 component becomes one provenance-o
   assert.equal(result.crossSource.possible.length, 0);
 });
 
-test('the approved override file retains eleven CONFIRMED decisions and adds twenty-three POSSIBLE stable human links without numeric targets', async () => {
+test('the approved override file retains thirty-four reviewed decisions and adds three POSSIBLE stable human links without numeric targets', async () => {
   const payload = JSON.parse(await fs.readFile('data-policy/diba-link-overrides.json', 'utf8')); const overrides = validateDibaPolicyOverrides(payload);
-  assert.equal(overrides.decisions.length, 34); assert.equal(overrides.decisions.filter(({ reviewedAt }) => reviewedAt === '2026-09-02').length, 11); assert.equal(overrides.decisions.filter(({ reviewedAt }) => reviewedAt === '2026-09-03').length, 23);
+  assert.equal(overrides.decisions.length, 37); assert.equal(overrides.decisions.filter(({ reviewedAt }) => reviewedAt === '2026-09-02').length, 11); assert.equal(overrides.decisions.filter(({ reviewedAt }) => reviewedAt === '2026-09-03').length, 23); assert.equal(overrides.decisions.filter(({ reviewedAt }) => reviewedAt === '2026-09-07').length, 3);
+  assert.deepEqual(overrides.decisions.filter(({ reviewedAt }) => reviewedAt === '2026-09-07').map(({ source: itemSource, target: itemTarget, decision }) => ({ source: itemSource, target: itemTarget, decision })), [
+    ['escenari107410252594310741071369116', '2026072000013@83aa71fabe9279a7'],
+    ['escenari118768052594311876831369118', '2026072000014@ce92b99328b87d6e'],
+    ['escenari29337136873213106111369112', '2026072000007@39e7c65495cf3775'],
+  ].map(([sourceRecordId, targetRecordId]) => ({ source: { sourceKey: 'diba-escenari', sourceRecordId }, target: { sourceKey: 'gencat-agenda', sourceRecordId: targetRecordId }, decision: 'LINK_TO_EXISTING' })));
   assert.ok(overrides.decisions.every(({ decision, source: itemSource, target: itemTarget, reviewer }) => decision === 'LINK_TO_EXISTING' && itemSource.sourceKey.startsWith('diba-') && itemTarget.sourceKey === 'gencat-agenda' && reviewer === 'human-review'));
   assert.ok(overrides.decisions.every((item) => !Object.hasOwn(item, 'planId') && !Object.hasOwn(item, 'targetPlanId')));
 });

@@ -8,10 +8,11 @@ import { openDatabase } from '../backend/src/db/database.js';
 import { migrate } from '../backend/src/db/migrate.js';
 import { applyProductionReconciliation, prepareProductionPreview } from '../backend/src/diba/dibaProductionAuthorization.js';
 import * as productionAuthorizationExports from '../backend/src/diba/dibaProductionAuthorization.js';
+import { prepareFinalReviewPlanForDatabase } from '../backend/src/diba/dibaFinalReviewPolicy.js';
 import { DEFAULT_ICGC_MANIFEST_PATH } from '../backend/src/jobs/updateIcgcGeography.js';
 import { sha256File } from '../backend/src/diba/dibaPolicyExecutor.js';
 
-function fixture() {
+function fixture(overrideCount = 37) {
   const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tenspla-diba-production-')); const data = path.join(projectRoot, 'data'); const policy = path.join(projectRoot, 'data-policy');
   fs.mkdirSync(data); fs.mkdirSync(policy); const databasePath = path.join(data, 'quefem.sqlite'); const overridePath = path.join(policy, 'overrides.json'); const decisionPath = path.join(policy, 'final.json');
   const db = openDatabase(databasePath); migrate(db); const now = '2026-09-04T12:00:00Z';
@@ -21,7 +22,7 @@ function fixture() {
     db.prepare('INSERT INTO plan_sources(plan_id,source_id,source_record_id,source_payload_json,imported_at,last_seen_at) VALUES(?,?,?,?,?,?)').run(planId, sourceIds[sourceKey], sourceRecordId, JSON.stringify({ titol: title, data_inici: '2026-09-10', data_fi: '2026-09-10', grup_adreca: { adreca_nom: 'Venue Test', adreca: 'Carrer Test', localitzacio: '41.4,2.1' }, ...payload }), now, now);
     return planId;
   };
-  const overrides = Array.from({ length: 34 }, (_, index) => ({ source: { sourceKey: 'diba-tourisme', sourceRecordId: `override-${index}` }, decision: 'LINK_TO_EXISTING', target: { sourceKey: 'gencat-agenda', sourceRecordId: `public-${index}` }, reason: 'Hermetic production-boundary fixture.', reviewedAt: '2026-09-03', reviewer: 'test' }));
+  const overrides = Array.from({ length: overrideCount }, (_, index) => ({ source: { sourceKey: 'diba-tourisme', sourceRecordId: `override-${index}` }, decision: 'LINK_TO_EXISTING', target: { sourceKey: 'gencat-agenda', sourceRecordId: `public-${index}` }, reason: 'Hermetic production-boundary fixture.', reviewedAt: '2026-09-03', reviewer: 'test' }));
   for (let index = 0; index < overrides.length; index += 1) {
     const planId = add('diba-tourisme', `override-${index}`, `Unique override ${index}`);
     let publicPlanId = planId;
@@ -77,9 +78,10 @@ test('production authorization rejects missing/wrong tokens and stale database o
   } finally { fs.rmSync(item.projectRoot, { recursive: true, force: true }); }
 });
 
-test('production reconciliation succeeds only with preview authorization and keeps DIBA disabled', async () => {
+test('production preview and authorized reconciliation accept exactly 37 reviewed overrides and keep DIBA disabled', async () => {
   const item = fixture();
   try {
+    assert.equal(JSON.parse(fs.readFileSync(item.overridePath, 'utf8')).decisions.length, 37);
     const preview = await prepareProductionPreview({ ...options(item), temporaryDirectory: item.projectRoot }); const before = sha256File(item.databasePath);
     const report = await applyProductionReconciliation({ ...options(item), backupPath: item.backupPath, authorization: preview.authorization });
     assert.equal(report.authorizationConsumed, preview.authorization); assert.equal(report.publicActivationReady, false); assert.ok(fs.existsSync(item.backupPath)); assert.notEqual(sha256File(item.databasePath), before);
@@ -88,6 +90,21 @@ test('production reconciliation succeeds only with preview authorization and kee
     finally { db.close(); }
   } finally { fs.rmSync(item.projectRoot, { recursive: true, force: true }); }
 });
+
+for (const count of [34, 36, 38]) {
+  test(`production preview, apply and final review reject ${count} reviewed overrides without database changes`, async () => {
+    const item = fixture(count);
+    try {
+      const before = sha256File(item.databasePath);
+      await assert.rejects(prepareProductionPreview({ ...options(item), temporaryDirectory: item.projectRoot }), /DIBA production review decision inventory is not exact/);
+      await assert.rejects(applyProductionReconciliation({ ...options(item), backupPath: item.backupPath, authorization: 'unexpected-inventory' }), /DIBA production review decision inventory is not exact/);
+      const overrides = JSON.parse(fs.readFileSync(item.overridePath, 'utf8'));
+      assert.throws(() => prepareFinalReviewPlanForDatabase({ overrides }), new RegExp(`Final DIBA review requires exactly 37 existing cross-source overrides; found ${count}\\.`));
+      assert.equal(sha256File(item.databasePath), before);
+      assert.equal(fs.existsSync(item.backupPath), false);
+    } finally { fs.rmSync(item.projectRoot, { recursive: true, force: true }); }
+  });
+}
 
 test('authorized production apply rolls C2 back completely when final review fails', async () => {
   const item = fixture();

@@ -476,6 +476,48 @@
       "reason": "Human review verified this DIBA record is the 18:00 BubbleBike session represented by the Gencat canonical schedule “11.45 i 18 h”; automatic corroboration was insufficient.",
       "reviewedAt": "2026-09-03",
       "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari107410252594310741071369116"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072000013@83aa71fabe9279a7"
+      },
+      "reason": "Human external/manual review confirmed the DIBA and Gencat records represent the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-07",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari118768052594311876831369118"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072000014@ce92b99328b87d6e"
+      },
+      "reason": "Human external/manual review confirmed the DIBA and Gencat records represent the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-07",
+      "reviewer": "human-review"
+    },
+    {
+      "source": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari29337136873213106111369112"
+      },
+      "decision": "LINK_TO_EXISTING",
+      "target": {
+        "sourceKey": "gencat-agenda",
+        "sourceRecordId": "2026072000007@39e7c65495cf3775"
+      },
+      "reason": "Human external/manual review confirmed the DIBA and Gencat records represent the same real-world event despite insufficient venue, address, URL or coordinate corroboration for automatic policy.",
+      "reviewedAt": "2026-09-07",
+      "reviewer": "human-review"
     }
   ]
 }
