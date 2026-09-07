@@ -5,10 +5,10 @@ import { isOutsideCatalonia } from '../location/cataloniaScope.js';
 import { isTemporallyInvalid } from '../quality/temporalCoherence.js';
 import { normalizeForFingerprint } from '../normalizers/text.normalizer.js';
 
-export function openDatabase(databasePath, { readonly = false } = {}) {
-  if (!readonly) fs.mkdirSync(path.dirname(databasePath), { recursive: true });
+export function openDatabase(databasePath, { readonly = false, configureJournal = true, fileMustExist = false } = {}) {
+  if (!readonly && !fileMustExist) fs.mkdirSync(path.dirname(databasePath), { recursive: true });
 
-  const db = new Database(databasePath, readonly ? { readonly: true, fileMustExist: true } : undefined);
+  const db = new Database(databasePath, readonly ? { readonly: true, fileMustExist: true } : fileMustExist ? { fileMustExist: true } : undefined);
   db.function('is_outside_catalonia', { deterministic: true }, (province, comarca, municipality, locality) => (
     isOutsideCatalonia({
       province,
@@ -31,7 +31,7 @@ export function openDatabase(databasePath, { readonly = false } = {}) {
     ),
   );
   db.pragma('foreign_keys = ON');
-  if (!readonly) db.pragma('journal_mode = WAL');
+  if (!readonly && configureJournal) db.pragma('journal_mode = WAL');
   db.pragma('busy_timeout = 5000');
   return db;
 }

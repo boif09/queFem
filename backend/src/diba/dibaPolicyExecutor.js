@@ -5,10 +5,6 @@ import { openDatabase } from '../db/database.js';
 import { runDibaQualityAudit } from './dibaQualityAudit.js';
 import { loadPolicyIdentityIndex, planDibaPolicy } from './dibaPolicyPlanner.js';
 import { DibaImporter } from './dibaImporter.js';
-import * as primaryLocal from './dibaPolicyPrimaryLocal.js';
-import * as d4PrimaryLocal from './dibaPolicyD4PrimaryLocal.js';
-import * as e4PrimaryLocal from './dibaPolicyE4PrimaryLocal.js';
-import * as stageObserver from './dibaPolicyStageObserver.js';
 
 function comparablePath(value) {
   const absolute = path.resolve(value);
@@ -19,10 +15,6 @@ function comparablePath(value) {
     while (!fs.existsSync(existing)) { const parent = path.dirname(existing); if (parent === existing) return normalize(absolute); missing.unshift(path.basename(existing)); existing = parent; }
     return normalize(path.join(fs.realpathSync.native(existing), ...missing));
   }
-}
-function sameResolvedPath(left, right) {
-  const normalize = (candidate) => process.platform === 'win32' ? candidate.toLowerCase() : candidate;
-  return normalize(path.resolve(left)) === normalize(path.resolve(right));
 }
 function samePhysicalFile(left, right) {
   if (!fs.existsSync(left) || !fs.existsSync(right)) return false;
@@ -39,13 +31,18 @@ export async function cloneDibaRehearsal(realPath, targetPath) {
   const target = assertC2RehearsalPath(targetPath, realPath);
   if (fs.existsSync(target)) throw new Error(`DIBA C2 rehearsal target already exists: ${target}`);
   fs.mkdirSync(path.dirname(target), { recursive: true });
-  // This rehearsal is run only while the local database is not being written.
-  // A direct copy is intentional here: it preserves an auditable byte-identical
-  // baseline before C2, which a SQLite backup cannot promise.
-  fs.copyFileSync(path.resolve(realPath), target, fs.constants.COPYFILE_EXCL);
-  const originalSha256 = sha256File(realPath); const rehearsalSha256 = sha256File(target);
-  if (originalSha256 !== rehearsalSha256) throw new Error('DIBA C2 rehearsal copy hash differs from the original database.');
-  return { originalPath: path.resolve(realPath), originalSha256, rehearsalPath: target, rehearsalSha256 };
+  // SQLite online backup includes committed WAL pages without checkpointing or
+  // otherwise writing the source database; raw filesystem copies do not.
+  const source = openDatabase(realPath, { readonly: true });
+  const logical = (db) => ({ plans: db.prepare('SELECT COUNT(*) AS count FROM plans').get().count, planSources: db.prepare('SELECT COUNT(*) AS count FROM plan_sources').get().count, sources: db.prepare('SELECT COUNT(*) AS count FROM sources').get().count });
+  let sourceSnapshot;
+  try { sourceSnapshot = logical(source); await source.backup(target); } finally { source.close(); }
+  const rehearsal = openDatabase(target, { readonly: true }); let rehearsalSnapshot;
+  try { const integrity = rehearsal.pragma('integrity_check', { simple: true }); if (integrity !== 'ok') throw new Error(`DIBA C2 rehearsal backup integrity_check failed: ${integrity}`); rehearsalSnapshot = logical(rehearsal); } finally { rehearsal.close(); }
+  // The live source can legitimately advance after the backup snapshot starts.
+  // Snapshot equality is therefore diagnostic only; SQLite backup + target
+  // integrity_check are the consistency guarantees.
+  return { originalPath: path.resolve(realPath), rehearsalPath: target, sourceSnapshot, rehearsalSnapshot, sourceAdvancedDuringBackup: !equal(sourceSnapshot, rehearsalSnapshot), rehearsalSha256: sha256File(target) };
 }
 function stableKey(value) { return `${value.sourceKey}:${value.sourceRecordId}`; }
 function dibaStates(db) { return db.prepare("SELECT key, enabled, allows_images FROM sources WHERE key IN ('diba-tourisme','diba-escenari','diba-museus') ORDER BY key").all(); }
@@ -81,23 +78,12 @@ function prepareExecutionPlan(databasePath, overrides) {
     try { return { auditReport, policy: planDibaPolicy({ auditReport, overrides, identityIndex: loadPolicyIdentityIndex(db) }) }; } finally { db.close(); }
   });
 }
-async function executeDibaPolicyTransaction({ databasePath, overrides, preparePlan = prepareExecutionPlan, d4Authorization, e4Authorization }) {
+async function executeDibaPolicyTransaction({ databasePath, overrides, preparePlan = prepareExecutionPlan }) {
   const rehearsalPath = path.resolve(databasePath);
   if (!fs.existsSync(rehearsalPath)) throw new Error(`DIBA C2 rehearsal database does not exist: ${rehearsalPath}`);
   const rehearsalBefore = sha256File(rehearsalPath);
   const { policy } = await preparePlan(rehearsalPath, overrides);
   const mappings = policy.mutationPlan.phases.finalSourceMappings;
-  if (d4Authorization) {
-    // Keep this after every read-only planning step and directly before the
-    // first writable open: an earlier repeat would leave the D4 TOCTOU open.
-    d4PrimaryLocal.assertD4WritableBaseline({ databasePath: rehearsalPath, ...d4Authorization });
-    stageObserver.notifyDibaPolicyStage('d4-before-transaction');
-  }
-  if (e4Authorization) {
-    // This is the final E4 TOCTOU gate immediately before the first writable open.
-    e4PrimaryLocal.assertE4WritableBaseline({ databasePath: rehearsalPath, ...e4Authorization });
-    stageObserver.notifyDibaPolicyStage('e4-before-transaction');
-  }
   const db = openDatabase(rehearsalPath); let result;
   try {
     result = db.transaction(() => {
@@ -162,6 +148,7 @@ async function executeDibaPolicyTransaction({ databasePath, overrides, preparePl
   } finally { db.close(); }
   return { rehearsalDatabasePath: rehearsalPath, rehearsalSha256Before: rehearsalBefore, rehearsalSha256After: sha256File(rehearsalPath), ...result };
 }
+
 export async function applyDibaPolicyRehearsal({ databasePath, realDatabasePath, overrides, preparePlan = prepareExecutionPlan }) {
   const rehearsalPath = assertC2RehearsalPath(databasePath, realDatabasePath);
   const originalBefore = sha256File(realDatabasePath);
@@ -169,40 +156,6 @@ export async function applyDibaPolicyRehearsal({ databasePath, realDatabasePath,
   const originalAfter = sha256File(realDatabasePath); if (originalBefore !== originalAfter) throw new Error('DIBA C2 detected a change to the original database.');
   return { ...result, originalDatabasePath: path.resolve(realDatabasePath), originalSha256Before: originalBefore, originalSha256After: originalAfter };
 }
-export async function applyDibaPolicyPrimaryLocal({ args, config, overrides, backupPath }) {
-  // The primary path is derived here, at the writable boundary, rather than
-  // accepted from a helper result. This remains true under NODE_ENV=test.
-  const primary = path.resolve(config.projectRoot, 'data', 'quefem.sqlite');
-  stageObserver.notifyDibaPolicyStage('preflight');
-  const pre = await primaryLocal.preflightC3PrimaryLocal({ args, config, overrides });
-  if (!sameResolvedPath(pre.primary, primary)) throw new Error('C3 preflight returned a non-canonical primary database path.');
-  stageObserver.notifyDibaPolicyStage('backup');
-  const backup = await primaryLocal.createVerifiedC3Backup(primary, backupPath);
-  stageObserver.notifyDibaPolicyStage('before-transaction');
-  const apply = await executeDibaPolicyTransaction({ databasePath: primary, overrides });
-  stageObserver.notifyDibaPolicyStage('after-transaction');
-  const post = primaryLocal.readonlyC3State(primary);
-  return { pre, backup, apply, post, postSha256: sha256File(primary) };
-}
-export async function applyDibaPolicyD4PrimaryLocal({ args, config, overrides, backupPath }) {
-  const primary = path.resolve(config.projectRoot, 'data', 'quefem.sqlite');
-  const pre = await d4PrimaryLocal.preflightD4PrimaryLocal({ args, config, overrides });
-  if (!sameResolvedPath(pre.primary, primary)) throw new Error('D4 preflight returned a non-canonical primary database path.');
-  const backup = await d4PrimaryLocal.createVerifiedD4Backup(primary, backupPath, config, args);
-  const apply = await executeDibaPolicyTransaction({ databasePath: primary, overrides, preparePlan: d4PrimaryLocal.prepareD4ExecutionPlan, d4Authorization: { args, config } });
-  const post = d4PrimaryLocal.readonlyD4State(primary);
-  return { pre, backup, apply, post, postSha256: sha256File(primary) };
-}
-export async function applyDibaPolicyE4PrimaryLocal({ args, config, overrides, backupPath }) {
-  const primary = path.resolve(config.projectRoot, 'data', 'quefem.sqlite');
-  const pre = await e4PrimaryLocal.preflightE4PrimaryLocal({ args, config, overrides });
-  if (!sameResolvedPath(pre.primary, primary)) throw new Error('E4 preflight returned a non-canonical primary database path.');
-  const backup = await e4PrimaryLocal.createVerifiedE4Backup(primary, backupPath, config, args);
-  const apply = await executeDibaPolicyTransaction({ databasePath: primary, overrides, preparePlan: e4PrimaryLocal.prepareE4ExecutionPlan, e4Authorization: { args, config } });
-  const post = e4PrimaryLocal.readonlyE4State(primary);
-  return { pre, backup, apply, post, postSha256: sha256File(primary) };
-}
-
 // This exercises the exact existing-source lookup used before the importer
 // persists a DIBA row. It is deliberately read-only and uses the rehearsal's
 // persisted provenance rather than a live, variable network snapshot.

@@ -5,7 +5,6 @@ import { runDibaQualityAudit } from './dibaQualityAudit.js';
 import { loadPolicyIdentityIndex, planDibaPolicy } from './dibaPolicyPlanner.js';
 import { componentKey, loadFinalReviewDecisions, stableKey } from './dibaFinalReviewDecisions.js';
 import { loadDibaPolicyOverrides } from './dibaPolicyOverrides.js';
-import * as f2Primary from './dibaFinalF2PrimaryLocal.js';
 
 const isDiba = (key) => String(key).startsWith('diba-');
 
@@ -37,13 +36,9 @@ export function rawComponents(policy) {
   return [...map.values()].map((item) => ({ ...item, classes: [...item.classes].sort(), planIds: [...item.planIds].sort((a, b) => a - b) }));
 }
 
-export async function prepareFinalReviewPlan({ databasePath, overridePath, decisionPath } = {}) {
-  const overrides = await loadDibaPolicyOverrides(overridePath);
+export function prepareFinalReviewPlanForDatabase({ db, databasePath, overrides, decisions, auditReport }) {
   if (overrides.decisions.length !== 34) throw new Error(`Final DIBA review requires exactly 34 existing cross-source overrides; found ${overrides.decisions.length}.`);
-  const decisions = loadFinalReviewDecisions(decisionPath);
-  const auditReport = await runDibaQualityAudit({ databasePath });
-  const db = openDatabase(databasePath, { readonly: true });
-  try {
+  if (decisions.decisions.length !== 5) throw new Error(`Final DIBA review requires exactly five decisions; found ${decisions.decisions.length}.`);
     const states = dibaStates(db); const index = loadPolicyIdentityIndex(db); const policy = planDibaPolicy({ auditReport, overrides, identityIndex: index }); const raw = rawComponents(policy);
     const rawByKey = new Map(raw.map((item) => [item.key, item])); const decisionKeys = new Set(decisions.decisions.map(({ sourceMembers }) => componentKey(sourceMembers)));
     if (raw.some(({ key }) => !decisionKeys.has(key))) throw new Error(`Final DIBA has an unreviewed raw component: ${raw.filter(({ key }) => !decisionKeys.has(key)).map(({ key }) => key).join(',')}.`);
@@ -73,14 +68,20 @@ export async function prepareFinalReviewPlan({ databasePath, overridePath, decis
       return { ...decision, key, raw: rawComponent, entries, planIds, canonical, moved };
     });
     const rawCounts = { sameFeed: raw.filter(({ classes }) => classes.includes('NEEDS_HUMAN_REVIEW')).length, sessionDefer: raw.filter(({ classes }) => classes.includes('KEEP_SEPARATE_SESSION')).length };
-    return { readOnly: true, decisions, overrides, auditReport, policy, states, rawComponents: raw, rawCounts, reviewed, humanReviewActivationGateReady: true, unresolvedFinalHumanComponents: 0, geography: { mutations: 0, noops: 19 } };
+  return { readOnly: true, decisions, overrides, auditReport, policy, states, rawComponents: raw, rawCounts, reviewed, humanReviewActivationGateReady: true, unresolvedFinalHumanComponents: 0, geography: { mutations: 0, noops: 19 } };
+}
+
+export async function prepareFinalReviewPlan({ databasePath, overridePath, decisionPath } = {}) {
+  const overrides = await loadDibaPolicyOverrides(overridePath);
+  const decisions = loadFinalReviewDecisions(decisionPath);
+  const auditReport = await runDibaQualityAudit({ databasePath });
+  const db = openDatabase(databasePath, { readonly: true });
+  try {
+    return prepareFinalReviewPlanForDatabase({ db, databasePath, overrides, decisions, auditReport });
   } finally { db.close(); }
 }
 
-async function executeFinalReviewTransaction({ databasePath, prepared }) {
-  const db = openDatabase(databasePath); let result;
-  try {
-    result = db.transaction(() => {
+function executeFinalReviewTransactionBody(db, { prepared }) {
       dibaStates(db); const relink = db.prepare('UPDATE plan_sources SET plan_id=? WHERE source_id=(SELECT id FROM sources WHERE key=?) AND source_record_id=? AND plan_id=?');
       const inactive = db.prepare("UPDATE plans SET status='inactive', inactive_at=?, updated_at=? WHERE id=? AND status<>'inactive'");
       const sourceCount = db.prepare('SELECT COUNT(*) AS count FROM plan_sources WHERE plan_id=?'); const now = new Date().toISOString(); const relinks = []; const orphans = []; const deferredInactivePlans = [];
@@ -102,8 +103,13 @@ async function executeFinalReviewTransaction({ databasePath, prepared }) {
       }
       const duplicate = db.prepare('SELECT 1 FROM plan_sources GROUP BY source_id,source_record_id HAVING COUNT(*)>1 LIMIT 1').get(); if (duplicate) throw new Error('Final DIBA rehearsal found duplicate stable provenance.');
       const integrity = db.pragma('integrity_check', { simple: true }); if (integrity !== 'ok') throw new Error(`Final DIBA integrity_check failed: ${integrity}`);
-      return { relinks, consolidationOrphans: orphans, deferredInactivePlans, integrity, sourceStates: dibaStates(db) };
-    })();
+  return { relinks, consolidationOrphans: orphans, deferredInactivePlans, integrity, sourceStates: dibaStates(db) };
+}
+
+async function executeFinalReviewTransaction({ databasePath, prepared }) {
+  const db = openDatabase(databasePath); let result;
+  try {
+    result = db.transaction(() => executeFinalReviewTransactionBody(db, { prepared }))();
   } finally { db.close(); }
   return { ...result, prepared, databasePath: path.resolve(databasePath), databaseShaAfter: sha256File(databasePath) };
 }
@@ -112,14 +118,4 @@ export async function applyFinalReviewRehearsal({ databasePath, realDatabasePath
   const rehearsalPath = assertC2RehearsalPath(databasePath, realDatabasePath); const realBefore = sha256File(realDatabasePath); const prepared = await prepareFinalReviewPlan({ databasePath: rehearsalPath, overridePath, decisionPath }); const result = await executeFinalReviewTransaction({ databasePath: rehearsalPath, prepared });
   const realAfter = sha256File(realDatabasePath); if (realBefore !== realAfter) throw new Error('Final DIBA rehearsal changed the real database.');
   return { ...result, rehearsalPath, realShaBefore: realBefore, realShaAfter: realAfter, rehearsalShaAfter: result.databaseShaAfter };
-}
-
-export async function applyFinalReviewPrimaryLocal({ config, overridePath, decisionPath, backupPath }) {
-  const primary = f2Primary.canonicalF2PrimaryLocalPath(config); const pre = f2Primary.preflightF2PrimaryLocal({ config }); const backup = await f2Primary.createVerifiedF2Backup({ primary, backupPath, config, token: pre.token });
-  const prepared = await prepareFinalReviewPlan({ databasePath: primary, overridePath, decisionPath });
-  // This boundary is synchronous by design: no await or caller-controlled work
-  // can intervene between its fresh SHA/path/token check and writable open.
-  f2Primary.assertF2WritableBoundary({ config, primary, token: pre.token, prepared });
-  const apply = await executeFinalReviewTransaction({ databasePath: primary, prepared });
-  return { pre, backup, apply, postSha256: sha256File(primary) };
 }

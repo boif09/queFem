@@ -7,6 +7,7 @@ import { openDatabase } from '../backend/src/db/database.js';
 import { migrate } from '../backend/src/db/migrate.js';
 import { applyDibaPolicyRehearsal, assertC2RehearsalPath, cloneDibaRehearsal, sha256File } from '../backend/src/diba/dibaPolicyExecutor.js';
 import * as executorExports from '../backend/src/diba/dibaPolicyExecutor.js';
+import * as finalReviewExports from '../backend/src/diba/dibaFinalReviewPolicy.js';
 
 function temporaryPair() {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'quefem-diba-c2-')); const real = path.join(directory, 'real.sqlite');
@@ -31,19 +32,37 @@ test('generic C2 executor always rejects the primary path even when passed obsol
 
 test('raw writable transaction and arbitrary-path factory are not exported', () => {
   assert.equal(typeof executorExports.executeDibaPolicyTransaction, 'undefined');
+  assert.equal(typeof executorExports.executeAuthorizedProductionC2Body, 'undefined');
+  assert.equal(typeof executorExports.executeAuthorizedProductionTransaction, 'undefined');
+  assert.equal(typeof finalReviewExports.executeFinalReviewTransactionBody, 'undefined');
   assert.equal(typeof executorExports.createPrimaryLocalTransactionRunner, 'undefined');
 });
 test('C2 only commits to an explicit rehearsal copy and preserves disabled source configuration', async () => {
   const pair = temporaryPair();
   try {
     const copied = await cloneDibaRehearsal(pair.real, pair.rehearsal);
-    assert.equal(copied.originalSha256, copied.rehearsalSha256);
+    assert.deepEqual(copied.sourceSnapshot, copied.rehearsalSnapshot);
     const before = sha256File(pair.real);
     const result = await applyDibaPolicyRehearsal({ databasePath: pair.rehearsal, realDatabasePath: pair.real, overrides: { version: 1, decisions: [] } });
     assert.equal(result.originalSha256Before, before); assert.equal(result.originalSha256After, before);
     assert.equal(result.finalRelinks.length, 0); assert.equal(result.invariantResults.integrity, 'ok');
     assert.ok(result.sourceStates.every(({ enabled, allows_images: images }) => enabled === 0 && images === 0));
   } finally { fs.rmSync(pair.directory, { recursive: true, force: true }); }
+});
+
+test('C2 rehearsal clone uses SQLite backup and includes committed rows residing in WAL', async () => {
+  const pair = temporaryPair(); let source;
+  try {
+    source = openDatabase(pair.real); const now = '2026-09-04T10:00:00Z';
+    source.prepare("INSERT INTO plans (kind,fingerprint,original_title,status,created_at,updated_at) VALUES ('event','wal-clone','Committed WAL row','active',?,?)").run(now, now);
+    assert.equal(source.pragma('journal_mode', { simple: true }), 'wal');
+    const before = source.prepare("SELECT COUNT(*) AS count FROM plans WHERE fingerprint='wal-clone'").get().count;
+    const copied = await cloneDibaRehearsal(pair.real, pair.rehearsal);
+    const clone = openDatabase(pair.rehearsal, { readonly: true });
+    try { assert.equal(clone.prepare("SELECT COUNT(*) AS count FROM plans WHERE fingerprint='wal-clone'").get().count, before); assert.equal(clone.pragma('integrity_check', { simple: true }), 'ok'); } finally { clone.close(); }
+    assert.deepEqual(copied.sourceSnapshot, copied.rehearsalSnapshot);
+    assert.equal(source.prepare("SELECT COUNT(*) AS count FROM plans WHERE fingerprint='wal-clone'").get().count, before);
+  } finally { source?.close(); fs.rmSync(pair.directory, { recursive: true, force: true }); }
 });
 
 test('C2 relinks provenance directly, protects public canonical fields, applies approved geography and inactivates only the source-less staging plan', async () => {
