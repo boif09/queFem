@@ -243,6 +243,16 @@ export class DibaImporter {
     }));
   }
 
+  persistedSameFeedComponent(component, entriesById) {
+    const entries = component.members.map(({ sourceRecordId }) => entriesById.get(String(sourceRecordId)));
+    if (entries.some((entry) => !entry || entry.existingPlanId == null || entry.disposition !== 'UNREVIEWED' || entry.suppressPublication)) return null;
+    const planIds = [...new Set(entries.map(({ existingPlanId }) => String(existingPlanId)))];
+    if (planIds.length !== 1) return null;
+    const plan = this.overlayPlan(planIds[0]);
+    if (!plan?.sourceLinks?.length) return null;
+    return { status: 'EXISTING_PERSISTED_COMPONENT', planId: plan.id };
+  }
+
   datasetSafetyPlan(feed, candidates, bounds, virtualPlans = new Map()) {
     const source = this.sourceByKey.get(feed.sourceKey);
     const blockers = [];
@@ -316,10 +326,12 @@ export class DibaImporter {
         candidates: [...databaseCandidates, ...compatibleVirtualPlans].map(planSnapshot).sort((left, right) => left.id.localeCompare(right.id)),
       });
     }
+    const entriesById = new Map(entries.map((entry) => [entry.sourceRecordId, entry]));
     const sameFeed = this.sameFeedComponents(feed, candidates);
     for (const component of sameFeed) {
       const reviewed = this.reviewedSameFeedComponent(component.members);
-      if (!reviewed) blockers.push({
+      const persisted = reviewed ? null : this.persistedSameFeedComponent(component, entriesById);
+      if (!reviewed && !persisted) blockers.push({
         code: 'UNRESOLVED_SAME_FEED_COMPONENT',
         sourceRecordIds: component.members.map(({ sourceRecordId }) => sourceRecordId).sort(),
         dispositions: component.members.map(({ sourceRecordId }) => this.reviewedDisposition(feed.sourceKey, sourceRecordId)?.type || 'UNREVIEWED'),
@@ -329,7 +341,7 @@ export class DibaImporter {
       .map(({ source_link_id: sourceLinkId, source_record_id: sourceRecordId, plan_id: planId }) => ({ sourceLinkId, sourceRecordId: String(sourceRecordId), planId }))
       .sort((left, right) => left.sourceRecordId.localeCompare(right.sourceRecordId)) : [];
     const state = { source: source ? { id: source.id, key: source.key, enabled: source.enabled, allows_images: source.allows_images } : null, entries, topology, removalRows };
-    return { entries, entriesById: new Map(entries.map((entry) => [entry.sourceRecordId, entry])), blockers, sameFeed, removalRows, authorization: canonicalJson(state) };
+    return { entries, entriesById, blockers, sameFeed, removalRows, authorization: canonicalJson(state) };
   }
 
   overlayPlan(planId) {
@@ -642,7 +654,7 @@ export class DibaImporter {
         }
         this.insideTransaction?.({ feed, summary, candidates });
         for (const candidate of candidates) {
-          const outcome = this.plans.persist({ ...candidate, sourceId: source.id });
+          const outcome = this.plans.persist({ ...candidate, sourceId: source.id, dibaOrphanFingerprintGuard: true });
           summary[outcome] += 1;
         }
         const removed = this.reconciliation.reconcile(source.id, seenIds, bounds.today, bounds.horizonEnd, { removedAt: startedAt, preservePlanStatus: source.enabled === 0 });

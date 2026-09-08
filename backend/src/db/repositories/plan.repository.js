@@ -9,6 +9,10 @@ const PLAN_FIELDS = [
   'family_friendly', 'indoor', 'outdoor', 'recommended_months', 'featured', 'quality_score', 'status',
 ];
 
+function dibaOrphanFingerprintFallback(fingerprint) {
+  return `${fingerprint}|recurring`;
+}
+
 export function canonicalJson(value) {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
   if (value && typeof value === 'object') {
@@ -24,6 +28,7 @@ export class PlanRepository {
     this.findSourceRecord = db.prepare(`
       SELECT * FROM plan_sources WHERE source_id = ? AND source_record_id = ?
     `);
+    this.countPlanSources = db.prepare('SELECT COUNT(*) AS count FROM plan_sources WHERE plan_id = ?');
     this.insertPlan = db.prepare(`
       INSERT INTO plans (${PLAN_FIELDS.join(', ')}, created_at, updated_at)
       VALUES (${PLAN_FIELDS.map((field) => `@${field}`).join(', ')}, @created_at, @updated_at)
@@ -130,15 +135,23 @@ export class PlanRepository {
       });
       outcome = 'updated';
     } else {
-      const duplicate = entry.targetPlanId
+      let plan = entry.plan;
+      let duplicate = entry.targetPlanId
         ? this.db.prepare('SELECT * FROM plans WHERE id = ?').get(entry.targetPlanId)
         : this.deduplicator.findByFingerprint(entry.plan.fingerprint);
+      if (entry.dibaOrphanFingerprintGuard && duplicate && this.countPlanSources.get(duplicate.id).count === 0) {
+        plan = { ...entry.plan, fingerprint: dibaOrphanFingerprintFallback(entry.plan.fingerprint) };
+        if (this.deduplicator.findByFingerprint(plan.fingerprint)) {
+          throw new Error(`DIBA orphan fingerprint fallback already exists for ${entry.sourceRecordId}`);
+        }
+        duplicate = null;
+      }
       if (duplicate) {
         planId = duplicate.id;
         if (!entry.provenanceOnly) this.fillPlan.run({ id: planId, ...entry.plan, updated_at: now });
         outcome = 'updated';
       } else {
-        planId = Number(this.insertPlan.run({ ...entry.plan, created_at: now, updated_at: now }).lastInsertRowid);
+        planId = Number(this.insertPlan.run({ ...plan, created_at: now, updated_at: now }).lastInsertRowid);
         outcome = 'inserted';
       }
       this.insertSourceRecord.run({

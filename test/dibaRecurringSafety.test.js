@@ -3,8 +3,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { DibaImporter, DIBA_FEEDS } from '../backend/src/diba/dibaImporter.js';
+import { DibaImporter, DIBA_FEEDS, normalizeDibaImportRecord } from '../backend/src/diba/dibaImporter.js';
 import { DibaImportLock } from '../backend/src/diba/importLock.js';
+import { PlanRepository } from '../backend/src/db/repositories/plan.repository.js';
 import { runDibaImport } from '../backend/src/jobs/dibaImportRunner.js';
 import { importDibaScheduled, parseScheduledArguments } from '../backend/src/jobs/importDibaScheduled.js';
 import { withTestDatabase } from './helpers.js';
@@ -54,6 +55,11 @@ function attachSource(db, planId, sourceKey, sourceRecordId) {
   db.prepare(`INSERT INTO plan_sources(plan_id,source_id,source_record_id,source_url,source_payload_json,imported_at,last_seen_at)
     VALUES (?,?,?,?, '{}',?,?)`).run(planId, sourceId, sourceRecordId, 'https://diba.example/event', NOW, NOW);
 }
+function addOrphanPlan(db, { sourceRecordId, ...options }) {
+  const planId = addPlan(db, { ...options, sourceRecordId });
+  db.prepare('DELETE FROM plan_sources WHERE plan_id=?').run(planId);
+  return planId;
+}
 function finalConsolidation(canonicalSourceRecordId = 'final-canonical', memberSourceRecordId = 'final-member') {
   return {
     operation: 'REVIEW_SAME_FEED_COMPONENT',
@@ -85,6 +91,157 @@ test('enabled DIBA rejects a complete topology containing a confirmed target and
   });
 });
 
+test('zero-provenance active and inactive orphan plans are excluded from DIBA matching', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const activeOrphanId = addOrphanPlan(db, { fingerprint: 'orphan-active', sourceRecordId: 'orphan-active' });
+    const inactiveOrphanId = addOrphanPlan(db, { fingerprint: 'orphan-inactive', status: 'inactive', sourceRecordId: 'orphan-inactive' });
+    const before = db.prepare('SELECT COUNT(*) count FROM plans').get().count;
+    const result = await importer(db, [raw('orphan-safe')]).run({ feeds: [FEED] });
+    const imported = sourcePlan(db, FEED.sourceKey, 'orphan-safe');
+    assert.equal(result.datasets[0].safety.status, 'approved');
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plans').get().count, before + 1);
+    assert.notEqual(imported.planId, activeOrphanId);
+    assert.notEqual(imported.planId, inactiveOrphanId);
+  });
+});
+
+test('DIBA persistence leaves an exact inactive orphan fingerprint unlinked and inactive', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const sourceRecordId = 'orphan-fingerprint';
+    const fingerprint = `diba|${FEED.dataset}|${sourceRecordId}`;
+    const orphanPlanId = addOrphanPlan(db, { fingerprint, status: 'inactive', sourceRecordId: 'historical-orphan' });
+    const before = db.prepare('SELECT COUNT(*) count FROM plans').get().count;
+    const result = await importer(db, [raw(sourceRecordId)]).run({ feeds: [FEED] });
+    const imported = sourcePlan(db, FEED.sourceKey, sourceRecordId);
+    const orphan = db.prepare('SELECT status FROM plans WHERE id=?').get(orphanPlanId);
+    assert.equal(result.datasets[0].safety.status, 'approved');
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plans').get().count, before + 1);
+    assert.notEqual(imported.planId, orphanPlanId);
+    assert.equal(imported.status, 'active');
+    assert.equal(orphan.status, 'inactive');
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plan_sources WHERE plan_id=?').get(orphanPlanId).count, 0);
+    assert.equal(db.prepare('SELECT fingerprint FROM plans WHERE id=?').get(imported.planId).fingerprint, `${fingerprint}|recurring`);
+  });
+});
+
+test('DIBA orphan fingerprint fallback collision fails closed without catalog mutation', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const sourceRecordId = 'orphan-fallback-collision';
+    const fingerprint = `diba|${FEED.dataset}|${sourceRecordId}`;
+    const orphanPlanId = addOrphanPlan(db, { fingerprint, status: 'inactive', sourceRecordId: 'historical-orphan' });
+    const fallbackPlanId = addOrphanPlan(db, { fingerprint: `${fingerprint}|recurring`, status: 'inactive', sourceRecordId: 'fallback-collision' });
+    const plansBefore = db.prepare('SELECT COUNT(*) count FROM plans').get().count;
+    const sourcesBefore = db.prepare('SELECT COUNT(*) count FROM plan_sources').get().count;
+    let failure;
+    await assert.rejects(importer(db, [raw(sourceRecordId)]).run({ feeds: [FEED] }), (error) => {
+      failure = error;
+      return /DIBA orphan fingerprint fallback already exists/.test(error.message);
+    });
+    assert.equal(failure.results[0].failureCode, 'DIBA_DATASET_FAILED');
+    assert.match(failure.results[0].error, /DIBA orphan fingerprint fallback already exists/);
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plans').get().count, plansBefore);
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plan_sources').get().count, sourcesBefore);
+    assert.deepEqual(db.prepare('SELECT id,status FROM plans WHERE id IN (?,?) ORDER BY id').all(orphanPlanId, fallbackPlanId), [
+      { id: orphanPlanId, status: 'inactive' }, { id: fallbackPlanId, status: 'inactive' },
+    ]);
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plan_sources WHERE plan_id IN (?,?)').get(orphanPlanId, fallbackPlanId).count, 0);
+    assert.deepEqual(db.prepare('SELECT fingerprint FROM plans WHERE fingerprint LIKE ? ORDER BY fingerprint').all(`${fingerprint}|%`), [
+      { fingerprint: `${fingerprint}|recurring` },
+    ]);
+    assert.equal(sourcePlan(db, FEED.sourceKey, sourceRecordId), undefined);
+  });
+});
+
+test('DIBA recurring fallback plan is idempotent after an orphan fingerprint collision', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const sourceRecordId = 'orphan-repeat';
+    const fingerprint = `diba|${FEED.dataset}|${sourceRecordId}`;
+    const orphanPlanId = addOrphanPlan(db, { fingerprint, status: 'inactive', sourceRecordId: 'historical-orphan' });
+    const plansBefore = db.prepare('SELECT COUNT(*) count FROM plans').get().count;
+    const sourcesBefore = db.prepare('SELECT COUNT(*) count FROM plan_sources').get().count;
+    await importer(db, [raw(sourceRecordId)]).run({ feeds: [FEED] });
+    const replacement = sourcePlan(db, FEED.sourceKey, sourceRecordId);
+    const plansAfterFirst = db.prepare('SELECT COUNT(*) count FROM plans').get().count;
+    const sourcesAfterFirst = db.prepare('SELECT COUNT(*) count FROM plan_sources').get().count;
+    assert.equal(plansAfterFirst, plansBefore + 1);
+    assert.equal(sourcesAfterFirst, sourcesBefore + 1);
+    assert.notEqual(replacement.planId, orphanPlanId);
+    assert.equal(db.prepare('SELECT fingerprint FROM plans WHERE id=?').get(replacement.planId).fingerprint, `${fingerprint}|recurring`);
+
+    await importer(db, [raw(sourceRecordId)]).run({ feeds: [FEED] });
+    const repeated = sourcePlan(db, FEED.sourceKey, sourceRecordId);
+    assert.equal(repeated.planId, replacement.planId);
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plans').get().count, plansAfterFirst);
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plan_sources').get().count, sourcesAfterFirst);
+    assert.equal(db.prepare('SELECT status FROM plans WHERE id=?').get(orphanPlanId).status, 'inactive');
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plan_sources WHERE plan_id=?').get(orphanPlanId).count, 0);
+    assert.deepEqual(db.prepare('SELECT fingerprint FROM plans WHERE fingerprint LIKE ? ORDER BY fingerprint').all(`${fingerprint}|%`), [
+      { fingerprint: `${fingerprint}|recurring` },
+    ]);
+  });
+});
+
+test('PlanRepository retains default fingerprint reuse while DIBA explicitly rejects orphan reuse', () => {
+  withTestDatabase((db) => {
+    const repository = new PlanRepository(db);
+    const gencatSourceId = db.prepare("SELECT id FROM sources WHERE key='gencat-agenda'").get().id;
+    const dibaSourceId = db.prepare('SELECT id FROM sources WHERE key=?').get(FEED.sourceKey).id;
+    const normalize = (id) => normalizeDibaImportRecord(FEED, raw(id), {
+      today: '2026-08-31', horizonEnd: '2027-08-31', municipalities: MUNICIPALITIES,
+    }).candidate;
+    const defaultCandidate = normalize('repository-default');
+    const defaultOrphanId = addOrphanPlan(db, {
+      fingerprint: defaultCandidate.plan.fingerprint, status: 'inactive', sourceRecordId: 'repository-default-orphan',
+    });
+    repository.persist({ ...defaultCandidate, sourceId: gencatSourceId });
+    assert.equal(sourcePlan(db, 'gencat-agenda', 'repository-default').planId, defaultOrphanId);
+
+    const dibaCandidate = normalize('repository-diba');
+    const dibaOrphanId = addOrphanPlan(db, {
+      fingerprint: dibaCandidate.plan.fingerprint, status: 'inactive', sourceRecordId: 'repository-diba-orphan',
+    });
+    repository.persist({ ...dibaCandidate, sourceId: dibaSourceId, dibaOrphanFingerprintGuard: true });
+    const persisted = sourcePlan(db, FEED.sourceKey, 'repository-diba');
+    assert.notEqual(persisted.planId, dibaOrphanId);
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plan_sources WHERE plan_id=?').get(dibaOrphanId).count, 0);
+    assert.equal(db.prepare('SELECT status FROM plans WHERE id=?').get(dibaOrphanId).status, 'inactive');
+    assert.equal(db.prepare('SELECT fingerprint FROM plans WHERE id=?').get(persisted.planId).fingerprint, `${dibaCandidate.plan.fingerprint}|recurring`);
+  });
+});
+
+test('orphan candidates cannot broaden a reviewed link topology', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const targetPlanId = addPlan(db, { fingerprint: 'reviewed-target', sourceRecordId: 'reviewed-target' });
+    addOrphanPlan(db, { fingerprint: 'old-orphan-one', sourceRecordId: 'old-orphan-one' });
+    addOrphanPlan(db, { fingerprint: 'old-orphan-two', sourceRecordId: 'old-orphan-two' });
+    const decision = {
+      source: { sourceKey: FEED.sourceKey, sourceRecordId: 'reviewed-with-orphans' }, decision: 'LINK_TO_EXISTING',
+      target: { sourceKey: 'gencat-agenda', sourceRecordId: 'reviewed-target' }, reason: 'reviewed', reviewedAt: '2026-09-07', reviewer: 'human-review',
+    };
+    const result = await importer(db, [raw('reviewed-with-orphans')], { reviewedOverrides: { version: 1, decisions: [decision] } }).run({ feeds: [FEED] });
+    assert.equal(result.datasets[0].safety.status, 'approved');
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'reviewed-with-orphans').planId, targetPlanId);
+  });
+});
+
+test('an inactive plan with provenance remains a DIBA candidate', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const targetPlanId = addPlan(db, {
+      fingerprint: 'inactive-with-source', status: 'inactive', venue: 'Teatre', address: 'Carrer Major 1', latitude: 41.54, longitude: 2.44,
+      sourceRecordId: 'inactive-with-source',
+    });
+    const result = await importer(db, [raw('link-inactive-with-source')]).run({ feeds: [FEED] });
+    assert.equal(result.datasets[0].safety.status, 'approved');
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'link-inactive-with-source').planId, targetPlanId);
+  });
+});
+
 test('enabled DIBA rejects a new same-feed ambiguity without committing either plan', async () => {
   await withTestDatabase(async (db) => {
     enableDiba(db);
@@ -93,6 +250,95 @@ test('enabled DIBA rejects a new same-feed ambiguity without committing either p
     assert.equal(sourcePlan(db, FEED.sourceKey, 'same-b'), undefined);
     const summary = JSON.parse(db.prepare('SELECT summary_json FROM import_runs ORDER BY id DESC LIMIT 1').get().summary_json);
     assert.ok(summary.safety.blockers.some(({ code }) => code === 'UNRESOLVED_SAME_FEED_COMPONENT'));
+  });
+});
+
+test('a wholly persisted same-feed component on one plan refreshes without relinking', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const planId = addPlan(db, { fingerprint: 'persisted-component', sourceKey: FEED.sourceKey, sourceRecordId: 'persisted-a' });
+    attachSource(db, planId, FEED.sourceKey, 'persisted-b');
+    const before = db.prepare('SELECT COUNT(*) count FROM plans').get().count;
+    const result = await importer(db, [raw('persisted-a', { descripcio: 'Actualització A' }), raw('persisted-b', { descripcio: 'Actualització B' })]).run({ feeds: [FEED] });
+    assert.equal(result.datasets[0].safety.status, 'approved');
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plans').get().count, before);
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'persisted-a').planId, planId);
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'persisted-b').planId, planId);
+    assert.notEqual(db.prepare('SELECT source_payload_json payload FROM plan_sources WHERE plan_id=? AND source_record_id=?').get(planId, 'persisted-a').payload, '{}');
+  });
+});
+
+test('a persisted same-feed component split across plans remains blocked', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const firstPlanId = addPlan(db, { fingerprint: 'split-a', sourceKey: FEED.sourceKey, sourceRecordId: 'split-a' });
+    const secondPlanId = addPlan(db, { fingerprint: 'split-b', sourceKey: FEED.sourceKey, sourceRecordId: 'split-b' });
+    let failure;
+    await assert.rejects(importer(db, [raw('split-a'), raw('split-b')]).run({ feeds: [FEED] }), (error) => {
+      failure = error;
+      return /recurring safety guard/.test(error.message);
+    });
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'split-a').planId, firstPlanId);
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'split-b').planId, secondPlanId);
+    assert.ok(failure.results[0].safety.blockers.some(({ code }) => code === 'UNRESOLVED_SAME_FEED_COMPONENT'));
+  });
+});
+
+test('transactional revalidation rejects a persisted same-feed component that splits after preflight', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const planId = addPlan(db, { fingerprint: 'persisted-component', sourceKey: FEED.sourceKey, sourceRecordId: 'persisted-a' });
+    attachSource(db, planId, FEED.sourceKey, 'persisted-b');
+    const wrongPlanId = addPlan(db, { fingerprint: 'late-component-drift', title: 'Unrelated', municipality: 'Barcelona', sourceRecordId: 'late-component-drift' });
+    const sourceId = db.prepare('SELECT id FROM sources WHERE key=?').get(FEED.sourceKey).id;
+    const guarded = importer(db, [raw('persisted-a'), raw('persisted-b')], {
+      beforePersist: () => db.prepare('UPDATE plan_sources SET plan_id=? WHERE source_id=? AND source_record_id=?').run(wrongPlanId, sourceId, 'persisted-b'),
+    });
+    let failure;
+    await assert.rejects(guarded.run({ feeds: [FEED] }), (error) => {
+      failure = error;
+      return /safety authorization changed/.test(error.message);
+    });
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'persisted-a').planId, planId);
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'persisted-b').planId, wrongPlanId);
+    assert.equal(failure.results[0].safety.code, 'DIBA_STALE_DATASET_AUTHORIZATION');
+    assert.ok(failure.results[0].safety.blockers.some(({ code }) => code === 'UNRESOLVED_SAME_FEED_COMPONENT'));
+  });
+});
+
+test('a new identity joining a persisted same-feed component remains blocked', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const planId = addPlan(db, { fingerprint: 'persisted-component', sourceKey: FEED.sourceKey, sourceRecordId: 'persisted-a' });
+    attachSource(db, planId, FEED.sourceKey, 'persisted-b');
+    await assert.rejects(importer(db, [raw('persisted-a'), raw('persisted-b'), raw('persisted-new')]).run({ feeds: [FEED] }), /recurring safety guard/);
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'persisted-new'), undefined);
+  });
+});
+
+test('a missing same-feed member does not inherit persisted-component approval', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const planId = addPlan(db, { fingerprint: 'persisted-member', sourceKey: FEED.sourceKey, sourceRecordId: 'persisted-only' });
+    await assert.rejects(importer(db, [raw('persisted-only'), raw('missing-member')]).run({ feeds: [FEED] }), /recurring safety guard/);
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'persisted-only').planId, planId);
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'missing-member'), undefined);
+  });
+});
+
+test('a provenance-bearing active cross-source POSSIBLE remains blocked', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const museums = DIBA_FEEDS[2];
+    const targetPlanId = addPlan(db, { fingerprint: 'museum-possible', venue: null, address: null, latitude: null, longitude: null, sourceKey: museums.sourceKey, sourceRecordId: 'museum-possible' });
+    db.prepare('UPDATE plan_sources SET source_url=? WHERE plan_id=?').run('https://diba.example/other-event', targetPlanId);
+    let failure;
+    await assert.rejects(importer(db, [raw('tourism-possible', { grup_adreca: {} })]).run({ feeds: [FEED] }), (error) => {
+      failure = error;
+      return /recurring safety guard/.test(error.message);
+    });
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'tourism-possible'), undefined);
+    assert.ok(failure.results[0].safety.blockers.some(({ code }) => code === 'UNRESOLVED_CROSS_SOURCE_POSSIBLE'));
   });
 });
 

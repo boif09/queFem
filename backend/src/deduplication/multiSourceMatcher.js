@@ -14,12 +14,14 @@ export class MultiSourceMatcher {
     `);
     // Interval-aware matching is intentionally opt-in. Ticketmaster sessions
     // retain their exact-date contract above, while DIBA publishes genuine
-    // multi-day intervals (not synthetic daily sessions).
+    // multi-day intervals (not synthetic daily sessions). DIBA never treats
+    // provenance-less historical orphan plans as matching candidates.
     this.findDibaCandidates = db.prepare(`
       SELECT DISTINCT p.* FROM plans p
       WHERE lower(p.municipality) = lower(?)
         AND COALESCE(p.end_date, p.start_date) >= ?
         AND p.start_date <= ?
+        AND EXISTS (SELECT 1 FROM plan_sources ps WHERE ps.plan_id = p.id)
     `);
     this.findPlanUrls = db.prepare('SELECT source_url FROM plan_sources WHERE plan_id=? AND source_url IS NOT NULL');
     this.findPlanSources = db.prepare(`SELECT s.key, s.enabled, ps.source_record_id, ps.source_url
