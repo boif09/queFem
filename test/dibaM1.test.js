@@ -99,7 +99,7 @@ test('dry-run is zero-write, while a confirmed Gencat match preserves image and 
   });
 });
 
-test('ambiguous same-title match is not force-merged, cross-feed high match is attached, and guards isolate feeds', async () => {
+test('ambiguous same-title match fails closed before persistence and removal guards still isolate feeds', async () => {
   await withTestDatabase(async (db) => {
     const now = '2026-08-31T10:00:00Z';
     const gencat = db.prepare("SELECT id FROM sources WHERE key='gencat-agenda'").get();
@@ -107,14 +107,8 @@ test('ambiguous same-title match is not force-merged, cross-feed high match is a
       VALUES ('event','gencat|ambiguous','Concert de prova','2026-09-10','2026-09-10','Mataró',?,?)`).run(now, now).lastInsertRowid);
     db.prepare(`INSERT INTO plan_sources (plan_id,source_id,source_record_id,source_payload_json,imported_at,last_seen_at) VALUES (?,?, 'amb','{}',?,?)`).run(planId, gencat.id, now, now);
     const importer = new DibaImporter({ db, client: client({ [FEED.dataset]: [raw('a', { grup_adreca: {} })] }), municipalities: MUNICIPALITIES, now: () => new Date('2026-08-31T12:00:00Z') });
-    const first = await new DibaImporter({ db, client: client({ [FEED.dataset]: [raw('a', { acte_url: 'https://shared.example', grup_adreca: {} })] }), municipalities: MUNICIPALITIES, now: () => new Date('2026-08-31T12:00:00Z') }).run({ feeds: [FEED] });
-    assert.equal(first.datasets[0].ambiguous, 1);
-    assert.equal(db.prepare('SELECT COUNT(*) count FROM plans').get().count, 2);
-
-    const museums = DIBA_FEEDS[2];
-    const second = new DibaImporter({ db, client: client({ [museums.dataset]: [raw('b', { acte_url: 'https://shared.example', grup_adreca: { adreca_nom: 'Teatre', adreca: 'Carrer Major 1' } })] }), municipalities: MUNICIPALITIES, now: () => new Date('2026-08-31T12:00:00Z') });
-    const m = await second.run({ feeds: [museums] });
-    assert.equal(m.datasets[0].internalDibaMatches, 1);
+    await assert.rejects(importer.run({ feeds: [FEED] }), /recurring safety guard/);
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plans').get().count, 1);
 
     const tourismSource = db.prepare("SELECT id FROM sources WHERE key='diba-tourisme'").get();
     db.prepare(`INSERT INTO plan_sources (plan_id,source_id,source_record_id,source_payload_json,imported_at,last_seen_at) VALUES (?,?, 'old','{}',?,?)`).run(planId, tourismSource.id, now, now);
@@ -333,7 +327,7 @@ test('rich dry-run diagnostics retain unresolved INE details and guided visits a
   });
 });
 
-test('feed-level dry-run staging never merges same-feed records, but reports them for review and exposes them to the next feed', async () => {
+test('feed-level dry-run reports a same-feed rejection and does not expose blocked plans to the next feed', async () => {
   await withTestDatabase(async (db) => {
     const museums = DIBA_FEEDS[2];
     const records = {
@@ -348,7 +342,9 @@ test('feed-level dry-run staging never merges same-feed records, but reports the
     assert.equal(result.datasets[0].sameFeedPotentialDuplicateClusters[0].classification, 'NEEDS REVIEW');
     assert.match(result.datasets[0].sameFeedPotentialDuplicateClusters[0].evidence.reason, /matching URL/);
     assert.doesNotMatch(result.datasets[0].sameFeedPotentialDuplicateClusters[0].evidence.reason, /but no matching/);
-    assert.equal(result.datasets[1].linksToEarlierDibaPlans, 1);
+    assert.equal(result.datasets[0].safety.status, 'would-reject');
+    assert.equal(result.datasets[1].linksToEarlierDibaPlans, 0);
+    assert.equal(result.datasets[1].uniqueNewPublicPlans, 1);
     assert.equal(result.datasets[0].primaryDisposition.invariantHolds, true);
   });
 });

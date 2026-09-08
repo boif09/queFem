@@ -1,4 +1,10 @@
+import fs from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+export const DIBA_POLICY_OVERRIDE_PATH = path.join(root, 'data-policy', 'diba-link-overrides.json');
 
 export const REVIEWED_DECISIONS = new Set(['LINK_TO_EXISTING', 'KEEP_SEPARATE', 'DEFER']);
 
@@ -28,5 +34,11 @@ export function validateDibaPolicyOverrides(payload) {
 export async function loadDibaPolicyOverrides(filePath) {
   let payload;
   try { payload = JSON.parse(await readFile(filePath, 'utf8')); } catch (error) { throw new Error(`Cannot load DIBA policy overrides: ${error.message}`); }
+  return validateDibaPolicyOverrides(payload);
+}
+
+export function loadDibaPolicyOverridesSync(filePath = DIBA_POLICY_OVERRIDE_PATH) {
+  let payload;
+  try { payload = JSON.parse(fs.readFileSync(filePath, 'utf8')); } catch (error) { throw new Error(`Cannot load DIBA policy overrides: ${error.message}`); }
   return validateDibaPolicyOverrides(payload);
 }

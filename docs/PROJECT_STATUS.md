@@ -1,6 +1,6 @@
 # Tens Pla? — Estado del proyecto
 
-Última revisión documental: 2026-09-03.
+Última revisión documental: 2026-09-08.
 
 Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mismo y qué toca hacer?». La arquitectura está en [`ARCHITECTURE.md`](ARCHITECTURE.md), las fuentes en [`DATA_SOURCES.md`](DATA_SOURCES.md) y la operación en [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
@@ -12,7 +12,7 @@ Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mism
 - El SEO público está desplegado: metadata por ruta, canonical, Open Graph/Twitter, Event JSON-LD conservador, `robots.txt` y sitemap público. Google Search Console ya está verificado.
 - Hay backups automáticos y probados de SQLite, con comprobaciones y copia externa mediante `rclone` al destino de Google Drive `TensPla/backups`.
 - La rotación de logs de Nginx está configurada y verificada.
-- Gencat, Ticketmaster y Fever están activos en producción. Fever tiene source habilitada, imágenes same-origin activadas y una primera importación real completada; la configuración efectiva de cron debe verificarse en el servidor antes de operar.
+- Gencat, Ticketmaster, Fever y las tres fuentes DIBA están activos en producción. `diba-tourisme`, `diba-escenari` y `diba-museus` tienen `enabled=1` y `allows_images=0`; su importación inicial, revisión humana, reconciliación y activación M1 están completadas. Fever tiene source habilitada, imágenes same-origin activadas y una primera importación real completada; la configuración efectiva de cron debe verificarse en el servidor antes de operar.
 
 La infraestructura de producción es parcialmente externa a Git. «Confirmado» describe el estado conocido a fecha de esta revisión, no sustituye la comprobación previa a una operación.
 
@@ -23,7 +23,8 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - DIBA M1.4B completado como diseño de política offline y versionado: define consolidación misma fuente, enlaces DIBA↔público por componente, sesiones, aliases municipales, propiedad canónica, reconciliación, overrides y gates de activación para M1.4C. No implementa ningún comportamiento productivo ni cambia la activación.
 - DIBA M1.4C1.1 completado localmente como endurecimiento final del plan de mutaciones read-only: los overrides de enlace requieren revisión completa por componente y destino público candidato, la evidencia de sesión exige horario real (nunca solo duración) y el dry-run produce destinos finales por fases, no una lista ejecutable. La snapshot mantiene bloqueadores de activación y DIBA continúa desactivada; M1.4C2 requerirá aprobación separada para cualquier mutación.
 - DIBA M1.4C2 completado como ensayo temporal: el ejecutor rechaza la SQLite real, exige una ruta explícita de copia y aplica el plan por fases en una única transacción, protegiendo los campos públicos y recalculando huérfanos. El ensayo completo pasó con relinks e idempotencia estructural; cualquier autorización separada para modificar la base local real sigue pendiente. DIBA permanece desactivada y sin imágenes.
-- DIBA M1.4C3/D1-D4/E1-E4 y FINAL F1/F2 cerrados localmente: la reconciliación automática y las revisiones humanas CONFIRMED (11 procedencias) y POSSIBLE (23 procedencias en 22 componentes) permanecen aplicadas y preservadas. La revisión final humana también está completa: 5/5 decisiones aplicadas, 2 relinks finales exactos (Tallers y Memòria), 2 staging orphans de consolidación inactivos y 8 procedencias/planes DEFER (Terrabastall, Cuina de contes y Anís del Mono) intencionalmente no publicados. Los 2 diagnósticos same-feed y 1 `session-DEFER` restantes son estructuras DEFER ya revisadas, no bloqueos humanos sin resolver. `HUMAN_REVIEW_ACTIVATION_GATE_READY=true`; CONFIRMED/POSSIBLE no resueltos=0; geografía=0 mutaciones/19 NOOP. La SQLite local POST-F2 tiene SHA `61A9E6F3D0D1291B7A9679F8DDD0B6CB59116D6E7136F2EAC770D7D0659D26A8`; backup PRE-F2 `data/backups/quefem_before_diba_final_f2_2026-09-03T12-17-36-438Z.sqlite` (SHA `AFDE04DC383CCA7C3643B84DC64E39B92BBA4C207610C5AFA254D31F503628B5`). Los 710 registros DIBA siguen con `enabled=0` y `allows_images=0`; futuros refresh preservan la supresión DEFER. No ha habido importación ni activación DIBA en producción.
+- DIBA M1.4C3/D1-D4/E1-E4 y FINAL F1/F2 cerraron la reconciliación y revisión humana. Las decisiones CONFIRMED/POSSIBLE y las cinco decisiones finales permanecen versionadas; los planes `DEFER` siguen intencionalmente inactivos. La activación M1 posterior ya está completada en producción con las tres fuentes habilitadas y sus imágenes deshabilitadas.
+- DIBA M2 prepara localmente la importación diaria fail-closed: analiza toda la topología cross-source y same-feed antes de mutar, respeta las decisiones humanas estables, impide que identidades desconocidas reactiven `DEFER`, revalida bajo `BEGIN IMMEDIATE` y comparte un lock entre imports reales manuales y programados. `diba:import:scheduled` no admite flags ni bypass de retirada masiva. No se ha instalado cron ni se ha ejecutado este código en producción.
 
 - Generic Image Library V1 preparada: manifiesto curado y auditable de 100 fotografías Pexels,
   resolver determinista local por categoría/fingerprint, prioridad de imágenes oficiales controladas,
@@ -48,9 +49,9 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## NEXT DIBA STEP
 
-### PRODUCTION PREPARATION
+### RECURRING IMPORT DEPLOYMENT
 
-La revisión humana local está cerrada: no hay relinks pendientes ni bloqueos humanos finales; DIBA continúa desactivada. El siguiente trabajo autorizado es backup de producción, despliegue del código DIBA manteniendo `enabled=0` y `allows_images=0`, verificación de ese estado, primera importación DIBA oculta, validación de conteos/integridad/idempotencia y activación pública deliberada únicamente después de superar los gates. La activación no es automática.
+M1 está activo. El siguiente paso operativo es desplegar M2 manteniendo `allows_images=0`, verificar el lock y una ejecución controlada de `diba:import:scheduled`, revisar su resumen y solo después instalar por autorización separada el cron diario propuesto a las 05:45. Este cambio de código no crea el cron.
 
 ## AUTONOMOUS WORK
 
@@ -93,6 +94,7 @@ La revisión humana local está cerrada: no hay relinks pendientes ni bloqueos h
 | Copia `rclone` a `TensPla/backups` | Confirmado externamente | Revisar último envío sin exponer credenciales ni IDs |
 | Logrotate | Confirmado externamente y verificado | Revisar configuración efectiva y rotaciones si se va a modificar |
 | Ticketmaster en producción | Activo según el estado confirmado | Verificar cron y configuración efectiva antes de operar |
+| DIBA en producción | Tres fuentes activas, imágenes deshabilitadas y sin cron | Desplegar/verificar M2 antes de instalar el cron por separado |
 | CSP | No aplicada según el último estado confirmado | Requiere prueba Report-Only y autorización |
 
 El roadmap operativo separa AUTONOMOUS WORK, PRODUCT DECISIONS, OPERATOR / PRODUCTION, BLOCKED y LATER / TECHNICAL DEBT. No existe una definición fiable de prioridades `P1`, `P2`, etc.; no deben usarse para decidir trabajo actual.

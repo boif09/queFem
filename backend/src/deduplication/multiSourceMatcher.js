@@ -22,7 +22,7 @@ export class MultiSourceMatcher {
         AND p.start_date <= ?
     `);
     this.findPlanUrls = db.prepare('SELECT source_url FROM plan_sources WHERE plan_id=? AND source_url IS NOT NULL');
-    this.findPlanSources = db.prepare(`SELECT s.key, s.enabled, ps.source_url
+    this.findPlanSources = db.prepare(`SELECT s.key, s.enabled, ps.source_record_id, ps.source_url
       FROM plan_sources ps JOIN sources s ON s.id=ps.source_id WHERE ps.plan_id=? ORDER BY s.key`);
   }
 
@@ -51,14 +51,26 @@ export class MultiSourceMatcher {
     if (!plan.start_date || !plan.municipality) return [];
     return this.findDibaCandidates.all(plan.municipality, plan.start_date, plan.end_date || plan.start_date).map((planRow) => {
       const sources = this.findPlanSources.all(planRow.id);
-      return { ...planRow, sourceUrls: sources.map(({ source_url: url }) => url).filter(Boolean), enabledSourceKeys: sources.filter(({ enabled }) => enabled === 1).map(({ key }) => key) };
+      return {
+        ...planRow,
+        sourceLinks: sources.map(({ key: sourceKey, source_record_id: sourceRecordId, source_url: sourceUrl, enabled }) => ({ sourceKey, sourceRecordId: String(sourceRecordId), sourceUrl, enabled })),
+        sourceUrls: sources.map(({ source_url: url }) => url).filter(Boolean),
+        enabledSourceKeys: sources.filter(({ enabled }) => enabled === 1).map(({ key }) => key),
+      };
     });
   }
 
   matchDibaCandidates(plan, candidates, { sourceUrl = null } = {}) {
+    const analysis = this.analyzeDibaCandidates(plan, candidates, { sourceUrl });
+    return { ...analysis, confirmed: analysis.confirmedCandidates[0] || null };
+  }
+
+  analyzeDibaCandidates(plan, candidates, { sourceUrl = null } = {}) {
     const title = normalizeForFingerprint(plan.original_title, { removeArticles: true });
     const possible = [];
     const possibleDetails = [];
+    const confirmedCandidates = [];
+    const confirmedDetails = [];
     for (const candidate of candidates) {
       if (normalizeForFingerprint(candidate.original_title, { removeArticles: true }) !== title) continue;
       const venue = normalizeForFingerprint(candidate.venue_name)
@@ -78,10 +90,14 @@ export class MultiSourceMatcher {
           ? `same title, municipality and overlapping interval; ${supportingEvidence.join(', ')}`
           : 'same title, municipality and overlapping interval, but no matching venue, address, URL or nearby coordinates',
       };
-      if (venue || address || url || coordinatesNear) return { confirmed: candidate, confirmedEvidence: evidence, possible, possibleDetails };
-      possible.push(candidate);
-      possibleDetails.push({ candidate, evidence });
+      if (venue || address || url || coordinatesNear) {
+        confirmedCandidates.push(candidate);
+        confirmedDetails.push({ candidate, evidence });
+      } else {
+        possible.push(candidate);
+        possibleDetails.push({ candidate, evidence });
+      }
     }
-    return { confirmed: null, possible, possibleDetails };
+    return { confirmedCandidates, confirmedDetails, confirmedEvidence: confirmedDetails[0]?.evidence || null, possible, possibleDetails };
   }
 }

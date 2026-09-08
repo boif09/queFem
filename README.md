@@ -54,6 +54,8 @@ No ejecutes la variante con escritura ni jobs de producción sin autorización. 
 | `npm run purge:inactive -- --dry-run` | Inspeccionar la purga de huérfanos inactivos |
 | `npm run import:gencat` | Sincronizar Agenda Cultural de Catalunya |
 | `npm run import:ticketmaster -- --dry-run` | Validar Ticketmaster sin escribir |
+| `npm run diba:import -- --dry-run` | Auditar los tres feeds DIBA sin escribir SQLite |
+| `npm run diba:import:scheduled` | Ejecutar la importación DIBA recurrente protegida, sin bypass de retirada masiva |
 | `npm run fever:discovery:dry-run` | Auditar el catálogo Fever/Impact sin abrir SQLite |
 | `npm run fever:normalize:dry-run` | Normalizar Fever y analizar sesiones en memoria, sin abrir SQLite |
 | `npm run geography:icgc:update` | Actualizar explícitamente el snapshot administrativo oficial ICGC |

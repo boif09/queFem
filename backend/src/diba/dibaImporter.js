@@ -3,7 +3,9 @@ import { PlanRepository, canonicalJson } from '../db/repositories/plan.repositor
 import { TicketmasterReconciliationRepository } from '../db/repositories/ticketmasterReconciliation.repository.js';
 import { normalizeForFingerprint } from '../normalizers/text.normalizer.js';
 import { classifyDate, dateInCatalonia, normalizeDibaRecord } from './m0Discovery.js';
-import { deferredFinalReviewKeys, stableKey } from './dibaFinalReviewDecisions.js';
+import { dibaEvidence } from './dibaQualityAudit.js';
+import { deferredFinalReviewKeys, loadFinalReviewDecisions, stableKey } from './dibaFinalReviewDecisions.js';
+import { loadDibaPolicyOverridesSync } from './dibaPolicyOverrides.js';
 
 export const DIBA_FEEDS = Object.freeze([
   { dataset: 'actesturisme_ca', sourceKey: 'diba-tourisme', label: 'Turisme: agenda d’activitats' },
@@ -134,6 +136,7 @@ function emptySummary(feed) {
     sameFeedPotentialDuplicateRecords: 0, sameFeedPotentialDuplicateClusters: [], ambiguousRecords: 0, allowMassRemovalUsed: false,
     actionableRecords: 0, actionableWithRequiredSemantics: 0,
     noOccurrencesCreated: 0, dryRun: false, catalogCommitted: false,
+    safety: { status: 'pending', code: null, blockers: [] },
   };
 }
 
@@ -144,7 +147,12 @@ function validateRegisteredSource(source) {
 }
 
 export class DibaImporter {
-  constructor({ db, client, now = () => new Date(), lookaheadDays = 365, municipalities = new Map(), maximumRemovalRatio = 0.5, minimumHealthRatio = 0.5, postCommitCheck, beforePersist, insideTransaction, finalDeferredKeys = deferredFinalReviewKeys() }) {
+  constructor({
+    db, client, now = () => new Date(), lookaheadDays = 365, municipalities = new Map(),
+    maximumRemovalRatio = 0.5, minimumHealthRatio = 0.5, postCommitCheck, beforePersist,
+    insideTransaction, finalDeferredKeys = deferredFinalReviewKeys(),
+    reviewedOverrides = loadDibaPolicyOverridesSync(), finalReviewDecisions = loadFinalReviewDecisions(),
+  }) {
     this.db = db; this.client = client; this.now = now; this.lookaheadDays = lookaheadDays;
     this.municipalities = municipalities; this.maximumRemovalRatio = maximumRemovalRatio; this.minimumHealthRatio = minimumHealthRatio;
     this.plans = new PlanRepository(db); this.matcher = new MultiSourceMatcher(db);
@@ -157,10 +165,171 @@ export class DibaImporter {
       FROM plan_sources ps JOIN sources s ON s.id=ps.source_id WHERE ps.plan_id=? ORDER BY s.key, ps.source_record_id`);
     this.planHasEnabledSource = db.prepare(`SELECT 1 FROM plan_sources ps JOIN sources s ON s.id=ps.source_id
       WHERE ps.plan_id=? AND s.enabled=1 LIMIT 1`);
+    this.findStableIdentity = db.prepare(`SELECT ps.plan_id AS planId, p.status, s.key AS sourceKey,
+      ps.source_record_id AS sourceRecordId, s.enabled
+      FROM plan_sources ps JOIN sources s ON s.id=ps.source_id JOIN plans p ON p.id=ps.plan_id
+      WHERE s.key=? AND ps.source_record_id=?`);
     this.postCommitCheck = postCommitCheck || (() => this.db.pragma('integrity_check', { simple: true }));
     this.beforePersist = beforePersist;
     this.insideTransaction = insideTransaction;
     this.finalDeferredKeys = finalDeferredKeys;
+    this.reviewedOverrides = new Map(reviewedOverrides.decisions.map((decision) => [stableKey(decision.source), decision]));
+    this.finalReviewBySource = new Map();
+    for (const decision of finalReviewDecisions.decisions) for (const member of decision.sourceMembers) this.finalReviewBySource.set(stableKey(member), decision);
+  }
+
+  candidateProfile(feed, candidate) {
+    const payload = candidate.sourcePayload || {};
+    return {
+      sourceKey: feed.sourceKey, dataset: feed.dataset, sourceRecordId: String(candidate.sourceRecordId),
+      normalizedTitle: normalizeForFingerprint(candidate.plan.original_title, { removeArticles: true }),
+      normalizedMunicipality: normalizeForFingerprint(candidate.plan.municipality),
+      startDate: candidate.plan.start_date, endDate: candidate.plan.end_date,
+      venue: candidate.plan.venue_name, address: candidate.plan.address,
+      coordinates: Number.isFinite(candidate.plan.latitude) && Number.isFinite(candidate.plan.longitude)
+        ? { latitude: candidate.plan.latitude, longitude: candidate.plan.longitude } : null,
+      matcherSourceUrl: candidate.sourceUrl, matcherCandidateUrls: [candidate.sourceUrl].filter(Boolean),
+      session: { fields: { observacionsHorari: payload.observacions_horari, durada: payload.durada, dies: payload.dies, scheduleText: candidate.plan.schedule_text } },
+    };
+  }
+
+  reviewedDisposition(sourceKey, sourceRecordId) {
+    const key = stableKey({ sourceKey, sourceRecordId });
+    const finalDecision = this.finalReviewBySource.get(key);
+    if (finalDecision) return { type: `FINAL_${finalDecision.disposition}`, key: finalDecision.sourceMembers.map(stableKey).sort().join('|'), decision: finalDecision };
+    if (this.finalDeferredKeys.has(key)) return { type: 'FINAL_DEFER', key, decision: null };
+    const override = this.reviewedOverrides.get(key);
+    return override ? { type: `OVERRIDE_${override.decision}`, key, decision: override } : null;
+  }
+
+  resolveReviewedTarget(identity) {
+    const rows = this.findStableIdentity.all(identity.sourceKey, identity.sourceRecordId);
+    return rows.length === 1 ? rows[0] : null;
+  }
+
+  planContainsDeferredIdentity(plan) {
+    return (plan.sourceLinks || []).some(({ sourceKey, sourceRecordId }) => {
+      const disposition = this.reviewedDisposition(sourceKey, sourceRecordId);
+      return disposition?.type === 'FINAL_DEFER' || disposition?.type === 'OVERRIDE_DEFER';
+    });
+  }
+
+  reviewedSameFeedComponent(component) {
+    const dispositions = component.map(({ sourceRecordId }) => this.reviewedDisposition(component[0].sourceKey, sourceRecordId));
+    if (dispositions.some((item) => !item)) return null;
+    if (dispositions.every(({ type, key }) => type.startsWith('FINAL_') && key === dispositions[0].key)) return dispositions[0];
+    if (dispositions.every(({ type, decision }) => type === 'OVERRIDE_LINK_TO_EXISTING'
+      && stableKey(decision.target) === stableKey(dispositions[0].decision.target))) return dispositions[0];
+    if (dispositions.every(({ type }) => type === 'OVERRIDE_KEEP_SEPARATE')) return dispositions[0];
+    if (dispositions.every(({ type }) => type === 'OVERRIDE_DEFER')) return dispositions[0];
+    return null;
+  }
+
+  sameFeedComponents(feed, candidates) {
+    const profiles = candidates.map((candidate) => this.candidateProfile(feed, candidate));
+    const parent = profiles.map((_, index) => index);
+    const find = (index) => parent[index] === index ? index : (parent[index] = find(parent[index]));
+    const join = (left, right) => { left = find(left); right = find(right); if (left !== right) parent[right] = left; };
+    const edges = [];
+    for (let left = 0; left < profiles.length; left += 1) for (let right = left + 1; right < profiles.length; right += 1) {
+      const evidence = dibaEvidence(profiles[left], profiles[right]) || dibaEvidence(profiles[right], profiles[left]);
+      if (evidence) { join(left, right); edges.push({ left, right, evidence }); }
+    }
+    const groups = new Map();
+    profiles.forEach((profile, index) => { const root = find(index); const group = groups.get(root) || []; group.push(profile); groups.set(root, group); });
+    return [...groups.entries()].filter(([, members]) => members.length > 1).map(([root, members]) => ({
+      members,
+      evidence: edges.filter(({ left, right }) => find(left) === root && find(right) === root).map(({ evidence }) => evidence),
+    }));
+  }
+
+  datasetSafetyPlan(feed, candidates, bounds, virtualPlans = new Map()) {
+    const source = this.sourceByKey.get(feed.sourceKey);
+    const blockers = [];
+    const entries = [];
+    const topology = [];
+    const effectiveVirtualPlans = [...virtualPlans.values()];
+    const planSnapshot = (plan) => plan ? ({
+      id: String(plan.id), original_title: plan.original_title, start_date: plan.start_date, end_date: plan.end_date,
+      municipality: plan.municipality, venue_name: plan.venue_name, address: plan.address,
+      latitude: plan.latitude, longitude: plan.longitude, status: plan.status,
+      sourceLinks: (plan.sourceLinks || []).map(({ sourceId, sourceKey, sourceRecordId: id, sourceUrl, enabled }) => ({ sourceId, sourceKey, sourceRecordId: id, sourceUrl, enabled })),
+    }) : null;
+    for (const candidate of candidates) {
+      const sourceRecordId = String(candidate.sourceRecordId);
+      const existingSource = source ? this.findExistingSource.get(source.id, sourceRecordId) : null;
+      const existingPlan = existingSource ? this.overlayPlan(existingSource.plan_id) : null;
+      const shadowedPlanIds = new Set(effectiveVirtualPlans.filter(({ overlayOrigin }) => overlayOrigin !== 'new').map(({ id }) => String(id)));
+      const databaseCandidates = this.matcher.dibaCandidates(candidate.plan)
+        .filter(({ id }) => String(id) !== String(existingSource?.plan_id) && !shadowedPlanIds.has(String(id)));
+      const compatibleVirtualPlans = effectiveVirtualPlans.filter((virtual) => (
+        String(virtual.id) !== String(existingSource?.plan_id)
+        && String(virtual.municipality || '').toLocaleLowerCase('ca') === String(candidate.plan.municipality || '').toLocaleLowerCase('ca')
+        && (virtual.end_date || virtual.start_date) >= candidate.plan.start_date
+        && virtual.start_date <= (candidate.plan.end_date || candidate.plan.start_date)
+      ));
+      const analysis = this.matcher.analyzeDibaCandidates(candidate.plan, [...databaseCandidates, ...compatibleVirtualPlans], { sourceUrl: candidate.sourceUrl });
+      const confirmedPlanIds = [...new Set(analysis.confirmedCandidates.map(({ id }) => String(id)))].sort();
+      const possiblePlanIds = [...new Set(analysis.possible.map(({ id }) => String(id)))].sort();
+      const disposition = this.reviewedDisposition(feed.sourceKey, sourceRecordId);
+      let targetPlanId = null;
+      let reviewedTarget = null;
+      let suppressPublication = disposition?.type === 'FINAL_DEFER' || disposition?.type === 'OVERRIDE_DEFER';
+      if (disposition?.type === 'OVERRIDE_LINK_TO_EXISTING') {
+        const target = this.resolveReviewedTarget(disposition.decision.target);
+        if (!target) blockers.push({ code: 'REVIEWED_TARGET_NOT_RESOLVED', sourceRecordIds: [sourceRecordId], target: disposition.decision.target });
+        else {
+          reviewedTarget = target;
+          targetPlanId = target.planId;
+          if (target.enabled !== 1 || target.sourceKey.startsWith('diba-')) blockers.push({ code: 'REVIEWED_TARGET_NOT_ENABLED_PUBLIC_SOURCE', sourceRecordIds: [sourceRecordId], target: disposition.decision.target });
+          const unexpected = [...confirmedPlanIds, ...possiblePlanIds].filter((planId) => planId !== String(target.planId));
+          if (unexpected.length) blockers.push({ code: 'REVIEWED_COMPONENT_TOPOLOGY_CHANGED', sourceRecordIds: [sourceRecordId], unexpectedPlanIds: [...new Set(unexpected)].sort() });
+          if (existingSource && existingSource.plan_id !== target.planId) blockers.push({ code: 'REVIEWED_SOURCE_LINK_CHANGED', sourceRecordIds: [sourceRecordId], expectedPlanId: target.planId, actualPlanId: existingSource.plan_id });
+        }
+      } else if (disposition?.type === 'FINAL_CONSOLIDATE_TO_ONE_PLAN') {
+        const target = this.resolveReviewedTarget(disposition.decision.canonicalSourceIdentity);
+        if (!target) blockers.push({ code: 'REVIEWED_TARGET_NOT_RESOLVED', sourceRecordIds: [sourceRecordId], target: disposition.decision.canonicalSourceIdentity });
+        else {
+          reviewedTarget = target;
+          targetPlanId = target.planId;
+          if (existingSource && existingSource.plan_id !== target.planId) blockers.push({
+            code: 'REVIEWED_FINAL_SOURCE_LINK_CHANGED', sourceRecordIds: [sourceRecordId],
+            canonicalSourceIdentity: disposition.decision.canonicalSourceIdentity,
+            expectedPlanId: target.planId, actualPlanId: existingSource.plan_id,
+          });
+        }
+      } else if (suppressPublication || disposition?.type === 'OVERRIDE_KEEP_SEPARATE') {
+        targetPlanId = existingSource?.plan_id ?? null;
+      } else {
+        if (possiblePlanIds.length) blockers.push({ code: 'UNRESOLVED_CROSS_SOURCE_POSSIBLE', sourceRecordIds: [sourceRecordId], candidatePlanIds: possiblePlanIds });
+        if (confirmedPlanIds.length > 1) blockers.push({ code: 'UNRESOLVED_MULTIPLE_CONFIRMED_TARGETS', sourceRecordIds: [sourceRecordId], candidatePlanIds: confirmedPlanIds });
+        if (confirmedPlanIds.length === 1) {
+          const target = analysis.confirmedCandidates.find(({ id }) => String(id) === confirmedPlanIds[0]);
+          if (this.planContainsDeferredIdentity(target)) blockers.push({ code: 'UNKNOWN_IDENTITY_MATCHES_REVIEWED_DEFER', sourceRecordIds: [sourceRecordId], candidatePlanIds: confirmedPlanIds });
+          else targetPlanId = target.id;
+        }
+      }
+      const existingHasOtherEnabledSource = Boolean(existingPlan?.sourceLinks.some(({ sourceId, enabled }) => sourceId !== source?.id && enabled === 1));
+      entries.push({ sourceRecordId, existingPlanId: existingSource?.plan_id ?? null, existingHasOtherEnabledSource, targetPlanId, suppressPublication, disposition: disposition?.type || 'UNREVIEWED', reviewedTarget, confirmedPlanIds, possiblePlanIds });
+      topology.push({
+        sourceRecordId, existingSource: existingSource || null, existingPlan: planSnapshot(existingPlan),
+        candidates: [...databaseCandidates, ...compatibleVirtualPlans].map(planSnapshot).sort((left, right) => left.id.localeCompare(right.id)),
+      });
+    }
+    const sameFeed = this.sameFeedComponents(feed, candidates);
+    for (const component of sameFeed) {
+      const reviewed = this.reviewedSameFeedComponent(component.members);
+      if (!reviewed) blockers.push({
+        code: 'UNRESOLVED_SAME_FEED_COMPONENT',
+        sourceRecordIds: component.members.map(({ sourceRecordId }) => sourceRecordId).sort(),
+        dispositions: component.members.map(({ sourceRecordId }) => this.reviewedDisposition(feed.sourceKey, sourceRecordId)?.type || 'UNREVIEWED'),
+      });
+    }
+    const removalRows = source ? this.reconciliation.candidates(source.id, bounds.today, bounds.horizonEnd)
+      .map(({ source_link_id: sourceLinkId, source_record_id: sourceRecordId, plan_id: planId }) => ({ sourceLinkId, sourceRecordId: String(sourceRecordId), planId }))
+      .sort((left, right) => left.sourceRecordId.localeCompare(right.sourceRecordId)) : [];
+    const state = { source: source ? { id: source.id, key: source.key, enabled: source.enabled, allows_images: source.allows_images } : null, entries, topology, removalRows };
+    return { entries, entriesById: new Map(entries.map((entry) => [entry.sourceRecordId, entry])), blockers, sameFeed, removalRows, authorization: canonicalJson(state) };
   }
 
   overlayPlan(planId) {
@@ -235,7 +404,9 @@ export class DibaImporter {
     const virtualPlans = new Map();
     for (const feed of feeds) {
       try { results.push(await this.runFeed(feed, bounds, { dryRun, virtualPlans, allowMassRemoval })); }
-      catch (error) { results.push({ dataset: feed.dataset, sourceKey: feed.sourceKey, failed: true, error: error.message, dryRun }); }
+      catch (error) {
+        results.push({ ...(error.summary || { dataset: feed.dataset, sourceKey: feed.sourceKey, dryRun }), failed: true, failureCode: error.code || 'DIBA_DATASET_FAILED', error: error.message });
+      }
     }
     const failures = results.filter(({ failed }) => failed);
     if (failures.length) {
@@ -266,32 +437,6 @@ export class DibaImporter {
       },
       evidence: detail.evidence,
     };
-  }
-
-  sameFeedPotentialDuplicates(feed, candidates) {
-    const pairs = [];
-    const records = new Set();
-    for (let left = 0; left < candidates.length; left += 1) {
-      for (let right = left + 1; right < candidates.length; right += 1) {
-        const first = candidates[left]; const second = candidates[right];
-        if (String(first.plan.municipality || '').toLocaleLowerCase('ca') !== String(second.plan.municipality || '').toLocaleLowerCase('ca')) continue;
-        if ((first.plan.end_date || first.plan.start_date) < second.plan.start_date || first.plan.start_date > (second.plan.end_date || second.plan.start_date)) continue;
-        const virtual = { ...first.plan, id: `same-feed:${first.sourceRecordId}`, sourceUrls: [first.sourceUrl].filter(Boolean) };
-        const match = this.matcher.matchDibaCandidates(second.plan, [virtual], { sourceUrl: second.sourceUrl });
-        if (!match.confirmed) continue;
-        records.add(first.sourceRecordId); records.add(second.sourceRecordId);
-        pairs.push({
-          dataset: feed.dataset, classification: 'NEEDS REVIEW', intervalRelation: first.plan.start_date === second.plan.start_date && first.plan.end_date === second.plan.end_date ? 'identical' : 'overlapping',
-          records: [first, second].map((candidate) => ({
-            acteId: candidate.sourceRecordId, title: candidate.item?.title || candidate.plan.original_title,
-            normalizedTitle: normalizeForFingerprint(candidate.item?.title || candidate.plan.original_title, { removeArticles: true }),
-            municipality: candidate.plan.municipality, start: candidate.plan.start_date, end: candidate.plan.end_date,
-            venue: candidate.plan.venue_name, address: candidate.plan.address, coordinates: candidate.item?.coordinates || null, url: candidate.sourceUrl,
-          })), evidence: match.confirmedEvidence,
-        });
-      }
-    }
-    return { records: records.size, pairs };
   }
 
   async runFeed(feed, bounds, { dryRun, virtualPlans, allowMassRemoval }) {
@@ -365,10 +510,29 @@ export class DibaImporter {
         throw new Error(`DIBA ${feed.dataset} desired-set guard rejected removal ${summary.plannedRemovals}/${existingIds.size}.`);
       }
 
+      const safety = this.datasetSafetyPlan(feed, candidates, bounds, dryRun ? virtualPlans : new Map());
+      summary.sameFeedPotentialDuplicateRecords = new Set(safety.sameFeed.flatMap(({ members }) => members.map(({ sourceRecordId }) => sourceRecordId))).size;
+      summary.sameFeedPotentialDuplicateClusters = safety.sameFeed.map(({ members, evidence }) => ({
+        dataset: feed.dataset, classification: 'NEEDS REVIEW',
+        sourceRecordIds: members.map(({ sourceRecordId }) => sourceRecordId).sort(),
+        records: members, evidence: evidence[0] || null, componentEvidence: evidence,
+      }));
+      summary.safety = {
+        status: safety.blockers.length ? (dryRun ? 'would-reject' : 'rejected') : 'approved',
+        code: safety.blockers.length ? 'UNRESOLVED_DIBA_AMBIGUITY' : null,
+        blockers: safety.blockers,
+      };
+      if (safety.blockers.length && !dryRun) {
+        const error = new Error(`DIBA ${feed.dataset} recurring safety guard rejected ${safety.blockers.length} unresolved ambiguity component(s).`);
+        error.code = 'UNRESOLVED_DIBA_AMBIGUITY';
+        throw error;
+      }
+
       const stagedVirtualPlans = new Map();
       const virtualPlanForId = (id) => virtualPlans.get(String(id));
 
       for (const candidate of candidates) {
+        const safetyEntry = safety.entriesById.get(String(candidate.sourceRecordId));
         const existingSource = source ? this.findExistingSource.get(source.id, candidate.sourceRecordId) : null;
         const effectiveVirtualPlans = [...virtualPlans.values()];
         const shadowedPlanIds = new Set(effectiveVirtualPlans.filter(({ overlayOrigin }) => overlayOrigin !== 'new').map(({ id }) => String(id)));
@@ -379,6 +543,11 @@ export class DibaImporter {
           && virtual.start_date <= (candidate.plan.end_date || candidate.plan.start_date)
         )) : [];
         const match = this.matcher.matchDibaCandidates(candidate.plan, [...databaseCandidates, ...compatibleVirtualPlans], { sourceUrl: candidate.sourceUrl });
+        const reviewedTarget = safetyEntry?.targetPlanId == null ? null
+          : [...databaseCandidates, ...compatibleVirtualPlans].find(({ id }) => String(id) === String(safetyEntry.targetPlanId))
+            || this.overlayPlan(safetyEntry.targetPlanId);
+        if (safetyEntry?.suppressPublication) match.confirmed = null;
+        else if (reviewedTarget) match.confirmed = reviewedTarget;
         if (match.possible.length) {
           summary.ambiguous += 1;
           summary.ambiguousDetails.push(...match.possibleDetails.map((detail) => this.ambiguousDetail(feed, candidate, detail)));
@@ -411,15 +580,15 @@ export class DibaImporter {
         }
         if (existingSource) { summary.existingSourceRecordUpdates += 1; summary.updatesOfExistingSameSourceRecord += 1; }
         else summary.newSourceRecordInserts += 1;
-        candidate.targetPlanId = match.confirmed?.id;
-        candidate.preserveExistingPlan = Boolean(match.confirmed);
+        candidate.targetPlanId = safetyEntry?.targetPlanId ?? match.confirmed?.id;
+        candidate.preserveExistingPlan = Boolean(match.confirmed) || Boolean(safetyEntry?.existingHasOtherEnabledSource);
         const targetPlanId = existingSource?.plan_id || candidate.targetPlanId;
         const targetHasEnabledSource = match.confirmed?.virtual
           ? Boolean(match.confirmed.enabledSourceKeys?.length)
           : targetPlanId && Boolean(this.planHasEnabledSource.get(targetPlanId));
         candidate.provenanceOnly = source.enabled === 0 && targetPlanId && targetHasEnabledSource;
         candidate.refreshCanonical = source.enabled === 1 && Boolean(existingSource);
-        candidate.deferPublication = this.finalDeferredKeys.has(stableKey({ sourceKey: source.key, sourceRecordId: candidate.sourceRecordId }));
+        candidate.deferPublication = Boolean(safetyEntry?.suppressPublication);
         if (candidate.deferPublication) {
           candidate.plan.status = 'inactive';
           candidate.preserveExistingPlan = true;
@@ -439,11 +608,6 @@ export class DibaImporter {
         }
         if (!existingSource && !match.confirmed) summary.uniqueNewPublicPlans += 1;
       }
-      if (dryRun) {
-        const sameFeed = this.sameFeedPotentialDuplicates(feed, candidates);
-        summary.sameFeedPotentialDuplicateRecords = sameFeed.records;
-        summary.sameFeedPotentialDuplicateClusters = sameFeed.pairs;
-      }
       summary.ambiguousRecords = summary.ambiguous;
       summary.linksToPreExistingPlans = summary.linksToExistingPlans;
       summary.primaryDisposition = {
@@ -462,13 +626,20 @@ export class DibaImporter {
         // plans only after every record in this feed has been matched. A plan
         // has one effective representation: the latest feed replaces any
         // previous virtual state while retaining its stable plan identity.
-        for (const [planId, plan] of stagedVirtualPlans) virtualPlans.set(planId, plan);
+        if (!safety.blockers.length) for (const [planId, plan] of stagedVirtualPlans) virtualPlans.set(planId, plan);
         return summary;
       }
 
       const startedAt = this.now().toISOString();
       this.beforePersist?.({ feed, summary, candidates });
       this.db.transaction(() => {
+        const lockedSafety = this.datasetSafetyPlan(feed, candidates, bounds);
+        if (lockedSafety.blockers.length || lockedSafety.authorization !== safety.authorization) {
+          summary.safety = { status: 'rejected', code: 'DIBA_STALE_DATASET_AUTHORIZATION', blockers: lockedSafety.blockers };
+          const error = new Error(`DIBA ${feed.dataset} database-dependent safety authorization changed before persistence.`);
+          error.code = 'DIBA_STALE_DATASET_AUTHORIZATION';
+          throw error;
+        }
         this.insideTransaction?.({ feed, summary, candidates });
         for (const candidate of candidates) {
           const outcome = this.plans.persist({ ...candidate, sourceId: source.id });
@@ -476,7 +647,7 @@ export class DibaImporter {
         }
         const removed = this.reconciliation.reconcile(source.id, seenIds, bounds.today, bounds.horizonEnd, { removedAt: startedAt, preservePlanStatus: source.enabled === 0 });
         summary.removed = removed.length;
-      })();
+      }).immediate();
       summary.catalogCommitted = true;
       const integrity = this.postCommitCheck({ feed, summary });
       if (integrity !== 'ok') throw new Error(`SQLite integrity_check failed after ${feed.dataset}: ${integrity}`);
@@ -491,6 +662,7 @@ export class DibaImporter {
         .run(this.now().toISOString(), summary.fetched, summary.catalogCommitted ? summary.inserted : 0,
           summary.catalogCommitted ? summary.updated : 0, summary.historical + summary.outside_horizon + summary.undated + summary.unchanged,
           summary.invalid, String(error.message).slice(0, 500), JSON.stringify(summary), runId);
+      error.summary = summary;
       throw error;
     }
   }

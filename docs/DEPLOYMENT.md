@@ -121,6 +121,18 @@ PATH=/root/.nvm/versions/node/v24.18.0/bin:/usr/local/sbin:/usr/local/bin:/usr/s
 
 Se ejecuta cada dos horas, en el minuto 17, usa Node/npm instalado mediante NVM y guarda stdout y stderr en `/var/log/quefem-import.log`.
 
+## Sincronización recurrente de DIBA
+
+El repositorio prepara `npm run diba:import:scheduled` para los tres feeds DIBA. Usa el mismo importador y lock que el comando manual real, rechaza argumentos, fija `allowMassRemoval=false`, escribe un resumen JSON en stdout, informa fallos por stderr y devuelve código distinto de cero si falla cualquier dataset. La ambigüedad nueva o una autorización que quede obsoleta antes de escribir revierte el dataset afectado.
+
+No hay cron DIBA instalado por este cambio. Cuando se autorice por separado, el horario recomendado es diario a las 05:45, después del backup aproximado de las 05:10 y fuera del minuto 17 usado por Gencat:
+
+```cron
+45 5 * * * cd /var/www/queFem && npm run diba:import:scheduled >> /var/log/quefem-diba.log 2>&1
+```
+
+El job programado nunca debe usar `npm run diba:import -- --allow-mass-removal`. Una retirada superior al 50 % requiere revisión y una ejecución manual explícita. Antes de instalar el cron hay que desplegar y verificar esta versión, confirmar el backup reciente y revisar una ejecución controlada del entrypoint programado.
+
 Para comprobar o editar la configuración y consultar los últimos logs:
 
 ```bash

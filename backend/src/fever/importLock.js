@@ -34,6 +34,7 @@ function startedRecently(owner, now, graceMs) {
 
 export class FeverImportLock {
   constructor(databasePath, {
+    lockName = 'fever-import',
     malformedLockGraceMs = 5000,
     legacyOwnerGraceMs = 7200000,
     processExistsImpl = processExists,
@@ -44,7 +45,7 @@ export class FeverImportLock {
     cleanupRetryAttempts = 4,
     cleanupRetryDelayMs = 20,
   } = {}) {
-    this.directory = `${path.resolve(databasePath)}.fever-import.lock`;
+    this.directory = `${path.resolve(databasePath)}.${lockName}.lock`;
     this.ownerFile = path.join(this.directory, 'owner.json');
     this.token = randomUUID();
     this.malformedLockGraceMs = malformedLockGraceMs;

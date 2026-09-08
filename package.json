@@ -16,6 +16,7 @@
     "fever:discovery:dry-run": "node backend/src/jobs/dryRunFeverDiscovery.js",
     "diba:discovery": "node scripts/dibaDiscovery.js",
     "diba:import": "node backend/src/jobs/importDiba.js",
+    "diba:import:scheduled": "node backend/src/jobs/importDibaScheduled.js",
     "diba:quality:audit": "node scripts/dibaQualityAudit.js",
     "diba:policy:dry-run": "node scripts/dibaPolicyDryRun.js",
     "diba:policy:apply": "node scripts/dibaPolicyApply.js",

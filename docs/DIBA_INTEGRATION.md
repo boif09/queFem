@@ -1,4 +1,4 @@
-# DIBA M1 — importación selectiva de Diputació de Barcelona
+# DIBA M1/M2 — importación selectiva de Diputació de Barcelona
 
 ## Alcance y atribución
 
@@ -8,7 +8,7 @@ Quedan fuera de M1 `actesbiblioteques_ca` (volumen y encaje editorial insuficien
 
 ## Arquitectura e identidad
 
-Hay tres fuentes operativas desactivadas por defecto: `diba-tourisme`, `diba-escenari` y `diba-museus`. Comparten editor y atribución, pero tienen una fila `sources`, `import_runs` y reconciliación separados. Es más seguro que una fuente única: una respuesta vacía o fallida de museos nunca puede retirar turismo ni Escenari. No se usa borrado por prefijos.
+Hay tres fuentes operativas: `diba-tourisme`, `diba-escenari` y `diba-museus`. Las tres están habilitadas en producción y mantienen `allows_images=0`. Comparten editor y atribución, pero tienen una fila `sources`, `import_runs` y reconciliación separados. Es más seguro que una fuente única: una respuesta vacía o fallida de museos nunca puede retirar turismo ni Escenari. No se usa borrado por prefijos.
 
 La identidad persistente es `source key + acte_id`; el fingerprint de un plan nuevo es `diba|dataset|acte_id`. Un mismo `acte_id` en dos datasets no colisiona.
 
@@ -38,11 +38,11 @@ Cada feed valida una snapshot no vacía y al menos un candidato válido antes de
 
 Los `import_runs` se crean antes de adquirir el feed (excepto en dry-run). El resumen registra `catalogCommitted`: un fallo previo a commit conserva contadores comprometidos a cero; un fallo posterior mantiene los contadores reales y deja claro que el catálogo sí cambió.
 
-El dry-run usa una superposición virtual en memoria, nunca SQLite, que replica los límites de transacción reales: todos los registros de Turismo se comparan contra SQLite y los feeds DIBA ya simulados; solo al terminar Turismo se publica su commit virtual. Escenari y Museos siguen el mismo patrón. Un registro no ve otros registros pendientes del mismo feed. En una repetición, cada `source_record` ya existente simula el plan y la procedencia efectivos que dejaría `PlanRepository`: no crea una identidad virtual adicional y cada identidad estable mantiene una sola representación visible, cuyo estado más reciente sustituye tanto SQLite como cualquier overlay anterior para los feeds posteriores. El canónico de un plan público se mantiene inerte cuando DIBA sigue desactivada y el overlay conserva la procedencia DIBA añadida a un plan inicialmente existente.
+El dry-run usa una superposición virtual en memoria, nunca SQLite, que replica los límites de transacción reales: todos los registros de Turismo se comparan contra SQLite y los feeds DIBA ya simulados; solo al terminar Turismo se publica su resultado virtual. Escenari y Museos siguen el mismo patrón. Antes de publicar ese resultado virtual se analiza también el componente completo de registros pendientes del propio feed. Un dataset con ambigüedad no revisada se marca `would-reject` y no se expone a feeds posteriores. En una repetición, cada `source_record` ya existente simula el plan y la procedencia efectivos que dejaría `PlanRepository`: no crea una identidad virtual adicional y cada identidad estable mantiene una sola representación visible, cuyo estado más reciente sustituye tanto SQLite como cualquier overlay anterior para los feeds posteriores.
 
-Por ello distingue `rawRecords`, `eligibleSourceRecords`, `updatesOfExistingSameSourceRecord`, `linksToPreExistingPlans`, `linksToEarlierDibaPlans` y `uniqueNewPublicPlans`. En una primera importación, `eligible = linksToPreExistingPlans + linksToEarlierDibaPlans + uniqueNewPublicPlans`; en ejecuciones posteriores se añade `updatesOfExistingSameSourceRecord`. Los ambiguos son diagnósticos ortogonales y no entran en la disposición primaria.
+Por ello distingue `rawRecords`, `eligibleSourceRecords`, `updatesOfExistingSameSourceRecord`, `linksToPreExistingPlans`, `linksToEarlierDibaPlans` y `uniqueNewPublicPlans`. En una primera importación, `eligible = linksToPreExistingPlans + linksToEarlierDibaPlans + uniqueNewPublicPlans`; en ejecuciones posteriores se añade `updatesOfExistingSameSourceRecord`. Los ambiguos se detallan por separado y, si no tienen una disposición humana estable, bloquean el dataset antes de persistir.
 
-`sameFeedPotentialDuplicateClusters` identifica pares del mismo dataset que cumplirían la evidencia de match si uno ya fuese un plan. Son siempre `NEEDS REVIEW`: no alteran identidad, persistencia, reconciliación ni la disposición primaria.
+`sameFeedPotentialDuplicateClusters` identifica componentes del mismo dataset que cumplen la evidencia de match si uno ya fuese un plan. Un componente nuevo o incompletamente revisado bloquea todo el dataset antes de persistir. Los componentes cubiertos por las decisiones finales versionadas conservan su consolidación o supresión aprobada.
 
 Mientras una fuente DIBA permanezca desactivada, un match con un plan respaldado por una fuente habilitada es estrictamente de procedencia: no cambia campos canónicos, categorías, estado, ranking, imagen ni comercio. Al retirar esa procedencia se conserva el estado de un plan compartido; si no queda ninguna procedencia, el plan se inactiva para evitar huérfanos activos. Al habilitarla tras aprobación y ejecutar otra importación, la normalización ya puede enriquecer esos campos según las reglas ordinarias.
 
@@ -60,7 +60,22 @@ npm run diba:import
 npm run diba:import -- --allow-mass-removal
 ```
 
-Las fuentes siguen `enabled=0`. La activación futura exige revisión, dry-run local, importación local auditada, backup y dry-run de producción, seguidos de aprobación explícita. M1 no instala cron, no despliega ni activa fuentes públicas.
+La importación inicial, la revisión humana, la reconciliación y la activación M1 ya están completadas en producción. Las tres fuentes están `enabled=1` y `allows_images=0`. Las imágenes DIBA continúan deshabilitadas.
+
+## Seguridad recurrente M2
+
+Antes de cualquier mutación, cada dataset calcula una autorización determinista sobre identidades entrantes, enlaces y destinos existentes, topología completa de candidatos confirmados y posibles, componentes pendientes del mismo feed, decisiones humanas versionadas y conjunto de retiradas. Un `POSSIBLE`, un componente same-feed no revisado, múltiples destinos confirmados o una identidad desconocida que coincida con un plan `DEFER` produce `UNRESOLVED_DIBA_AMBIGUITY`; el `import_run` queda fallido con el detalle estructurado y ese dataset no cambia el catálogo.
+
+La autorización se recalcula como primera operación bajo `BEGIN IMMEDIATE`. Si cambian enlaces, candidatos, fuente, destinos revisados o retiradas entre preflight y persistencia, se devuelve `DIBA_STALE_DATASET_AUTHORIZATION` y se revierte el dataset. Las decisiones estables `LINK_TO_EXISTING`, las consolidaciones finales y los `DEFER` conocidos siguen aplicándose por identidad `source key + source_record_id`; un `DEFER` siempre mantiene el plan inactivo.
+
+Todos los imports reales, manuales o programados, comparten el lock `<database>.diba-import.lock`. Una segunda ejecución real falla antes de abrir o importar la base; el dry-run no toma el lock y conserva el modo de solo lectura. El límite de retiradas sigue siendo exacto: más del 50 % requiere el flag manual `--allow-mass-removal` y el comando programado no acepta argumentos ni expone ese bypass.
+
+```bash
+# Entrada recurrente: mismo importador y lock, salida JSON en stdout y fallos en stderr.
+npm run diba:import:scheduled
+```
+
+M2 prepara el comando, pero no instala cron ni ejecuta importaciones de producción.
 
 ## Auditoría preactivación M1.4A
 
