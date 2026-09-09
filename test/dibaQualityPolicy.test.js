@@ -128,8 +128,8 @@ test('reviewed links are component-complete and constrained to a candidate enabl
   const accepted = plan([reviewed(a, publicTarget), reviewed(b, publicTarget)]);
   assert.equal(accepted.crossSource.possible[0].reviewedDecision, 'LINK_TO_EXISTING'); assert.equal(accepted.mutationPlan.phases.finalSourceMappings.length, 2);
   assert.equal(plan([reviewed(a, unrelated), reviewed(b, unrelated)]).crossSource.possible[0].review.reason, 'reviewed link target is outside this conflict component');
-  assert.equal(plan([reviewed(a, disabled), reviewed(b, disabled)]).crossSource.possible[0].review.reason, 'reviewed link target is not an enabled non-DIBA public source');
-  assert.equal(plan([reviewed(a, dibaTarget), reviewed(b, dibaTarget)]).crossSource.possible[0].review.reason, 'reviewed link target is not an enabled non-DIBA public source');
+  assert.equal(plan([reviewed(a, disabled), reviewed(b, disabled)]).crossSource.possible[0].review.reason, 'reviewed link target is not an enabled canonical source');
+  assert.equal(plan([reviewed(a, dibaTarget), reviewed(b, dibaTarget)]).crossSource.possible[0].review.reason, 'reviewed link target is not an enabled canonical source');
   const secondPublic = entry('gencat-agenda', 'p2', 11, 1); const conflicting = planDibaPolicy({ auditReport: componentAudit({ diba: [a, b], candidates: [publicTarget, secondPublic] }), identityIndex: indexOf([a, b, publicTarget, secondPublic]), overrides: { version: 1, decisions: [reviewed(a, publicTarget), reviewed(b, secondPublic)] } });
   assert.equal(conflicting.crossSource.possible[0].review.reason, 'reviewed links do not share one approved public canonical target');
   assert.equal(plan([]).crossSource.possible[0].activationBlocker, true);
