@@ -291,7 +291,7 @@ export class DibaImporter {
         else {
           reviewedTarget = target;
           targetPlanId = target.planId;
-          if (target.enabled !== 1 || target.sourceKey.startsWith('diba-')) blockers.push({ code: 'REVIEWED_TARGET_NOT_ENABLED_PUBLIC_SOURCE', sourceRecordIds: [sourceRecordId], target: disposition.decision.target });
+          if (target.enabled !== 1) blockers.push({ code: 'REVIEWED_TARGET_NOT_ENABLED_PUBLIC_SOURCE', sourceRecordIds: [sourceRecordId], target: disposition.decision.target });
           const unexpected = [...confirmedPlanIds, ...possiblePlanIds].filter((planId) => planId !== String(target.planId));
           if (unexpected.length) blockers.push({ code: 'REVIEWED_COMPONENT_TOPOLOGY_CHANGED', sourceRecordIds: [sourceRecordId], unexpectedPlanIds: [...new Set(unexpected)].sort() });
           if (existingSource && existingSource.plan_id !== target.planId) blockers.push({ code: 'REVIEWED_SOURCE_LINK_CHANGED', sourceRecordIds: [sourceRecordId], expectedPlanId: target.planId, actualPlanId: existingSource.plan_id });

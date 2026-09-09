@@ -93,7 +93,7 @@ function state(db, inputs, databasePath, includeFinal = false) {
 }
 async function loadInputs({ overridePath, decisionPath, manifestPath = DEFAULT_ICGC_MANIFEST_PATH }) {
   const overrides = await loadDibaPolicyOverrides(overridePath); const decisions = loadFinalReviewDecisions(decisionPath);
-  if (overrides.decisions.length !== 37 || decisions.decisions.length !== 5) throw new Error('DIBA production review decision inventory is not exact.');
+  if (overrides.decisions.length !== 38 || decisions.decisions.length !== 5) throw new Error('DIBA production review decision inventory is not exact.');
   const snapshot = await readAndVerifyIcgcSnapshot(manifestPath);
   return { overrides, decisions, municipalityReferences: municipalityReferencesFromSnapshot(snapshot.snapshot), decisionFilesFingerprint: fingerprint({ overrides: overrides.decisions, final: decisions.decisions }) };
 }

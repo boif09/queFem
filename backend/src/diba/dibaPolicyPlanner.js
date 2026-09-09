@@ -61,7 +61,7 @@ function reviewedComponentDisposition(component, findings, overrides) {
   const decision = reviewed[0].decision;
   if (decision !== 'LINK_TO_EXISTING') return { complete: true, decision, sources, reviewed };
   const targets = reviewed.map(({ targetEntry }) => targetEntry);
-  if (targets.some((target) => !target || target.enabled !== 1 || isDiba(target))) return { complete: false, decision: null, sources, reason: 'reviewed link target is not an enabled non-DIBA public source' };
+  if (targets.some((target) => !target || target.enabled !== 1)) return { complete: false, decision: null, sources, reason: 'reviewed link target is not an enabled canonical source' };
   const planIds = new Set(targets.map(({ planId }) => planId));
   if (planIds.size !== 1) return { complete: false, decision: null, sources, reason: 'reviewed links do not share one approved public canonical target' };
   const target = targets[0];

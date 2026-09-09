@@ -12,7 +12,7 @@ import { prepareFinalReviewPlanForDatabase } from '../backend/src/diba/dibaFinal
 import { DEFAULT_ICGC_MANIFEST_PATH } from '../backend/src/jobs/updateIcgcGeography.js';
 import { sha256File } from '../backend/src/diba/dibaPolicyExecutor.js';
 
-function fixture(overrideCount = 37) {
+function fixture(overrideCount = 38) {
   const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tenspla-diba-production-')); const data = path.join(projectRoot, 'data'); const policy = path.join(projectRoot, 'data-policy');
   fs.mkdirSync(data); fs.mkdirSync(policy); const databasePath = path.join(data, 'quefem.sqlite'); const overridePath = path.join(policy, 'overrides.json'); const decisionPath = path.join(policy, 'final.json');
   const db = openDatabase(databasePath); migrate(db); const now = '2026-09-04T12:00:00Z';
@@ -78,10 +78,10 @@ test('production authorization rejects missing/wrong tokens and stale database o
   } finally { fs.rmSync(item.projectRoot, { recursive: true, force: true }); }
 });
 
-test('production preview and authorized reconciliation accept exactly 37 reviewed overrides and keep DIBA disabled', async () => {
+test('production preview and authorized reconciliation accept exactly 38 reviewed overrides and keep DIBA disabled', async () => {
   const item = fixture();
   try {
-    assert.equal(JSON.parse(fs.readFileSync(item.overridePath, 'utf8')).decisions.length, 37);
+    assert.equal(JSON.parse(fs.readFileSync(item.overridePath, 'utf8')).decisions.length, 38);
     const preview = await prepareProductionPreview({ ...options(item), temporaryDirectory: item.projectRoot }); const before = sha256File(item.databasePath);
     const report = await applyProductionReconciliation({ ...options(item), backupPath: item.backupPath, authorization: preview.authorization });
     assert.equal(report.authorizationConsumed, preview.authorization); assert.equal(report.publicActivationReady, false); assert.ok(fs.existsSync(item.backupPath)); assert.notEqual(sha256File(item.databasePath), before);
@@ -91,7 +91,7 @@ test('production preview and authorized reconciliation accept exactly 37 reviewe
   } finally { fs.rmSync(item.projectRoot, { recursive: true, force: true }); }
 });
 
-for (const count of [34, 36, 38]) {
+for (const count of [34, 36, 37, 39]) {
   test(`production preview, apply and final review reject ${count} reviewed overrides without database changes`, async () => {
     const item = fixture(count);
     try {
@@ -99,7 +99,7 @@ for (const count of [34, 36, 38]) {
       await assert.rejects(prepareProductionPreview({ ...options(item), temporaryDirectory: item.projectRoot }), /DIBA production review decision inventory is not exact/);
       await assert.rejects(applyProductionReconciliation({ ...options(item), backupPath: item.backupPath, authorization: 'unexpected-inventory' }), /DIBA production review decision inventory is not exact/);
       const overrides = JSON.parse(fs.readFileSync(item.overridePath, 'utf8'));
-      assert.throws(() => prepareFinalReviewPlanForDatabase({ overrides }), new RegExp(`Final DIBA review requires exactly 37 existing cross-source overrides; found ${count}\\.`));
+      assert.throws(() => prepareFinalReviewPlanForDatabase({ overrides }), new RegExp(`Final DIBA review requires exactly 38 existing cross-source overrides; found ${count}\\.`));
       assert.equal(sha256File(item.databasePath), before);
       assert.equal(fs.existsSync(item.backupPath), false);
     } finally { fs.rmSync(item.projectRoot, { recursive: true, force: true }); }

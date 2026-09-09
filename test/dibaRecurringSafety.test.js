@@ -356,6 +356,56 @@ test('a reviewed LINK_TO_EXISTING permits a weak match and links the exact stabl
   });
 });
 
+test('a reviewed Museums identity may link to its enabled Tourism canonical plan', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const tourism = DIBA_FEEDS[0]; const museums = DIBA_FEEDS[2];
+    const tourismRecordId = 'agendaturisme444985488'; const museumsRecordId = 'actesmuseus3355625';
+    const title = "Visites guiades a l'Ermita de Sales";
+    const tourismPlanId = addPlan(db, {
+      fingerprint: 'ermita-sales-tourism', title, venue: 'Ermita de Sales', address: 'Pla de les Deodates s/n, Viladecans',
+      latitude: null, longitude: null, sourceKey: tourism.sourceKey, sourceRecordId: tourismRecordId,
+    });
+    db.prepare('UPDATE plan_sources SET source_url=? WHERE plan_id=?').run('https://diba.example/tourism-ermita-sales', tourismPlanId);
+    const decision = {
+      source: { sourceKey: museums.sourceKey, sourceRecordId: museumsRecordId }, decision: 'LINK_TO_EXISTING',
+      target: { sourceKey: tourism.sourceKey, sourceRecordId: tourismRecordId }, reason: 'reviewed', reviewedAt: '2026-09-08', reviewer: 'human-review',
+    };
+    const result = await importer(db, [raw(museumsRecordId, {
+      titol: title, grup_adreca: { adreca_nom: 'Museu de Viladecans', adreca: 'Plaça de la Vila', localitzacio: null },
+    })], { reviewedOverrides: { version: 1, decisions: [decision] } }).run({ feeds: [museums] });
+    assert.equal(result.datasets[0].safety.status, 'approved');
+    assert.equal(sourcePlan(db, museums.sourceKey, museumsRecordId).planId, tourismPlanId);
+  });
+});
+
+test('an adjacent Museums identity does not inherit the Ermita de Sales reviewed link', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const tourism = DIBA_FEEDS[0]; const museums = DIBA_FEEDS[2];
+    const tourismRecordId = 'agendaturisme444985488'; const reviewedRecordId = 'actesmuseus3355625'; const adjacentRecordId = 'actesmuseus3355625-adjacent';
+    const title = "Visites guiades a l'Ermita de Sales";
+    const tourismPlanId = addPlan(db, {
+      fingerprint: 'ermita-sales-tourism', title, venue: 'Ermita de Sales', address: 'Pla de les Deodates s/n, Viladecans',
+      latitude: null, longitude: null, sourceKey: tourism.sourceKey, sourceRecordId: tourismRecordId,
+    });
+    db.prepare('UPDATE plan_sources SET source_url=? WHERE plan_id=?').run('https://diba.example/tourism-ermita-sales', tourismPlanId);
+    const decision = {
+      source: { sourceKey: museums.sourceKey, sourceRecordId: reviewedRecordId }, decision: 'LINK_TO_EXISTING',
+      target: { sourceKey: tourism.sourceKey, sourceRecordId: tourismRecordId }, reason: 'reviewed', reviewedAt: '2026-09-08', reviewer: 'human-review',
+    };
+    let failure;
+    await assert.rejects(importer(db, [raw(adjacentRecordId, {
+      titol: title, grup_adreca: { adreca_nom: 'Museu de Viladecans', adreca: 'Plaça de la Vila', localitzacio: null },
+    })], { reviewedOverrides: { version: 1, decisions: [decision] } }).run({ feeds: [museums] }), (error) => {
+      failure = error;
+      return /recurring safety guard/.test(error.message);
+    });
+    assert.ok(failure.results[0].safety.blockers.some(({ code }) => code === 'UNRESOLVED_CROSS_SOURCE_POSSIBLE'));
+    assert.equal(sourcePlan(db, museums.sourceKey, adjacentRecordId), undefined);
+  });
+});
+
 test('known DEFER refresh stays inactive when DIBA is enabled', async () => {
   await withTestDatabase(async (db) => {
     enableDiba(db); const key = `${FEED.sourceKey}:known-defer`;

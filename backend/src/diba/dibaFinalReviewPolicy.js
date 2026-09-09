@@ -37,7 +37,7 @@ export function rawComponents(policy) {
 }
 
 export function prepareFinalReviewPlanForDatabase({ db, databasePath, overrides, decisions, auditReport }) {
-  if (overrides.decisions.length !== 37) throw new Error(`Final DIBA review requires exactly 37 existing cross-source overrides; found ${overrides.decisions.length}.`);
+  if (overrides.decisions.length !== 38) throw new Error(`Final DIBA review requires exactly 38 existing cross-source overrides; found ${overrides.decisions.length}.`);
   if (decisions.decisions.length !== 5) throw new Error(`Final DIBA review requires exactly five decisions; found ${decisions.decisions.length}.`);
     const states = dibaStates(db); const index = loadPolicyIdentityIndex(db); const policy = planDibaPolicy({ auditReport, overrides, identityIndex: index }); const raw = rawComponents(policy);
     const rawByKey = new Map(raw.map((item) => [item.key, item])); const decisionKeys = new Set(decisions.decisions.map(({ sourceMembers }) => componentKey(sourceMembers)));
