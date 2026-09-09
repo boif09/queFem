@@ -99,6 +99,10 @@ el mapeo editorial, la preparación de binarios y la política de procedencia es
 
 La búsqueda combina texto, fechas, provincia, comarca, municipio, categorías múltiples y gratuidad con aplicación inmediata; los filtros compartibles viven en la URL. El municipio usa un selector buscable con contexto territorial. El frontend guarda en `localStorage` la preferencia de idioma (`quefem.language`) y, tras acciones explícitas en los filtros, los niveles territoriales realmente seleccionados (`quefem.location`) para contextualizar la home; no usa GPS ni integra analítica o seguimiento. Los detalles y las decisiones de cobertura están en [`DISCOVERY_FILTERS_V2.md`](DISCOVERY_FILTERS_V2.md).
 
+Las landings editoriales `/avui` y `/cap-de-setmana` reutilizan `/api/plans`: la primera usa el día civil de `Europe/Madrid` y el filtro exacto `date`; la segunda calcula el viernes-domingo relevante en esa zona y usa `editorial=home-weekend`, que conserva el orden occurrence-aware y prioriza inicios dentro del intervalo frente a solapamientos largos. No existe un endpoint API específico para estas páginas.
+
+Express entrega metadata inicial determinista para `/`, `/plans`, `/plans/:id`, `/avui` y `/cap-de-setmana`. Las dos landings tienen canonical estable sin fecha y sus variantes con query son `noindex,follow` sin canonical.
+
 ## Tests, build y producción
 
 Los tests backend usan `node:test` y bases temporales; los frontend, Vitest, Testing Library y jsdom. Vite genera `frontend/dist`. Los comandos canónicos están en [`../README.md`](../README.md).

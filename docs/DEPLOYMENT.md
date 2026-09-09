@@ -113,6 +113,27 @@ location ^~ /plans/ {
 }
 ```
 
+P2.2 amplía la misma entrega determinista a las dos landings editoriales `/avui` y
+`/cap-de-setmana`. Sus URLs sin query son indexables y las variantes con query reciben
+`noindex,follow` sin canonical. El cambio de código no modifica Nginx. Cuando se autorice
+el despliegue, se requieren exactamente estas dos locations adicionales antes del fallback SPA:
+
+```nginx
+location = /avui {
+    proxy_pass http://127.0.0.1:3014;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+location = /cap-de-setmana {
+    proxy_pass http://127.0.0.1:3014;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
 Primero hay que compilar el frontend, confirmar que existe `frontend/dist/index.html`, inspeccionar la configuración efectiva de Nginx, ejecutar `nginx -t` y recargar Nginx sólo bajo autorización de producción separada.
 
 El dominio canónico de toda la metadata es `https://tenspla.cat`. Home, `/plans` sin parámetros, `/fonts` y las fichas públicas de eventos activos son indexables. Las búsquedas, filtros, páginas legales, privacidad, almacenamiento, contacto y rutas no encontradas utilizan `noindex,follow`. La metadata por ruta, Open Graph, Twitter/X y Event JSON-LD se generan localmente, sin analytics, cookies ni scripts externos.

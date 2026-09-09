@@ -47,9 +47,9 @@ describe('Pop Editorial home', () => {
     renderHome();
     await user.type(screen.getByRole('searchbox', { name: /Cerca esdeveniments/ }), 'weeknd{Enter}');
     expect(screen.getByText('/plans?q=weeknd')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Avui/ }).getAttribute('href')).toMatch(/^\/plans\?date=\d{4}-\d{2}-\d{2}$/);
+    expect(screen.getByRole('link', { name: /Avui/ })).toHaveAttribute('href', '/avui');
     expect(screen.getByRole('link', { name: /Demà/ }).getAttribute('href')).toMatch(/^\/plans\?date=\d{4}-\d{2}-\d{2}$/);
-    expect(screen.getAllByRole('link', { name: /Aquest cap de setmana/ })[0].getAttribute('href')).toMatch(/^\/plans\?dateFrom=\d{4}-\d{2}-\d{2}&dateTo=\d{4}-\d{2}-\d{2}$/);
+    expect(screen.getAllByRole('link', { name: /Aquest cap de setmana/ })[0]).toHaveAttribute('href', '/cap-de-setmana');
   });
 
   it('separates weekend, deduplicated upcoming and permanent plans', async () => {
@@ -74,7 +74,7 @@ describe('Pop Editorial home', () => {
     await waitFor(() => expect(api.getPlans).toHaveBeenCalledWith(expect.objectContaining({ comarca: 'Baix Empordà', municipality: 'Begur', permanent: false })));
     const categoryUrl = new URL((await screen.findByRole('link', { name: /Música/ })).getAttribute('href'), 'https://tenspla.cat');
     expect(Object.fromEntries(categoryUrl.searchParams)).toEqual(expect.objectContaining({ category: 'musica', comarca: 'Baix Empordà', municipality: 'Begur' }));
-    expect(screen.getByRole('link', { name: /Avui/ }).getAttribute('href')).toContain('comarca=Baix+Empord%C3%A0&municipality=Begur');
+    expect(screen.getByRole('link', { name: /Avui/ }).getAttribute('href')).toContain('/avui?comarca=Baix+Empord%C3%A0&municipality=Begur');
   });
 
   it('offers explicit location recovery for empty blocks and reloads Catalunya after removal', async () => {

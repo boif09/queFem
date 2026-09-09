@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout.jsx';
 import { FontsPage } from './pages/FontsPage.jsx';
+import { DiscoveryLandingPage } from './pages/DiscoveryLandingPage.jsx';
 import { HomePage } from './pages/HomePage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { PlanDetailPage } from './pages/PlanDetailPage.jsx';
@@ -12,6 +13,8 @@ export function AppRoutes() {
     <Routes>
         <Route element={<Layout />}>
           <Route index element={<HomePage />} />
+          <Route path="avui" element={<DiscoveryLandingPage type="today" />} />
+          <Route path="cap-de-setmana" element={<DiscoveryLandingPage type="weekend" />} />
           <Route path="plans" element={<PlansPage />} />
           <Route path="plans/:id" element={<PlanDetailPage />} />
           <Route path="fonts" element={<FontsPage />} />

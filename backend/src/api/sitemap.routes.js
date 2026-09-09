@@ -22,6 +22,8 @@ export function createSitemapRouter(repository) {
     const urls = [
       `${PUBLIC_ORIGIN}/`,
       `${PUBLIC_ORIGIN}/plans`,
+      `${PUBLIC_ORIGIN}/avui`,
+      `${PUBLIC_ORIGIN}/cap-de-setmana`,
       `${PUBLIC_ORIGIN}/fonts`,
       ...repository.findSitemapPlanIds().map((id) => `${PUBLIC_ORIGIN}/plans/${id}`),
     ];

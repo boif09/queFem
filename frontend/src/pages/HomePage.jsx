@@ -7,7 +7,7 @@ import { PlanList } from '../components/PlanList.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
-import { getQuickDateRange } from '../utils/dates.js';
+import { getCataloniaQuickDateRange } from '../utils/dates.js';
 import { clearLocationPreference, formatLocationPreference, readLocationPreference } from '../utils/locationPreference.js';
 import { createPlansSearch } from '../utils/search.js';
 
@@ -43,9 +43,9 @@ export function HomePage() {
   const [permanentPlans, setPermanentPlans] = useState({ status: 'loading', plans: [] });
   const [categories, setCategories] = useState({ status: 'loading', items: [] });
   const [reloadKey, setReloadKey] = useState(0);
-  const today = useMemo(() => getQuickDateRange('today'), []);
-  const tomorrow = useMemo(() => getQuickDateRange('tomorrow'), []);
-  const weekend = useMemo(() => getQuickDateRange('weekend'), []);
+  const today = useMemo(() => getCataloniaQuickDateRange('today'), []);
+  const tomorrow = useMemo(() => getCataloniaQuickDateRange('tomorrow'), []);
+  const weekend = useMemo(() => getCataloniaQuickDateRange('weekend'), []);
   const locationKey = JSON.stringify(location);
   const locationActive = Object.keys(location).length > 0;
   const locationLabel = formatLocationPreference(location);
@@ -80,9 +80,13 @@ export function HomePage() {
     const search = createPlansSearch({ ...filters, ...location });
     return search ? `/plans?${search}` : '/plans';
   };
-  const todayUrl = planUrl(today);
+  const landingUrl = (path) => {
+    const search = createPlansSearch(location);
+    return search ? `${path}?${search}` : path;
+  };
+  const todayUrl = landingUrl('/avui');
   const tomorrowUrl = planUrl(tomorrow);
-  const weekendUrl = planUrl(weekend);
+  const weekendUrl = landingUrl('/cap-de-setmana');
   const changeLocationUrl = planUrl();
   const clearLocation = () => { clearLocationPreference(); setLocation({}); };
   const retry = () => setReloadKey((value) => value + 1);

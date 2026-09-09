@@ -7,6 +7,8 @@ import { validatePlanId } from './validation.js';
 
 const HOME = { title: 'Tens pla? | Plans i activitats a Catalunya', description: 'Descobreix concerts, festes, cultura, mercats i activitats arreu de Catalunya. Troba què fer avui o aquest cap de setmana amb Tens pla?.' };
 const PLANS = { title: 'Explora plans a Catalunya | Tens pla?', description: 'Explora concerts, festes, cultura, mercats i activitats disponibles arreu de Catalunya amb Tens pla?.' };
+const TODAY = { title: 'Què fer avui a Catalunya | Tens pla?', description: 'Descobreix activitats, festes, cultura, concerts i plans per fer avui arreu de Catalunya amb Tens pla?.' };
+const WEEKEND = { title: 'Què fer aquest cap de setmana a Catalunya | Tens pla?', description: 'Descobreix activitats i plans per fer aquest cap de setmana arreu de Catalunya amb Tens pla?.' };
 
 function sendHtml(response, status, html) { return response.status(status).type('html').send(html); }
 function notFoundHtml(template) { return renderSeoHtml(template, { title: 'Pàgina no trobada | Tens pla?', description: 'La pàgina sol·licitada no existeix o ja no està disponible.', robots: 'noindex,follow' }); }
@@ -31,6 +33,14 @@ export function createSeoRouter(repository, { templatePath = path.resolve(proces
   router.get('/plans', withTemplate((request, response, html) => {
     const filtered = Object.keys(request.query).length > 0;
     return sendHtml(response, 200, renderSeoHtml(html, { ...PLANS, robots: filtered ? 'noindex,follow' : 'index,follow', canonicalPath: filtered ? null : '/plans' }));
+  }));
+  router.get('/avui', withTemplate((request, response, html) => {
+    const filtered = Object.keys(request.query).length > 0;
+    return sendHtml(response, 200, renderSeoHtml(html, { ...TODAY, robots: filtered ? 'noindex,follow' : 'index,follow', canonicalPath: filtered ? null : '/avui' }));
+  }));
+  router.get('/cap-de-setmana', withTemplate((request, response, html) => {
+    const filtered = Object.keys(request.query).length > 0;
+    return sendHtml(response, 200, renderSeoHtml(html, { ...WEEKEND, robots: filtered ? 'noindex,follow' : 'index,follow', canonicalPath: filtered ? null : '/cap-de-setmana' }));
   }));
   router.get('/plans/:id', withTemplate((request, response, html) => {
     let id;

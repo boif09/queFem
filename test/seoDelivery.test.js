@@ -111,6 +111,48 @@ test('SEO shell makes home query variants deterministically non-indexable', asyn
   });
 });
 
+test('SEO shell delivers deterministic metadata for the today landing and noindexes its queries', async () => {
+  await withTestDatabase(async (db) => {
+    const app = createSeoApp(db);
+    const landing = await request(app).get('/avui');
+    assert.equal(landing.status, 200);
+    assert.match(landing.text, /<title>Què fer avui a Catalunya \| Tens pla\?<\/title>/);
+    assert.match(landing.text, /name="description" content="Descobreix activitats, festes, cultura, concerts i plans per fer avui arreu de Catalunya amb Tens pla\?\."/);
+    assert.match(landing.text, /name="robots" content="index,follow"/);
+    assert.match(landing.text, /<link rel="canonical" href="https:\/\/tenspla\.cat\/avui" \/>/);
+    assert.match(landing.text, /property="og:title" content="Què fer avui a Catalunya \| Tens pla\?"/);
+    assert.match(landing.text, /name="twitter:title" content="Què fer avui a Catalunya \| Tens pla\?"/);
+    assert.equal((landing.text.match(/rel="canonical"/g) ?? []).length, 1);
+    assert.doesNotMatch(landing.text, /data-tenspla-jsonld/);
+
+    const query = await request(app).get('/avui?x=1');
+    assert.equal(query.status, 200);
+    assert.match(query.text, /name="robots" content="noindex,follow"/);
+    assert.doesNotMatch(query.text, /rel="canonical"/);
+  });
+});
+
+test('SEO shell delivers deterministic metadata for the weekend landing and noindexes its queries', async () => {
+  await withTestDatabase(async (db) => {
+    const app = createSeoApp(db);
+    const landing = await request(app).get('/cap-de-setmana');
+    assert.equal(landing.status, 200);
+    assert.match(landing.text, /<title>Què fer aquest cap de setmana a Catalunya \| Tens pla\?<\/title>/);
+    assert.match(landing.text, /name="description" content="Descobreix activitats i plans per fer aquest cap de setmana arreu de Catalunya amb Tens pla\?\."/);
+    assert.match(landing.text, /name="robots" content="index,follow"/);
+    assert.match(landing.text, /<link rel="canonical" href="https:\/\/tenspla\.cat\/cap-de-setmana" \/>/);
+    assert.match(landing.text, /property="og:title" content="Què fer aquest cap de setmana a Catalunya \| Tens pla\?"/);
+    assert.match(landing.text, /name="twitter:title" content="Què fer aquest cap de setmana a Catalunya \| Tens pla\?"/);
+    assert.equal((landing.text.match(/rel="canonical"/g) ?? []).length, 1);
+    assert.doesNotMatch(landing.text, /data-tenspla-jsonld/);
+
+    const query = await request(app).get('/cap-de-setmana?x=1');
+    assert.equal(query.status, 200);
+    assert.match(query.text, /name="robots" content="noindex,follow"/);
+    assert.doesNotMatch(query.text, /rel="canonical"/);
+  });
+});
+
 test('SEO shell escapes hostile metadata and JSON-LD values without executable markup', async () => {
   await withTestDatabase(async (db) => {
     const title = '</script><script>window.pwned=1</script> " & < >';

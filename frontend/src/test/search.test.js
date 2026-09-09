@@ -46,7 +46,7 @@ describe('quick date ranges', () => {
   it('uses Friday through Sunday and shortens an in-progress weekend', () => {
     expect(getQuickDateRange('weekend', new Date(2026, 7, 20))).toEqual({ dateFrom: '2026-08-21', dateTo: '2026-08-23' });
     expect(getQuickDateRange('weekend', new Date(2026, 7, 21))).toEqual({ dateFrom: '2026-08-21', dateTo: '2026-08-23' });
-    expect(getQuickDateRange('weekend', new Date(2026, 7, 22))).toEqual({ dateFrom: '2026-08-22', dateTo: '2026-08-23' });
-    expect(getQuickDateRange('weekend', new Date(2026, 7, 23))).toEqual({ dateFrom: '2026-08-23', dateTo: '2026-08-23' });
+    expect(getQuickDateRange('weekend', new Date(2026, 7, 22))).toEqual({ dateFrom: '2026-08-21', dateTo: '2026-08-23' });
+    expect(getQuickDateRange('weekend', new Date(2026, 7, 23))).toEqual({ dateFrom: '2026-08-21', dateTo: '2026-08-23' });
   });
 });
