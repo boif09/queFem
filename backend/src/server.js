@@ -10,6 +10,7 @@ migrate(db);
 
 const app = createApp({
   db,
+  seoTemplatePath: config.seoTemplatePath,
   defaultLanguage: config.defaultLanguage,
   eventRetentionDays: config.eventRetentionDays,
   ticketmasterImagesEnabled: config.ticketmasterImagesEnabled,

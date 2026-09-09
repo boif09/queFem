@@ -5,6 +5,7 @@ import { createMediaRouter } from './api/media.routes.js';
 import { createPlansRouter } from './api/plans.routes.js';
 import { createSourcesRouter } from './api/sources.routes.js';
 import { createSitemapRouter } from './api/sitemap.routes.js';
+import { createSeoRouter } from './api/seo.routes.js';
 import { ValidationError } from './api/validation.js';
 import { PlanQueryRepository } from './db/repositories/planQuery.repository.js';
 import { PlanSourceImageRepository } from './db/repositories/planSourceImage.repository.js';
@@ -27,6 +28,8 @@ export function createApp({
   feverImageCacheMaxMb = 512, feverImageRequestTimeoutMs = 15_000,
   feverImageMaximumBytes = 10 * 1024 * 1024, feverImageFetchImpl,
   fallbackImageLibrary,
+  seoTemplatePath,
+  seoTemplate,
   now = () => new Date(),
   logger = console,
 }) {
@@ -62,6 +65,7 @@ export function createApp({
   const feverProxy = new TicketmasterImageProxy({ cache: feverCache, fetchImpl: feverImageFetchImpl, timeoutMs: feverImageRequestTimeoutMs, maximumBytes: feverImageMaximumBytes, validImageIds: () => imageRepository.findAllImageIds(), validateUrl: validateFeverImageUrl });
 
   app.disable('x-powered-by');
+  app.use(createSeoRouter(repository, { templatePath: seoTemplatePath, template: seoTemplate }));
   app.use('/api/sitemap.xml', createSitemapRouter(repository));
   app.use('/api/media', createMediaRouter({
     repository: imageRepository, proxy: imageProxy, enabled: ticketmasterImagesEnabled,

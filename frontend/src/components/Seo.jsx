@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
+import { PUBLIC_ORIGIN } from '../../../shared/seo/eventJsonLd.js';
 
-export const PUBLIC_ORIGIN = 'https://tenspla.cat';
+export { PUBLIC_ORIGIN };
 export const DEFAULT_SOCIAL_IMAGE = `${PUBLIC_ORIGIN}/og/tenspla-default.png`;
 
 function upsertMeta(attribute, key, content) {

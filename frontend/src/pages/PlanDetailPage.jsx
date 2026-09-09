@@ -3,7 +3,8 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CategoryIcon } from '../components/CategoryIcon.jsx';
 import { PlanVisual } from '../components/PlanVisual.jsx';
-import { hasValidCoordinates, MiniMap } from '../components/MiniMap.jsx';
+import { MiniMap } from '../components/MiniMap.jsx';
+import { buildEventJsonLd, compactDescription, hasValidCoordinates } from '../../../shared/seo/eventJsonLd.js';
 import { SourceAttribution } from '../components/SourceAttribution.jsx';
 import { PUBLIC_ORIGIN, Seo } from '../components/Seo.jsx';
 import { ErrorState, LoadingState } from '../components/States.jsx';
@@ -11,63 +12,11 @@ import { api } from '../services/api.js';
 import { trackAffiliateClick } from '../services/analytics.js';
 import { formatDate } from '../utils/dates.js';
 
+export { buildEventJsonLd };
+
 function InfoItem({ label, children }) {
   if (children === null || children === undefined || children === '') return null;
   return <div className="info-item"><dt>{label}</dt><dd>{children}</dd></div>;
-}
-
-function compactDescription(value, limit = 160) {
-  const compact = value?.replace(/\s+/g, ' ').trim();
-  if (!compact || compact.length <= limit) return compact || '';
-  const shortened = compact.slice(0, limit - 1);
-  return `${shortened.slice(0, shortened.lastIndexOf(' ')) || shortened}…`;
-}
-
-export function buildEventJsonLd(plan, url, description) {
-  const occurrenceDate = plan.nextOccurrence?.localDate;
-  const hasOccurrence = /^\d{4}-\d{2}-\d{2}$/.test(occurrenceDate || '');
-  const hasStartDate = hasOccurrence || /^\d{4}-\d{2}-\d{2}$/.test(plan.start_date || '');
-  const hasCoordinates = hasValidCoordinates(plan.latitude, plan.longitude);
-  const address = [plan.address, plan.postal_code, plan.locality, plan.municipality, plan.province]
-    .filter(Boolean).join(', ');
-  const hasNamedPlace = Boolean(plan.venue_name || plan.address);
-  const hasGeographicContext = Boolean(address || hasCoordinates);
-  if (!plan.title?.trim() || !hasStartDate || !hasNamedPlace || !hasGeographicContext) return null;
-
-  const event = {
-    '@context': 'https://schema.org',
-    '@type': 'Event',
-    name: plan.title,
-    url,
-    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-    eventStatus: 'https://schema.org/EventScheduled',
-  };
-  if (hasOccurrence) {
-    event.startDate = plan.nextOccurrence.localTime
-      ? `${occurrenceDate}T${plan.nextOccurrence.localTime}:00`
-      : occurrenceDate;
-  } else {
-    event.startDate = plan.start_date;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(plan.end_date || '')) event.endDate = plan.end_date;
-  }
-  if (description) event.description = description;
-  if (plan.image?.kind === 'official' && plan.image.jsonld_event_image_eligible === true) {
-    event.image = new URL(plan.image.url, PUBLIC_ORIGIN).href;
-  }
-
-  event.location = {
-    '@type': 'Place',
-    name: plan.venue_name || plan.address,
-  };
-  if (address) event.location.address = address;
-  if (hasCoordinates) {
-    event.location.geo = {
-      '@type': 'GeoCoordinates',
-      latitude: Number(plan.latitude),
-      longitude: Number(plan.longitude),
-    };
-  }
-  return event;
 }
 
 export function PlanDetailPage() {
@@ -90,7 +39,7 @@ export function PlanDetailPage() {
 
   useEffect(() => setDetailImageFailed(false), [id, state.plan?.image?.url]);
 
-  if (state.status === 'loading') return <><Seo title={t('seo.detailLoadingTitle')} description={t('seo.notFoundDescription')} robots="noindex,follow" /><section className="page-section"><div className="container"><LoadingState /></div></section></>;
+  if (state.status === 'loading') return <section className="page-section"><div className="container"><LoadingState /></div></section>;
   if (state.status === 'error') return <><Seo title={`${t('detail.errorTitle')} | Tens pla?`} description={t('detail.notFound')} robots="noindex,follow" /><section className="page-section"><div className="container"><ErrorState titleKey="detail.errorTitle" onRetry={() => setReloadKey((value) => value + 1)} /></div></section></>;
   if (state.status === 'not-found') return <><Seo title={t('seo.notFoundTitle')} description={t('detail.notFound')} robots="noindex,follow" /><section className="page-section"><div className="container"><ErrorState titleKey="detail.errorTitle" textKey="detail.notFound" /></div></section></>;
 

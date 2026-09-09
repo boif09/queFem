@@ -84,6 +84,37 @@ Cron definitivo propuesto, todavía no aplicado, cada dos horas después del imp
 
 ## SEO V1, sitemap público y Search Console
 
+### P2.1 entrega determinista de fichas (pendiente de despliegue)
+
+P2.1 añade una entrega HTML determinista y limitada para `/`, `/plans` y `/plans/:id`. Express reutiliza la misma consulta de visibilidad que API y sitemap, lee el `frontend/dist/index.html` ya compilado e inyecta sólo el `head`; no renderiza React ni hace peticiones externas. Una ficha inexistente, inválida o no pública devuelve HTML `noindex` con HTTP 404. Las queries de `/` o `/plans` reciben `noindex,follow` y no incluyen canonical. React sigue siendo responsable de la interfaz y la navegación cliente.
+
+Al desplegar este código, las siguientes locations deben situarse antes del fallback SPA. Conservan path y query y no alteran `/api`, media ni assets estáticos:
+
+```nginx
+location = / {
+    proxy_pass http://127.0.0.1:3014;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+location = /plans {
+    proxy_pass http://127.0.0.1:3014;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+location ^~ /plans/ {
+    proxy_pass http://127.0.0.1:3014;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+Primero hay que compilar el frontend, confirmar que existe `frontend/dist/index.html`, inspeccionar la configuración efectiva de Nginx, ejecutar `nginx -t` y recargar Nginx sólo bajo autorización de producción separada.
+
 El dominio canónico de toda la metadata es `https://tenspla.cat`. Home, `/plans` sin parámetros, `/fonts` y las fichas públicas de eventos activos son indexables. Las búsquedas, filtros, páginas legales, privacidad, almacenamiento, contacto y rutas no encontradas utilizan `noindex,follow`. La metadata por ruta, Open Graph, Twitter/X y Event JSON-LD se generan localmente, sin analytics, cookies ni scripts externos.
 
 `frontend/public/robots.txt` anuncia `https://tenspla.cat/sitemap.xml`. El sitemap se genera dinámicamente desde SQLite en `/api/sitemap.xml`, reutilizando las mismas condiciones de visibilidad pública de la API. No incluye `lastmod`, porque `plans.updated_at` también puede cambiar por procesos técnicos y no representa de forma fiable un cambio visible de contenido.
