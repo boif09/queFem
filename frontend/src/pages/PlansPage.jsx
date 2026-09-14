@@ -41,6 +41,7 @@ export function PlansPage() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const filtersPanelRef = useRef(null);
+  const [filtersActivated, setFiltersActivated] = useState(() => Boolean(location.state?.openFilters));
   const [state, setState] = useState({ status: 'loading', plans: [], pagination: null });
   const [reloadKey, setReloadKey] = useState(0);
   const searchKey = searchParams.toString();
@@ -51,7 +52,10 @@ export function PlansPage() {
   const filtered = searchParams.size > 0;
 
   useEffect(() => {
-    if (location.state?.openFilters && filtersPanelRef.current) filtersPanelRef.current.open = true;
+    if (location.state?.openFilters && filtersPanelRef.current) {
+      filtersPanelRef.current.open = true;
+      setFiltersActivated(true);
+    }
   }, [location.state]);
 
   useEffect(() => {
@@ -95,9 +99,11 @@ export function PlansPage() {
           <div><p className="eyebrow dark">{t('results.eyebrow')}</p><h1>{filters.q || t('results.title')}</h1></div>
           <Link className="button button-secondary" to={homeQuery ? `/?${homeQuery}` : '/'}>{t('results.changeSearch')}</Link>
         </header>
-        <details ref={filtersPanelRef} className="results-filters" id="filters">
+        <details ref={filtersPanelRef} className="results-filters" id="filters" onToggle={(event) => {
+          if (event.currentTarget.open) setFiltersActivated(true);
+        }}>
           <summary>{t('results.filtersToggle')}</summary>
-          <SearchFilters initialFilters={filters} onSearch={applyFilters} />
+          {filtersActivated && <SearchFilters initialFilters={filters} onSearch={applyFilters} />}
         </details>
         <ActiveFilters filters={filters} onRemove={removeFilter} onClear={() => { saveLocationPreference({}); applyFilters({}); }} />
         {state.status === 'loading' && <LoadingState />}

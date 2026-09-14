@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import i18n from '../i18n.js';
 import { SearchFilters } from '../components/SearchFilters.jsx';
@@ -14,6 +14,13 @@ vi.mock('../services/api.js', () => ({
     getCategories: vi.fn(),
   },
 }));
+
+function deferred() {
+  let resolve;
+  let reject;
+  const promise = new Promise((nextResolve, nextReject) => { resolve = nextResolve; reject = nextReject; });
+  return { promise, resolve, reject };
+}
 
 describe('SearchFilters', () => {
   beforeEach(async () => {
@@ -37,6 +44,8 @@ describe('SearchFilters', () => {
       'placeholder', 'Busca un concert, una festa, una exposició...',
     );
     await user.type(screen.getByRole('searchbox', { name: 'Cerca' }), '  rock  ');
+
+    await user.click(screen.getByRole('combobox', { name: /omarca/ }));
 
     await screen.findByRole('option', { name: 'Baix Empordà' });
     await user.selectOptions(screen.getByLabelText('Comarca'), 'Baix Empordà');
@@ -86,6 +95,7 @@ describe('SearchFilters', () => {
     render(<SearchFilters onSearch={onSearch} />);
     const municipality = await screen.findByPlaceholderText('Busca qualsevol municipi');
     await user.click(municipality);
+    await screen.findByRole('option', { name: /Begur/ });
     await user.keyboard('{ArrowDown}{Enter}');
     expect(municipality).toHaveValue('Begur');
     const clear = screen.getByRole('button', { name: 'Esborrar el municipi seleccionat' });
@@ -129,5 +139,128 @@ describe('SearchFilters', () => {
     expect(today).toHaveAttribute('aria-pressed', 'false');
     await user.click(screen.getByRole('button', { name: 'Esborrar filtres' }));
     expect(today).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('deduplicates repeated municipality requests for the same pending and completed scope', async () => {
+    const pending = deferred();
+    api.getMunicipalities.mockReturnValueOnce(pending.promise);
+    render(<SearchFilters onSearch={vi.fn()} />);
+    const municipality = screen.getByPlaceholderText('Busca qualsevol municipi');
+    await waitFor(() => expect(municipality).not.toBeDisabled());
+
+    fireEvent.focus(municipality);
+    fireEvent.blur(municipality);
+    fireEvent.focus(municipality);
+    expect(api.getMunicipalities).toHaveBeenCalledTimes(1);
+
+    pending.resolve({ data: [{ municipality: 'Begur', comarca: 'Baix Emporda', province: 'Girona' }] });
+    await screen.findByRole('option', { name: /Begur/ });
+    fireEvent.blur(municipality);
+    fireEvent.focus(municipality);
+    expect(api.getMunicipalities).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries a failed municipality request for the same scope', async () => {
+    api.getMunicipalities.mockRejectedValueOnce(new Error('offline'))
+      .mockResolvedValueOnce({ data: [{ municipality: 'Begur', comarca: 'Baix Emporda', province: 'Girona' }] });
+    render(<SearchFilters onSearch={vi.fn()} />);
+    const municipality = screen.getByPlaceholderText('Busca qualsevol municipi');
+    await waitFor(() => expect(municipality).not.toBeDisabled());
+
+    fireEvent.focus(municipality);
+    await screen.findByRole('alert');
+    fireEvent.blur(municipality);
+    fireEvent.focus(municipality);
+    await screen.findByRole('option', { name: /Begur/ });
+    expect(api.getMunicipalities).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps newer municipality results when a previous scope resolves late', async () => {
+    const first = deferred();
+    const second = deferred();
+    api.getMunicipalities.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const user = userEvent.setup();
+    render(<SearchFilters onSearch={vi.fn()} />);
+    const municipality = screen.getByPlaceholderText('Busca qualsevol municipi');
+    await waitFor(() => expect(municipality).not.toBeDisabled());
+
+    fireEvent.focus(municipality);
+    await user.selectOptions(screen.getByRole('combobox', { name: /rov/ }), 'Girona');
+    fireEvent.blur(municipality);
+    fireEvent.focus(municipality);
+    await waitFor(() => expect(api.getMunicipalities).toHaveBeenLastCalledWith('Girona', ''));
+    expect(api.getMunicipalities).toHaveBeenCalledTimes(2);
+
+    second.resolve({ data: [{ municipality: 'Girona', comarca: 'GironÃ¨s', province: 'Girona' }] });
+    await screen.findByRole('option', { name: /^Girona .*/ });
+    first.resolve({ data: [{ municipality: 'Barcelona', comarca: 'Barcelones', province: 'Barcelona' }] });
+    await Promise.resolve();
+    expect(screen.queryByRole('option', { name: /^Barcelona .*/ })).not.toBeInTheDocument();
+  });
+
+  it('keeps a restored resolved comarca scope active when another scope resolves late', async () => {
+    const resolvedA = deferred();
+    const pendingB = deferred();
+    api.getComarques.mockReturnValueOnce(resolvedA.promise).mockReturnValueOnce(pendingB.promise);
+    const user = userEvent.setup();
+    render(<SearchFilters onSearch={vi.fn()} />);
+
+    const province = screen.getByRole('combobox', { name: /rov/ });
+    const comarca = screen.getByLabelText('Comarca');
+    await waitFor(() => expect(province).not.toBeDisabled());
+    await user.click(comarca);
+    await waitFor(() => expect(api.getComarques).toHaveBeenCalledWith(''));
+    resolvedA.resolve({ data: [{ comarca: 'Comarca A', province: 'Barcelona' }] });
+    await screen.findByRole('option', { name: 'Comarca A' });
+
+    await user.selectOptions(province, 'Girona');
+    await waitFor(() => expect(api.getComarques).toHaveBeenLastCalledWith('Girona'));
+    await user.selectOptions(province, '');
+    expect(screen.getByRole('option', { name: 'Comarca A' })).toBeInTheDocument();
+    expect(api.getComarques).toHaveBeenCalledTimes(2);
+
+    await act(async () => {
+      pendingB.resolve({ data: [{ comarca: 'Comarca B', province: 'Girona' }] });
+      await pendingB.promise;
+    });
+    expect(screen.queryByRole('option', { name: 'Comarca B' })).not.toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Comarca A' })).toBeInTheDocument();
+  });
+
+  it('prevents stale deep-link comarca responses from replacing a newer scope', async () => {
+    const first = deferred();
+    const second = deferred();
+    api.getComarques.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const { rerender } = render(<SearchFilters initialFilters={{ province: 'Old', comarca: 'Old comarca' }} onSearch={vi.fn()} />);
+    await waitFor(() => expect(api.getComarques).toHaveBeenCalledWith('Old'));
+    rerender(<SearchFilters initialFilters={{ province: 'New', comarca: 'New comarca' }} onSearch={vi.fn()} />);
+    await waitFor(() => expect(api.getComarques).toHaveBeenCalledWith('New'));
+
+    second.resolve({ data: [{ comarca: 'New comarca', province: 'New' }] });
+    await screen.findByRole('option', { name: 'New comarca' });
+    first.resolve({ data: [{ comarca: 'Old comarca', province: 'Old' }] });
+    await Promise.resolve();
+    expect(screen.queryByRole('option', { name: 'Old comarca' })).not.toBeInTheDocument();
+  });
+
+  it('does not update after unmounting with a deep-link comarca request pending', async () => {
+    const pending = deferred();
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    api.getComarques.mockReturnValueOnce(pending.promise);
+
+    const { unmount } = render(
+      <SearchFilters
+        initialFilters={{ province: 'Girona', comarca: 'Baix Emporda' }}
+        onSearch={vi.fn()}
+      />,
+    );
+    await waitFor(() => expect(api.getComarques).toHaveBeenCalledWith('Girona'));
+
+    unmount();
+    pending.resolve({ data: [{ comarca: 'Baix Emporda', province: 'Girona' }] });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
   });
 });

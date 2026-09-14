@@ -1,5 +1,7 @@
 const configuredBaseUrl = import.meta.env.VITE_API_URL?.trim() || '';
 const API_BASE_URL = configuredBaseUrl.replace(/\/$/, '');
+let categoriesResult = null;
+let categoriesRequest = null;
 
 export class ApiError extends Error {
   constructor(message, status) {
@@ -30,6 +32,22 @@ async function request(path, parameters = {}) {
   return payload;
 }
 
+function getCategories() {
+  if (categoriesResult) return Promise.resolve(categoriesResult);
+  if (categoriesRequest) return categoriesRequest;
+  categoriesRequest = request('/api/categories')
+    .then((payload) => {
+      categoriesResult = payload;
+      categoriesRequest = null;
+      return payload;
+    })
+    .catch((error) => {
+      categoriesRequest = null;
+      throw error;
+    });
+  return categoriesRequest;
+}
+
 export const api = {
   getPlans(parameters) {
     return request('/api/plans', parameters);
@@ -47,7 +65,7 @@ export const api = {
     return request('/api/municipalities', { province, comarca });
   },
   getCategories() {
-    return request('/api/categories');
+    return getCategories();
   },
   getSources() {
     return request('/api/sources');

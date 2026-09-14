@@ -7,12 +7,13 @@ import { CategorySelector } from './CategorySelector.jsx';
 
 const EMPTY_FILTERS = { q: '', date: '', dateFrom: '', dateTo: '', province: '', comarca: '', municipality: '', category: '', free: false };
 const ALIASES = new Map([['gerona', 'girona'], ['lerida', 'lleida']]);
+const municipalityScope = (province = '', comarca = '') => `${province}\u0000${comarca}`;
 function normalizeSearch(value) {
   const text = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   return ALIASES.get(text) || text;
 }
 
-function MunicipalityCombobox({ items, value, onChange, loading }) {
+function MunicipalityCombobox({ items, value, onChange, loading, onFocus }) {
   const { t } = useTranslation();
   const listboxId = useId();
   const [query, setQuery] = useState(value || '');
@@ -34,7 +35,7 @@ function MunicipalityCombobox({ items, value, onChange, loading }) {
   return <div className={`municipality-combobox${value ? ' has-value' : ''}`}>
     <div className="municipality-control">
       <input ref={inputRef} type="text" value={query} disabled={loading} autoComplete="off" role="combobox" aria-autocomplete="list" aria-expanded={open} aria-controls={listboxId} aria-activedescendant={activeIndex >= 0 ? `${listboxId}-${activeIndex}` : undefined} placeholder={t('filters.municipalitySearch')}
-        onFocus={() => setOpen(true)} onBlur={() => setOpen(false)}
+        onFocus={() => { onFocus?.(); setOpen(true); }} onBlur={() => setOpen(false)}
         onChange={(event) => { setQuery(event.target.value); setOpen(true); setActiveIndex(-1); if (value) onChange(''); }}
         onKeyDown={(event) => {
           if (event.key === 'ArrowDown') { event.preventDefault(); moveActive(1); }
@@ -64,7 +65,25 @@ export function SearchFilters({ initialFilters = {}, onSearch }) {
   const [loadError, setLoadError] = useState(false);
   const initialized = useRef(false);
   const lastEmittedKey = useRef('');
+  const comarquesScope = useRef(null);
+  const municipalitiesScope = useRef(null);
+  const comarquesLoadedScope = useRef(null);
+  const municipalitiesLoadedScope = useRef(null);
+  const comarquesData = useRef([]);
+  const municipalitiesData = useRef([]);
+  const comarquesRequest = useRef(null);
+  const municipalitiesRequest = useRef(null);
+  const mounted = useRef(true);
   const initialKey = JSON.stringify(initialFilters);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      comarquesRequest.current = null;
+      municipalitiesRequest.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     const next = { ...EMPTY_FILTERS, ...initialFilters };
@@ -75,8 +94,8 @@ export function SearchFilters({ initialFilters = {}, onSearch }) {
 
   useEffect(() => {
     let active = true;
-    Promise.all([api.getProvinces(), api.getComarques(), api.getMunicipalities(), api.getCategories()])
-      .then(([p, c, m, k]) => { if (active) { setProvinces(p.data); setComarques(c.data); setMunicipalities(m.data); setCategories(k.data); } })
+    Promise.all([api.getProvinces(), api.getCategories()])
+      .then(([p, k]) => { if (active) { setProvinces(p.data); setCategories(k.data); } })
       .catch(() => active && setLoadError(true)).finally(() => active && setLoading(false));
     return () => { active = false; };
   }, []);
@@ -90,12 +109,56 @@ export function SearchFilters({ initialFilters = {}, onSearch }) {
     return () => clearTimeout(timeout);
   }, [filters, onSearch]);
 
-  const reloadLocations = async (province, comarca) => {
-    try {
-      const [c, m] = await Promise.all([api.getComarques(province), api.getMunicipalities(province, comarca)]);
-      setComarques(c.data); setMunicipalities(m.data); setLoadError(false);
-    } catch { setLoadError(true); }
+  const loadComarques = (province = '') => {
+    comarquesScope.current = province;
+    if (comarquesLoadedScope.current === province) {
+      setComarques(comarquesData.current);
+      return Promise.resolve();
+    }
+    if (comarquesRequest.current?.scope === province) return comarquesRequest.current.promise;
+    const request = api.getComarques(province);
+    comarquesRequest.current = { scope: province, promise: request };
+    return request.then((payload) => {
+      const currentRequest = comarquesRequest.current?.promise === request;
+      if (currentRequest) comarquesRequest.current = null;
+      if (!mounted.current || !currentRequest || comarquesScope.current !== province) return;
+      comarquesLoadedScope.current = province;
+      comarquesData.current = payload.data;
+      setComarques(payload.data); setLoadError(false);
+    }).catch(() => {
+      const currentRequest = comarquesRequest.current?.promise === request;
+      if (currentRequest) comarquesRequest.current = null;
+      if (!mounted.current || !currentRequest || comarquesScope.current !== province) return;
+      setLoadError(true);
+    });
   };
+  const loadMunicipalities = (province = '', comarca = '') => {
+    const scope = municipalityScope(province, comarca);
+    municipalitiesScope.current = scope;
+    if (municipalitiesLoadedScope.current === scope) {
+      setMunicipalities(municipalitiesData.current);
+      return Promise.resolve();
+    }
+    if (municipalitiesRequest.current?.scope === scope) return municipalitiesRequest.current.promise;
+    const request = api.getMunicipalities(province, comarca);
+    municipalitiesRequest.current = { scope, promise: request };
+    return request.then((payload) => {
+      const currentRequest = municipalitiesRequest.current?.promise === request;
+      if (currentRequest) municipalitiesRequest.current = null;
+      if (!mounted.current || !currentRequest || municipalitiesScope.current !== scope) return;
+      municipalitiesLoadedScope.current = scope;
+      municipalitiesData.current = payload.data;
+      setMunicipalities(payload.data); setLoadError(false);
+    }).catch(() => {
+      const currentRequest = municipalitiesRequest.current?.promise === request;
+      if (currentRequest) municipalitiesRequest.current = null;
+      if (!mounted.current || !currentRequest || municipalitiesScope.current !== scope) return;
+      setLoadError(true);
+    });
+  };
+  useEffect(() => {
+    if (initialFilters.comarca) loadComarques(initialFilters.province || '');
+  }, [initialKey]);
   const setExplicitLocation = (values, changedKey) => {
     const next = { ...filters, ...values };
     const preference = { ...readLocationPreference(), [changedKey]: next[changedKey] };
@@ -106,7 +169,13 @@ export function SearchFilters({ initialFilters = {}, onSearch }) {
   };
   const chooseQuickDate = (type) => { const selected = getQuickDateRange(type); setShowRange(Boolean(selected.dateFrom)); setFilters((current) => ({ ...current, date: selected.date || '', dateFrom: selected.dateFrom || '', dateTo: selected.dateTo || '' })); };
   const chooseCustomRange = () => { setShowRange(true); setFilters((current) => ({ ...current, date: '', dateFrom: current.dateFrom || toISODate(new Date()), dateTo: current.dateTo || toISODate(new Date()) })); };
-  const clear = () => { saveLocationPreference({}); setFilters(EMPTY_FILTERS); setShowRange(false); reloadLocations('', ''); };
+  const clear = () => {
+    saveLocationPreference({}); setFilters(EMPTY_FILTERS); setShowRange(false);
+    setComarques([]); setMunicipalities([]); comarquesScope.current = null; municipalitiesScope.current = null;
+    comarquesLoadedScope.current = null; municipalitiesLoadedScope.current = null;
+    comarquesData.current = []; municipalitiesData.current = [];
+    comarquesRequest.current = null; municipalitiesRequest.current = null;
+  };
   const activeQuickDate = ['today', 'tomorrow', 'weekend', 'nextSeven'].find((type) => {
     const selected = getQuickDateRange(type);
     return selected.date
@@ -124,9 +193,9 @@ export function SearchFilters({ initialFilters = {}, onSearch }) {
     <div className="filter-section">
       <div className="section-heading"><span className="section-number" aria-hidden="true">02</span><div><span>{t('filters.where')}</span><strong>{t('filters.municipality')}</strong></div></div>
       <div className="location-fields">
-        <label><span>{t('filters.province')}</span><select value={filters.province} disabled={loading} onChange={(event) => { const province = event.target.value; const comarca = !filters.comarca || comarques.some((item) => item.comarca === filters.comarca && (!province || item.province === province)) ? filters.comarca : ''; const municipality = !filters.municipality || municipalities.some((item) => item.municipality === filters.municipality && (!province || item.province === province) && (!comarca || item.comarca === comarca)) ? filters.municipality : ''; setExplicitLocation({ province, comarca, municipality }, 'province'); reloadLocations(province, comarca); }}><option value="">{t('filters.allProvinces')}</option>{provinces.map((province) => <option key={province} value={province}>{province}</option>)}</select></label>
-        <label><span>{t('filters.comarca')}</span><select value={filters.comarca} disabled={loading} onChange={(event) => { const comarca = event.target.value; const municipality = !filters.municipality || municipalities.some((item) => item.municipality === filters.municipality && (!comarca || item.comarca === comarca)) ? filters.municipality : ''; setExplicitLocation({ comarca, municipality }, 'comarca'); reloadLocations(filters.province, comarca); }}><option value="">{t('filters.allComarques')}</option>{comarques.map((item) => <option key={`${item.comarca}-${item.province}`} value={item.comarca}>{item.comarca}</option>)}</select></label>
-        <label><span>{t('filters.municipality')}</span><MunicipalityCombobox items={municipalities} value={filters.municipality} loading={loading} onChange={(municipality) => setExplicitLocation({ municipality }, 'municipality')} /></label>
+        <label><span>{t('filters.province')}</span><select value={filters.province} disabled={loading} onChange={(event) => { const province = event.target.value; const comarca = !filters.comarca || comarques.some((item) => item.comarca === filters.comarca && (!province || item.province === province)) ? filters.comarca : ''; const municipality = !filters.municipality || municipalities.some((item) => item.municipality === filters.municipality && (!province || item.province === province) && (!comarca || item.comarca === comarca)) ? filters.municipality : ''; setExplicitLocation({ province, comarca, municipality }, 'province'); setMunicipalities([]); municipalitiesScope.current = municipalityScope(province, comarca); municipalitiesRequest.current = null; loadComarques(province); }}><option value="">{t('filters.allProvinces')}</option>{provinces.map((province) => <option key={province} value={province}>{province}</option>)}</select></label>
+        <label><span>{t('filters.comarca')}</span><select value={filters.comarca} disabled={loading} onFocus={() => loadComarques(filters.province)} onChange={(event) => { const comarca = event.target.value; const municipality = !filters.municipality || municipalities.some((item) => item.municipality === filters.municipality && (!comarca || item.comarca === comarca)) ? filters.municipality : ''; setExplicitLocation({ comarca, municipality }, 'comarca'); setMunicipalities([]); municipalitiesScope.current = municipalityScope(filters.province, comarca); municipalitiesRequest.current = null; loadMunicipalities(filters.province, comarca); }}><option value="">{t('filters.allComarques')}</option>{comarques.map((item) => <option key={`${item.comarca}-${item.province}`} value={item.comarca}>{item.comarca}</option>)}</select></label>
+        <label><span>{t('filters.municipality')}</span><MunicipalityCombobox items={municipalities} value={filters.municipality} loading={loading} onFocus={() => loadMunicipalities(filters.province, filters.comarca)} onChange={(municipality) => setExplicitLocation({ municipality }, 'municipality')} /></label>
       </div>
     </div>
     <div className="filter-section"><div className="section-heading"><span className="section-number" aria-hidden="true">03</span><div><span>{t('filters.category')}</span><strong>{t('filters.allCategories')}</strong></div></div><CategorySelector categories={categories} selected={filters.category ? filters.category.split(',') : []} onChange={(values) => setFilters((current) => ({ ...current, category: values.join(',') }))} loading={loading} /></div>

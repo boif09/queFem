@@ -69,8 +69,24 @@ describe('PlansPage', () => {
     api.getPlans.mockResolvedValue({ data: [], pagination: { page: 1, limit: 12, total: 0, pages: 0 } });
     render(<MemoryRouter initialEntries={['/plans']}><PlansPage /></MemoryRouter>);
     await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
+    expect(api.getProvinces).not.toHaveBeenCalled();
+    expect(api.getComarques).not.toHaveBeenCalled();
+    expect(api.getMunicipalities).not.toHaveBeenCalled();
+    expect(api.getCategories).not.toHaveBeenCalled();
     expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'index,follow');
     expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute('href', 'https://tenspla.cat/plans');
+  });
+
+  it('loads only the initial filter catalogs after the panel opens', async () => {
+    const user = userEvent.setup();
+    api.getPlans.mockResolvedValue({ data: [], pagination: { page: 1, limit: 12, total: 0, pages: 0 } });
+    render(<MemoryRouter initialEntries={['/plans']}><PlansPage /></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
+    await user.click(screen.getByText('Filtres de cerca'));
+    await waitFor(() => expect(api.getProvinces).toHaveBeenCalledTimes(1));
+    expect(api.getCategories).toHaveBeenCalledTimes(1);
+    expect(api.getComarques).not.toHaveBeenCalled();
+    expect(api.getMunicipalities).not.toHaveBeenCalled();
   });
 
   it('marks any filtered plans URL noindex, including free-only searches', async () => {
@@ -90,17 +106,32 @@ describe('PlansPage', () => {
     api.getPlans.mockResolvedValue({
       data: [], pagination: { page: 1, limit: 12, total: 0, pages: 0 },
     });
+    const initialEntry = typeof entry === 'string'
+      ? { pathname: entry.split('?')[0], search: entry.includes('?') ? `?${entry.split('?')[1]}` : '', state: { openFilters: true } }
+      : entry;
     return render(
-      <MemoryRouter initialEntries={[entry]}>
+      <MemoryRouter initialEntries={[initialEntry]}>
         <PlansPage />
         <LocationProbe />
       </MemoryRouter>,
     );
   }
 
+  it('loads geography progressively when its controls become relevant', async () => {
+    const user = userEvent.setup();
+    renderPlans();
+    const province = await screen.findByRole('combobox', { name: /rov/ });
+    await user.selectOptions(province, 'Barcelona');
+    await waitFor(() => expect(api.getComarques).toHaveBeenCalledWith('Barcelona'));
+    expect(api.getMunicipalities).not.toHaveBeenCalled();
+    await user.click(screen.getByPlaceholderText('Busca qualsevol municipi'));
+    await waitFor(() => expect(api.getMunicipalities).toHaveBeenCalledWith('Barcelona', ''));
+  });
+
   it('applies municipality and replaces it when the selection changes', async () => {
     const user = userEvent.setup();
     renderPlans();
+    await user.click(await screen.findByRole('combobox', { name: /omarca/ }));
     await screen.findByRole('option', { name: 'Barcelones' });
     await user.selectOptions(screen.getByLabelText('Comarca'), 'Barcelones');
     const municipality = screen.getByPlaceholderText('Busca qualsevol municipi');
@@ -136,6 +167,7 @@ describe('PlansPage', () => {
     const user = userEvent.setup();
     renderPlans();
     await user.type(screen.getByRole('searchbox', { name: 'Cerca' }), '  weeknd  ');
+    await user.click(screen.getByRole('combobox', { name: /omarca/ }));
     await screen.findByRole('option', { name: 'Barcelones' });
     await user.selectOptions(screen.getByLabelText('Comarca'), 'Barcelones');
     const municipality = screen.getByPlaceholderText('Busca qualsevol municipi');
