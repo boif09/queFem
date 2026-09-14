@@ -40,7 +40,12 @@ export function Layout() {
   const { t, i18n } = useTranslation();
   const { pathname } = useLocation();
   const spanish = i18n.resolvedLanguage?.startsWith('es');
-  const showMobileNav = pathname === '/' || pathname === '/plans';
+  const showMobileNav = pathname === '/'
+    || pathname === '/avui'
+    || pathname === '/cap-de-setmana'
+    || pathname === '/fonts'
+    || pathname === '/plans'
+    || pathname.startsWith('/plans/');
   return (
     <div className={`site-shell${showMobileNav ? ' has-mobile-nav' : ''}`}>
       <Header />

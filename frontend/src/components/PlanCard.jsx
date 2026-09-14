@@ -28,7 +28,6 @@ export function PlanCard({ plan }) {
         className="plan-card-link"
         to={`/plans/${plan.id}`}
         state={{ from: `${location.pathname}${location.search}` }}
-        aria-label={t('plan.openDetail', { title: plan.title })}
       >
         <PlanVisual plan={plan} showKind loading="lazy" />
         <div className="plan-card-body">

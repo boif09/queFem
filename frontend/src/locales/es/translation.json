@@ -105,7 +105,7 @@
   "results.emptyTitle": "No hemos encontrado ningún plan",
   "results.emptyText": "Prueba otra fecha, localización o categoría.",
   "results.errorTitle": "No hemos podido cargar los planes",
-  "results.errorText": "Comprueba que la API esté en marcha y vuelve a intentarlo.",
+  "results.errorText": "No hemos podido cargar los planes. Vuelve a intentarlo dentro de unos momentos.",
   "filter.date": "Fecha: {{value}}",
   "filter.query": "Búsqueda: {{query}}",
   "filter.range": "Del {{from}} al {{to}}",

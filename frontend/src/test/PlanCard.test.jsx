@@ -31,6 +31,7 @@ describe('PlanCard', () => {
     expect(screen.getByText('Palafrugell · Baix Empordà')).toBeInTheDocument();
     expect(screen.getByText('Gratuït')).toBeInTheDocument();
     expect(screen.getByRole('link')).toHaveAttribute('href', '/plans/42');
+    expect(screen.getByRole('link')).toHaveAccessibleName(/Concert de tarda.*22.*Palafrugell.*Gratu/);
     expect(document.querySelector('img')).not.toBeInTheDocument();
     expect(document.querySelector('[data-pattern="musica"]')).toBeInTheDocument();
   });

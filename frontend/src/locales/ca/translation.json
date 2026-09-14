@@ -105,7 +105,7 @@
   "results.emptyTitle": "No hem trobat cap pla",
   "results.emptyText": "Prova una altra data, localització o categoria.",
   "results.errorTitle": "No hem pogut carregar els plans",
-  "results.errorText": "Comprova que l’API estigui en marxa i torna-ho a provar.",
+  "results.errorText": "No hem pogut carregar els plans. Torna-ho a provar d’aquí a uns moments.",
   "filter.date": "Data: {{value}}",
   "filter.query": "Cerca: {{query}}",
   "filter.range": "Del {{from}} al {{to}}",

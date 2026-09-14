@@ -123,7 +123,7 @@ describe('legal and privacy pages', () => {
     expect(footerBrand.innerHTML).toBe(headerBrand.innerHTML);
   });
 
-  it('shows mobile navigation only on home and results routes', () => {
+  it('keeps mobile navigation available across discovery routes without adding it to legal pages', () => {
     const pending = new Promise(() => {});
     api.getPlans.mockReturnValue(pending);
     api.getCategories.mockReturnValue(pending);
@@ -143,9 +143,14 @@ describe('legal and privacy pages', () => {
     results.unmount();
 
     const detail = renderRoute('/plans/123');
-    expect(detail.container.querySelector('.mobile-nav')).not.toBeInTheDocument();
-    expect(detail.container.querySelector('.site-shell')).not.toHaveClass('has-mobile-nav');
+    expect(detail.container.querySelector('.mobile-nav')).toBeInTheDocument();
+    expect(detail.container.querySelector('.site-shell')).toHaveClass('has-mobile-nav');
     detail.unmount();
+
+    const today = renderRoute('/avui');
+    expect(today.container.querySelector('.mobile-nav')).toBeInTheDocument();
+    expect(today.container.querySelector('.site-shell')).toHaveClass('has-mobile-nav');
+    today.unmount();
 
     const legal = renderRoute('/legal');
     expect(legal.container.querySelector('.mobile-nav')).not.toBeInTheDocument();

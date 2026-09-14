@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import i18n from '../i18n.js';
 import { SearchFilters } from '../components/SearchFilters.jsx';
@@ -106,5 +106,28 @@ describe('SearchFilters', () => {
     expect(screen.getByLabelText('Comarca')).toHaveValue('Baix Empordà');
     await user.click(screen.getByRole('button', { name: 'Esborrar filtres' }));
     expect(localStorage.getItem(LOCATION_PREFERENCE_KEY)).toBeNull();
+  });
+
+  it('marks the active quick date with aria-pressed and the selected visual state', async () => {
+    const user = userEvent.setup();
+    render(<SearchFilters onSearch={vi.fn()} />);
+    for (const name of [/Avui/, /Dem/, /Aquest cap de setmana/]) {
+      const button = screen.getByRole('button', { name });
+      await user.click(button);
+      expect(button).toHaveAttribute('aria-pressed', 'true');
+      expect(button).toHaveClass('is-selected');
+    }
+  });
+
+  it('clears quick-date selection after a manual date change or clearing filters', async () => {
+    const user = userEvent.setup();
+    render(<SearchFilters onSearch={vi.fn()} />);
+    const today = screen.getByRole('button', { name: 'Avui' });
+    await user.click(today);
+    expect(today).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.change(screen.getByLabelText('Data'), { target: { value: '2099-01-01' } });
+    expect(today).toHaveAttribute('aria-pressed', 'false');
+    await user.click(screen.getByRole('button', { name: 'Esborrar filtres' }));
+    expect(today).toHaveAttribute('aria-pressed', 'false');
   });
 });

@@ -33,7 +33,9 @@ describe('Pop Editorial home', () => {
     renderHome();
     expect(screen.getAllByLabelText('Tens pla?').length).toBeGreaterThan(0);
     expect(await screen.findByRole('heading', { name: 'Pla real' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Música/ })).toHaveAttribute('href', '/plans?category=musica');
+    const categoryLink = (await screen.findAllByRole('link', { name: /Música/ }))
+      .find((link) => new URL(link.getAttribute('href'), 'https://tenspla.cat').searchParams.get('category') === 'musica');
+    expect(categoryLink).toHaveAttribute('href', '/plans?category=musica');
     expect(screen.queryByText('Què Fem?')).not.toBeInTheDocument();
     await waitFor(() => expect(document.title).toBe('Tens pla? | Plans i activitats a Catalunya'));
     expect(document.head.querySelector('meta[name="description"]')).toHaveAttribute('content', expect.stringContaining('Descobreix concerts'));
@@ -72,7 +74,9 @@ describe('Pop Editorial home', () => {
     renderHome();
     expect(screen.getByText(/Begur · Baix Empordà/)).toBeInTheDocument();
     await waitFor(() => expect(api.getPlans).toHaveBeenCalledWith(expect.objectContaining({ comarca: 'Baix Empordà', municipality: 'Begur', permanent: false })));
-    const categoryUrl = new URL((await screen.findByRole('link', { name: /Música/ })).getAttribute('href'), 'https://tenspla.cat');
+    const categoryLink = (await screen.findAllByRole('link', { name: /Música/ }))
+      .find((link) => new URL(link.getAttribute('href'), 'https://tenspla.cat').searchParams.get('category') === 'musica');
+    const categoryUrl = new URL(categoryLink.getAttribute('href'), 'https://tenspla.cat');
     expect(Object.fromEntries(categoryUrl.searchParams)).toEqual(expect.objectContaining({ category: 'musica', comarca: 'Baix Empordà', municipality: 'Begur' }));
     expect(screen.getByRole('link', { name: /Avui/ }).getAttribute('href')).toContain('/avui?comarca=Baix+Empord%C3%A0&municipality=Begur');
   });

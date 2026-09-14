@@ -86,6 +86,22 @@ describe('PlanDetailPage', () => {
     expect(structuredData).not.toHaveProperty('offers');
   });
 
+  it('keeps the Fever purchase action primary and the official site secondary', async () => {
+    api.getPlan.mockResolvedValue({ data: {
+      id: 16, kind: 'event', title: 'Fever experience', start_date: '2026-09-01', end_date: '2026-09-01',
+      permanent: false, free: false, municipality: 'Barcelona', website_url: 'https://example.test/official',
+      commerce: { provider: 'fever', affiliateUrl: 'https://example.test/fever', price: { type: 'fixed', amount: 18 } },
+      categories: [], sources: [],
+    } });
+    render(<MemoryRouter initialEntries={['/plans/16']}><Routes><Route path="/plans/:id" element={<PlanDetailPage />} /></Routes></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'Fever experience' });
+    const tickets = screen.getByRole('link', { name: /Veure entrades a Fever/ });
+    const official = screen.getByRole('link', { name: /Web oficial/ });
+    expect(tickets).toHaveClass('button-primary');
+    expect(official).toHaveClass('button-secondary');
+    expect(document.querySelectorAll('.official-links .button-primary')).toHaveLength(1);
+  });
+
   it('does not generate Event JSON-LD without a sufficiently reliable location', () => {
     expect(buildEventJsonLd({
       kind: 'event', title: 'Concert sense lloc', start_date: '2026-09-01',

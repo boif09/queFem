@@ -150,6 +150,7 @@ h1, h2, h3, h4, h5, h6, strong, .legal-section h2, .prose { font-family: var(--f
 .municipality-options button:hover, .municipality-options button.is-active, .municipality-options button[aria-selected="true"] { background: var(--color-yellow); }
 .municipality-options button:focus-visible { outline-color: var(--color-blue); }
 .quick-date-list button:hover, .category-choice:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--color-text); }
+.quick-date-list button.is-selected { background: var(--color-blue); color: white; box-shadow: 3px 3px 0 var(--color-text); }
 .category-choice.is-selected { background: var(--color-blue); border-color: var(--color-text); box-shadow: 3px 3px 0 var(--color-text); }
 .button { min-height: 48px; border: var(--border-strong); border-radius: 0; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 .button-primary { background: var(--color-blue-dark); color: white; box-shadow: 4px 4px 0 var(--color-text); }
