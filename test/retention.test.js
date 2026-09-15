@@ -39,6 +39,16 @@ test('uses localhost as the default host and accepts an explicit host', () => {
   assert.equal(loadConfig({ HOST: '0.0.0.0' }).host, '0.0.0.0');
 });
 
+test('bounds remote media concurrency configuration to a strict integer range', () => {
+  assert.equal(loadConfig({}).mediaRemoteFetchConcurrency, 4);
+  assert.equal(loadConfig({ MEDIA_REMOTE_FETCH_CONCURRENCY: '1' }).mediaRemoteFetchConcurrency, 1);
+  assert.equal(loadConfig({ MEDIA_REMOTE_FETCH_CONCURRENCY: '8' }).mediaRemoteFetchConcurrency, 8);
+  assert.equal(loadConfig({ MEDIA_REMOTE_FETCH_CONCURRENCY: '16' }).mediaRemoteFetchConcurrency, 16);
+  for (const value of ['0', '-1', '2.5', '17', '999', 'not-a-number']) {
+    assert.equal(loadConfig({ MEDIA_REMOTE_FETCH_CONCURRENCY: value }).mediaRemoteFetchConcurrency, 4);
+  }
+});
+
 test('retains cutoff-day, undated and permanent plans', () => {
   assert.equal(isPlanRetained({ permanent: 0, end_date: '2026-05-18' }, '2026-05-19'), false);
   assert.equal(isPlanRetained({ permanent: 0, end_date: '2026-05-19' }, '2026-05-19'), true);

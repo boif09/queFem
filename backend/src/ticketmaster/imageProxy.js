@@ -2,12 +2,38 @@ const ALLOWED_HOSTS = new Set(['s1.ticketm.net']);
 const ALLOWED_CONTENT_TYPES = new Set([
   'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif',
 ]);
+export const DEFAULT_MEDIA_REMOTE_FETCH_CONCURRENCY = 4;
+export const MAXIMUM_MEDIA_REMOTE_FETCH_CONCURRENCY = 16;
 
 export class TicketmasterMediaError extends Error {
   constructor(status, code, message) {
     super(message);
     this.status = status;
     this.code = code;
+  }
+}
+
+export class MediaRemoteFetchLimiter {
+  constructor(maximum = DEFAULT_MEDIA_REMOTE_FETCH_CONCURRENCY) {
+    if (!Number.isSafeInteger(maximum) || maximum < 1 || maximum > MAXIMUM_MEDIA_REMOTE_FETCH_CONCURRENCY) {
+      throw new TypeError('El límit de concurrència remota de media no és vàlid.');
+    }
+    this.maximum = maximum;
+    this.active = 0;
+  }
+
+  run(operation) {
+    if (this.active >= this.maximum) {
+      return Promise.reject(new TicketmasterMediaError(
+        503,
+        'MEDIA_CAPACITY',
+        'La imatge no està disponible temporalment.',
+      ));
+    }
+    this.active += 1;
+    return Promise.resolve().then(operation).finally(() => {
+      this.active -= 1;
+    });
   }
 }
 
@@ -61,6 +87,7 @@ export class TicketmasterImageProxy {
   constructor({
     cache, fetchImpl = globalThis.fetch, timeoutMs = 15_000,
     maximumBytes = 10 * 1024 * 1024, validImageIds, validateUrl = validateTicketmasterImageUrl,
+    limiter = new MediaRemoteFetchLimiter(),
   }) {
     this.cache = cache;
     this.fetchImpl = fetchImpl;
@@ -68,6 +95,7 @@ export class TicketmasterImageProxy {
     this.maximumBytes = maximumBytes;
     this.validImageIds = validImageIds;
     this.validateUrl = validateUrl;
+    this.limiter = limiter;
     this.inFlight = new Map();
   }
 
@@ -76,7 +104,7 @@ export class TicketmasterImageProxy {
     const cached = await this.cache.read(image);
     if (cached) return cached;
     if (!this.inFlight.has(image.id)) {
-      this.inFlight.set(image.id, this.fetchAndCache(image, sourceUrl)
+      this.inFlight.set(image.id, this.limiter.run(() => this.fetchAndCache(image, sourceUrl))
         .finally(() => this.inFlight.delete(image.id)));
     }
     return this.inFlight.get(image.id);

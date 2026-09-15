@@ -1,5 +1,9 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  DEFAULT_MEDIA_REMOTE_FETCH_CONCURRENCY,
+  MAXIMUM_MEDIA_REMOTE_FETCH_CONCURRENCY,
+} from './ticketmaster/imageProxy.js';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -11,6 +15,11 @@ function positiveInteger(value, fallback) {
 function nonNegativeInteger(value, fallback) {
   const parsed = Number.parseInt(value ?? '', 10);
   return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
+function boundedInteger(value, fallback, minimum, maximum) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= minimum && parsed <= maximum ? parsed : fallback;
 }
 
 export function loadConfig(env = process.env) {
@@ -49,6 +58,12 @@ export function loadConfig(env = process.env) {
     feverImageCacheMaxMb: positiveInteger(env.FEVER_IMAGE_CACHE_MAX_MB, 512),
     feverImageRequestTimeoutMs: positiveInteger(env.FEVER_IMAGE_REQUEST_TIMEOUT_MS, 15000),
     feverImageMaximumBytes: positiveInteger(env.FEVER_IMAGE_MAX_BYTES, 10485760),
+    mediaRemoteFetchConcurrency: boundedInteger(
+      env.MEDIA_REMOTE_FETCH_CONCURRENCY,
+      DEFAULT_MEDIA_REMOTE_FETCH_CONCURRENCY,
+      1,
+      MAXIMUM_MEDIA_REMOTE_FETCH_CONCURRENCY,
+    ),
     eventRetentionDays: nonNegativeInteger(env.EVENT_RETENTION_DAYS, 0),
     inactivePlanRetentionDays: positiveInteger(env.INACTIVE_PLAN_RETENTION_DAYS, 7),
     defaultLanguage: env.DEFAULT_LANGUAGE || 'ca',

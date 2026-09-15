@@ -25,6 +25,7 @@ const app = createApp({
   feverImageCacheMaxMb: config.feverImageCacheMaxMb,
   feverImageRequestTimeoutMs: config.feverImageRequestTimeoutMs,
   feverImageMaximumBytes: config.feverImageMaximumBytes,
+  mediaRemoteFetchConcurrency: config.mediaRemoteFetchConcurrency,
 });
 const server = app.listen(config.port, config.host, () => {
   console.log(`API de Què Fem? disponible a http://${config.host}:${config.port}`);

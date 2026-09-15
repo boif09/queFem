@@ -52,6 +52,7 @@ TICKETMASTER_IMAGE_CACHE_MAX_MB=512
 TICKETMASTER_IMAGE_METADATA_REFRESH_HOURS=24
 TICKETMASTER_IMAGE_REQUEST_TIMEOUT_MS=15000
 TICKETMASTER_IMAGE_MAX_BYTES=10485760
+MEDIA_REMOTE_FETCH_CONCURRENCY=4
 ```
 
 `TICKETMASTER_IMAGES_ENABLED` es el único feature flag de esta función y su valor seguro por
@@ -71,7 +72,11 @@ El cron debe ejecutarse con ese mismo usuario o el directorio debe prepararse pr
 propietario y permisos compatibles; la aplicación no intenta elevar privilegios.
 La limpieza se aplica al llenar la caché y al terminar el sync: elimina primero huérfanos y
 expirados y, si aún supera 512 MB, las entradas más antiguas. El proxy aplica timeout de 15
-segundos y un máximo de 10 MiB por imagen.
+segundos y un máximo de 10 MiB por imagen. Ticketmaster y Fever comparten además un límite
+aplicativo de cuatro descargas remotas simultáneas por proceso. El valor
+`MEDIA_REMOTE_FETCH_CONCURRENCY` acepta enteros entre 1 y 16; cuando se alcanza, una nueva
+cache miss distinta falla temporalmente con HTTP 503 en lugar de crear una cola sin límite.
+Los hits de caché y los consumidores concurrentes de un mismo ID no ocupan plazas adicionales.
 
 El comando utiliza un lock atómico dentro de la caché. Una segunda ejecución sale correctamente
 sin sincronizar; un lock cuyo PID ya no existe se recupera automáticamente.

@@ -10,7 +10,12 @@ import { ValidationError } from './api/validation.js';
 import { PlanQueryRepository } from './db/repositories/planQuery.repository.js';
 import { PlanSourceImageRepository } from './db/repositories/planSourceImage.repository.js';
 import { TicketmasterImageCache } from './ticketmaster/imageCache.js';
-import { TicketmasterImageProxy, validateFeverImageUrl } from './ticketmaster/imageProxy.js';
+import {
+  DEFAULT_MEDIA_REMOTE_FETCH_CONCURRENCY,
+  MediaRemoteFetchLimiter,
+  TicketmasterImageProxy,
+  validateFeverImageUrl,
+} from './ticketmaster/imageProxy.js';
 import { loadFallbackImageLibrary } from './images/fallbackImageLibrary.js';
 
 export function createApp({
@@ -27,6 +32,7 @@ export function createApp({
   feverImagesEnabled = false, feverImageCachePath, feverImageCacheTtlHours = 6,
   feverImageCacheMaxMb = 512, feverImageRequestTimeoutMs = 15_000,
   feverImageMaximumBytes = 10 * 1024 * 1024, feverImageFetchImpl,
+  mediaRemoteFetchConcurrency = DEFAULT_MEDIA_REMOTE_FETCH_CONCURRENCY,
   fallbackImageLibrary,
   seoTemplatePath,
   seoTemplate,
@@ -48,6 +54,7 @@ export function createApp({
     fallbackImageLibrary: resolvedFallbackImageLibrary,
   });
   const imageRepository = new PlanSourceImageRepository(db);
+  const mediaRemoteFetchLimiter = new MediaRemoteFetchLimiter(mediaRemoteFetchConcurrency);
   const imageCache = new TicketmasterImageCache({
     directory: ticketmasterImageCachePath || `${process.cwd()}/data/cache/ticketmaster-images`,
     ttlHours: ticketmasterImageCacheTtlHours,
@@ -60,9 +67,10 @@ export function createApp({
     timeoutMs: ticketmasterImageRequestTimeoutMs,
     maximumBytes: ticketmasterImageMaximumBytes,
     validImageIds: () => imageRepository.findAllImageIds(),
+    limiter: mediaRemoteFetchLimiter,
   });
   const feverCache = new TicketmasterImageCache({ directory: feverImageCachePath || `${process.cwd()}/data/cache/fever-images`, ttlHours: feverImageCacheTtlHours, maximumMb: feverImageCacheMaxMb, now });
-  const feverProxy = new TicketmasterImageProxy({ cache: feverCache, fetchImpl: feverImageFetchImpl, timeoutMs: feverImageRequestTimeoutMs, maximumBytes: feverImageMaximumBytes, validImageIds: () => imageRepository.findAllImageIds(), validateUrl: validateFeverImageUrl });
+  const feverProxy = new TicketmasterImageProxy({ cache: feverCache, fetchImpl: feverImageFetchImpl, timeoutMs: feverImageRequestTimeoutMs, maximumBytes: feverImageMaximumBytes, validImageIds: () => imageRepository.findAllImageIds(), validateUrl: validateFeverImageUrl, limiter: mediaRemoteFetchLimiter });
 
   app.disable('x-powered-by');
   app.use(createSeoRouter(repository, { templatePath: seoTemplatePath, template: seoTemplate }));
