@@ -6,6 +6,7 @@ export function PlanVisual({
   plan,
   className = '',
   showKind = false,
+  showAttribution = false,
   loading = 'eager',
   onImageError,
 }) {
@@ -23,7 +24,7 @@ export function PlanVisual({
     onImageError?.();
   };
 
-  return (
+  const visual = (
     <div className={`plan-visual${canShowImage ? ' has-image' : ''}${className ? ` ${className}` : ''}`} data-category={category}>
       {canShowImage ? (
         <img
@@ -42,6 +43,16 @@ export function PlanVisual({
         </div>
       )}
       {showKind && <span className="kind-label">{t(`plan.kind.${plan.kind}`)}</span>}
+    </div>
+  );
+
+  if (!showAttribution) return visual;
+  return (
+    <div className="plan-card-visual">
+      {visual}
+      {canShowImage && image.attribution ? (
+        <span className="card-image-attribution">{image.attribution}</span>
+      ) : null}
     </div>
   );
 }

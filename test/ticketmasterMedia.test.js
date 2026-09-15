@@ -27,8 +27,8 @@ function seedImage(db, url = 'https://s1.ticketm.net/served.jpg', sourceKey = 't
   ) VALUES (?,?,'media-event','{}',?,?)`).run(planId, source.id, now, now).lastInsertRowid);
   const imageId = Number(db.prepare(`INSERT INTO plan_source_images (
     plan_source_id, role, url, ratio, width, height, is_fallback,
-    attribution, last_seen_at, created_at, updated_at
-  ) VALUES (?,'card',?,'16_9',640,360,0,NULL,?,?,?)`)
+    attribution, attribution_known, last_seen_at, created_at, updated_at
+  ) VALUES (?,'card',?,'16_9',640,360,0,NULL,1,?,?,?)`)
     .run(planSourceId, url, now, now, now).lastInsertRowid);
   return { planId, planSourceId, imageId };
 }

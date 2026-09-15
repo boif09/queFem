@@ -168,6 +168,28 @@ El despliegue no ejecuta `npm run import:gencat`: descargar datos no debe formar
 
 ## Sincronización de Gencat
 
+La configuración preparada para imágenes Gencat es:
+
+```dotenv
+GENCAT_IMAGES_ENABLED=true
+GENCAT_IMAGE_CACHE_PATH=./data/cache/gencat-images
+GENCAT_IMAGE_CACHE_TTL_HOURS=6
+GENCAT_IMAGE_CACHE_MAX_MB=512
+GENCAT_IMAGE_METADATA_RETRY_HOURS=24
+GENCAT_HISTORICAL_IMAGE_RESOLUTION_BUDGET=100
+GENCAT_IMAGE_REQUEST_TIMEOUT_MS=15000
+GENCAT_IMAGE_MAX_BYTES=10485760
+```
+
+El import normal resuelve siempre el pie de imágenes nuevas o cuya ruta haya cambiado. Para las
+imágenes históricas sin resolver aplica un presupuesto de 100 por ejecución; las restantes se
+persisten normalmente y continúan en imports posteriores. Los estados desconocidos ya intentados
+respetan además el plazo durable de reintento. Con 10 segundos de timeout de metadata, 100 fallos
+consecutivos pueden ocupar unos 16 minutos y 40 segundos; no es necesario aumentar concurrencia.
+La entrega binaria se hace por `/api/media/gencat/:imageId`; el navegador no recibe la URL DAM.
+La activación efectiva requiere el despliegue y migración normales, que no forman parte de este
+cambio local.
+
 La sincronización no está gestionada por Node ni por PM2. Utiliza el `crontab` del usuario `root`:
 
 ```cron
@@ -176,7 +198,7 @@ PATH=/root/.nvm/versions/node/v24.18.0/bin:/usr/local/sbin:/usr/local/bin:/usr/s
 17 */2 * * * cd /var/www/queFem && npm run import:gencat >> /var/log/quefem-import.log 2>&1
 ```
 
-Se ejecuta cada dos horas, en el minuto 17, usa Node/npm instalado mediante NVM y guarda stdout y stderr en `/var/log/quefem-import.log`.
+Se ejecuta cada dos horas, en el minuto 17, usa Node/npm instalado mediante NVM y guarda stdout y stderr en `/var/log/quefem-import.log`. El comando adquiere el lock atómico `<DATABASE_PATH>.gencat-import.lock` antes de abrir SQLite o contactar la fuente. Una invocación cron o manual concurrente termina correctamente con estado `skipped`; un lock cuyo proceso ya no existe se recupera mediante la misma identidad PID/inicio usada por los imports Fever.
 
 ## Sincronización recurrente de DIBA
 

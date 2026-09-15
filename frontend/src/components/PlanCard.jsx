@@ -29,7 +29,7 @@ export function PlanCard({ plan }) {
         to={`/plans/${plan.id}`}
         state={{ from: `${location.pathname}${location.search}` }}
       >
-        <PlanVisual plan={plan} showKind loading="lazy" />
+        <PlanVisual plan={plan} showKind showAttribution loading="lazy" />
         <div className="plan-card-body">
           {primaryCategory && <span className="category-label">{primaryCategory.name}</span>}
           <h2>{plan.title}</h2>

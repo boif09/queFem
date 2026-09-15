@@ -27,9 +27,10 @@ export class FeverPersistenceRepository {
     this.insertCategory = db.prepare('INSERT OR IGNORE INTO plan_categories (plan_id,category_id) VALUES (?,?)');
     this.deleteCategories = db.prepare('DELETE FROM plan_categories WHERE plan_id=?');
     this.upsertImage = db.prepare(`INSERT INTO plan_source_images
-      (plan_source_id,role,url,ratio,width,height,is_fallback,attribution,last_seen_at,created_at,updated_at)
-      VALUES (?,?,?,'unknown',1,1,0,NULL,?,?,?)
+      (plan_source_id,role,url,ratio,width,height,is_fallback,attribution,attribution_known,last_seen_at,created_at,updated_at)
+      VALUES (?,?,?,'unknown',1,1,0,NULL,1,?,?,?)
       ON CONFLICT(plan_source_id,role) DO UPDATE SET url=excluded.url,last_seen_at=excluded.last_seen_at,
+        attribution_known=1,
         updated_at=CASE WHEN url<>excluded.url THEN excluded.updated_at ELSE updated_at END`);
     this.deleteImages = db.prepare('DELETE FROM plan_source_images WHERE plan_source_id=?');
     this.findSource = db.prepare(`SELECT ps.*, p.fingerprint FROM plan_sources ps

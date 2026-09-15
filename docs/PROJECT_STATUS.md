@@ -1,6 +1,6 @@
 # Tens Pla? — Estado del proyecto
 
-Última revisión documental: 2026-09-08.
+Última revisión documental: 2026-09-15.
 
 Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mismo y qué toca hacer?». La arquitectura está en [`ARCHITECTURE.md`](ARCHITECTURE.md), las fuentes en [`DATA_SOURCES.md`](DATA_SOURCES.md) y la operación en [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
@@ -9,6 +9,11 @@ Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mism
 - **Tens Pla?** está publicada y funcionando en `https://tenspla.cat`; `www.tenspla.cat` y el host legacy redirigen al dominio principal.
 - Nginx sirve el frontend React/Vite y hace proxy a la API Express de solo lectura; PM2 gestiona `quefem-api` y SQLite es la persistencia.
 - Gencat se sincroniza cada dos horas mediante cron externo. Búsqueda, filtros, fichas bilingües, planes permanentes, deduplicación multi-source y purgas están implementados.
+- El resolvedor fail-closed de imágenes Gencat y su atribución por `Peu d'imatge` están
+  implementados y validados localmente; este cambio aún no se ha desplegado. La reimportación normal
+  enriquece como máximo 100 históricos por ejecución, prioriza sin presupuesto imágenes nuevas o
+  cambiadas, reintenta metadata desconocida tras 24 h y usa un lock durable contra solapamientos.
+  Los créditos largos se reservan al detalle y los créditos de tarjeta quedan completos fuera de la imagen.
 - El SEO público está desplegado: metadata por ruta, canonical, Open Graph/Twitter, Event JSON-LD conservador, `robots.txt` y sitemap público. Google Search Console ya está verificado.
 - Hay backups automáticos y probados de SQLite, con comprobaciones y copia externa mediante `rclone` al destino de Google Drive `TensPla/backups`.
 - La rotación de logs de Nginx está configurada y verificada.

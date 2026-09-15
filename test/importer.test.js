@@ -54,7 +54,7 @@ test('imports a real-shaped row and skips it when the payload is unchanged', asy
     const provenance = db.prepare('SELECT * FROM plan_sources').get();
     assert.equal(plan.image_url, null);
     assert.equal(plan.original_description, record.descripcio);
-    assert.equal(JSON.parse(provenance.source_payload_json).imatges, undefined);
+    assert.equal(JSON.parse(provenance.source_payload_json).imatges, record.imatges);
     assert.equal(provenance.source_created_at, record.data_creacio);
     assert.match(provenance.source_record_id, /^20260817001@[a-f0-9]{16}$/);
   });

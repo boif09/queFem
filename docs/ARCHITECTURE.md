@@ -21,6 +21,7 @@ Todo vive en un único paquete npm. El backend usa Node.js, Express 5 y `better-
 - `/api/comarques?province=...`
 - `/api/municipalities?province=...&comarca=...`
 - `/api/media/ticketmaster/:imageId`
+- `/api/media/gencat/:imageId`
 - `/api/sitemap.xml`
 
 La API no ofrece escritura. La consulta de planes limita `page` a 200, `limit` a 100, `q` a 100 caracteres y los filtros textuales a 120 caracteres. `category` acepta uno o varios slugs separados por comas y los combina con semántica OR; el filtro booleano `permanent` permite separar los bloques temporales y permanentes de la home. Los modos técnicos explícitos `editorial=home-weekend|home-upcoming`, usados solo por la home, priorizan antes de paginar los inicios dentro del fin de semana o exigen inicios desde hoy, respectivamente. En una búsqueda general con rango cerrado, el orden temporal prioriza los inicios del plan dentro del rango, después las occurrences activas dentro del rango y finalmente los solapamientos legacy que comenzaron antes; la inclusión occurrence-aware no cambia.
@@ -54,7 +55,21 @@ Los comandos de `backend/src/jobs/` invocan importadores y servicios; no existe 
 
 ### Gencat
 
-`GencatImporter` descarga el dataset oficial `rhpv-yr4f`, normaliza cada localización, filtra Catalunya, fechas caducadas o incoherentes y conserva procedencia auditable sin campos de imagen no autorizados. La identidad remota combina el código oficial con una huella del payload porque la fuente no proporciona un ID único de fila.
+`GencatImporter` descarga el dataset oficial `rhpv-yr4f`, normaliza cada localización y filtra
+Catalunya, fechas caducadas o incoherentes. Conserva `imatges` en la procedencia auditable, pero la
+identidad remota sigue excluyendo todos los campos de imagen: combina el código oficial con una
+huella del payload porque la fuente no proporciona un ID único de fila.
+
+Para la primera ruta DAM utilizable, el resolver Gencat consulta únicamente la página pública
+construida desde el `codi`, correlaciona la ruta exacta del `onerror` acotado con un único slide y
+lee como texto el único `.image-footertext > .slider-footer`. HTTPS, host, redirección, MIME,
+timeout y tamaño están restringidos. `plan_source_images.attribution_known` distingue un pie vacío
+confirmado (`1` + `attribution NULL`) de una resolución desconocida (`0`), que nunca es servible.
+La migración conserva como conocidas solo las selecciones legacy de Ticketmaster/Fever; cualquier
+fila legacy Gencat u otra procedencia ambigua empieza como desconocida. El import serial limita a
+100 las resoluciones históricas por ejecución, sin limitar planes nuevos ni rutas de imagen
+cambiadas, y un lock durable junto a SQLite impide imports Gencat solapados en el mismo host.
+Las atribuciones largas se conservan completas en `detail`, pero omiten el rol `card`.
 
 ### Ticketmaster
 
@@ -82,14 +97,17 @@ desaparecida puede dejar el plan `inactive`; los huérfanos inactivos tienen una
 dry-run, tras el plazo configurado. La retirada expresa está en
 [`TICKETMASTER_REMOVAL.md`](TICKETMASTER_REMOVAL.md).
 
-Las imágenes de categorías son assets locales. Gencat no aporta imágenes reutilizadas. Las imágenes Ticketmaster se vinculan a su procedencia, se sirven same-origin y usan una caché local limitada. Con `TICKETMASTER_IMAGES_ENABLED=false` no hay sincronización remota ni selección en API.
+Las imágenes de categorías son assets locales. Las imágenes oficiales Gencat con atribución
+resuelta y las imágenes Ticketmaster se vinculan a su procedencia, se sirven same-origin y usan
+cachés locales limitadas. Con `GENCAT_IMAGES_ENABLED=false` se desactivan resolución y selección
+Gencat; con `TICKETMASTER_IMAGES_ENABLED=false` no hay sincronización remota ni selección Ticketmaster.
 
 La librería permanente **Generic Image Library V1** resuelve la imagen de visualización una vez en
-el repositorio de planes: oficial controlada de Fever/Ticketmaster, genérica local por `fingerprint`
+el repositorio de planes: oficial controlada de Fever/Ticketmaster/Gencat, genérica local por `fingerprint`
 y categoría, o el patrón gráfico existente si falta el WebP. Las genéricas no sobrescriben
 `plans.image_url`, se distinguen mediante `image.kind='generic'`, usan alt CA/ES del manifiesto,
-muestran una breve indicación en el detalle y se excluyen siempre de `Event.image` JSON-LD. Gencat
-permanece deliberadamente en el segundo paso aunque conserve metadata de imagen. El manifiesto,
+muestran una breve indicación en el detalle y se excluyen siempre de `Event.image` JSON-LD. Las
+imágenes Gencat desconocidas permanecen deliberadamente en el fallback aunque conserven estado. El manifiesto,
 el mapeo editorial, la preparación de binarios y la política de procedencia están en
 [`FALLBACK_IMAGES.md`](FALLBACK_IMAGES.md).
 

@@ -57,6 +57,19 @@ export function validateFeverImageUrl(value) {
   } catch { throw new TicketmasterMediaError(404, 'MEDIA_NOT_AVAILABLE', 'La imatge no està disponible.'); }
 }
 
+export function validateGencatImageUrl(value) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || url.hostname !== 'agenda.cultura.gencat.cat'
+      || url.port || url.username || url.password || url.search || url.hash
+      || !url.pathname.startsWith('/content/dam/agenda/')
+      || /%2e/i.test(url.pathname)) throw new Error();
+    return url;
+  } catch {
+    throw new TicketmasterMediaError(404, 'MEDIA_NOT_AVAILABLE', 'La imatge no està disponible.');
+  }
+}
+
 async function responseBuffer(response, maximumBytes) {
   const declaredLength = Number(response.headers.get('content-length'));
   if (Number.isFinite(declaredLength) && declaredLength > maximumBytes) {

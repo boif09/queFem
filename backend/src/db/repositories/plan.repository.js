@@ -88,6 +88,10 @@ export class PlanRepository {
     return this.persistTransaction(entry);
   }
 
+  getSourceRecord(sourceId, sourceRecordId) {
+    return this.findSourceRecord.get(sourceId, sourceRecordId) || null;
+  }
+
   persistGroup(entry, sourceRecords) {
     return this.db.transaction(() => {
       let planId = entry.targetPlanId || null;

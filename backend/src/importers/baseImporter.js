@@ -50,6 +50,12 @@ export class BaseImporter {
     return true;
   }
 
+  async prepareRecord() {
+    return null;
+  }
+
+  async afterPersist() {}
+
   getInvalidIssue() {
     return null;
   }
@@ -102,15 +108,18 @@ export class BaseImporter {
             continue;
           }
 
+          const sourceRecordId = this.getExternalId(record);
+          const prepared = await this.prepareRecord(record, normalized, source, sourceRecordId);
           const outcome = this.plans.persist({
             ...normalized,
             sourceId: source.id,
-            sourceRecordId: this.getExternalId(record),
+            sourceRecordId,
             sourceUrl: this.getSourceUrl(record, source),
             sourceCreatedAt: this.getSourceCreatedAt(record),
             sourceUpdatedAt: this.getSourceUpdatedAt(record),
             sourcePayload: this.getSourcePayload(record, source),
           });
+          await this.afterPersist(record, normalized, source, sourceRecordId, outcome, prepared);
           summary[outcome] += 1;
         } catch (error) {
           summary.errors += 1;

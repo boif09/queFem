@@ -98,4 +98,65 @@ describe('PlanCard', () => {
     expect(document.querySelector('.plan-visual img')).not.toBeInTheDocument();
     expect(document.querySelector('[data-pattern="musica"]')).toBeInTheDocument();
   });
+
+  it('renders official attribution as escaped plain text only while the card image is visible', () => {
+    render(
+      <MemoryRouter>
+        <PlanCard plan={{
+          id: 46, kind: 'event', title: 'Foto Gencat', start_date: '2026-09-20',
+          end_date: '2026-09-20', permanent: false, free: false,
+          image: {
+            url: '/api/media/gencat/46', kind: 'official', source: 'gencat',
+            attribution: 'Fundació & <autora>',
+          },
+          categories: [{ slug: 'cultura', name: 'Cultura', icon: 'book-open' }],
+        }} />
+      </MemoryRouter>,
+    );
+    const credit = screen.getByText('Fundació & <autora>');
+    expect(credit).toHaveClass('card-image-attribution');
+    expect(credit.parentElement).toHaveClass('plan-card-visual');
+    expect(document.querySelector('.plan-visual')).not.toContainElement(credit);
+    expect(credit.querySelector('autora')).toBeNull();
+    fireEvent.error(document.querySelector('.plan-visual img'));
+    expect(screen.queryByText('Fundació & <autora>')).not.toBeInTheDocument();
+  });
+
+  it('shows a known-empty Gencat card image without a credit element', () => {
+    render(
+      <MemoryRouter>
+        <PlanCard plan={{
+          id: 47, kind: 'event', title: 'Known empty credit', start_date: '2026-09-20',
+          end_date: '2026-09-20', permanent: false, free: false,
+          image: { url: '/api/media/gencat/47', kind: 'official', source: 'gencat' },
+          categories: [{ slug: 'cultura', name: 'Cultura', icon: 'book-open' }],
+        }} />
+      </MemoryRouter>,
+    );
+    expect(document.querySelector('.plan-visual img')).toBeInTheDocument();
+    expect(document.querySelector('.card-image-attribution')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['real', 'Auditori-Palau de Congressos de Girona (foto: Aniol Resclosa). Font: el mateix Auditori'],
+    ['long', 'Complete photographic credit. Source: Agenda Cultural de Catalunya. '.repeat(25).trim()],
+    ['unbroken', 'A'.repeat(160)],
+  ])('keeps the complete %s attribution in normal card flow', (_label, attribution) => {
+    render(
+      <MemoryRouter>
+        <PlanCard plan={{
+          id: 48, kind: 'event', title: 'Complete credit', start_date: '2026-09-20',
+          end_date: '2026-09-20', permanent: false, free: false,
+          image: {
+            url: '/api/media/gencat/48', kind: 'official', source: 'gencat', attribution,
+          },
+          categories: [{ slug: 'cultura', name: 'Cultura', icon: 'book-open' }],
+        }} />
+      </MemoryRouter>,
+    );
+    const credit = document.querySelector('.card-image-attribution');
+    expect(credit.textContent).toBe(attribution);
+    expect(credit.parentElement).toHaveClass('plan-card-visual');
+    expect(document.querySelector('.plan-visual')).not.toContainElement(credit);
+  });
 });

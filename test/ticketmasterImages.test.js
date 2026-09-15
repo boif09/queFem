@@ -48,8 +48,8 @@ function insertImage(db, planSourceId, role, url, width, height, attribution = n
   const now = NOW.toISOString();
   db.prepare(`INSERT INTO plan_source_images (
     plan_source_id, role, url, ratio, width, height, is_fallback,
-    attribution, last_seen_at, created_at, updated_at
-  ) VALUES (?, ?, ?, '16_9', ?, ?, 0, ?, ?, ?, ?)`)
+    attribution, attribution_known, last_seen_at, created_at, updated_at
+  ) VALUES (?, ?, ?, '16_9', ?, ?, 0, ?, 1, ?, ?, ?)`)
     .run(planSourceId, role, url, width, height, attribution, now, now, now);
 }
 
@@ -80,7 +80,7 @@ test('API exposes only controlled Ticketmaster images with card/detail roles and
 
     const gencatPlan = insertPlan(db, 'gencat-image');
     const gencatSource = insertSource(db, gencatPlan, 'gencat-agenda', 'gencat-image');
-    insertImage(db, gencatSource, 'card', 'https://example.test/gencat.jpg', 640, 360);
+    insertImage(db, gencatSource, 'card', 'https://agenda.cultura.gencat.cat/content/dam/agenda/gencat.jpg', 640, 360);
     db.prepare("UPDATE plans SET image_url='https://example.test/gencat-raw.jpg', image_reuse_allowed=1 WHERE id=?").run(gencatPlan);
 
     const noImagePlan = insertPlan(db, 'without-image');
@@ -104,8 +104,9 @@ test('API exposes only controlled Ticketmaster images with card/detail roles and
       url: `/api/media/ticketmaster/${db.prepare("SELECT id FROM plan_source_images WHERE plan_source_id=? AND role='card'").get(ticketmasterSource).id}`,
       kind: 'official', width: 640, height: 360, source: 'ticketmaster',
     });
-    assert.equal(byId.get(gencatPlan).image.kind, 'generic');
-    assert.equal(byId.get(gencatPlan).image.source, 'tenspla-fallback');
+    assert.equal(byId.get(gencatPlan).image.kind, 'official');
+    assert.equal(byId.get(gencatPlan).image.source, 'gencat');
+    assert.match(byId.get(gencatPlan).image.url, /^\/api\/media\/gencat\/\d+$/);
     assert.equal(byId.get(gencatPlan).image_url, 'https://example.test/gencat-raw.jpg');
     assert.equal(byId.get(noImagePlan).image.kind, 'generic');
     assert.match(byId.get(noImagePlan).image.url, /^\/media\/fallbacks\/card\//);

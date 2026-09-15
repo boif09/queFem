@@ -28,8 +28,8 @@ function seedPlan(db, { shared = false, eventId = 'tm-remove' } = {}) {
 async function seedCachedImage(db, planSourceId, cacheDirectory) {
   const imageId = Number(db.prepare(`INSERT INTO plan_source_images (
     plan_source_id, role, url, ratio, width, height, is_fallback,
-    attribution, last_seen_at, created_at, updated_at
-  ) VALUES (?,'card','https://s1.ticketm.net/removal.jpg','16_9',640,360,0,NULL,?,?,?)`)
+    attribution, attribution_known, last_seen_at, created_at, updated_at
+  ) VALUES (?,'card','https://s1.ticketm.net/removal.jpg','16_9',640,360,0,NULL,1,?,?,?)`)
     .run(planSourceId, NOW, NOW, NOW).lastInsertRowid);
   const cache = new TicketmasterImageCache({
     directory: cacheDirectory, ttlHours: 6, now: () => new Date(NOW),

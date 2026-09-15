@@ -59,6 +59,7 @@ export class PlanQueryRepository {
     now = () => new Date(),
     ticketmasterImagesEnabled = false,
     feverImagesEnabled = false,
+    gencatImagesEnabled = true,
     fallbackImageLibrary = null,
   } = {}) {
     this.db = db;
@@ -66,6 +67,7 @@ export class PlanQueryRepository {
     this.now = now;
     this.ticketmasterImagesEnabled = ticketmasterImagesEnabled;
     this.feverImagesEnabled = feverImagesEnabled;
+    this.gencatImagesEnabled = gencatImagesEnabled;
     this.fallbackImageLibrary = fallbackImageLibrary;
   }
 
@@ -329,7 +331,7 @@ export class PlanQueryRepository {
     for (const plan of plans) plan.image = null;
     if (plans.length === 0) return;
     const placeholders = plans.map(() => '?').join(', ');
-    const rows = (!this.ticketmasterImagesEnabled && !this.feverImagesEnabled) ? [] : this.db.prepare(`
+    const rows = (!this.ticketmasterImagesEnabled && !this.feverImagesEnabled && !this.gencatImagesEnabled) ? [] : this.db.prepare(`
       SELECT plan_id, image_id, width, height, attribution, source_key
       FROM (
         SELECT
@@ -337,21 +339,34 @@ export class PlanQueryRepository {
           CASE WHEN psi.ratio='unknown' THEN NULL ELSE psi.width END width,
           CASE WHEN psi.ratio='unknown' THEN NULL ELSE psi.height END height,
           psi.attribution,
-          CASE WHEN s.key='fever' THEN 'fever' ELSE 'ticketmaster' END source_key,
+          CASE
+            WHEN s.key = 'fever' THEN 'fever'
+            WHEN s.key = 'gencat-agenda' THEN 'gencat'
+            ELSE 'ticketmaster'
+          END source_key,
           ROW_NUMBER() OVER (
             PARTITION BY ps.plan_id
-            ORDER BY psi.is_fallback ASC, psi.last_seen_at DESC, psi.id ASC
+            ORDER BY
+              CASE WHEN s.key IN ('ticketmaster-discovery-feed', 'fever') THEN 0 ELSE 1 END,
+              psi.is_fallback ASC, psi.last_seen_at DESC, psi.id ASC
           ) image_rank
         FROM plan_source_images psi
         JOIN plan_sources ps ON ps.id = psi.plan_source_id
         JOIN sources s ON s.id = ps.source_id
         WHERE ps.plan_id IN (${placeholders})
           AND psi.role = ?
-          AND ((s.key = 'ticketmaster-discovery-feed' AND ? = 1) OR (s.key = 'fever' AND ? = 1))
+          AND psi.attribution_known = 1
+          AND (s.key <> 'gencat-agenda' OR s.allows_images = 1)
+          AND ((s.key = 'ticketmaster-discovery-feed' AND ? = 1)
+            OR (s.key = 'fever' AND ? = 1)
+            OR (s.key = 'gencat-agenda' AND ? = 1))
           AND s.enabled = 1
       ) ranked
       WHERE image_rank = 1
-    `).all(...plans.map(({ id }) => id), role, Number(this.ticketmasterImagesEnabled), Number(this.feverImagesEnabled));
+    `).all(
+      ...plans.map(({ id }) => id), role,
+      Number(this.ticketmasterImagesEnabled), Number(this.feverImagesEnabled), Number(this.gencatImagesEnabled),
+    );
     const byPlan = new Map(rows.map((row) => [row.plan_id, {
       url: `/api/media/${row.source_key || 'ticketmaster'}/${row.image_id}`,
       kind: 'official',

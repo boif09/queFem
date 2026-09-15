@@ -49,6 +49,13 @@ test('bounds remote media concurrency configuration to a strict integer range', 
   }
 });
 
+test('uses a bounded configurable Gencat historical image budget', () => {
+  assert.equal(loadConfig({}).gencatHistoricalImageResolutionBudget, 100);
+  assert.equal(loadConfig({ GENCAT_HISTORICAL_IMAGE_RESOLUTION_BUDGET: '0' }).gencatHistoricalImageResolutionBudget, 0);
+  assert.equal(loadConfig({ GENCAT_HISTORICAL_IMAGE_RESOLUTION_BUDGET: '25' }).gencatHistoricalImageResolutionBudget, 25);
+  assert.equal(loadConfig({ GENCAT_HISTORICAL_IMAGE_RESOLUTION_BUDGET: '-1' }).gencatHistoricalImageResolutionBudget, 100);
+});
+
 test('retains cutoff-day, undated and permanent plans', () => {
   assert.equal(isPlanRetained({ permanent: 0, end_date: '2026-05-18' }, '2026-05-19'), false);
   assert.equal(isPlanRetained({ permanent: 0, end_date: '2026-05-19' }, '2026-05-19'), true);

@@ -190,8 +190,8 @@ function seedImage(db, { sourceKey, sourceRecordId, url }) {
   ) VALUES (?,?,?,'{}',?,?)`).run(planId, source.id, sourceRecordId, timestamp, timestamp).lastInsertRowid);
   return Number(db.prepare(`INSERT INTO plan_source_images (
     plan_source_id, role, url, ratio, width, height, is_fallback,
-    attribution, last_seen_at, created_at, updated_at
-  ) VALUES (?,'card',?,'16_9',640,360,0,NULL,?,?,?)`)
+    attribution, attribution_known, last_seen_at, created_at, updated_at
+  ) VALUES (?,'card',?,'16_9',640,360,0,NULL,1,?,?,?)`)
     .run(planSourceId, url, timestamp, timestamp, timestamp).lastInsertRowid);
 }
 

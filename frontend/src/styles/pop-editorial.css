@@ -213,6 +213,7 @@ h1, h2, h3, h4, h5, h6, strong, .legal-section h2, .prose { font-family: var(--f
 .detail-media { margin: 0; }
 .detail-visual.has-image { aspect-ratio: 16 / 9; }
 .image-attribution { margin-top: 10px; color: var(--color-muted); font-size: .72rem; text-align: right; }
+.card-image-attribution { border-bottom: var(--border-strong); background: var(--color-background); color: var(--color-text); font-weight: 700; }
 .detail-visual .category-icon-large { width: 110px; height: 110px; font-size: 3rem; }
 .detail-hero { padding: 48px 0 44px; background: transparent !important; }
 .detail-title-row { grid-template-columns: 1fr; }

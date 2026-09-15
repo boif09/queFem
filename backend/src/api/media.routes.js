@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { TicketmasterMediaError } from '../ticketmaster/imageProxy.js';
 
-export function createMediaRouter({ repository, proxy, enabled, feverProxy, feverEnabled = false }) {
+export function createMediaRouter({
+  repository, proxy, enabled, feverProxy, feverEnabled = false, gencatProxy, gencatEnabled = true,
+}) {
   const router = Router();
   router.get('/ticketmaster/:imageId', async (request, response) => {
     try {
@@ -39,6 +41,27 @@ export function createMediaRouter({ repository, proxy, enabled, feverProxy, feve
       return response.status(200).send(media.data);
     } catch (error) {
       if (error instanceof TicketmasterMediaError) return response.status(error.status).json({ error: { code: error.code, message: error.message } });
+      throw error;
+    }
+  });
+  router.get('/gencat/:imageId', async (request, response) => {
+    try {
+      if (Object.keys(request.query).length || !gencatEnabled || !/^\d+$/.test(request.params.imageId)) {
+        return response.status(404).json({ error: { code: 'MEDIA_NOT_FOUND', message: 'Imatge no trobada.' } });
+      }
+      const image = repository.findServableImage(Number(request.params.imageId), 'gencat-agenda');
+      if (!image) return response.status(404).json({ error: { code: 'MEDIA_NOT_FOUND', message: 'Imatge no trobada.' } });
+      const media = await gencatProxy.get(image);
+      response.set({
+        'Cache-Control': 'public, max-age=3600', 'Content-Type': media.contentType,
+        'Content-Length': String(media.data.length), 'X-Content-Type-Options': 'nosniff',
+        'X-Tenspla-Cache': media.cacheStatus,
+      });
+      return response.status(200).send(media.data);
+    } catch (error) {
+      if (error instanceof TicketmasterMediaError) {
+        return response.status(error.status).json({ error: { code: error.code, message: error.message } });
+      }
       throw error;
     }
   });

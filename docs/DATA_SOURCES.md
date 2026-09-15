@@ -6,9 +6,29 @@ Status: ACTIVE
 Type: Official Open Data
 Commercial reuse: allowed
 Attribution: required
-Images: do not reuse automatically. Mientras no exista confirmación explícita sobre derechos de
-terceros, cualquier metadata de imagen se conserva como procedencia y no se usa como imagen de
-visualización; el resolver local usa la librería genérica de Tens Pla? cuando tiene binario.
+Images: reusable, as explicitly confirmed by the Generalitat / Departament de Cultura on
+2026-09-15. If the public `Peu d'imatge` contains text, Tens Pla? must reproduce that text; an
+existing blank footer positively means that no image credit is required.
+
+The importer selects only the first usable `imatges` DAM path and resolves its footer from the
+matching carousel slide at `https://agenda.cultura.gencat.cat/ca/activitat.html/{codi}`. This is a
+narrow, approved `PUBLIC_BUT_FRAGILE` extraction contract, not general-purpose scraping. It fails
+closed on any network, response, path-correlation or structure uncertainty. Unknown attribution
+is stored durably but never selected or served; known-empty attribution is separately represented
+and may be served without invented copy. The browser receives only same-origin
+`/api/media/gencat/:imageId` URLs.
+
+Resolution is incremental: new selected images, changed `imatges`, and unresolved metadata older
+than `GENCAT_IMAGE_METADATA_RETRY_HOURS` (24 by default). The serial importer awaits one resolution
+at a time; starts are spaced by 500 ms. Historical unresolved records are limited to
+`GENCAT_HISTORICAL_IMAGE_RESOLUTION_BUDGET` (100 by default) per run, while new and changed images
+bypass that budget. A durable filesystem lock shared by cron and manual invocations prevents
+overlap. Normal reimport still persists deferred records without changing their image-independent
+provenance identity.
+
+Credits of at most 160 characters keep both `card` and `detail` roles. Longer confirmed credits
+are detail-only, so the complete required text remains visible without making result cards
+unusable; the detail page never truncates it.
 
 Importer:
 gencatAgenda.importer.js
@@ -61,8 +81,8 @@ Technical retention and removal:
   feature flag is enabled. Binary images use a six-hour temporary server-side cache by default.
 - Media requests revalidate the active Ticketmaster provenance before every cache read. The
   browser receives a same-origin URL and a one-hour HTTP cache policy without `immutable`.
-- Gencat images remain excluded and `allows_images = false` remains unchanged for both sources;
-  the local Ticketmaster mechanism is source-key-specific rather than a generic image permission.
+- Gencat uses its separately confirmed image policy and fail-closed resolver. Ticketmaster's legal
+  flags and feature gate remain source-specific and unchanged.
 - The metadata sync is incremental: missing or older than 24 hours by default; `--force` is manual.
 - Removal deletes provenance metadata through FK cascade and invalidates its filesystem cache.
 - A manual removal is available as `npm run ticketmaster:remove -- EVENT_ID --dry-run`, followed after review and backup by the same command without `--dry-run`. See `docs/TICKETMASTER_REMOVAL.md`.

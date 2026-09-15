@@ -61,6 +61,7 @@
     "entities": "^8.0.0",
     "express": "^5.1.0",
     "i18next": "^25.6.0",
+    "parse5": "^8.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^16.4.0",

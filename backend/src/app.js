@@ -15,6 +15,7 @@ import {
   MediaRemoteFetchLimiter,
   TicketmasterImageProxy,
   validateFeverImageUrl,
+  validateGencatImageUrl,
 } from './ticketmaster/imageProxy.js';
 import { loadFallbackImageLibrary } from './images/fallbackImageLibrary.js';
 
@@ -32,6 +33,9 @@ export function createApp({
   feverImagesEnabled = false, feverImageCachePath, feverImageCacheTtlHours = 6,
   feverImageCacheMaxMb = 512, feverImageRequestTimeoutMs = 15_000,
   feverImageMaximumBytes = 10 * 1024 * 1024, feverImageFetchImpl,
+  gencatImagesEnabled = true, gencatImageCachePath, gencatImageCacheTtlHours = 6,
+  gencatImageCacheMaxMb = 512, gencatImageRequestTimeoutMs = 15_000,
+  gencatImageMaximumBytes = 10 * 1024 * 1024, gencatImageFetchImpl,
   mediaRemoteFetchConcurrency = DEFAULT_MEDIA_REMOTE_FETCH_CONCURRENCY,
   fallbackImageLibrary,
   seoTemplatePath,
@@ -50,7 +54,7 @@ export function createApp({
     }
   }
   const repository = new PlanQueryRepository(db, {
-    eventRetentionDays, now, ticketmasterImagesEnabled, feverImagesEnabled,
+    eventRetentionDays, now, ticketmasterImagesEnabled, feverImagesEnabled, gencatImagesEnabled,
     fallbackImageLibrary: resolvedFallbackImageLibrary,
   });
   const imageRepository = new PlanSourceImageRepository(db);
@@ -71,13 +75,22 @@ export function createApp({
   });
   const feverCache = new TicketmasterImageCache({ directory: feverImageCachePath || `${process.cwd()}/data/cache/fever-images`, ttlHours: feverImageCacheTtlHours, maximumMb: feverImageCacheMaxMb, now });
   const feverProxy = new TicketmasterImageProxy({ cache: feverCache, fetchImpl: feverImageFetchImpl, timeoutMs: feverImageRequestTimeoutMs, maximumBytes: feverImageMaximumBytes, validImageIds: () => imageRepository.findAllImageIds(), validateUrl: validateFeverImageUrl, limiter: mediaRemoteFetchLimiter });
+  const gencatCache = new TicketmasterImageCache({
+    directory: gencatImageCachePath || `${process.cwd()}/data/cache/gencat-images`,
+    ttlHours: gencatImageCacheTtlHours, maximumMb: gencatImageCacheMaxMb, now,
+  });
+  const gencatProxy = new TicketmasterImageProxy({
+    cache: gencatCache, fetchImpl: gencatImageFetchImpl, timeoutMs: gencatImageRequestTimeoutMs,
+    maximumBytes: gencatImageMaximumBytes, validImageIds: () => imageRepository.findAllImageIds(),
+    validateUrl: validateGencatImageUrl, limiter: mediaRemoteFetchLimiter,
+  });
 
   app.disable('x-powered-by');
   app.use(createSeoRouter(repository, { templatePath: seoTemplatePath, template: seoTemplate }));
   app.use('/api/sitemap.xml', createSitemapRouter(repository));
   app.use('/api/media', createMediaRouter({
     repository: imageRepository, proxy: imageProxy, enabled: ticketmasterImagesEnabled,
-    feverProxy, feverEnabled: feverImagesEnabled,
+    feverProxy, feverEnabled: feverImagesEnabled, gencatProxy, gencatEnabled: gencatImagesEnabled,
   }));
   app.use('/api/plans', createPlansRouter(repository, defaultLanguage));
   app.use('/api/categories', createCategoriesRouter(repository));

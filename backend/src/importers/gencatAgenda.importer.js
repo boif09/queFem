@@ -1,6 +1,16 @@
 import { createHash } from 'node:crypto';
 import { BaseImporter } from './baseImporter.js';
 import { canonicalJson } from '../db/repositories/plan.repository.js';
+import { PlanSourceImageRepository } from '../db/repositories/planSourceImage.repository.js';
+import {
+  GencatImageMetadataResolver,
+  gencatImageUrl,
+  selectGencatImagePath,
+} from '../gencat/imageMetadataResolver.js';
+import {
+  DEFAULT_GENCAT_HISTORICAL_IMAGE_RESOLUTION_BUDGET,
+  MAX_GENCAT_CARD_ATTRIBUTION_LENGTH,
+} from '../gencat/imagePolicy.js';
 import { isOutsideCatalonia } from '../location/cataloniaScope.js';
 import { normalizePlan } from '../normalizers/plan.normalizer.js';
 import { nullableString } from '../normalizers/text.normalizer.js';
@@ -24,7 +34,7 @@ function parseMetadataDate(unixSeconds) {
   return Number.isFinite(seconds) ? new Date(seconds * 1000).toISOString() : null;
 }
 
-function recordWithoutRestrictedImages(record) {
+function recordForIdentity(record) {
   const {
     imatges: _images,
     destacada_imatge: _featuredImage,
@@ -38,6 +48,14 @@ function recordWithoutRestrictedImages(record) {
   return allowedRecord;
 }
 
+function approvedSourcePayload(record) {
+  const { imgapp: _appImage, ...payload } = record;
+  if (typeof payload.descripcio_html === 'string') {
+    payload.descripcio_html = payload.descripcio_html.replace(/<img\b[^>]*>/gi, '');
+  }
+  return payload;
+}
+
 export class GencatAgendaImporter extends BaseImporter {
   constructor({
     db,
@@ -46,6 +64,10 @@ export class GencatAgendaImporter extends BaseImporter {
     retentionDays = 0,
     now = () => new Date(),
     logger = console,
+    imagesEnabled = true,
+    imageMetadataResolver,
+    imageMetadataRetryHours = 24,
+    historicalImageResolutionBudget = DEFAULT_GENCAT_HISTORICAL_IMAGE_RESOLUTION_BUDGET,
   }) {
     super({ db, logger });
     if (typeof fetchImpl !== 'function') throw new TypeError('Cal una implementació de fetch.');
@@ -55,6 +77,30 @@ export class GencatAgendaImporter extends BaseImporter {
     this.now = now;
     this.cutoff = null;
     this.datasetUpdatedAt = null;
+    this.imagesEnabled = imagesEnabled;
+    this.imageMetadataResolver = imageMetadataResolver || new GencatImageMetadataResolver({ fetchImpl });
+    this.imageMetadataRetryMs = imageMetadataRetryHours * 60 * 60 * 1000;
+    if (!Number.isSafeInteger(historicalImageResolutionBudget) || historicalImageResolutionBudget < 0) {
+      throw new TypeError('El pressupost de resolució històrica Gencat no és vàlid.');
+    }
+    this.historicalImageResolutionBudget = historicalImageResolutionBudget;
+    this.historicalImageResolutions = 0;
+    this.deferredHistoricalImageResolutions = 0;
+    this.sourceImages = new PlanSourceImageRepository(db);
+  }
+
+  async run() {
+    this.historicalImageResolutions = 0;
+    this.deferredHistoricalImageResolutions = 0;
+    return super.run();
+  }
+
+  imageMetadataSummary() {
+    return {
+      historicalResolutionBudget: this.historicalImageResolutionBudget,
+      historicalResolutions: this.historicalImageResolutions,
+      deferredHistoricalResolutions: this.deferredHistoricalImageResolutions,
+    };
   }
 
   getSourceId() {
@@ -71,14 +117,64 @@ export class GencatAgendaImporter extends BaseImporter {
     // for the same activity and location. An immutable payload identity preserves
     // every distinct official variant instead of overwriting one of them.
     const payloadHash = createHash('sha256')
-      .update(canonicalJson(recordWithoutRestrictedImages(record)))
+      .update(canonicalJson(recordForIdentity(record)))
       .digest('hex')
       .slice(0, 16);
     return `${record.codi}@${payloadHash}`;
   }
 
   getSourcePayload(record) {
-    return recordWithoutRestrictedImages(record);
+    return approvedSourcePayload(record);
+  }
+
+  async prepareRecord(record, normalized, source, sourceRecordId) {
+    if (!this.imagesEnabled || source.allows_images !== 1) return null;
+    const imagePath = selectGencatImagePath(record.imatges);
+    if (!imagePath) return { action: 'remove' };
+    const url = gencatImageUrl(imagePath);
+    const priorSourceRecord = this.plans.getSourceRecord(source.id, sourceRecordId);
+    const existing = this.sourceImages.findResolutionBySourceRecord(source.id, sourceRecordId);
+    if (existing && existing.url === url) {
+      if (existing.attribution_known === 1) return null;
+      const checkedAt = Date.parse(existing.updated_at);
+      if (Number.isFinite(checkedAt) && this.now().getTime() - checkedAt < this.imageMetadataRetryMs) return null;
+    }
+    const historicalResolution = Boolean(priorSourceRecord) && (!existing || existing.url === url);
+    if (historicalResolution) {
+      if (this.historicalImageResolutions >= this.historicalImageResolutionBudget) {
+        this.deferredHistoricalImageResolutions += 1;
+        return { action: 'defer' };
+      }
+      this.historicalImageResolutions += 1;
+    }
+    const metadata = await this.imageMetadataResolver.resolve({ codi: record.codi, imagePath });
+    const selection = {
+      url,
+      ratio: 'unknown',
+      width: 1,
+      height: 1,
+      isFallback: false,
+      attribution: metadata.attribution,
+      attributionKnown: metadata.attributionKnown,
+    };
+    const cardSuitable = metadata.attributionKnown !== true
+      || metadata.attribution === null
+      || metadata.attribution.length <= MAX_GENCAT_CARD_ATTRIBUTION_LENGTH;
+    return {
+      action: 'persist',
+      selections: { ...(cardSuitable ? { card: selection } : {}), detail: selection },
+    };
+  }
+
+  async afterPersist(record, normalized, source, sourceRecordId, outcome, prepared) {
+    if (!prepared || prepared.action === 'defer') return;
+    const sourceRecord = this.plans.getSourceRecord(source.id, sourceRecordId);
+    if (!sourceRecord) throw new Error('No s’ha trobat la procedència Gencat acabada de persistir.');
+    this.sourceImages.persistSelections(
+      sourceRecord.id,
+      prepared.action === 'persist' ? prepared.selections : {},
+      this.now().toISOString(),
+    );
   }
 
   getSourceUrl(record) {

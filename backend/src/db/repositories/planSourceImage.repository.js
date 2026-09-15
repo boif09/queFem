@@ -6,7 +6,8 @@ function sameImage(row, image) {
     && row.width === image.width
     && row.height === image.height
     && row.is_fallback === Number(image.isFallback)
-    && row.attribution === image.attribution;
+    && row.attribution === image.attribution
+    && row.attribution_known === Number(image.attributionKnown ?? true);
 }
 
 export class PlanSourceImageRepository {
@@ -60,6 +61,8 @@ export class PlanSourceImageRepository {
       WHERE psi.id = ?
         AND s.key = ?
         AND s.enabled = 1
+        AND (s.key <> 'gencat-agenda' OR s.allows_images = 1)
+        AND psi.attribution_known = 1
         AND p.status = 'active'
     `).get(imageId, sourceKey);
   }
@@ -71,6 +74,19 @@ export class PlanSourceImageRepository {
   findImageIdsForPlanSource(planSourceId) {
     return this.db.prepare('SELECT id FROM plan_source_images WHERE plan_source_id = ? ORDER BY id')
       .all(planSourceId).map(({ id }) => id);
+  }
+
+  findResolutionBySourceRecord(sourceId, sourceRecordId) {
+    return this.db.prepare(`
+      SELECT psi.*,
+        (SELECT COUNT(*) FROM plan_source_images state_psi
+          WHERE state_psi.plan_source_id = psi.plan_source_id) role_count
+      FROM plan_source_images psi
+      JOIN plan_sources ps ON ps.id = psi.plan_source_id
+      WHERE ps.source_id = ? AND ps.source_record_id = ?
+      ORDER BY CASE psi.role WHEN 'card' THEN 0 ELSE 1 END
+      LIMIT 1
+    `).get(sourceId, sourceRecordId) || null;
   }
 
   persistSelections(planSourceId, selections, now = new Date().toISOString()) {
@@ -89,22 +105,24 @@ export class PlanSourceImageRepository {
           this.db.prepare(`
             INSERT INTO plan_source_images (
               plan_source_id, role, url, ratio, width, height, is_fallback,
-              attribution, last_seen_at, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              attribution, attribution_known, last_seen_at, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `).run(planSourceId, role, image.url, image.ratio, image.width, image.height,
-            Number(image.isFallback), image.attribution, now, now, now);
+            Number(image.isFallback), image.attribution, Number(image.attributionKnown ?? true), now, now, now);
           summary.created += 1;
         } else if (sameImage(existing, image)) {
-          this.db.prepare('UPDATE plan_source_images SET last_seen_at = ? WHERE id = ?').run(now, existing.id);
+          const timestampColumn = image.attributionKnown === false ? 'last_seen_at = ?, updated_at = ?' : 'last_seen_at = ?';
+          const parameters = image.attributionKnown === false ? [now, now, existing.id] : [now, existing.id];
+          this.db.prepare(`UPDATE plan_source_images SET ${timestampColumn} WHERE id = ?`).run(...parameters);
           summary.unchanged += 1;
         } else {
           this.db.prepare(`
             UPDATE plan_source_images SET
               url = ?, ratio = ?, width = ?, height = ?, is_fallback = ?,
-              attribution = ?, last_seen_at = ?, updated_at = ?
+              attribution = ?, attribution_known = ?, last_seen_at = ?, updated_at = ?
             WHERE id = ?
           `).run(image.url, image.ratio, image.width, image.height, Number(image.isFallback),
-            image.attribution, now, now, existing.id);
+            image.attribution, Number(image.attributionKnown ?? true), now, now, existing.id);
           summary.updated += 1;
         }
       }

@@ -11,7 +11,10 @@ Registro ligero de decisiones demostrables en documentación, configuración o c
 
 - Se priorizan fuentes oficiales y datos abiertos. Una fuente nueva requiere revisar licencia/términos; no se hace scraping sin aprobación explícita.
 - La procedencia, atribución y actualización se conservan por registro. El plan canónico puede tener varias fuentes.
-- No se presupone que las imágenes sean reutilizables. Gencat se importa sin ellas; las Ticketmaster quedan ligadas a su procedencia y desactivadas por defecto.
+- No se presupone que las imágenes sean reutilizables. Excepción confirmada el 2026-09-15: las
+  imágenes de Agenda Cultural Gencat pueden reutilizarse; se reproduce literalmente el
+  `Peu d'imatge` no vacío y un pie existente vacío no exige crédito. La resolución pública es
+  `PUBLIC_BUT_FRAGILE` y falla cerrada. Ticketmaster mantiene su política y activación separadas.
 - La deduplicación multi-source es conservadora: una coincidencia dudosa se revisa, no se fusiona silenciosamente.
 - Los planes permanentes se conservan. Retirada y purga ofrecen dry-run y límites transaccionales.
 
