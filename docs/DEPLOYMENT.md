@@ -183,9 +183,17 @@ GENCAT_IMAGE_MAX_BYTES=10485760
 
 El import normal resuelve siempre el pie de imágenes nuevas o cuya ruta haya cambiado. Para las
 imágenes históricas sin resolver aplica un presupuesto de 100 por ejecución; las restantes se
-persisten normalmente y continúan en imports posteriores. Los estados desconocidos ya intentados
-respetan además el plazo durable de reintento. Con 10 segundos de timeout de metadata, 100 fallos
-consecutivos pueden ocupar unos 16 minutos y 40 segundos; no es necesario aumentar concurrencia.
+persisten normalmente y continúan en imports posteriores. Antes de consumir ese presupuesto, las
+candidatas históricas se ordenan mediante una consulta local por relevancia pública: actividad
+actual, próximas fechas más cercanas, contenido permanente y, al final, histórico. Las imágenes
+nuevas y las rutas cambiadas no entran en ese orden ni en el presupuesto. Con presupuesto 100, la
+selección reserva proporcionalmente 80 plazas para actividad actual o próxima, 10 para contenido
+permanente y 10 para histórico; los huecos no usados se redistribuyen de forma proporcional entre
+los grupos pendientes. Para otros presupuestos, el redondeo usa los restos mayores, con desempate
+por relevancia. No hay cola persistente y los grupos inferiores siguen siendo alcanzables en cada
+ejecución con backlog suficiente. Los estados desconocidos ya intentados respetan además el plazo
+durable de reintento. Con 10 segundos de timeout de metadata, 100 fallos consecutivos pueden ocupar
+unos 16 minutos y 40 segundos; no es necesario aumentar concurrencia.
 La entrega binaria se hace por `/api/media/gencat/:imageId`; el navegador no recibe la URL DAM.
 La activación efectiva requiere el despliegue y migración normales, que no forman parte de este
 cambio local.

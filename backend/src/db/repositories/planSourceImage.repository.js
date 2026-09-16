@@ -89,6 +89,63 @@ export class PlanSourceImageRepository {
     `).get(sourceId, sourceRecordId) || null;
   }
 
+  findGencatHistoricalImageStates(sourceId, sourceRecordIds, cutoff) {
+    const uniqueIds = [...new Set(sourceRecordIds)];
+    const rows = [];
+    // SQLite reserves some bind parameters internally. Keep this comfortably
+    // below its default limit while still avoiding a query per source record.
+    const batchSize = 900;
+    for (let index = 0; index < uniqueIds.length; index += batchSize) {
+      const ids = uniqueIds.slice(index, index + batchSize);
+      if (!ids.length) continue;
+      rows.push(...this.db.prepare(`
+        SELECT
+          ps.source_record_id,
+          p.status,
+          p.start_date,
+          p.end_date,
+          p.permanent,
+          image.url AS image_url,
+          image.attribution_known AS attribution_known,
+          image.updated_at AS image_updated_at,
+          EXISTS (
+            SELECT 1
+            FROM plan_sources visibility_ps
+            JOIN sources visibility_s ON visibility_s.id = visibility_ps.source_id
+            WHERE visibility_ps.plan_id = p.id AND visibility_s.enabled = 1
+          ) AS has_enabled_source,
+          EXISTS (
+            SELECT 1
+            FROM plan_sources occurrence_ps
+            JOIN plan_occurrences occurrence_o ON occurrence_o.plan_source_id = occurrence_ps.id
+            JOIN sources occurrence_s ON occurrence_s.id = occurrence_ps.source_id
+            WHERE occurrence_ps.plan_id = p.id AND occurrence_s.enabled = 1
+          ) AS has_enabled_occurrence_history,
+          (
+            SELECT MIN(occurrence_o.local_date)
+            FROM plan_sources occurrence_ps
+            JOIN plan_occurrences occurrence_o ON occurrence_o.plan_source_id = occurrence_ps.id
+            JOIN sources occurrence_s ON occurrence_s.id = occurrence_ps.source_id
+            WHERE occurrence_ps.plan_id = p.id
+              AND occurrence_s.enabled = 1
+              AND occurrence_o.status = 'active'
+              AND occurrence_o.local_date >= ?
+          ) AS next_active_occurrence
+        FROM plan_sources ps
+        JOIN plans p ON p.id = ps.plan_id
+        LEFT JOIN plan_source_images image ON image.id = (
+          SELECT state_image.id
+          FROM plan_source_images state_image
+          WHERE state_image.plan_source_id = ps.id
+          ORDER BY CASE state_image.role WHEN 'card' THEN 0 ELSE 1 END
+          LIMIT 1
+        )
+        WHERE ps.source_id = ? AND ps.source_record_id IN (${ids.map(() => '?').join(', ')})
+      `).all(cutoff, sourceId, ...ids));
+    }
+    return new Map(rows.map((row) => [row.source_record_id, row]));
+  }
+
   persistSelections(planSourceId, selections, now = new Date().toISOString()) {
     return this.db.transaction(() => {
       const summary = { created: 0, updated: 0, unchanged: 0, removed: 0 };

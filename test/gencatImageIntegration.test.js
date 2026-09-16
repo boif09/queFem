@@ -5,7 +5,8 @@ import path from 'node:path';
 import test from 'node:test';
 import request from 'supertest';
 import { createApp } from '../backend/src/app.js';
-import { GencatAgendaImporter } from '../backend/src/importers/gencatAgenda.importer.js';
+import { GencatAgendaImporter, selectFairHistoricalImageCandidates } from '../backend/src/importers/gencatAgenda.importer.js';
+import { PlanOccurrenceRepository } from '../backend/src/db/repositories/planOccurrence.repository.js';
 import { PlanQueryRepository } from '../backend/src/db/repositories/planQuery.repository.js';
 import { withTestDatabase } from './helpers.js';
 
@@ -39,6 +40,72 @@ function importer(db, input, imageMetadataResolver, overrides = {}) {
 function imageState(db) {
   return db.prepare(`SELECT role,url,attribution,attribution_known FROM plan_source_images ORDER BY role`).all();
 }
+
+function fairnessCandidates(prefix, count, tier) {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `${prefix}-${index}`, priority: { tier, date: `${index}` }, originalIndex: index,
+  }));
+}
+
+function fairnessCounts(candidates) {
+  return candidates.reduce((counts, { id }) => {
+    const prefix = id.split('-')[0];
+    counts[prefix] = (counts[prefix] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+test('fair historical selection preserves relevance while giving every tier reachable capacity', () => {
+  const high = fairnessCandidates('high', 220, 1);
+  const permanent = fairnessCandidates('permanent', 30, 2);
+  const historical = fairnessCandidates('historical', 30, 3);
+  const backlog = [...high, ...permanent, ...historical];
+  const first = selectFairHistoricalImageCandidates(backlog, 100);
+  assert.deepEqual(fairnessCounts(first), { high: 80, permanent: 10, historical: 10 });
+  assert.deepEqual(first.slice(0, 3).map(({ id }) => id), ['high-0', 'high-1', 'high-2']);
+
+  const afterFirst = backlog.filter((candidate) => !new Set(first).has(candidate));
+  const second = selectFairHistoricalImageCandidates(afterFirst, 100);
+  assert.deepEqual(fairnessCounts(second), { high: 80, permanent: 10, historical: 10 });
+
+  const noPermanent = selectFairHistoricalImageCandidates([
+    ...fairnessCandidates('high', 100, 1), ...fairnessCandidates('historical', 100, 3),
+  ], 100);
+  assert.deepEqual(fairnessCounts(noPermanent), { high: 89, historical: 11 });
+
+  const noHistorical = selectFairHistoricalImageCandidates([
+    ...fairnessCandidates('high', 100, 1), ...fairnessCandidates('permanent', 100, 2),
+  ], 100);
+  assert.deepEqual(fairnessCounts(noHistorical), { high: 89, permanent: 11 });
+
+  const onlyHigh = selectFairHistoricalImageCandidates(fairnessCandidates('high', 101, 1), 100);
+  assert.equal(onlyHigh.length, 100);
+  assert.deepEqual(fairnessCounts(onlyHigh), { high: 100 });
+
+  const shortHigh = selectFairHistoricalImageCandidates([
+    ...fairnessCandidates('high', 50, 1),
+    ...fairnessCandidates('permanent', 100, 2),
+    ...fairnessCandidates('historical', 100, 3),
+  ], 100);
+  assert.deepEqual(fairnessCounts(shortHigh), { high: 50, permanent: 25, historical: 25 });
+
+  assert.deepEqual(selectFairHistoricalImageCandidates(backlog, 0), []);
+  for (let budget = 1; budget < 10; budget += 1) {
+    const selected = selectFairHistoricalImageCandidates(backlog, budget);
+    assert.ok(selected.length <= budget);
+    assert.deepEqual(selected, selectFairHistoricalImageCandidates(backlog, budget));
+  }
+
+  const currentThenUpcoming = [
+    { id: 'current-first', priority: { tier: 0, date: '2026-09-15' } },
+    { id: 'current-second', priority: { tier: 0, date: '2026-09-15' } },
+    { id: 'upcoming-near', priority: { tier: 1, date: '2026-09-16' } },
+    { id: 'upcoming-later', priority: { tier: 1, date: '2026-09-20' } },
+  ];
+  assert.deepEqual(selectFairHistoricalImageCandidates(currentThenUpcoming, 4).map(({ id }) => id), [
+    'current-first', 'current-second', 'upcoming-near', 'upcoming-later',
+  ]);
+});
 
 test('repeated unchanged imports do not refetch resolved Gencat metadata', async () => {
   await withTestDatabase(async (db) => {
@@ -182,6 +249,82 @@ test('historical image enrichment stops at its budget and continues on the next 
     assert.equal(secondImporter.imageMetadataSummary().historicalResolutions, 1);
     assert.equal(secondImporter.imageMetadataSummary().deferredHistoricalResolutions, 0);
     assert.equal(db.prepare('SELECT COUNT(*) count FROM plan_source_images').get().count, 4);
+  });
+});
+
+test('historical Gencat image enrichment prioritizes current relevance before upcoming, durable, and expired records', async () => {
+  await withTestDatabase(async (db) => {
+    const rows = [
+      record(FIRST_PATH, { codi: '202609150031', denominaci: 'Expired historical', data_inici: '2026-09-15T00:00:00.000', data_fi: '2026-09-15T00:00:00.000' }),
+      record(FIRST_PATH, { codi: '202609150032', denominaci: 'Distant upcoming', data_inici: '2026-10-20T00:00:00.000', data_fi: '2026-10-20T00:00:00.000' }),
+      record(FIRST_PATH, { codi: '202609150033', denominaci: 'Permanent activity', permanent: 'Si' }),
+      record(FIRST_PATH, { codi: '202609150034', denominaci: 'Near upcoming', data_inici: '2026-09-16T00:00:00.000', data_fi: '2026-09-16T00:00:00.000' }),
+      record(FIRST_PATH, { codi: '202609150035', denominaci: 'Current activity', data_inici: '2026-09-15T00:00:00.000', data_fi: '2026-09-15T00:00:00.000' }),
+      record(FIRST_PATH, { codi: '202609150036', denominaci: 'Active long-running', data_inici: '2026-08-01T00:00:00.000', data_fi: '2026-10-01T00:00:00.000' }),
+    ];
+    const resolvedCodes = [];
+    const metadata = { resolve: async ({ codi, imagePath }) => {
+      resolvedCodes.push(codi);
+      return { imagePath, attribution: null, attributionKnown: true };
+    } };
+    await importer(db, rows, metadata, { imagesEnabled: false }).run();
+    db.prepare("UPDATE plans SET end_date = '2026-09-14' WHERE original_title = 'Expired historical'").run();
+
+    await importer(db, rows, metadata, { historicalImageResolutionBudget: 6 }).run();
+    assert.deepEqual(resolvedCodes, [
+      '202609150035', '202609150036', '202609150034', '202609150032', '202609150033', '202609150031',
+    ]);
+  });
+});
+
+test('historical Gencat image priority follows enabled occurrence semantics used by public upcoming plans', async () => {
+  await withTestDatabase(async (db) => {
+    const current = record(FIRST_PATH, { codi: '202609150041', denominaci: 'Legacy current', data_inici: '2026-09-15T00:00:00.000', data_fi: '2026-09-15T00:00:00.000' });
+    const occurrenceAware = record(FIRST_PATH, { codi: '202609150042', denominaci: 'Occurrence next', data_inici: '2026-09-15T00:00:00.000', data_fi: '2026-09-15T00:00:00.000' });
+    const later = record(FIRST_PATH, { codi: '202609150043', denominaci: 'Legacy later', data_inici: '2026-09-17T00:00:00.000', data_fi: '2026-09-17T00:00:00.000' });
+    const rows = [later, occurrenceAware, current];
+    const resolvedCodes = [];
+    const metadata = { resolve: async ({ codi, imagePath }) => {
+      resolvedCodes.push(codi);
+      return { imagePath, attribution: null, attributionKnown: true };
+    } };
+    await importer(db, rows, metadata, { imagesEnabled: false }).run();
+    const sourceRecordId = importer(db, occurrenceAware, metadata).getExternalId(occurrenceAware);
+    const sourceId = db.prepare("SELECT id FROM sources WHERE key='gencat-agenda'").get().id;
+    const planSource = db.prepare('SELECT id FROM plan_sources WHERE source_id=? AND source_record_id=?').get(sourceId, sourceRecordId);
+    new PlanOccurrenceRepository(db).upsert(planSource.id, {
+      occurrenceKey: 'next-active-session', startsAt: '2026-09-16T18:00:00+02:00', endsAt: null,
+      localDate: '2026-09-16', localTime: '18:00', timezone: 'Europe/Madrid', status: 'active',
+    });
+    new PlanOccurrenceRepository(db).upsert(planSource.id, {
+      occurrenceKey: 'past-active-session', startsAt: '2026-09-14T18:00:00+02:00', endsAt: null,
+      localDate: '2026-09-14', localTime: '18:00', timezone: 'Europe/Madrid', status: 'active',
+    });
+
+    await importer(db, rows, metadata, { historicalImageResolutionBudget: 3 }).run();
+    assert.deepEqual(resolvedCodes, ['202609150041', '202609150042', '202609150043']);
+  });
+});
+
+test('a budget of 100 resolves exactly 100 prioritized historical Gencat images and defers the remainder', async () => {
+  await withTestDatabase(async (db) => {
+    const rows = Array.from({ length: 101 }, (_, index) => record(FIRST_PATH, {
+      codi: `20260916${String(index).padStart(4, '0')}`,
+      denominaci: `Historical ${index}`,
+      data_inici: '2026-09-20T00:00:00.000', data_fi: '2026-09-20T00:00:00.000',
+    }));
+    let resolutions = 0;
+    const metadata = { resolve: async ({ imagePath }) => {
+      resolutions += 1;
+      return { imagePath, attribution: null, attributionKnown: true };
+    } };
+    await importer(db, rows, metadata, { imagesEnabled: false, pageSize: 200 }).run();
+    const run = importer(db, rows, metadata, { pageSize: 200 });
+    await run.run();
+    assert.equal(resolutions, 100);
+    assert.deepEqual(run.imageMetadataSummary(), {
+      historicalResolutionBudget: 100, historicalResolutions: 100, deferredHistoricalResolutions: 1,
+    });
   });
 });
 

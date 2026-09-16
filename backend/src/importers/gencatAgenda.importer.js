@@ -53,6 +53,74 @@ function approvedSourcePayload(record) {
   return payload;
 }
 
+function historicalImagePriority(state, cutoff) {
+  if (state.status !== 'active' || state.has_enabled_source !== 1) {
+    return { tier: 3, date: null };
+  }
+
+  if (state.has_enabled_occurrence_history === 1) {
+    if (!state.next_active_occurrence) return { tier: 3, date: null };
+    if (state.next_active_occurrence === cutoff) return { tier: 0, date: cutoff };
+    if (state.next_active_occurrence > cutoff) return { tier: 1, date: state.next_active_occurrence };
+    return { tier: 3, date: null };
+  }
+
+  if (state.permanent === 1) return { tier: 2, date: null };
+  const effectiveEndDate = state.end_date || state.start_date;
+  if (!effectiveEndDate || effectiveEndDate < cutoff) return { tier: 3, date: null };
+  if (state.start_date && state.start_date > cutoff) return { tier: 1, date: state.start_date };
+  return { tier: 0, date: cutoff };
+}
+
+const FAIRNESS_WEIGHTS = Object.freeze({ high: 8, permanent: 1, historical: 1 });
+const FAIRNESS_GROUPS = Object.freeze(['high', 'permanent', 'historical']);
+
+function proportionalSlots(capacity, groups) {
+  if (capacity <= 0 || groups.length === 0) return new Map();
+  const totalWeight = groups.reduce((total, group) => total + FAIRNESS_WEIGHTS[group], 0);
+  const slots = new Map(groups.map((group) => [group, Math.floor((capacity * FAIRNESS_WEIGHTS[group]) / totalWeight)]));
+  let remaining = capacity - [...slots.values()].reduce((total, count) => total + count, 0);
+  const byRemainder = [...groups].sort((left, right) => {
+    const leftRemainder = (capacity * FAIRNESS_WEIGHTS[left]) % totalWeight;
+    const rightRemainder = (capacity * FAIRNESS_WEIGHTS[right]) % totalWeight;
+    return rightRemainder - leftRemainder || FAIRNESS_GROUPS.indexOf(left) - FAIRNESS_GROUPS.indexOf(right);
+  });
+  for (let index = 0; remaining > 0; index = (index + 1) % byRemainder.length) {
+    const group = byRemainder[index];
+    slots.set(group, slots.get(group) + 1);
+    remaining -= 1;
+  }
+  return slots;
+}
+
+export function selectFairHistoricalImageCandidates(candidates, budget) {
+  if (budget === 0 || candidates.length === 0) return [];
+  const queues = {
+    high: candidates.filter(({ priority }) => priority.tier <= 1),
+    permanent: candidates.filter(({ priority }) => priority.tier === 2),
+    historical: candidates.filter(({ priority }) => priority.tier === 3),
+  };
+  const offsets = new Map(FAIRNESS_GROUPS.map((group) => [group, 0]));
+  const selected = [];
+  let remaining = budget;
+
+  while (remaining > 0) {
+    const available = FAIRNESS_GROUPS.filter((group) => offsets.get(group) < queues[group].length);
+    if (available.length === 0) break;
+    const slots = proportionalSlots(remaining, available);
+    let claimed = 0;
+    for (const group of available) {
+      const count = Math.min(slots.get(group), queues[group].length - offsets.get(group));
+      if (count === 0) continue;
+      selected.push(...queues[group].slice(offsets.get(group), offsets.get(group) + count));
+      offsets.set(group, offsets.get(group) + count);
+      claimed += count;
+    }
+    remaining -= claimed;
+  }
+  return selected;
+}
+
 export class GencatAgendaImporter extends BaseImporter {
   constructor({
     db,
@@ -90,6 +158,61 @@ export class GencatAgendaImporter extends BaseImporter {
     this.historicalImageResolutions = 0;
     this.deferredHistoricalImageResolutions = 0;
     return super.run();
+  }
+
+  isHistoricalResolutionCandidate(record, sourceRecordId, state) {
+    if (!state) return false;
+    const imagePath = selectGencatImagePath(record.imatges);
+    if (!imagePath) return false;
+    const url = gencatImageUrl(imagePath);
+    if (state.image_url && state.image_url !== url) return false;
+    if (state.attribution_known === 1) return false;
+    if (state.image_url && state.attribution_known === 0) {
+      const checkedAt = Date.parse(state.image_updated_at);
+      if (Number.isFinite(checkedAt) && this.now().getTime() - checkedAt < this.imageMetadataRetryMs) {
+        return false;
+      }
+    }
+    return Boolean(sourceRecordId);
+  }
+
+  prioritizeHistoricalImageRecords(records) {
+    if (!this.imagesEnabled) return records;
+    const source = this.sources.requireApproved(this.getSourceId());
+    if (source.allows_images !== 1) return records;
+
+    const identified = records.map((record, originalIndex) => {
+      try {
+        return { record, originalIndex, sourceRecordId: this.getExternalId(record) };
+      } catch {
+        // Preserve BaseImporter's per-record error reporting for malformed rows.
+        return { record, originalIndex, sourceRecordId: null };
+      }
+    });
+    const states = this.sourceImages.findGencatHistoricalImageStates(
+      source.id,
+      identified.flatMap(({ sourceRecordId }) => sourceRecordId ? [sourceRecordId] : []),
+      this.cutoff,
+    );
+    const candidates = [];
+    const ordinary = [];
+    for (const item of identified) {
+      const state = item.sourceRecordId ? states.get(item.sourceRecordId) : null;
+      if (!this.isHistoricalResolutionCandidate(item.record, item.sourceRecordId, state)) {
+        ordinary.push(item);
+        continue;
+      }
+      candidates.push({ ...item, priority: historicalImagePriority(state, this.cutoff) });
+    }
+    candidates.sort((left, right) => (
+      left.priority.tier - right.priority.tier
+      || String(left.priority.date || '').localeCompare(String(right.priority.date || ''))
+      || left.originalIndex - right.originalIndex
+    ));
+    const selected = selectFairHistoricalImageCandidates(candidates, this.historicalImageResolutionBudget);
+    const selectedSet = new Set(selected);
+    return [...ordinary, ...selected, ...candidates.filter((item) => !selectedSet.has(item))]
+      .map(({ record }) => record);
   }
 
   imageMetadataSummary() {
@@ -241,6 +364,7 @@ export class GencatAgendaImporter extends BaseImporter {
       "permanent = 'Sí'",
     ].join(' OR ');
 
+    const allRecords = [];
     let offset = 0;
     while (true) {
       const url = new URL(GENCAT_RESOURCE_URL);
@@ -253,9 +377,10 @@ export class GencatAgendaImporter extends BaseImporter {
         throw new Error('La resposta de dades de la font oficial no és una llista.');
       }
 
-      for (const record of records) yield record;
+      allRecords.push(...records);
       if (records.length < this.pageSize) break;
       offset += records.length;
     }
+    yield* this.prioritizeHistoricalImageRecords(allRecords);
   }
 }

@@ -22,9 +22,16 @@ Resolution is incremental: new selected images, changed `imatges`, and unresolve
 than `GENCAT_IMAGE_METADATA_RETRY_HOURS` (24 by default). The serial importer awaits one resolution
 at a time; starts are spaced by 500 ms. Historical unresolved records are limited to
 `GENCAT_HISTORICAL_IMAGE_RESOLUTION_BUDGET` (100 by default) per run, while new and changed images
-bypass that budget. A durable filesystem lock shared by cron and manual invocations prevents
-overlap. Normal reimport still persists deferred records without changing their image-independent
-provenance identity.
+bypass that budget. Before a run spends that historical budget, it uses one batched local lookup
+to order only the eligible historical candidates by the same enabled-occurrence and legacy-date
+semantics as public plan discovery: current first, then nearer upcoming dates, then permanent
+content, and finally historical rows. The default 100-slot budget reserves a proportional 80/10/10
+share for current-or-upcoming, permanent, and historical candidates. Integer shares use largest
+remainders with relevance-first ties; unused slots are redistributed proportionally among tiers
+that still have candidates. Ties preserve source order; there is no persistent queue, and the
+lower tiers remain reachable on every run with sufficient backlog. A durable filesystem lock
+shared by cron and manual invocations prevents overlap. Normal reimport still persists deferred
+records without changing their image-independent provenance identity.
 
 Every known Gencat attribution, including a known-empty footer and any valid length within the
 resolver safety limit, keeps both `card` and `detail` roles. Cards never render the Gencat image
