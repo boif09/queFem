@@ -69,7 +69,10 @@ La migración conserva como conocidas solo las selecciones legacy de Ticketmaste
 fila legacy Gencat u otra procedencia ambigua empieza como desconocida. El import serial limita a
 100 las resoluciones históricas por ejecución, sin limitar planes nuevos ni rutas de imagen
 cambiadas, y un lock durable junto a SQLite impide imports Gencat solapados en el mismo host.
-Las atribuciones largas se conservan completas en `detail`, pero omiten el rol `card`.
+Toda atribución conocida conserva los roles `card` y `detail`, incluida la conocida-vacía y cualquier
+texto válido dentro del límite de seguridad de 2.000 caracteres del resolver. Ese límite protege la
+entrada y no decide roles. La tarjeta no muestra el `Peu d'imatge`; el detalle muestra completo y
+exacto el texto no vacío. Una atribución desconocida no es seleccionable y mantiene el fallback.
 
 ### Ticketmaster
 

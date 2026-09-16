@@ -7,10 +7,7 @@ import {
   gencatImageUrl,
   selectGencatImagePath,
 } from '../gencat/imageMetadataResolver.js';
-import {
-  DEFAULT_GENCAT_HISTORICAL_IMAGE_RESOLUTION_BUDGET,
-  MAX_GENCAT_CARD_ATTRIBUTION_LENGTH,
-} from '../gencat/imagePolicy.js';
+import { DEFAULT_GENCAT_HISTORICAL_IMAGE_RESOLUTION_BUDGET } from '../gencat/imagePolicy.js';
 import { isOutsideCatalonia } from '../location/cataloniaScope.js';
 import { normalizePlan } from '../normalizers/plan.normalizer.js';
 import { nullableString } from '../normalizers/text.normalizer.js';
@@ -157,12 +154,9 @@ export class GencatAgendaImporter extends BaseImporter {
       attribution: metadata.attribution,
       attributionKnown: metadata.attributionKnown,
     };
-    const cardSuitable = metadata.attributionKnown !== true
-      || metadata.attribution === null
-      || metadata.attribution.length <= MAX_GENCAT_CARD_ATTRIBUTION_LENGTH;
     return {
       action: 'persist',
-      selections: { ...(cardSuitable ? { card: selection } : {}), detail: selection },
+      selections: { card: selection, detail: selection },
     };
   }
 

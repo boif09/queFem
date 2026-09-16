@@ -26,9 +26,9 @@ bypass that budget. A durable filesystem lock shared by cron and manual invocati
 overlap. Normal reimport still persists deferred records without changing their image-independent
 provenance identity.
 
-Credits of at most 160 characters keep both `card` and `detail` roles. Longer confirmed credits
-are detail-only, so the complete required text remains visible without making result cards
-unusable; the detail page never truncates it.
+Every known Gencat attribution, including a known-empty footer and any valid length within the
+resolver safety limit, keeps both `card` and `detail` roles. Cards never render the Gencat image
+credit; the detail page renders the complete exact non-empty credit without truncation.
 
 Importer:
 gencatAgenda.importer.js

@@ -99,7 +99,7 @@ describe('PlanCard', () => {
     expect(document.querySelector('[data-pattern="musica"]')).toBeInTheDocument();
   });
 
-  it('renders official attribution as escaped plain text only while the card image is visible', () => {
+  it('never renders Gencat attribution text on a card', () => {
     render(
       <MemoryRouter>
         <PlanCard plan={{
@@ -113,11 +113,9 @@ describe('PlanCard', () => {
         }} />
       </MemoryRouter>,
     );
-    const credit = screen.getByText('Fundació & <autora>');
-    expect(credit).toHaveClass('card-image-attribution');
-    expect(credit.parentElement).toHaveClass('plan-card-visual');
-    expect(document.querySelector('.plan-visual')).not.toContainElement(credit);
-    expect(credit.querySelector('autora')).toBeNull();
+    expect(document.querySelector('.plan-visual img')).toBeInTheDocument();
+    expect(screen.queryByText('Fundació & <autora>')).not.toBeInTheDocument();
+    expect(document.querySelector('.card-image-attribution')).not.toBeInTheDocument();
     fireEvent.error(document.querySelector('.plan-visual img'));
     expect(screen.queryByText('Fundació & <autora>')).not.toBeInTheDocument();
   });
@@ -138,10 +136,9 @@ describe('PlanCard', () => {
   });
 
   it.each([
-    ['real', 'Auditori-Palau de Congressos de Girona (foto: Aniol Resclosa). Font: el mateix Auditori'],
-    ['long', 'Complete photographic credit. Source: Agenda Cultural de Catalunya. '.repeat(25).trim()],
-    ['unbroken', 'A'.repeat(160)],
-  ])('keeps the complete %s attribution in normal card flow', (_label, attribution) => {
+    ['longer than the retired limit', 'A'.repeat(161)],
+    ['within the backend safety limit', 'Complete photographic credit. Source: Agenda Cultural de Catalunya. '.repeat(30).trim()],
+  ])('keeps the Gencat image eligible for a %s attribution without rendering it', (_label, attribution) => {
     render(
       <MemoryRouter>
         <PlanCard plan={{
@@ -154,9 +151,7 @@ describe('PlanCard', () => {
         }} />
       </MemoryRouter>,
     );
-    const credit = document.querySelector('.card-image-attribution');
-    expect(credit.textContent).toBe(attribution);
-    expect(credit.parentElement).toHaveClass('plan-card-visual');
-    expect(document.querySelector('.plan-visual')).not.toContainElement(credit);
+    expect(document.querySelector('.plan-visual img')).toHaveAttribute('src', '/api/media/gencat/48');
+    expect(document.querySelector('.card-image-attribution')).not.toBeInTheDocument();
   });
 });

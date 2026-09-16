@@ -160,6 +160,47 @@ describe('PlanDetailPage', () => {
     expect(screen.queryByText('Crèdit literal Ticketmaster')).not.toBeInTheDocument();
   });
 
+  it('shows a Gencat detail image and its complete literal attribution', async () => {
+    const attribution = 'Crèdit literal Gencat';
+    api.getPlan.mockResolvedValue({ data: {
+      id: 18, kind: 'event', title: 'Concert Gencat', start_date: '2026-09-01',
+      end_date: '2026-09-01', permanent: false, free: false,
+      image: { url: '/api/media/gencat/18', kind: 'official', source: 'gencat', attribution },
+      categories: [{ slug: 'musica', name: 'Música', icon: 'music' }], sources: [],
+    } });
+    render(<MemoryRouter initialEntries={['/plans/18']}><Routes><Route path="/plans/:id" element={<PlanDetailPage />} /></Routes></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'Concert Gencat' });
+    expect(document.querySelector('.detail-visual img')).toHaveAttribute('src', '/api/media/gencat/18');
+    expect(document.querySelector('.image-attribution')).toHaveTextContent(attribution);
+  });
+
+  it('shows a known-empty Gencat detail image without an attribution element', async () => {
+    api.getPlan.mockResolvedValue({ data: {
+      id: 16, kind: 'event', title: 'Imatge Gencat sense crèdit', start_date: '2026-09-01',
+      end_date: '2026-09-01', permanent: false, free: false,
+      image: { url: '/api/media/gencat/16', kind: 'official', source: 'gencat' },
+      categories: [{ slug: 'cultura', name: 'Cultura', icon: 'book-open' }], sources: [],
+    } });
+    render(<MemoryRouter initialEntries={['/plans/16']}><Routes><Route path="/plans/:id" element={<PlanDetailPage />} /></Routes></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'Imatge Gencat sense crèdit' });
+    expect(document.querySelector('.detail-visual img')).toHaveAttribute('src', '/api/media/gencat/16');
+    expect(document.querySelector('.image-attribution')).not.toBeInTheDocument();
+  });
+
+  it('renders the complete very long valid Gencat attribution on detail', async () => {
+    const attribution = 'A'.repeat(2000);
+    api.getPlan.mockResolvedValue({ data: {
+      id: 17, kind: 'event', title: 'Imatge Gencat amb crèdit llarg', start_date: '2026-09-01',
+      end_date: '2026-09-01', permanent: false, free: false,
+      image: { url: '/api/media/gencat/17', kind: 'official', source: 'gencat', attribution },
+      categories: [{ slug: 'cultura', name: 'Cultura', icon: 'book-open' }], sources: [],
+    } });
+    render(<MemoryRouter initialEntries={['/plans/17']}><Routes><Route path="/plans/:id" element={<PlanDetailPage />} /></Routes></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'Imatge Gencat amb crèdit llarg' });
+    expect(document.querySelector('.detail-visual img')).toHaveAttribute('src', '/api/media/gencat/17');
+    expect(document.querySelector('.image-attribution')).toHaveTextContent(attribution);
+  });
+
   it('keeps the existing detail pattern and no attribution without an image', async () => {
     api.getPlan.mockResolvedValue({ data: {
       id: 11, kind: 'event', title: 'Pla sense foto', start_date: '2026-09-01',

@@ -50,7 +50,7 @@ export function PlanVisual({
   return (
     <div className="plan-card-visual">
       {visual}
-      {canShowImage && image.attribution ? (
+      {canShowImage && image.source !== 'gencat' && image.attribution ? (
         <span className="card-image-attribution">{image.attribution}</span>
       ) : null}
     </div>

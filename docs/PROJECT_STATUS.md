@@ -8,12 +8,16 @@ Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mism
 
 - **Tens Pla?** está publicada y funcionando en `https://tenspla.cat`; `www.tenspla.cat` y el host legacy redirigen al dominio principal.
 - Nginx sirve el frontend React/Vite y hace proxy a la API Express de solo lectura; PM2 gestiona `quefem-api` y SQLite es la persistencia.
-- Gencat se sincroniza cada dos horas mediante cron externo. Búsqueda, filtros, fichas bilingües, planes permanentes, deduplicación multi-source y purgas están implementados.
-- El resolvedor fail-closed de imágenes Gencat y su atribución por `Peu d'imatge` están
-  implementados y validados localmente; este cambio aún no se ha desplegado. La reimportación normal
-  enriquece como máximo 100 históricos por ejecución, prioriza sin presupuesto imágenes nuevas o
-  cambiadas, reintenta metadata desconocida tras 24 h y usa un lock durable contra solapamientos.
-  Los créditos largos se reservan al detalle y los créditos de tarjeta quedan completos fuera de la imagen.
+- Gencat se sincroniza normalmente cada dos horas mediante cron externo; la ejecución automática está
+  temporalmente pausada hasta desplegar el ajuste final de elegibilidad de imágenes en tarjeta. Búsqueda,
+  filtros, fichas bilingües, planes permanentes, deduplicación multi-source y purgas están implementados.
+- La infraestructura y la migración del resolvedor fail-closed de imágenes Gencat ya están desplegadas,
+  y los canarios reales de producción terminaron correctamente. Al reanudarse, la reimportación normal
+  enriquecerá como máximo 100 históricos por ejecución, priorizará sin presupuesto imágenes nuevas o
+  cambiadas, reintentará metadata desconocida tras 24 h y mantendrá el lock durable contra solapamientos.
+  El ajuste final pendiente de despliegue hará elegible toda imagen con atribución conocida tanto en tarjeta
+  como en detalle; la tarjeta omitirá el `Peu d'imatge` y el detalle conservará el texto exacto completo
+  cuando exista. Las atribuciones desconocidas seguirán cerradas con fallback.
 - El SEO público está desplegado: metadata por ruta, canonical, Open Graph/Twitter, Event JSON-LD conservador, `robots.txt` y sitemap público. Google Search Console ya está verificado.
 - Hay backups automáticos y probados de SQLite, con comprobaciones y copia externa mediante `rclone` al destino de Google Drive `TensPla/backups`.
 - La rotación de logs de Nginx está configurada y verificada.

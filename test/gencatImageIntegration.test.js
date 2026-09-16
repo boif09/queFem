@@ -76,7 +76,7 @@ test('an image-path change preserves source identity and triggers a new resoluti
   });
 });
 
-test('unknown attribution is durable, retried on a controlled cadence, and never served', async () => {
+test('unknown attribution is durable, retried on a controlled cadence, and falls back instead of being served', async () => {
   await withTestDatabase(async (db) => {
     let now = NOW;
     let resolutions = 0;
@@ -95,27 +95,46 @@ test('unknown attribution is durable, retried on a controlled cadence, and never
     await run();
     assert.equal(resolutions, 2);
     assert.ok(imageState(db).every(({ attribution_known }) => attribution_known === 0));
-    const plan = new PlanQueryRepository(db, { now: () => now, gencatImagesEnabled: true }).findById(1, 'ca');
-    assert.equal(plan.image, null);
+    const fallbackImageLibrary = { resolve: (_plan, { role }) => ({
+      url: `/media/fallbacks/${role}/cultura.webp`, kind: 'generic', source: 'tenspla-fallback',
+    }) };
+    const repository = new PlanQueryRepository(db, {
+      now: () => now, gencatImagesEnabled: true, fallbackImageLibrary,
+    });
+    const cards = [{ id: 1 }];
+    repository.attachImages(cards, 'card');
+    assert.equal(cards[0].image.url, '/media/fallbacks/card/cultura.webp');
+    const plan = repository.findById(1, 'ca');
+    assert.equal(plan.image.url, '/media/fallbacks/detail/cultura.webp');
   });
 });
 
-test('known empty enables the image without inventing a visible credit', async () => {
+test('known empty enables Gencat images for card and detail without inventing a credit', async () => {
   await withTestDatabase(async (db) => {
     const metadata = { resolve: async ({ imagePath }) => ({ imagePath, attribution: null, attributionKnown: true }) };
     await importer(db, record(), metadata).run();
-    const plan = new PlanQueryRepository(db, { now: () => NOW, gencatImagesEnabled: true }).findById(1, 'ca');
+    const repository = new PlanQueryRepository(db, { now: () => NOW, gencatImagesEnabled: true });
+    const cards = [{ id: 1 }];
+    repository.attachImages(cards, 'card');
+    assert.match(cards[0].image.url, /^\/api\/media\/gencat\/\d+$/);
+    assert.equal('attribution' in cards[0].image, false);
+    const plan = repository.findById(1, 'ca');
     assert.match(plan.image.url, /^\/api\/media\/gencat\/\d+$/);
     assert.equal(plan.image.source, 'gencat');
     assert.equal('attribution' in plan.image, false);
   });
 });
 
-test('known non-empty enables the image with the exact normalized credit', async () => {
+test('known non-empty enables Gencat images for card and detail with the exact detail credit', async () => {
   await withTestDatabase(async (db) => {
     const metadata = { resolve: async ({ imagePath }) => ({ imagePath, attribution: 'Fundació & autora <literal>', attributionKnown: true }) };
     await importer(db, record(), metadata).run();
-    const plan = new PlanQueryRepository(db, { now: () => NOW, gencatImagesEnabled: true }).findById(1, 'ca');
+    const repository = new PlanQueryRepository(db, { now: () => NOW, gencatImagesEnabled: true });
+    const cards = [{ id: 1 }];
+    repository.attachImages(cards, 'card');
+    assert.match(cards[0].image.url, /^\/api\/media\/gencat\/\d+$/);
+    assert.equal(cards[0].image.attribution, 'Fundació & autora <literal>');
+    const plan = repository.findById(1, 'ca');
     assert.equal(plan.image.attribution, 'Fundació & autora <literal>');
   });
 });
@@ -192,29 +211,41 @@ test('new and changed images bypass an exhausted historical enrichment budget', 
   });
 });
 
-test('pathological attribution is detail-only while realistic attribution keeps both roles', async () => {
+test('attributions longer than 160 characters keep the Gencat image eligible for card and detail', async () => {
   await withTestDatabase(async (db) => {
-    const realistic = 'Auditori-Palau de Congressos de Girona (foto: Aniol Resclosa). Font: el mateix Auditori';
+    const attribution = 'Credit '.repeat(30).trim();
     await importer(db, record(), {
-      resolve: async ({ imagePath }) => ({ imagePath, attribution: realistic, attributionKnown: true }),
+      resolve: async ({ imagePath }) => ({ imagePath, attribution, attributionKnown: true }),
     }).run();
     assert.deepEqual(db.prepare('SELECT role FROM plan_source_images ORDER BY role').all(), [
       { role: 'card' }, { role: 'detail' },
     ]);
+    const repository = new PlanQueryRepository(db, { now: () => NOW, gencatImagesEnabled: true });
+    const cards = [{ id: 1 }];
+    repository.attachImages(cards, 'card');
+    assert.match(cards[0].image.url, /^\/api\/media\/gencat\/\d+$/);
+    assert.equal(cards[0].image.attribution, attribution);
+    const plan = repository.findById(1, 'ca');
+    assert.match(plan.image.url, /^\/api\/media\/gencat\/\d+$/);
+    assert.equal(plan.image.attribution, attribution);
+  });
+});
 
-    const veryLong = 'Credit '.repeat(100).trim();
-    await importer(db, record(SECOND_PATH), {
-      resolve: async ({ imagePath }) => ({ imagePath, attribution: veryLong, attributionKnown: true }),
+test('a very long valid Gencat attribution keeps card eligibility and full detail text', async () => {
+  await withTestDatabase(async (db) => {
+    const attribution = 'A'.repeat(2000);
+    await importer(db, record(), {
+      resolve: async ({ imagePath }) => ({ imagePath, attribution, attributionKnown: true }),
     }).run();
-    assert.deepEqual(db.prepare('SELECT role,attribution FROM plan_source_images').all(), [
-      { role: 'detail', attribution: veryLong },
+    assert.deepEqual(db.prepare('SELECT role,attribution FROM plan_source_images ORDER BY role').all(), [
+      { role: 'card', attribution }, { role: 'detail', attribution },
     ]);
     const repository = new PlanQueryRepository(db, { now: () => NOW, gencatImagesEnabled: true });
     const cards = [{ id: 1 }];
     repository.attachImages(cards, 'card');
-    assert.equal(cards[0].image, null);
+    assert.match(cards[0].image.url, /^\/api\/media\/gencat\/\d+$/);
     const plan = repository.findById(1, 'ca');
-    assert.equal(plan.image.attribution, veryLong);
+    assert.equal(plan.image.attribution, attribution);
   });
 });
 
