@@ -128,6 +128,7 @@ select:disabled { opacity: .55; cursor: not-allowed; }
 .category-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .category-choice { min-height: 92px; display: grid; place-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 15px; background: white; cursor: pointer; padding: 12px 8px; font-size: .78rem; font-weight: 700; }
 .category-choice:hover { transform: translateY(-2px); border-color: #9bb8af; box-shadow: var(--shadow-soft); }
+.category-choice-label { overflow-wrap: break-word; word-break: break-word; text-align: center; }
 .category-choice.is-selected { background: var(--forest); color: white; border-color: var(--forest); }
 .category-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--mint); color: var(--forest); font-size: 1.18rem; font-family: var(--font-display); }
 .category-choice.is-selected .category-icon { background: var(--sun); }
@@ -402,7 +403,7 @@ h1, h2, h3, .result-count { text-wrap: balance; }
 .filter-section { padding: 34px 40px; }
 .filter-section-date { min-height: 248px; border-right: 1px solid var(--line); background: white; }
 .filter-section-date + .filter-section { min-height: 248px; background: white; }
-.filter-section-date + .filter-section + .filter-section { grid-column: 1 / -1; background: white; }
+.filter-section-date + .filter-section + .filter-section, .filter-section-category { grid-column: 1 / -1; background: white; }
 .section-heading { margin-bottom: 22px; }
 .section-number { border-color: var(--line); color: var(--coral); }
 .section-heading strong { font-size: 1.55rem; font-weight: 600; }
@@ -508,7 +509,7 @@ input[type="date"], select { border-color: var(--line); background-color: #fbf9f
   .search-section { margin-top: -104px; }
   .search-panel { grid-template-columns: 1fr; }
   .filter-section-date, .filter-section-date + .filter-section { min-height: 0; border-right: 0; }
-  .filter-section-date + .filter-section + .filter-section, .filter-actions, .search-panel > .inline-error { grid-column: 1; }
+  .filter-section-date + .filter-section + .filter-section, .filter-section-category, .filter-actions, .search-panel > .inline-error { grid-column: 1; }
   .filter-section { padding: 26px 20px; }
   .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filter-actions { padding: 22px 20px; }

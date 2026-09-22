@@ -22,7 +22,7 @@ export function CategorySelector({ categories, selected, onChange, loading = fal
               : [...selected, category.slug])}
           >
             <CategoryIcon icon={category.icon} />
-            <span>{name}</span>
+            <span className="category-choice-label">{name}</span>
           </button>
         );
       })}
