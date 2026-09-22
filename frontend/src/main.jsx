@@ -5,6 +5,7 @@ import '@fontsource-variable/montserrat/wght.css';
 import './i18n.js';
 import './styles/index.css';
 import './styles/pop-editorial.css';
+import './styles/editorial-foundation.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

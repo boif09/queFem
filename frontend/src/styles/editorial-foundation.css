@@ -1,0 +1,286 @@
+/*
+ * TensPla editorial — Phase 1 foundation.
+ * Additive layer loaded after pop-editorial.css: introduces reusable design
+ * tokens (safe everywhere) and applies the new art direction to the Home
+ * page only, via `.home-page` ancestor scoping, plus light, low-risk
+ * breathing-room refinements to the shared header/footer chrome.
+ * /plans, /avui, /cap-de-setmana and plan detail are intentionally untouched.
+ */
+
+:root {
+  /* Typographic scale: display attracts, body/UI communicates */
+  --text-display-xl: clamp(2.75rem, 6.4vw, 5.5rem);
+  --text-display-m: clamp(2.25rem, 4.2vw, 3.75rem);
+  --text-headline: clamp(1.35rem, 1.7vw, 1.6rem);
+  --text-body: 1.05rem;
+  --text-body-sm: 0.92rem;
+  --text-ui: 0.78rem;
+
+  /* Warm secondary ink for editorial copy, additive to --color-muted */
+  --ink-warm-soft: #5c5347;
+
+  /* Spacing rhythm */
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 5rem;
+  --space-3xl: 7rem;
+
+  /* Temporal identity, named after the existing quick-action hues */
+  --color-temporal-today: #ffdf9e;
+  --color-temporal-tomorrow: #dce1ff;
+  --color-temporal-tomorrow-ink: #001551;
+  --color-temporal-weekend: var(--color-pink);
+
+  /* Surface strength system: strong / medium / soft */
+  --surface-strong-border: 2px solid var(--color-text);
+  --surface-strong-shadow: 5px 5px 0 var(--color-text);
+  --surface-strong-shadow-sm: 3px 3px 0 var(--color-text);
+  --surface-medium-border: 1.5px solid rgba(26, 26, 26, 0.16);
+  --surface-medium-shadow: 0 10px 28px rgba(26, 26, 26, 0.07);
+  --surface-medium-shadow-hover: 0 16px 36px rgba(26, 26, 26, 0.11);
+  --surface-soft-border: 1px solid rgba(26, 26, 26, 0.12);
+  --surface-soft-shadow: none;
+
+  --radius-editorial: 6px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Shared chrome: light-touch breathing room only (site-wide by nature)   */
+/* ---------------------------------------------------------------------- */
+
+.header-inner { min-height: 92px; }
+.primary-nav { gap: 34px; }
+.nav-link { color: rgba(26, 26, 26, 0.6); font-weight: 650; }
+.nav-link:hover, .nav-link.is-active { color: var(--color-text); }
+
+.site-footer { padding: 56px 0 60px; }
+.footer-inner { gap: 40px; }
+.footer-meta { gap: 14px; }
+.footer-links a { font-weight: 650; }
+
+@media (max-width: 680px) {
+  .header-inner { min-height: 68px; }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Home: content width — desktop uses the viewport more confidently       */
+/* ---------------------------------------------------------------------- */
+
+.home-page { --container: 1360px; }
+
+/* ---------------------------------------------------------------------- */
+/* Home: hero — landscape image, top-aligned, compact height              */
+/* ---------------------------------------------------------------------- */
+
+.home-page .home-hero { min-height: 0; display: block; overflow: visible; border-bottom: 0; padding-block: 40px 32px; }
+.home-page .home-hero-inner { display: grid; grid-template-columns: minmax(0, 45fr) minmax(0, 55fr); gap: 44px; align-items: start; padding-block: 0; text-align: left; }
+.home-page .home-hero-eyebrow { margin: 0 0 16px; }
+.home-page .home-hero h1 { font-size: var(--text-display-xl); line-height: 0.9; font-weight: 900; letter-spacing: -0.045em; }
+.home-page .home-hero-intro { max-width: 520px; margin: 16px 0 28px; color: var(--ink-warm-soft); font-size: var(--text-body); line-height: 1.55; }
+
+.home-page .hero-search { max-width: none; width: 100%; }
+.home-page .hero-search > div { grid-template-columns: 1fr 60px; }
+.home-page .hero-search input { padding: 18px 0; font-size: 1.05rem; }
+.home-page .hero-search button { width: 60px; height: 60px; font-size: 1.6rem; }
+
+.home-page .home-hero-media { position: relative; }
+.home-page .home-hero-image {
+  display: block;
+  width: 100%;
+  height: clamp(300px, 26vw, 400px);
+  object-fit: contain;
+  object-position: center;
+}
+
+@media (max-width: 980px) {
+  .home-page .home-hero-inner { grid-template-columns: 1fr; gap: 32px; }
+  .home-page .home-hero-image { height: auto; }
+}
+
+@media (max-width: 680px) {
+  .home-page .home-hero { padding-block: 36px 28px; }
+  .home-page .home-hero-media { display: none; }
+  .home-page .home-hero h1 { font-size: clamp(2.4rem, 11vw, 3.2rem); }
+  .home-page .home-hero-intro { font-size: 0.95rem; margin-bottom: 24px; }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Home: temporal quick cards — split content / editorial photo           */
+/* ---------------------------------------------------------------------- */
+
+.home-page .quick-actions-wrap { padding: 32px 0; background: transparent; border-bottom: 0; }
+.home-page .quick-actions { gap: 28px; }
+.home-page .quick-action { position: relative; display: grid; grid-template-columns: 1fr 38%; height: 170px; min-height: 0; padding: 0; border-right: var(--border-strong); overflow: hidden; }
+.home-page .quick-action::after { display: none; }
+.home-page .quick-action-content { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%; padding: 24px 28px 24px 26px; }
+.home-page .quick-action-content strong { display: block; font-size: clamp(1.4rem, 1.9vw, 1.9rem); font-weight: 900; line-height: 1.02; text-transform: uppercase; }
+.home-page .quick-action-supporting { display: block; margin-top: 8px; font-size: 0.9rem; font-weight: 600; opacity: 0.82; }
+.home-page .quick-action-arrow {
+  align-self: flex-start;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+.home-page .quick-action:hover .quick-action-arrow { transform: translateX(5px); }
+.home-page .quick-action-media {
+  position: relative;
+  overflow: hidden;
+  clip-path: polygon(22% 0%, 100% 0%, 100% 100%, 0% 100%);
+}
+.home-page .quick-action-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.home-page .quick-action.is-today .quick-action-media img { object-position: 50% 68%; }
+.home-page .quick-action.is-tomorrow .quick-action-media img { object-position: 50% 22%; }
+.home-page .quick-action.is-weekend .quick-action-media img { object-position: 50% 58%; }
+
+@media (max-width: 680px) {
+  .home-page .quick-action { height: auto; min-height: 132px; grid-template-columns: 1fr; }
+  .home-page .quick-action-media { display: none; }
+  .home-page .quick-action-content { padding: 18px; }
+  .home-page .quick-action-content strong { font-size: 1.35rem; }
+  .home-page .quick-action-supporting { font-size: 0.8rem; }
+  .home-page .quick-action-arrow { width: 32px; height: 32px; font-size: 1.05rem; }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Home: section rhythm + titles (title / intro / view-all row)           */
+/* ---------------------------------------------------------------------- */
+
+.home-page .home-section { padding: 64px 0 72px; }
+.home-page .home-section:last-child:not(.explore-section) { background: transparent; }
+
+/* ---------------------------------------------------------------------- */
+/* Home: location context — contained strip, not a full-width band        */
+/* ---------------------------------------------------------------------- */
+
+.home-page .home-location { padding: 0; border-bottom: 0; background: transparent; margin: 28px 0; }
+.home-page .home-location .container {
+  padding: 11px 22px;
+  border: var(--border-strong);
+  border-radius: 4px;
+  background: var(--color-yellow);
+  box-shadow: none;
+}
+
+@media (max-width: 680px) {
+  .home-page .home-location { margin: 20px 0; }
+  .home-page .home-location .container { padding: 14px 18px; }
+}
+.home-page .section-title-row { align-items: center; justify-content: flex-start; gap: 24px; margin-bottom: 32px; }
+.home-page .section-title-row h2 { font-size: var(--text-display-m); line-height: 0.98; }
+.home-page .section-title-row .section-title-intro { flex: 1 1 auto; margin: 0; text-align: center; color: var(--ink-warm-soft); font-size: 0.92rem; line-height: 1.5; }
+.home-page .section-title-row > a { margin-left: auto; padding: 12px 18px; font-size: 0.8rem; white-space: nowrap; }
+
+@media (max-width: 680px) {
+  .home-page .home-section { padding: 40px 0 52px; }
+  .home-page .section-title-row { flex-wrap: wrap; }
+  .home-page .section-title-row .section-title-intro { display: none; }
+  .home-page .section-title-row > a { margin-left: 0; padding: 10px 0; white-space: normal; }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Home: event cards — image dominant, category over image, reordered    */
+/* meta so date/location precede the title (CSS order only; PlanCard.jsx */
+/* markup and every other page keep the original DOM order and styling). */
+/* ---------------------------------------------------------------------- */
+
+.home-page .plan-grid { gap: 28px; }
+.home-page .plan-card { border: var(--surface-medium-border); border-radius: var(--radius-editorial); background: var(--color-surface); box-shadow: var(--surface-medium-shadow); }
+.home-page .plan-card:hover { transform: translateY(-4px); box-shadow: var(--surface-medium-shadow-hover); }
+.home-page .plan-card-link { position: relative; }
+.home-page .plan-visual { border-bottom: 1px solid rgba(26, 26, 26, 0.1); }
+.home-page .plan-card .kind-label { display: none; }
+.home-page .category-label {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  padding: 5px 10px;
+  border-bottom: 0;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--color-text);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.home-page .plan-card-body { display: flex; flex-direction: column; padding: 26px; }
+.home-page .card-meta { order: 1; margin: 0 0 12px; gap: 8px; }
+.home-page .card-meta dd { color: var(--ink-warm-soft); font-size: 0.85rem; }
+.home-page .plan-card h2 { order: 2; margin: 0 0 14px; font-size: var(--text-headline); font-weight: 700; letter-spacing: -0.01em; text-transform: none; line-height: 1.25; }
+.home-page .card-footer { order: 3; margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(26, 26, 26, 0.08); }
+.home-page .price-tag { font-weight: 700; font-size: 0.82rem; }
+
+/* ---------------------------------------------------------------------- */
+/* Home: Explora — one magazine-index row, image-led, overlaid labels     */
+/* ---------------------------------------------------------------------- */
+
+.home-page .explore-title-row h2 { display: inline-block; padding-bottom: 6px; border-bottom: 5px solid var(--color-red); }
+.home-page .explore-categories { gap: 14px; }
+.home-page .explore-categories a,
+.home-page .explore-categories a:has(.explore-category-photo) {
+  position: relative;
+  grid-template-rows: 1fr;
+  aspect-ratio: 4 / 5;
+  min-height: 0;
+}
+.home-page .explore-categories a > strong {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 18px 14px 14px;
+  border-top: 0;
+  background: linear-gradient(to top, rgba(15, 13, 10, 0.82), rgba(15, 13, 10, 0) 72%);
+  color: #fff;
+  font-size: 0.82rem;
+  text-align: left;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.home-page .explore-category-artwork,
+.home-page .explore-category-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.home-page .explore-category-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+@media (min-width: 1200px) {
+  .home-page .explore-categories { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Home: Plans permanents — quiet, horizontal, deliberately not an event  */
+/* ---------------------------------------------------------------------- */
+
+.home-page .permanent-section .plan-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.home-page .permanent-section .plan-card { border: var(--surface-soft-border); box-shadow: var(--surface-soft-shadow); }
+.home-page .permanent-section .plan-card:hover { transform: none; box-shadow: 0 8px 20px rgba(26, 26, 26, 0.08); }
+.home-page .permanent-section .plan-card-link { grid-template-columns: 84px 1fr; grid-template-rows: none; align-items: center; gap: 16px; padding: 14px; }
+.home-page .permanent-section .plan-visual,
+.home-page .permanent-section .plan-card-visual { width: 84px; height: 84px; aspect-ratio: 1; border: 0; border-radius: 4px; overflow: hidden; }
+.home-page .permanent-section .kind-label { display: none; }
+.home-page .permanent-section .plan-card-body { padding: 0; min-width: 0; }
+.home-page .permanent-section .category-label { position: static; background: none; padding: 0; font-size: 0.66rem; }
+.home-page .permanent-section .plan-card h2 { min-height: 0; margin: 6px 0 6px; font-size: 1rem; -webkit-line-clamp: 2; }
+.home-page .permanent-section .card-meta { margin: 6px 0 0; gap: 2px; }
+.home-page .permanent-section .card-meta > div:first-child { display: none; }
+.home-page .permanent-section .card-meta dd { font-size: 0.74rem; }
+.home-page .permanent-section .card-footer { margin-top: 6px; padding-top: 0; border-top: 0; }
+.home-page .permanent-section .price-tag { display: none; }
+.home-page .permanent-section .card-arrow { width: 26px; height: 26px; font-size: 1rem; }
+
+@media (max-width: 980px) {
+  .home-page .permanent-section .plan-grid { grid-template-columns: 1fr; }
+}

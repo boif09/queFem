@@ -51,7 +51,7 @@ describe('Pop Editorial home', () => {
     expect(screen.getByText('/plans?q=weeknd')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Avui/ })).toHaveAttribute('href', '/avui');
     expect(screen.getByRole('link', { name: /Demà/ }).getAttribute('href')).toMatch(/^\/plans\?date=\d{4}-\d{2}-\d{2}$/);
-    expect(screen.getAllByRole('link', { name: /Aquest cap de setmana/ })[0]).toHaveAttribute('href', '/cap-de-setmana');
+    expect(screen.getAllByRole('link', { name: /Cap de setmana/ })[0]).toHaveAttribute('href', '/cap-de-setmana');
   });
 
   it('separates weekend, deduplicated upcoming and permanent plans', async () => {
@@ -97,7 +97,7 @@ describe('Pop Editorial home', () => {
   it('keeps the brand and natural copy in Spanish without adding account navigation', async () => {
     await i18n.changeLanguage('es');
     renderHome();
-    expect(screen.getByText('¿Todavía no? Te encontramos uno.')).toBeInTheDocument();
+    expect(screen.getByText(/Descubre la cultura que te rodea/)).toBeInTheDocument();
     expect(screen.queryByText(/Saved|Profile|Cuenta/i)).not.toBeInTheDocument();
   });
 

@@ -12,20 +12,39 @@ import { clearLocationPreference, formatLocationPreference, readLocationPreferen
 import { createPlansSearch } from '../utils/search.js';
 
 const HOME_PLAN_LIMIT = 6;
+const WEEKEND_HOME_LIMIT = 3;
 
-function QuickAction({ className, label, to, eyebrow }) {
-  return <Link className={`quick-action ${className}`} to={to}><small>{eyebrow}</small><strong>{label}</strong><span aria-hidden="true">↗</span></Link>;
+function QuickAction({ className, label, supporting, to, image }) {
+  return (
+    <Link className={`quick-action ${className}`} to={to}>
+      <div className="quick-action-content">
+        <div>
+          <strong>{label}</strong>
+          <span className="quick-action-supporting">{supporting}</span>
+        </div>
+        <span className="quick-action-arrow" aria-hidden="true">→</span>
+      </div>
+      <div className="quick-action-media" aria-hidden="true">
+        <img src={image} alt="" loading="lazy" decoding="async" />
+      </div>
+    </Link>
+  );
 }
 
-function PlanSection({ eyebrow, title, state, viewAllUrl, locationUrl, onRetry, locationActive, onClearLocation }) {
+function PlanSection({ eyebrow, title, intro, state, viewAllUrl, locationUrl, onRetry, locationActive, onClearLocation, variant, limit }) {
   const { t } = useTranslation();
-  return <section className="home-section discovery-section">
+  const plans = limit ? state.plans.slice(0, limit) : state.plans;
+  return <section className={`home-section discovery-section${variant ? ` ${variant}-section` : ''}`}>
     <div className="container">
-      <header className="section-title-row"><div><p>{eyebrow}</p><h2>{title}</h2></div>{viewAllUrl && <Link to={viewAllUrl}>{t('home.viewAll')} →</Link>}</header>
+      <header className="section-title-row">
+        <div><p>{eyebrow}</p><h2>{title}</h2></div>
+        {intro && <p className="section-title-intro">{intro}</p>}
+        {viewAllUrl && <Link to={viewAllUrl}>{t('home.viewAll')} →</Link>}
+      </header>
       {state.status === 'loading' && <LoadingState />}
       {state.status === 'error' && <ErrorState onRetry={onRetry} />}
-      {state.status === 'success' && state.plans.length > 0 && <PlanList plans={state.plans} />}
-      {state.status === 'success' && state.plans.length === 0 && (locationActive
+      {state.status === 'success' && plans.length > 0 && <PlanList plans={plans} />}
+      {state.status === 'success' && plans.length === 0 && (locationActive
         ? <div className="location-empty"><EmptyState titleKey="home.locationEmptyTitle" textKey="home.locationEmptyText" /><div><Link className="button button-secondary" to={`${viewAllUrl || locationUrl || '/plans'}#filters`} state={{ openFilters: true }}>{t('home.changeLocation')}</Link><button className="button button-primary" type="button" onClick={onClearLocation}>{t('home.viewCatalunya')}</button></div></div>
         : <EmptyState />)}
     </div>
@@ -98,24 +117,29 @@ export function HomePage() {
   return <><Seo title={t('seo.homeTitle')} description={t('seo.homeDescription')} canonicalPath="/" />
     <div className="home-page">
       <section className="home-hero">
-        <div className="home-question" aria-hidden="true">?</div>
         <div className="container home-hero-inner">
-          <BrandLogo className="home-wordmark" />
-          <h1><span className="desktop-hero-title">TENS PLA?</span><span className="mobile-hero-title">{t('home.mobileTitle')}</span></h1>
-          <p>{t('home.popClaim')}</p>
-          <form className="hero-search" role="search" onSubmit={submit}>
-            <label htmlFor="home-search">{t('home.searchLabel')}</label>
-            <div><input id="home-search" type="search" maxLength="100" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('home.searchPlaceholder')} /><button type="submit" aria-label={t('filters.search')}>→</button></div>
-          </form>
+          <div className="home-hero-copy">
+            <BrandLogo compact className="sr-only" />
+            <p className="eyebrow dark home-hero-eyebrow">{t('home.heroEyebrow')}</p>
+            <h1>{t('home.mobileTitle')}</h1>
+            <p className="home-hero-intro">{t('home.heroIntro')}</p>
+            <form className="hero-search" role="search" onSubmit={submit}>
+              <label htmlFor="home-search">{t('home.searchLabel')}</label>
+              <div><input id="home-search" type="search" maxLength="100" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('home.searchPlaceholder')} /><button type="submit" aria-label={t('filters.search')}>→</button></div>
+            </form>
+          </div>
+          <div className="home-hero-media" aria-hidden="true">
+            <img className="home-hero-image" src="/images/home/tibidabo-cultura-i-vida-a-barcelona.webp" alt="" width="1672" height="941" loading="eager" decoding="async" />
+          </div>
         </div>
       </section>
 
       <section className="quick-actions-wrap" aria-labelledby="quick-actions-title">
         <h2 id="quick-actions-title" className="sr-only">{t('home.quickActions')}</h2>
         <div className="container quick-actions">
-          <QuickAction className="is-today" label={t('filters.today')} to={todayUrl} eyebrow={t('home.quickFilter')} />
-          <QuickAction className="is-tomorrow" label={t('filters.tomorrow')} to={tomorrowUrl} eyebrow={t('home.quickFilter')} />
-          <QuickAction className="is-weekend" label={t('filters.weekend')} to={weekendUrl} eyebrow={t('home.quickFilter')} />
+          <QuickAction className="is-today" label={t('filters.today')} supporting={t('home.quickTodayCopy')} to={todayUrl} image="/images/home/quick-avui-natura.jpg" />
+          <QuickAction className="is-tomorrow" label={t('filters.tomorrow')} supporting={t('home.quickTomorrowCopy')} to={tomorrowUrl} image="/images/home/quick-dema-girona.jpg" />
+          <QuickAction className="is-weekend" label={t('home.weekendShort')} supporting={t('home.quickWeekendCopy')} to={weekendUrl} image="/images/home/quick-capdesetmana-concert.jpg" />
         </div>
       </section>
 
@@ -123,12 +147,15 @@ export function HomePage() {
         <div className="container"><p><strong>{t('home.showingLocation')}</strong> {locationActive ? locationLabel : t('home.allCatalunya')}</p><div><Link to={`${changeLocationUrl}#filters`} state={{ openFilters: true }}>{t('home.changeLocation')}</Link>{locationActive && <button type="button" onClick={clearLocation}>{t('home.removeLocation')}</button>}</div></div>
       </aside>
 
-      <PlanSection eyebrow={t('home.featured')} title={t('home.weekendTitle')} state={weekendPlans} viewAllUrl={weekendUrl} onRetry={retry} locationActive={locationActive} onClearLocation={clearLocation} />
-      <PlanSection eyebrow={t('home.upcomingEyebrow')} title={t('home.upcomingTitle')} state={upcomingWithoutWeekend} viewAllUrl={planUrl({ dateFrom: today.date })} onRetry={retry} locationActive={locationActive} onClearLocation={clearLocation} />
+      <PlanSection eyebrow={t('home.featured')} title={t('home.weekendTitle')} state={weekendPlans} viewAllUrl={weekendUrl} limit={WEEKEND_HOME_LIMIT} onRetry={retry} locationActive={locationActive} onClearLocation={clearLocation} />
 
       <section className="home-section explore-section" id="explore">
         <div className="container">
-          <header className="explore-heading"><h2>{t('home.exploreTitle')}</h2><p>{t('home.exploreIntro')}</p></header>
+          <header className="section-title-row explore-title-row">
+            <h2>{t('home.exploreTitle')}</h2>
+            <p className="section-title-intro">{t('home.exploreIntro')}</p>
+            <Link to={changeLocationUrl}>{t('home.exploreViewAll')} →</Link>
+          </header>
           {categories.status === 'loading' && <LoadingState />}
           {categories.status === 'error' && <ErrorState onRetry={retry} />}
           {categories.status === 'success' && categories.items.length === 0 && <EmptyState />}
@@ -138,11 +165,12 @@ export function HomePage() {
               return <Link key={category.slug} data-category={category.slug} to={planUrl({ category: category.slug })}><ExploreCategoryArtwork category={category} eager={index < 4} /><strong>{name}</strong></Link>;
             })}
           </div>}
-          <div className="explore-all"><Link className="button button-primary" to={changeLocationUrl}>{t('home.exploreAll')} →</Link></div>
         </div>
       </section>
 
-      <PlanSection eyebrow={t('home.permanentEyebrow')} title={t('home.permanentTitle')} state={permanentPlans} locationUrl={changeLocationUrl} onRetry={retry} locationActive={locationActive} onClearLocation={clearLocation} />
+      <PlanSection eyebrow={t('home.permanentEyebrow')} title={t('home.permanentTitle')} intro={t('home.permanentIntro')} state={permanentPlans} locationUrl={changeLocationUrl} onRetry={retry} locationActive={locationActive} onClearLocation={clearLocation} variant="permanent" />
+
+      <PlanSection eyebrow={t('home.upcomingEyebrow')} title={t('home.upcomingTitle')} state={upcomingWithoutWeekend} viewAllUrl={planUrl({ dateFrom: today.date })} onRetry={retry} locationActive={locationActive} onClearLocation={clearLocation} />
     </div>
   </>;
 }
