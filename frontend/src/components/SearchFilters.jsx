@@ -53,7 +53,7 @@ function MunicipalityCombobox({ items, value, onChange, loading, onFocus }) {
   </div>;
 }
 
-export function SearchFilters({ initialFilters = {}, onSearch }) {
+export function SearchFilters({ initialFilters = {}, onSearch, hideDateSection = false }) {
   const { t } = useTranslation();
   const [filters, setFilters] = useState({ ...EMPTY_FILTERS, ...initialFilters });
   const [showRange, setShowRange] = useState(Boolean(initialFilters.dateFrom || initialFilters.dateTo));
@@ -185,11 +185,11 @@ export function SearchFilters({ initialFilters = {}, onSearch }) {
 
   return <form className="search-panel" onSubmit={(event) => event.preventDefault()}>
     <div className="text-search-section"><label htmlFor="plan-text-search">{t('filters.textSearch')}</label><div className="text-search-control"><span aria-hidden="true">⌕</span><input id="plan-text-search" type="search" maxLength="100" value={filters.q} placeholder={t('filters.textSearchPlaceholder')} onChange={(event) => setFilters((current) => ({ ...current, q: event.target.value }))} /></div></div>
-    <div className="filter-section filter-section-date">
+    {!hideDateSection && <div className="filter-section filter-section-date">
       <div className="section-heading"><span className="section-number" aria-hidden="true">01</span><div><span>{t('filters.when')}</span><strong>{t('filters.date')}</strong></div></div>
       <div className="quick-date-list" aria-label={t('filters.quickDates')}>{['today', 'tomorrow', 'weekend', 'nextSeven'].map((type) => <button type="button" key={type} className={activeQuickDate === type ? 'is-selected' : ''} aria-pressed={activeQuickDate === type} onClick={() => chooseQuickDate(type)}>{t(`filters.${type}`)}</button>)}<button type="button" onClick={chooseCustomRange}>{t('filters.chooseDates')}</button></div>
       {showRange ? <div className="date-range"><label><span>{t('filters.from')}</span><input type="date" value={filters.dateFrom} onChange={(event) => setFilters((current) => ({ ...current, dateFrom: event.target.value }))} /></label><label><span>{t('filters.to')}</span><input type="date" min={filters.dateFrom || undefined} value={filters.dateTo} onChange={(event) => setFilters((current) => ({ ...current, dateTo: event.target.value }))} /></label></div> : <label className="single-date"><span>{t('filters.date')}</span><input type="date" value={filters.date} onChange={(event) => setFilters((current) => ({ ...current, date: event.target.value, dateFrom: '', dateTo: '' }))} /></label>}
-    </div>
+    </div>}
     <div className="filter-section">
       <div className="section-heading"><span className="section-number" aria-hidden="true">02</span><div><span>{t('filters.where')}</span><strong>{t('filters.municipality')}</strong></div></div>
       <div className="location-fields">

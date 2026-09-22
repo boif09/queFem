@@ -1,47 +1,21 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Pagination } from '../components/Pagination.jsx';
 import { PlanList } from '../components/PlanList.jsx';
-import { SearchFilters } from '../components/SearchFilters.jsx';
+import { ActiveFilters } from '../components/ActiveFilters.jsx';
+import { FiltersPanel } from '../components/FiltersPanel.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
-import { formatDate } from '../utils/dates.js';
 import { readLocationPreference, saveLocationPreference } from '../utils/locationPreference.js';
 import { createPlansSearch, filtersFromSearchParams } from '../utils/search.js';
-
-function ActiveFilters({ filters, onRemove, onClear }) {
-  const { t, i18n } = useTranslation();
-  const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
-  const items = [
-    filters.q && { key: 'q', label: t('filter.query', { query: filters.q }) },
-    filters.date && { key: 'date', label: t('filter.date', { value: formatDate(filters.date, language) }) },
-    filters.dateFrom && filters.dateTo && { key: 'range', label: t('filter.range', {
-      from: formatDate(filters.dateFrom, language), to: formatDate(filters.dateTo, language),
-    }) },
-    filters.province && { key: 'province', label: t('filter.province', { value: filters.province }) },
-    filters.comarca && { key: 'comarca', label: t('filter.comarca', { value: filters.comarca }) },
-    filters.municipality && { key: 'municipality', label: t('filter.municipality', { value: filters.municipality }) },
-    ...(filters.category || '').split(',').filter(Boolean).map((category) => ({ key: `category:${category}`, label: t('filter.category', { value: category }) })),
-    filters.free && { key: 'free', label: t('filter.free') },
-  ].filter(Boolean);
-  return (
-    <div className="active-filters">
-      <strong>{t('results.activeFilters')}</strong>
-      <div>{items.length ? items.map((item) => <button type="button" className="filter-chip" aria-label={t('filter.remove', { label: item.label })} key={item.key} onClick={() => onRemove(item.key)}><span className="filter-chip-label">{item.label}</span><span className="filter-chip-remove" aria-hidden="true">×</span></button>) : <span className="no-active-filters">{t('results.noActiveFilters')}</span>}</div>
-      {items.length > 0 && <button type="button" className="clear-active-filters" onClick={onClear}>{t('filters.clear')}</button>}
-    </div>
-  );
-}
 
 export function PlansPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const filtersPanelRef = useRef(null);
-  const [filtersActivated, setFiltersActivated] = useState(() => Boolean(location.state?.openFilters));
   const [state, setState] = useState({ status: 'loading', plans: [], pagination: null });
   const [reloadKey, setReloadKey] = useState(0);
   const searchKey = searchParams.toString();
@@ -50,13 +24,6 @@ export function PlansPage() {
   const page = searchParams.get('page') || '1';
   const sort = filters.date || filters.dateFrom || filters.dateTo ? 'date' : 'quality';
   const filtered = searchParams.size > 0;
-
-  useEffect(() => {
-    if (location.state?.openFilters && filtersPanelRef.current) {
-      filtersPanelRef.current.open = true;
-      setFiltersActivated(true);
-    }
-  }, [location.state]);
 
   useEffect(() => {
     let active = true;
@@ -99,12 +66,7 @@ export function PlansPage() {
           <div><p className="eyebrow dark">{t('results.eyebrow')}</p><h1>{filters.q || t('results.title')}</h1></div>
           <Link className="button button-secondary" to={homeQuery ? `/?${homeQuery}` : '/'}>{t('results.changeSearch')}</Link>
         </header>
-        <details ref={filtersPanelRef} className="results-filters" id="filters" onToggle={(event) => {
-          if (event.currentTarget.open) setFiltersActivated(true);
-        }}>
-          <summary>{t('results.filtersToggle')}</summary>
-          {filtersActivated && <SearchFilters initialFilters={filters} onSearch={applyFilters} />}
-        </details>
+        <FiltersPanel initialFilters={filters} onSearch={applyFilters} openOnMount={Boolean(location.state?.openFilters)} />
         <ActiveFilters filters={filters} onRemove={removeFilter} onClear={() => { saveLocationPreference({}); applyFilters({}); }} />
         {state.status === 'loading' && <LoadingState />}
         {state.status === 'error' && <ErrorState onRetry={() => setReloadKey((value) => value + 1)} />}

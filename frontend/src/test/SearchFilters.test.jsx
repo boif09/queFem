@@ -89,6 +89,15 @@ describe('SearchFilters', () => {
     );
   });
 
+  it('can hide the date section while retaining it by default', () => {
+    const { rerender } = render(<SearchFilters onSearch={vi.fn()} hideDateSection />);
+    expect(document.querySelector('.filter-section-date')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Data')).not.toBeInTheDocument();
+    rerender(<SearchFilters onSearch={vi.fn()} />);
+    expect(document.querySelector('.filter-section-date')).toBeInTheDocument();
+    expect(screen.getByLabelText('Data')).toBeInTheDocument();
+  });
+
   it('supports keyboard selection and an integrated clear action', async () => {
     const user = userEvent.setup();
     const onSearch = vi.fn();
