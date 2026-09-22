@@ -20,7 +20,9 @@ function replaceMeta(html, attribute, key, content) {
   return expression.test(html) ? html.replace(expression, tag) : html.replace('</head>', `  ${tag}\n</head>`);
 }
 
-export function renderSeoHtml(template, { title, description, robots, canonicalPath = null, jsonLd = null }) {
+export function renderSeoHtml(template, {
+  title, description, robots, canonicalPath = null, jsonLd = null, bodyHtml = null,
+}) {
   let html = template.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
   html = replaceMeta(html, 'name', 'description', description);
   html = replaceMeta(html, 'name', 'robots', robots);
@@ -42,5 +44,6 @@ export function renderSeoHtml(template, { title, description, robots, canonicalP
     canonical && `<meta property="og:url" content="${escapeHtml(canonical)}" />`,
     jsonLd && `<script type="application/ld+json" data-tenspla-jsonld>${escapeJsonForHtml(jsonLd)}</script>`,
   ].filter(Boolean).join('\n    ');
-  return additions ? html.replace('</head>', `    ${additions}\n  </head>`) : html;
+  html = additions ? html.replace('</head>', `    ${additions}\n  </head>`) : html;
+  return bodyHtml === null ? html : html.replace('<div id="root"></div>', `<div id="root">${bodyHtml}</div>`);
 }

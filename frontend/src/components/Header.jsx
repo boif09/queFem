@@ -14,6 +14,8 @@ export function Header() {
         </NavLink>
         <nav className="primary-nav" aria-label={t('nav.explore')}>
           <NavLink className={navClass} to="/">{t('nav.home')}</NavLink>
+          <NavLink className={navClass} to="/avui">{t('nav.today')}</NavLink>
+          <NavLink className={navClass} to="/cap-de-setmana">{t('nav.weekend')}</NavLink>
           <NavLink className={navClass} to="/plans">{t('nav.explore')}</NavLink>
           <NavLink className={navClass} to="/fonts">{t('nav.sources')}</NavLink>
         </nav>

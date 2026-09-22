@@ -9,6 +9,9 @@ const HOME = { title: 'Tens pla? | Plans i activitats a Catalunya', description:
 const PLANS = { title: 'Explora plans a Catalunya | Tens pla?', description: 'Explora concerts, festes, cultura, mercats i activitats disponibles arreu de Catalunya amb Tens pla?.' };
 const TODAY = { title: 'Què fer avui a Catalunya | Tens pla?', description: 'Descobreix activitats, festes, cultura, concerts i plans per fer avui arreu de Catalunya amb Tens pla?.' };
 const WEEKEND = { title: 'Què fer aquest cap de setmana a Catalunya | Tens pla?', description: 'Descobreix activitats i plans per fer aquest cap de setmana arreu de Catalunya amb Tens pla?.' };
+const HOME_BODY = '<nav aria-label="Descobriu plans"><a href="/avui">Descobreix què fer avui a Catalunya</a><a href="/cap-de-setmana">Troba plans per a aquest cap de setmana</a><a href="/plans">Explora tots els plans a Catalunya</a></nav>';
+const TODAY_BODY = '<main><h1>Què fer avui a Catalunya</h1><p>Descobreix activitats, festes, cultura, concerts i altres plans per fer avui arreu de Catalunya.</p><p>Els plans s\'actualitzen automàticament a partir de les fonts disponibles.</p><nav aria-label="Més plans"><a href="/cap-de-setmana">Consulta plans per a aquest cap de setmana</a><a href="/plans">Explora tots els plans a Catalunya</a></nav></main>';
+const WEEKEND_BODY = '<main><h1>Què fer aquest cap de setmana a Catalunya</h1><p>Descobreix plans i activitats per gaudir aquest cap de setmana arreu de Catalunya.</p><p>Els plans s\'actualitzen automàticament a partir de les fonts disponibles.</p><nav aria-label="Més plans"><a href="/avui">Descobreix què fer avui a Catalunya</a><a href="/plans">Explora tots els plans a Catalunya</a></nav></main>';
 
 function sendHtml(response, status, html) { return response.status(status).type('html').send(html); }
 function notFoundHtml(template) { return renderSeoHtml(template, { title: 'Pàgina no trobada | Tens pla?', description: 'La pàgina sol·licitada no existeix o ja no està disponible.', robots: 'noindex,follow' }); }
@@ -28,7 +31,7 @@ export function createSeoRouter(repository, { templatePath = path.resolve(proces
   };
   router.get('/', withTemplate((request, response, html) => {
     const filtered = Object.keys(request.query).length > 0;
-    return sendHtml(response, 200, renderSeoHtml(html, { ...HOME, robots: filtered ? 'noindex,follow' : 'index,follow', canonicalPath: filtered ? null : '/' }));
+    return sendHtml(response, 200, renderSeoHtml(html, { ...HOME, robots: filtered ? 'noindex,follow' : 'index,follow', canonicalPath: filtered ? null : '/', bodyHtml: HOME_BODY }));
   }));
   router.get('/plans', withTemplate((request, response, html) => {
     const filtered = Object.keys(request.query).length > 0;
@@ -36,11 +39,11 @@ export function createSeoRouter(repository, { templatePath = path.resolve(proces
   }));
   router.get('/avui', withTemplate((request, response, html) => {
     const filtered = Object.keys(request.query).length > 0;
-    return sendHtml(response, 200, renderSeoHtml(html, { ...TODAY, robots: filtered ? 'noindex,follow' : 'index,follow', canonicalPath: filtered ? null : '/avui' }));
+    return sendHtml(response, 200, renderSeoHtml(html, { ...TODAY, robots: filtered ? 'noindex,follow' : 'index,follow', canonicalPath: filtered ? null : '/avui', bodyHtml: TODAY_BODY }));
   }));
   router.get('/cap-de-setmana', withTemplate((request, response, html) => {
     const filtered = Object.keys(request.query).length > 0;
-    return sendHtml(response, 200, renderSeoHtml(html, { ...WEEKEND, robots: filtered ? 'noindex,follow' : 'index,follow', canonicalPath: filtered ? null : '/cap-de-setmana' }));
+    return sendHtml(response, 200, renderSeoHtml(html, { ...WEEKEND, robots: filtered ? 'noindex,follow' : 'index,follow', canonicalPath: filtered ? null : '/cap-de-setmana', bodyHtml: WEEKEND_BODY }));
   }));
   router.get('/plans/:id', withTemplate((request, response, html) => {
     let id;

@@ -100,6 +100,28 @@ test('SEO shell gives the unfiltered plans listing deterministic indexable metad
   });
 });
 
+test('SEO shell delivers crawlable internal links for the home and discovery landings', async () => {
+  await withTestDatabase(async (db) => {
+    const app = createSeoApp(db);
+    const home = await request(app).get('/');
+    assert.match(home.text, /<a href="\/avui">Descobreix què fer avui a Catalunya<\/a>/);
+    assert.match(home.text, /<a href="\/cap-de-setmana">Troba plans per a aquest cap de setmana<\/a>/);
+    assert.match(home.text, /<a href="\/plans">Explora tots els plans a Catalunya<\/a>/);
+
+    const today = await request(app).get('/avui');
+    assert.match(today.text, /<h1>Què fer avui a Catalunya<\/h1>/);
+    assert.match(today.text, /Descobreix activitats, festes, cultura, concerts i altres plans per fer avui arreu de Catalunya\./);
+    assert.match(today.text, /<a href="\/cap-de-setmana">Consulta plans per a aquest cap de setmana<\/a>/);
+    assert.match(today.text, /<a href="\/plans">Explora tots els plans a Catalunya<\/a>/);
+
+    const weekend = await request(app).get('/cap-de-setmana');
+    assert.match(weekend.text, /<h1>Què fer aquest cap de setmana a Catalunya<\/h1>/);
+    assert.match(weekend.text, /Descobreix plans i activitats per gaudir aquest cap de setmana arreu de Catalunya\./);
+    assert.match(weekend.text, /<a href="\/avui">Descobreix què fer avui a Catalunya<\/a>/);
+    assert.match(weekend.text, /<a href="\/plans">Explora tots els plans a Catalunya<\/a>/);
+  });
+});
+
 test('SEO shell makes home query variants deterministically non-indexable', async () => {
   await withTestDatabase(async (db) => {
     const response = await request(createSeoApp(db)).get('/?some=query');

@@ -3,6 +3,8 @@
   "app.tagline": "Idees per viure Catalunya",
   "app.notOfficial": "Tens pla? és una iniciativa independent i no és una aplicació oficial.",
   "nav.home": "Inici",
+  "nav.today": "Avui",
+  "nav.weekend": "Cap de setmana",
   "nav.explore": "Explorar plans",
   "nav.sources": "Fonts",
   "nav.mobile": "Navegació principal mòbil",
