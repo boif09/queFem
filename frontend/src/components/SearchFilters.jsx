@@ -23,7 +23,7 @@ function MunicipalityCombobox({ items, value, onChange, loading, onFocus }) {
   useEffect(() => { setQuery(value || ''); setActiveIndex(-1); }, [value]);
   const matches = useMemo(() => {
     const needle = normalizeSearch(query);
-    return items.filter((item) => !needle || normalizeSearch([item.municipality, item.comarca, item.province].filter(Boolean).join(' ')).includes(needle));
+    return items.filter((item) => !needle || normalizeSearch(item.municipality).includes(needle));
   }, [items, query]);
   const choose = (item) => { setQuery(item.municipality); onChange(item.municipality); setOpen(false); setActiveIndex(-1); };
   const clear = () => { setQuery(''); onChange(''); setOpen(true); setActiveIndex(-1); inputRef.current?.focus(); };

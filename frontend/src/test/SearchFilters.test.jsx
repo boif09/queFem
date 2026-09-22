@@ -252,6 +252,61 @@ describe('SearchFilters', () => {
     expect(screen.queryByRole('option', { name: 'Old comarca' })).not.toBeInTheDocument();
   });
 
+  it('matches municipality search against the municipality name only, not its comarca/province', async () => {
+    api.getMunicipalities.mockResolvedValue({
+      data: [
+        { municipality: 'Barcelona', comarca: 'Barcelonès', province: 'Barcelona' },
+        { municipality: 'Alella', comarca: 'Maresme', province: 'Barcelona' },
+        { municipality: 'Sabadell', comarca: 'Vallès Occidental', province: 'Barcelona' },
+        { municipality: 'Rubí', comarca: 'Vallès Occidental', province: 'Barcelona' },
+      ],
+    });
+    const user = userEvent.setup();
+    render(<SearchFilters onSearch={vi.fn()} />);
+    const municipality = await screen.findByPlaceholderText('Busca qualsevol municipi');
+
+    await user.click(municipality);
+    await user.type(municipality, 'barce');
+    expect(await screen.findByRole('option', { name: /^Barcelona /})).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /^Alella /})).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /^Sabadell /})).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /^Rubí /})).not.toBeInTheDocument();
+
+    await user.clear(municipality);
+    await user.type(municipality, 'BARCE');
+    expect(await screen.findByRole('option', { name: /^Barcelona /})).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /^Alella /})).not.toBeInTheDocument();
+
+    await user.clear(municipality);
+    await user.type(municipality, 'rubi');
+    expect(await screen.findByRole('option', { name: /^Rubí /})).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /^Barcelona /})).not.toBeInTheDocument();
+
+    await user.clear(municipality);
+    await user.type(municipality, 'occ');
+    expect(screen.getByText('Cap municipi coincideix amb la cerca.')).toBeInTheDocument();
+  });
+
+  it('restricts municipality name search to the province/comarca scope already loaded', async () => {
+    api.getMunicipalities.mockResolvedValue({
+      data: [{ municipality: 'Begur', comarca: 'Baix Empordà', province: 'Girona' }],
+    });
+    const user = userEvent.setup();
+    render(<SearchFilters onSearch={vi.fn()} />);
+    const province = screen.getByRole('combobox', { name: /rov/ });
+    await waitFor(() => expect(province).not.toBeDisabled());
+
+    await user.selectOptions(province, 'Girona');
+    const municipality = screen.getByPlaceholderText('Busca qualsevol municipi');
+    await user.click(municipality);
+    await waitFor(() => expect(api.getMunicipalities).toHaveBeenLastCalledWith('Girona', ''));
+    await user.type(municipality, 'begur');
+    expect(await screen.findByRole('option', { name: /^Begur /})).toBeInTheDocument();
+
+    await user.click(screen.getByRole('combobox', { name: /omarca/ }));
+    await waitFor(() => expect(api.getComarques).toHaveBeenCalledWith('Girona'));
+  });
+
   it('does not update after unmounting with a deep-link comarca request pending', async () => {
     const pending = deferred();
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
