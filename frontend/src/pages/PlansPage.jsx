@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Pagination } from '../components/Pagination.jsx';
@@ -8,6 +8,7 @@ import { FiltersPanel } from '../components/FiltersPanel.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
+import { trackCollectionView } from '../services/analytics.js';
 import { readLocationPreference, saveLocationPreference } from '../utils/locationPreference.js';
 import { createPlansSearch, filtersFromSearchParams } from '../utils/search.js';
 
@@ -18,12 +19,19 @@ export function PlansPage() {
   const [searchParams] = useSearchParams();
   const [state, setState] = useState({ status: 'loading', plans: [], pagination: null });
   const [reloadKey, setReloadKey] = useState(0);
+  const viewedCollections = useRef(new Set());
   const searchKey = searchParams.toString();
   const filters = useMemo(() => filtersFromSearchParams(searchParams), [searchKey]);
   const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
   const page = searchParams.get('page') || '1';
   const sort = filters.date || filters.dateFrom || filters.dateTo ? 'date' : 'quality';
   const filtered = searchParams.size > 0;
+
+  useEffect(() => {
+    if (viewedCollections.current.has('plans')) return;
+    viewedCollections.current.add('plans');
+    trackCollectionView({ collection: 'plans', language });
+  }, []);
 
   useEffect(() => {
     let active = true;

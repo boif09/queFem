@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CategoryIcon } from '../components/CategoryIcon.jsx';
@@ -9,7 +9,7 @@ import { SourceAttribution } from '../components/SourceAttribution.jsx';
 import { PUBLIC_ORIGIN, Seo } from '../components/Seo.jsx';
 import { ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
-import { trackAffiliateClick } from '../services/analytics.js';
+import { trackAffiliateClick, trackPlanView } from '../services/analytics.js';
 import { formatDate } from '../utils/dates.js';
 
 export { buildEventJsonLd };
@@ -27,6 +27,7 @@ export function PlanDetailPage() {
   const [state, setState] = useState({ status: 'loading', plan: null });
   const [reloadKey, setReloadKey] = useState(0);
   const [detailImageFailed, setDetailImageFailed] = useState(false);
+  const lastPlanId = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -38,6 +39,16 @@ export function PlanDetailPage() {
   }, [id, language, reloadKey]);
 
   useEffect(() => setDetailImageFailed(false), [id, state.plan?.image?.url]);
+
+  useEffect(() => {
+    if (state.status !== 'success' || lastPlanId.current === state.plan.id) return;
+    lastPlanId.current = state.plan.id;
+    trackPlanView({
+      planId: state.plan.id,
+      hasAffiliate: state.plan.commerce?.provider === 'fever',
+      language,
+    });
+  }, [state.status, state.plan, language]);
 
   if (state.status === 'loading') return <section className="page-section"><div className="container"><LoadingState /></div></section>;
   if (state.status === 'error') return <><Seo title={`${t('detail.errorTitle')} | Tens pla?`} description={t('detail.notFound')} robots="noindex,follow" /><section className="page-section"><div className="container"><ErrorState titleKey="detail.errorTitle" onRetry={() => setReloadKey((value) => value + 1)} /></div></section></>;
