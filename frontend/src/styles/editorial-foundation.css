@@ -284,3 +284,240 @@
 @media (max-width: 980px) {
   .home-page .permanent-section .plan-grid { grid-template-columns: 1fr; }
 }
+
+/* ---------------------------------------------------------------------- */
+/* Discovery pages: /plans, /avui, /cap-de-setmana — Phase 2               */
+/* Additive, scoped under `.discovery-page` (ancestor). Reuses the Home    */
+/* editorial language/tokens above. Home and plan detail are untouched.   */
+/* ---------------------------------------------------------------------- */
+
+.discovery-page { --container: 1360px; }
+
+/* Page header: eyebrow + editorial title, temporal accent underline */
+
+.discovery-page .results-header,
+.discovery-page .page-heading { margin-bottom: 40px; }
+.discovery-page .results-header { align-items: end; }
+.discovery-page .results-header .eyebrow,
+.discovery-page .page-heading .eyebrow { margin-bottom: 14px; font-size: var(--text-ui); }
+.discovery-page .results-header h1,
+.discovery-page .page-heading h1 {
+  display: inline-block;
+  max-width: 760px;
+  padding-bottom: 12px;
+  border-bottom: 5px solid var(--color-blue);
+  font-size: var(--text-display-m);
+  line-height: 1.02;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  overflow-wrap: normal;
+}
+.discovery-page .page-heading > p:last-child {
+  max-width: 620px;
+  margin: 18px 0 0;
+  color: var(--ink-warm-soft);
+  font-size: var(--text-body);
+  line-height: 1.6;
+}
+.discovery-page .results-header .button-secondary {
+  min-height: 0;
+  padding: 12px 20px;
+  border: var(--surface-medium-border);
+  box-shadow: none;
+  color: var(--color-blue-dark);
+  font-size: var(--text-ui);
+}
+.discovery-page .results-header .button-secondary:hover { background: #eef4ff; }
+
+.discovery-page.is-today .results-header h1,
+.discovery-page.is-today .page-heading h1 { border-bottom-color: var(--color-yellow); }
+.discovery-page.is-weekend .results-header h1,
+.discovery-page.is-weekend .page-heading h1 { border-bottom-color: var(--color-pink); }
+
+@media (max-width: 680px) {
+  .discovery-page .results-header,
+  .discovery-page .page-heading { margin-bottom: 28px; }
+  .discovery-page .results-header h1,
+  .discovery-page .page-heading h1 { font-size: clamp(1.9rem, 9vw, 2.6rem); }
+}
+
+/* Filter toggle */
+
+.discovery-page .results-filters { margin: 0 0 24px; }
+.discovery-page .results-filters > summary {
+  padding: 12px 20px;
+  border: var(--surface-medium-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow: none;
+  color: var(--color-blue-dark);
+  font-size: var(--text-ui);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.discovery-page .results-filters > summary:hover { border-color: var(--color-blue); background: #eef4ff; }
+.discovery-page .results-filters[open] > summary {
+  margin-bottom: 24px;
+  background: var(--color-blue);
+  border-color: var(--color-blue);
+  color: #fff;
+}
+
+@media (max-width: 680px) {
+  .discovery-page .results-filters > summary { width: 100%; text-align: center; }
+}
+
+/* Filter panel: cream/medium surface, calmer borders, editorial radius */
+
+.discovery-page .search-panel {
+  border: var(--surface-medium-border);
+  border-radius: var(--radius-editorial);
+  box-shadow: var(--surface-medium-shadow);
+  background: var(--color-surface);
+}
+.discovery-page .text-search-section { padding: 26px 30px; border-color: rgba(26, 26, 26, 0.1); }
+.discovery-page .text-search-control { padding-inline: 0; }
+.discovery-page .text-search-control input { padding: 16px 0; font-size: 1.05rem; }
+
+.discovery-page .filter-section { padding: 26px 30px; border-color: rgba(26, 26, 26, 0.1); }
+.discovery-page .filter-section-date,
+.discovery-page .filter-section-date + .filter-section,
+.discovery-page .filter-section-date + .filter-section + .filter-section,
+.discovery-page .filter-section-category { background: transparent; }
+.discovery-page .section-heading { gap: 12px; margin-bottom: 18px; }
+.discovery-page .section-number { border: 1.5px solid rgba(26, 26, 26, 0.16); color: var(--color-blue-dark); }
+.discovery-page .section-heading span { color: var(--ink-warm-soft); }
+.discovery-page .section-heading strong { font-size: 1.15rem; font-weight: 800; }
+
+.discovery-page .quick-date-list button {
+  border: 1.5px solid rgba(26, 26, 26, 0.16);
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+.discovery-page .quick-date-list button:hover { transform: none; box-shadow: none; border-color: var(--color-blue); }
+.discovery-page .quick-date-list button.is-selected { background: var(--color-blue); border-color: var(--color-blue); box-shadow: none; }
+.discovery-page input[type="date"],
+.discovery-page select {
+  border: 1.5px solid rgba(26, 26, 26, 0.16);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.discovery-page .municipality-control { border: 1.5px solid rgba(26, 26, 26, 0.16); border-radius: 8px; }
+.discovery-page .municipality-control:focus-within { border-color: var(--color-blue); box-shadow: none; outline: 2px solid rgba(0, 85, 255, 0.18); }
+.discovery-page .municipality-options { border: var(--surface-medium-border); border-radius: var(--radius-editorial); box-shadow: var(--surface-medium-shadow); }
+
+.discovery-page .category-grid { gap: 10px; }
+.discovery-page .category-choice {
+  border: 1.5px solid rgba(26, 26, 26, 0.14);
+  border-radius: var(--radius-editorial);
+  background: var(--color-surface);
+}
+.discovery-page .category-choice:hover { transform: translateY(-2px); box-shadow: var(--surface-medium-shadow); border-color: rgba(26, 26, 26, 0.24); }
+.discovery-page .category-choice.is-selected { background: var(--color-blue); border-color: var(--color-blue); box-shadow: none; color: #fff; }
+.discovery-page .category-choice-label { overflow-wrap: break-word; }
+
+.discovery-page .filter-actions { padding: 22px 30px; background: transparent; border-color: rgba(26, 26, 26, 0.1); }
+.discovery-page .check-control > span { border-radius: 6px; }
+.discovery-page .button-ghost { border: 1.5px solid rgba(26, 26, 26, 0.18); box-shadow: none; }
+
+/* Active filter chips */
+
+.discovery-page .active-filters {
+  padding: 16px 20px;
+  border: 1px solid rgba(26, 26, 26, 0.1);
+  border-radius: var(--radius-editorial);
+  background: var(--color-surface);
+  margin-bottom: 24px;
+}
+.discovery-page .active-filters > strong { color: var(--ink-warm-soft); font-weight: 700; }
+.discovery-page .filter-chip {
+  border: 1.5px solid rgba(26, 26, 26, 0.16);
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-weight: 600;
+}
+.discovery-page .filter-chip:hover { border-color: var(--color-blue); background: #eef4ff; transform: none; box-shadow: none; color: var(--color-blue-dark); }
+.discovery-page .clear-active-filters { color: var(--color-blue-dark); font-weight: 700; }
+
+/* Result count: quieter meta line, not competing with the H1 */
+
+.discovery-page .result-count {
+  width: auto;
+  margin: 0 0 22px;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink-warm-soft);
+  font-family: var(--font-ui);
+  font-size: var(--text-body-sm);
+  font-weight: 650;
+  text-transform: none;
+}
+
+/* Discovery card variant: image-led, calmer border, natural DOM order   */
+/* already matches image -> category -> title -> meta -> price/CTA.     */
+
+.discovery-page .plan-grid { gap: 26px; }
+.discovery-page .plan-card {
+  border: var(--surface-soft-border);
+  border-radius: var(--radius-editorial);
+  background: var(--color-surface);
+  box-shadow: var(--surface-medium-shadow);
+}
+.discovery-page .plan-card:hover { transform: translateY(-4px); box-shadow: var(--surface-medium-shadow-hover); }
+.discovery-page .plan-card-link { position: relative; }
+.discovery-page .plan-visual { border-bottom: 1px solid rgba(26, 26, 26, 0.1); }
+.discovery-page .plan-card .kind-label { display: none; }
+.discovery-page .category-label {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  padding: 5px 10px;
+  border-bottom: 0;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--color-text);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.discovery-page .plan-card-body { padding: 22px; }
+.discovery-page .plan-card h2 {
+  min-height: 0;
+  margin: 0 0 12px;
+  font-size: var(--text-headline);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  line-height: 1.25;
+}
+.discovery-page .card-meta { gap: 6px; margin: 0 0 12px; }
+.discovery-page .card-meta dd { color: var(--ink-warm-soft); font-size: 0.85rem; }
+.discovery-page .card-footer { padding-top: 14px; border-top: 1px solid rgba(26, 26, 26, 0.08); }
+.discovery-page .price-tag { font-weight: 700; font-size: 0.82rem; text-transform: none; }
+.discovery-page .card-arrow { color: var(--color-blue); }
+
+@media (max-width: 980px) {
+  .discovery-page .plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  .discovery-page .plan-grid { grid-template-columns: 1fr; }
+}
+
+/* Empty / error states */
+
+.discovery-page .state-card {
+  border: 1px dashed rgba(26, 26, 26, 0.22);
+  border-radius: var(--radius-editorial);
+  background: var(--color-surface);
+}
+.discovery-page .state-card > span:not(.loader) { background: transparent; border: 1.5px solid rgba(26, 26, 26, 0.16); border-radius: 50%; }
+.discovery-page .state-card h2 { font-size: 1.4rem; }
+.discovery-page .filtered-empty .button-primary,
+.discovery-page .location-empty .button-primary { background: var(--color-blue); box-shadow: none; }
+
+/* Pagination */
+
+.discovery-page .page-control { border: 1.5px solid rgba(26, 26, 26, 0.16); border-radius: 999px; box-shadow: none; }

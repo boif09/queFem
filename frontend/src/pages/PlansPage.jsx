@@ -60,7 +60,7 @@ export function PlansPage() {
       canonicalPath={filtered ? null : '/plans'}
       robots={filtered ? 'noindex,follow' : 'index,follow'}
     />
-    <section className="results-page page-section">
+    <section className="results-page page-section discovery-page is-plans">
       <div className="container">
         <header className="results-header">
           <div><p className="eyebrow dark">{t('results.eyebrow')}</p><h1>{filters.q || t('results.title')}</h1></div>

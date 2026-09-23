@@ -80,7 +80,7 @@ export function DiscoveryLandingPage({ type, now }) {
     canonicalPath={queryVariant ? null : landing.path}
     robots={queryVariant ? 'noindex,follow' : 'index,follow'}
   />
-  <section className="page-section discovery-landing-page">
+  <section className={`page-section discovery-landing-page discovery-page is-${type}`}>
     <div className="container">
       <header className="page-heading">
         <p className="eyebrow dark">{t(`landing.${landing.key}.eyebrow`)}</p>
