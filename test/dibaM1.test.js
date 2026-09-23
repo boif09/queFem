@@ -50,6 +50,66 @@ test('M1 rejects ended, invalid and missing-end records and leaves unresolved IN
   assert.equal(unresolved.candidate.plan.municipality, null);
 });
 
+test('M1 infers free from unqualified Catalan price text instead of a broken regex', () => {
+  const free = normalizeDibaImportRecord(FEED, raw('free', { preu: 'Activitat gratuïta' }), { ...WINDOW, municipalities: MUNICIPALITIES });
+  assert.equal(free.candidate.plan.is_free, 1);
+  assert.equal(free.candidate.plan.price_text, 'Activitat gratuïta');
+
+  const exact = normalizeDibaImportRecord(FEED, raw('free-exact', { preu: 'Gratuït' }), { ...WINDOW, municipalities: MUNICIPALITIES });
+  assert.equal(exact.candidate.plan.is_free, 1);
+});
+
+test('M1 never infers free from conditional wording or when a real price is present', () => {
+  const conditional = normalizeDibaImportRecord(
+    FEED,
+    raw('conditional', { preu: "Activitat gratuïta inclosa en el preu de l'entrada" }),
+    { ...WINDOW, municipalities: MUNICIPALITIES },
+  );
+  assert.notEqual(conditional.candidate.plan.is_free, 1);
+
+  // "Accés lliure" next to a separate priced item is a genuine contradiction
+  // within the text itself, not just paid: it must stay unresolved rather
+  // than being silently reported as a clean paid event.
+  const priced = normalizeDibaImportRecord(
+    FEED,
+    raw('priced', { preu: 'Accés lliure a la festa. Amb tiquet: visita guiada 5 €' }),
+    { ...WINDOW, municipalities: MUNICIPALITIES },
+  );
+  assert.equal(priced.candidate.plan.is_free, null);
+});
+
+test('a scheduled re-import does not self-correct an is_free value left stale by a prior code defect', async () => {
+  // This is why existing bad rows need a bounded backfill rather than "wait
+  // for the next scheduled import": when the upstream payload is byte-for-
+  // byte unchanged, persistWithinTransaction's payload-unchanged shortcut
+  // means canonical fields (including is_free) are not re-derived, so a
+  // value written under a prior buggy normalizer survives untouched even
+  // after the normalizer is fixed and the exact same record is re-imported.
+  await withTestDatabase(async (db) => {
+    const museums = DIBA_FEEDS[2];
+    const base = { db, municipalities: MUNICIPALITIES, now: () => new Date('2026-08-31T12:00:00Z') };
+    const feed = { [museums.dataset]: [raw('museum-stale', { preu: 'Activitat gratuïta' })] };
+
+    await new DibaImporter({ ...base, client: client(feed) }).run({ feeds: [museums] });
+    const planId = db.prepare(`
+      SELECT p.id FROM plans p JOIN plan_sources ps ON ps.plan_id = p.id JOIN sources s ON s.id = ps.source_id
+      WHERE s.key = 'diba-museus' AND ps.source_record_id = 'museum-stale'
+    `).get().id;
+    assert.equal(db.prepare('SELECT is_free FROM plans WHERE id = ?').get(planId).is_free, 1);
+
+    // Simulate a row written before this fix shipped.
+    db.prepare('UPDATE plans SET is_free = NULL WHERE id = ?').run(planId);
+
+    // Re-import the identical upstream record (payload unchanged).
+    await new DibaImporter({ ...base, client: client(feed) }).run({ feeds: [museums] });
+    assert.equal(
+      db.prepare('SELECT is_free FROM plans WHERE id = ?').get(planId).is_free,
+      null,
+      'a re-import with an unchanged payload must not be assumed to self-heal stale canonical fields',
+    );
+  });
+});
+
 test('reviewed final DEFER preserves an existing DIBA source refresh while keeping its plan inactive', async () => {
   await withTestDatabase(async (db) => {
     const key = 'diba-tourisme:deferred-existing'; const now = () => new Date('2026-08-31T12:00:00Z');

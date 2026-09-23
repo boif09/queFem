@@ -38,6 +38,35 @@ test('normalizes verified Gencat fields and never reuses an image', () => {
   assert.equal(normalized.plan.fingerprint, 'concert-estiu|palafrugell|2026-08-17');
 });
 
+test('resolves a Gencat gratuita/entrades contradiction using the price text, not the flag', () => {
+  const normalized = normalizePlan({
+    codi: '20260817002',
+    denominaci: 'El camí del gat salvatge',
+    descripcio: 'Text original',
+    data_inici: '2026-08-17T00:00:00.000',
+    entrades: 'Preu: 16€ per família/grup (màxim 5 persones)',
+    gratuita: 'Sí',
+    permanent: 'No',
+    municipi: 'agenda:ubicacions/girona/baix-emporda/palafrugell',
+  });
+  assert.equal(normalized.plan.is_free, 0);
+  assert.equal(normalized.plan.price_text, 'Preu: 16€ per família/grup (màxim 5 persones)');
+});
+
+test('resolves the reverse Gencat contradiction using unqualified free text', () => {
+  const normalized = normalizePlan({
+    codi: '20260817003',
+    denominaci: 'Entrada gratuïta a la mostra',
+    descripcio: 'Text original',
+    data_inici: '2026-08-17T00:00:00.000',
+    entrades: 'Entrada gratuïta',
+    gratuita: 'No',
+    permanent: 'No',
+    municipi: 'agenda:ubicacions/girona/baix-emporda/palafrugell',
+  });
+  assert.equal(normalized.plan.is_free, 1);
+});
+
 test('skips records without the two official identity fields', () => {
   assert.equal(normalizePlan({ codi: '1' }), null);
   assert.equal(normalizePlan({ denominaci: 'Sense codi' }), null);

@@ -1,4 +1,5 @@
 import { normalizeCategories, isFamilyFriendly } from './category.normalizer.js';
+import { inferFreeStatus } from './freeStatus.normalizer.js';
 import { normalizeLocation } from './location.normalizer.js';
 import { normalizeForFingerprint, nullableString, stripHtml } from './text.normalizer.js';
 
@@ -81,7 +82,11 @@ export function normalizePlan(record) {
     schedule_text: stripHtml(record.horari),
     permanent,
     price_text: stripHtml(record.entrades),
-    is_free: sourceBoolean(record.gratuita),
+    // record.gratuita and record.entrades are independently entered upstream
+    // and can directly contradict each other (confirmed in production);
+    // inferFreeStatus reconciles the flag against the actual price text
+    // instead of trusting the flag blindly.
+    is_free: inferFreeStatus({ flag: sourceBoolean(record.gratuita), text: stripHtml(record.entrades) }),
     ...location,
     address: nullableString(record.adre_a),
     postal_code: nullableString(record.codi_postal),

@@ -1,6 +1,7 @@
 import { MultiSourceMatcher } from '../deduplication/multiSourceMatcher.js';
 import { PlanRepository, canonicalJson } from '../db/repositories/plan.repository.js';
 import { TicketmasterReconciliationRepository } from '../db/repositories/ticketmasterReconciliation.repository.js';
+import { inferFreeStatus } from '../normalizers/freeStatus.normalizer.js';
 import { normalizeForFingerprint } from '../normalizers/text.normalizer.js';
 import { classifyDate, dateInCatalonia, normalizeDibaRecord } from './m0Discovery.js';
 import { dibaEvidence } from './dibaQualityAudit.js';
@@ -103,7 +104,10 @@ export function normalizeDibaImportRecord(feed, raw, { today, horizonEnd, munici
     title_ca: item.title, title_es: null, subtitle_ca: null, subtitle_es: null,
     description_ca: item.description, description_es: null,
     start_date: item.startDate, end_date: item.endDate, schedule_text: item.schedule,
-    permanent: 0, price_text: item.price, is_free: /^(gratu.it|0(?:[,.]0+)?\s*(€|eur)?)/i.test(item.price || '') ? 1 : null,
+    // DIBA has no separate free/paid flag, only this free-text price field;
+    // inferFreeStatus replaces a prior regex that never matched any real
+    // Catalan spelling of "gratuït"/"gratuïta" (confirmed defect).
+    permanent: 0, price_text: item.price, is_free: inferFreeStatus({ flag: null, text: item.price }),
     province: municipality?.province ?? null, comarca: municipality?.comarca ?? null,
     municipality: municipality?.municipality ?? null, locality: null,
     address: item.address, postal_code: item.postalCode, venue_name: item.venue,
