@@ -4,7 +4,7 @@ import request from 'supertest';
 import { createApp } from '../backend/src/app.js';
 import { withTestDatabase } from './helpers.js';
 
-function insertPlan(db, values) {
+function insertPlan(db, values, { addDefaultSource = true } = {}) {
   const now = '2026-08-17T10:00:00.000Z';
   const planId = Number(db.prepare(`
     INSERT INTO plans (
@@ -42,11 +42,39 @@ function insertPlan(db, values) {
     updated_at: now,
     ...values,
   }).lastInsertRowid);
-  db.prepare(`INSERT INTO plan_sources
-    (plan_id,source_id,source_record_id,source_payload_json,imported_at,last_seen_at)
-    SELECT ?,id,?,'{}',?,? FROM sources WHERE key='gencat-agenda'`
-  ).run(planId, `api-${planId}`, now, now);
+  if (addDefaultSource) {
+    db.prepare(`INSERT INTO plan_sources
+      (plan_id,source_id,source_record_id,source_payload_json,imported_at,last_seen_at)
+      SELECT ?,id,?,'{}',?,? FROM sources WHERE key='gencat-agenda'`
+    ).run(planId, `api-${planId}`, now, now);
+  }
   return planId;
+}
+
+function insertPlanSource(db, planId, {
+  sourceKey = 'gencat-agenda',
+  sourceRecordId,
+  sourceUrl = null,
+  sourceUpdatedAt = null,
+  importedAt = '2026-08-17T10:00:00.000Z',
+}) {
+  const source = db.prepare('SELECT id FROM sources WHERE key = ?').get(sourceKey);
+  db.prepare(`
+    INSERT INTO plan_sources (
+      plan_id, source_id, source_record_id, source_url, source_updated_at,
+      source_payload_json, imported_at, last_seen_at
+    ) VALUES (?, ?, ?, ?, ?, '{}', ?, ?)
+  `).run(planId, source.id, sourceRecordId, sourceUrl, sourceUpdatedAt, importedAt, importedAt);
+}
+
+function insertVisiblePlan(db, fingerprint) {
+  return insertPlan(db, {
+    fingerprint,
+    original_title: 'Pla de procedència',
+    title_ca: 'Pla de procedència',
+    start_date: '2026-08-20',
+    end_date: '2026-08-20',
+  }, { addDefaultSource: false });
 }
 
 function linkCategory(db, planId, slug) {
@@ -337,6 +365,128 @@ test('Milestone 2 REST API', async (context) => {
         assert.equal(body.data.sources[0].attribution_text, 'Generalitat de Catalunya. Departament de Cultura');
         assert.equal(body.data.sources[0].source_updated_at, '2026-08-17T08:00:00.000Z');
         assert.equal(body.data.sources[0].imported_at, '2026-08-17T09:00:00.000Z');
+      });
+
+      await context.test('deduplica procedencias idénticas del mismo proveedor por fecha mostrada', async () => {
+        const planId = insertVisiblePlan(db, 'provenance-identical|girona|2026-08-20');
+        insertPlanSource(db, planId, {
+          sourceRecordId: 'identical-a',
+          sourceUrl: 'https://example.test/gencat-identical',
+          sourceUpdatedAt: '2026-08-17T08:00:00.000Z',
+        });
+        insertPlanSource(db, planId, {
+          sourceRecordId: 'identical-b',
+          sourceUrl: 'https://example.test/gencat-identical',
+          sourceUpdatedAt: '2026-08-17T18:00:00.000Z',
+          importedAt: '2026-08-17T19:00:00.000Z',
+        });
+
+        const { body } = await apiRequest(`/api/plans/${planId}`);
+        assert.equal(body.data.sources.length, 1);
+        assert.equal(
+          db.prepare('SELECT COUNT(*) c FROM plan_sources WHERE plan_id = ?').get(planId).c,
+          2,
+        );
+        db.prepare("UPDATE plans SET status = 'inactive' WHERE id = ?").run(planId);
+      });
+
+      await context.test('mantiene procedencias distintas del mismo proveedor', async () => {
+        const planId = insertVisiblePlan(db, 'provenance-distinct|girona|2026-08-20');
+        insertPlanSource(db, planId, {
+          sourceRecordId: 'distinct-a',
+          sourceUrl: 'https://example.test/gencat-a',
+          sourceUpdatedAt: '2026-08-17T08:00:00.000Z',
+        });
+        insertPlanSource(db, planId, {
+          sourceRecordId: 'distinct-b',
+          sourceUrl: 'https://example.test/gencat-b',
+          sourceUpdatedAt: '2026-08-17T08:00:00.000Z',
+        });
+
+        const { body } = await apiRequest(`/api/plans/${planId}`);
+        assert.equal(body.data.sources.length, 2);
+        db.prepare("UPDATE plans SET status = 'inactive' WHERE id = ?").run(planId);
+      });
+
+      await context.test('mantiene procedencias de proveedores distintos', async () => {
+        const planId = insertVisiblePlan(db, 'provenance-providers|girona|2026-08-20');
+        insertPlanSource(db, planId, {
+          sourceRecordId: 'provider-gencat',
+          sourceUrl: 'https://example.test/gencat',
+          sourceUpdatedAt: '2026-08-17T08:00:00.000Z',
+        });
+        insertPlanSource(db, planId, {
+          sourceKey: 'ticketmaster-discovery-feed',
+          sourceRecordId: 'provider-ticketmaster',
+          sourceUrl: 'https://example.test/ticketmaster',
+          sourceUpdatedAt: '2026-08-17T08:00:00.000Z',
+        });
+
+        const { body } = await apiRequest(`/api/plans/${planId}`);
+        assert.equal(body.data.sources.length, 2);
+        assert.deepEqual(
+          new Set(body.data.sources.map(({ name }) => name)),
+          new Set(['Agenda Cultural de Catalunya', 'Ticketmaster Discovery Feed España']),
+        );
+        db.prepare("UPDATE plans SET status = 'inactive' WHERE id = ?").run(planId);
+      });
+
+      await context.test('conserva una procedencia única', async () => {
+        const planId = insertVisiblePlan(db, 'provenance-single|girona|2026-08-20');
+        insertPlanSource(db, planId, {
+          sourceRecordId: 'single-source',
+          sourceUrl: 'https://example.test/single',
+          sourceUpdatedAt: '2026-08-17T08:00:00.000Z',
+        });
+
+        const { body } = await apiRequest(`/api/plans/${planId}`);
+        assert.equal(body.data.sources.length, 1);
+        db.prepare("UPDATE plans SET status = 'inactive' WHERE id = ?").run(planId);
+      });
+
+      await context.test('deduplica solo la pareja idéntica y conserva su atribución', async () => {
+        const planId = insertVisiblePlan(db, 'provenance-three-source|girona|2026-08-20');
+        insertPlanSource(db, planId, {
+          sourceRecordId: 'three-gencat',
+          sourceUrl: 'https://example.test/gencat-three',
+          sourceUpdatedAt: '2026-08-16T08:00:00.000Z',
+        });
+        insertPlanSource(db, planId, {
+          sourceKey: 'ticketmaster-discovery-feed',
+          sourceRecordId: 'three-ticketmaster-a',
+          sourceUrl: 'https://example.test/ticketmaster-three',
+          sourceUpdatedAt: '2026-08-17T08:00:00.000Z',
+        });
+        insertPlanSource(db, planId, {
+          sourceKey: 'ticketmaster-discovery-feed',
+          sourceRecordId: 'three-ticketmaster-b',
+          sourceUrl: 'https://example.test/ticketmaster-three',
+          sourceUpdatedAt: '2026-08-17T18:00:00.000Z',
+          importedAt: '2026-08-17T19:00:00.000Z',
+        });
+
+        const { body } = await apiRequest(`/api/plans/${planId}`);
+        const ticketmaster = db.prepare(`
+          SELECT name, publisher, attribution_text
+          FROM sources WHERE key = 'ticketmaster-discovery-feed'
+        `).get();
+        const surviving = body.data.sources.find(({ name }) => name === ticketmaster.name);
+        assert.equal(body.data.sources.length, 2);
+        assert.deepEqual(
+          {
+            name: surviving.name,
+            publisher: surviving.publisher,
+            attribution_text: surviving.attribution_text,
+            source_url: surviving.source_url,
+            source_updated_at: surviving.source_updated_at,
+          },
+          {
+            ...ticketmaster,
+            source_url: 'https://example.test/ticketmaster-three',
+            source_updated_at: '2026-08-17T18:00:00.000Z',
+          },
+        );
+        db.prepare("UPDATE plans SET status = 'inactive' WHERE id = ?").run(planId);
       });
 
       await context.test('lista comarcas, municipios filtrados y categorías', async () => {

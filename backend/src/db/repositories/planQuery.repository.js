@@ -435,7 +435,7 @@ export class PlanQueryRepository {
       plan.commerce = { provider: 'fever', affiliateUrl: fever.source_url, sourceRecordId: fever.source_record_id,
         price: normalizeFeverPrice(payload.CurrentPrice, payload.Currency, payload.Labels) };
     }
-    plan.sources = this.db.prepare(`
+    const rawSources = this.db.prepare(`
       SELECT
         s.name, s.publisher, ps.source_url, s.attribution_text,
         s.license_name, s.license_url, ps.source_updated_at, ps.imported_at
@@ -444,6 +444,27 @@ export class PlanQueryRepository {
       WHERE ps.plan_id = ? AND s.enabled = 1
       ORDER BY s.name, ps.source_updated_at DESC, ps.imported_at DESC
     `).all(id);
+    const seenSourceAttributions = new Set();
+    const attributionKeyPart = (value) => {
+      if (value === null) return ['null'];
+      if (value === undefined) return ['undefined'];
+      return ['value', value];
+    };
+    plan.sources = rawSources.filter((source) => {
+      const displayedUpdatedAt = source.source_updated_at
+        ? source.source_updated_at.slice(0, 10)
+        : source.source_updated_at;
+      const key = JSON.stringify([
+        attributionKeyPart(source.name),
+        attributionKeyPart(source.publisher),
+        attributionKeyPart(source.attribution_text),
+        attributionKeyPart(source.source_url),
+        attributionKeyPart(displayedUpdatedAt),
+      ]);
+      if (seenSourceAttributions.has(key)) return false;
+      seenSourceAttributions.add(key);
+      return true;
+    });
     return plan;
   }
 
