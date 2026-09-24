@@ -8,6 +8,7 @@ data/reports/
 data/rehearsal/
 data/backups/
 data/fallback-image-originals/
+data/backfill-logs/
 coverage/
 frontend/dist/
 npm-debug.log*
