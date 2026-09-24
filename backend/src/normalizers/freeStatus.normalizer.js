@@ -77,16 +77,49 @@ const STRONG_FREE_WORD_RE = /gratu[iï]ts?a?/i;
 // Catalan forms, membership ("soci"/"carnet de soci"), and common
 // eligibility/restriction wording ("per invitació", "per estudiants", "per
 // abonats", "per residents", "codi promocional", "per jubilats"/"aturats",
-// "reserva/inscripció prèvia", "primeres N persones", "acreditació") — all
-// confirmed false-positive paths during independent cross-review of earlier
-// versions of this regex. This list is necessarily not exhaustive — it
-// covers wording confirmed during review, not every possible Catalan
-// eligibility phrase; new gaps found later should be added the same way.
+// "primeres N persones", "acreditació") — all confirmed false-positive paths
+// during independent cross-review of earlier versions of this regex. This
+// list is necessarily not exhaustive — it covers wording confirmed during
+// review, not every possible Catalan eligibility phrase; new gaps found
+// later should be added the same way.
 // "invitaci[oó]" and "acreditaci[oó]" intentionally have no trailing \b: a
 // non-unicode-aware \b misbehaves right after an accented character at the
 // end of a word (confirmed empirically — \binvitaci[oó]\b failed to match
 // "invitació", while \binvitaci[oó] without the trailing boundary matched).
-const CONDITIONAL_RE = /\bper\s*a\b|\bmembres?\b|\bmenors?\b|\binfants?\b|\bincl(?:òs|osa|osos|oses)\b|\bdescompte|\bcarnet\b|\bs[oò]ci(?:a|es|s)?\b|\bamb\s+(?:l['’]?)?entrada\b|\binvitaci[oó]|\bacompanyants?\b|\bestudiants?\b|\babonats?\b|\bresidents?\b|\bpromocional\b|\bjubila(?:t|da|ts|des)\b|\batura(?:t|da|ts|des)\b|\b(?:reserva|inscripci[oó])\s+pr[eè]via\b|\bprimer(?:a|es)?\s+\d+\s+persones\b|\bacreditaci[oó]/i;
+//
+// Confirmed real production gaps found during a Phase 4B.3 dry-run audit —
+// none of these were caught by the CONDITIONAL_RE above, in production,
+// before this patch:
+//   "de pagament"    — a mixed free/paid offering stated directly
+//                       (e.g. "Hi ha activitats gratuïtes i d'altres que
+//                       són de pagament").
+//   "abonant"        — free conditional on having paid separately elsewhere
+//                       (e.g. "Entrada gratuïta abonant l'entrada del
+//                       recinte del Poble Espanyol").
+//   "excepte"         — an exception carve-out (e.g. "Entrada gratuïta
+//                       (excepte activitats amb preu indicat)"). Broad by
+//                       design: it also catches "excepte" used in unrelated
+//                       scheduling clauses (e.g. "Tots els diumenges,
+//                       excepte l'últim diumenge de mes"), which is an
+//                       accepted, deliberate trade-off — the helper cannot
+//                       reliably distinguish a pricing exception from a
+//                       scheduling one without real NLP, so it conservatively
+//                       treats both as unresolved (null) rather than risk a
+//                       false FREE on the pricing case.
+//   "reserva"          — any reservation requirement, not just "reserva
+//                       prèvia" (e.g. "Entrada gratuïta amb reserva
+//                       d'entrades").
+//   "presentant el/un tiquet/bitllet/carnet/targeta" — a prerequisite item
+//                       must be shown.
+//   "targeta de soci/club/membre/fidelitat" — a membership/loyalty card
+//                       requirement, scoped narrowly so bare "targeta"
+//                       (which could mean an unrelated payment card) doesn't
+//                       trigger on its own.
+//   "disfress-"        — a costume-wearing condition (e.g. "si vens
+//                       disfressat").
+//   "audiogui-"        — an optional paid add-on named directly (e.g. "en
+//                       adquirir l'audioguia").
+const CONDITIONAL_RE = /\bper\s*a\b|\bmembres?\b|\bmenors?\b|\binfants?\b|\bincl(?:òs|osa|osos|oses)\b|\bdescompte|\bcarnet\b|\bs[oò]ci(?:a|es|s)?\b|\bamb\s+(?:l['’]?)?entrada\b|\binvitaci[oó]|\bacompanyants?\b|\bestudiants?\b|\babonats?\b|\bresidents?\b|\bpromocional\b|\bjubila(?:t|da|ts|des)\b|\batura(?:t|da|ts|des)\b|\binscripci[oó]\s+pr[eè]via\b|\bprimer(?:a|es)?\s+\d+\s+persones\b|\bacreditaci[oó]|\bde\s+pagament\b|\babonant\b|\bexcepte\b|\breserva\b|\bpresentant\s+(?:el\s+|un\s+)?(?:tiquet|bitllet|carnet|targeta)\b|\btargeta\s+(?:de\s+)?(?:soci|club|membre|fidelitat)\b|\bdisfress|\baudiogui/i;
 
 function normalizeFlag(flag) {
   if (flag === true || flag === 1) return 1;

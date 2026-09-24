@@ -121,6 +121,59 @@ test('never infers globally free from further eligibility/restriction wording', 
   }
 });
 
+test('never infers globally free from the real production phrases found in the Phase 4B.3 dry-run', () => {
+  // These four are the confirmed real production texts (via plan IDs 2059,
+  // 655, 672, 3641) that the deployed helper wrongly resolved to FREE before
+  // this patch — none were caught by the prior CONDITIONAL_RE.
+  const restricted = [
+    // Explicitly states a mixed free/paid offering.
+    'Hi ha activitats gratuïtes i d’altres que són de pagament.',
+    // Free conditional on having paid separate venue admission.
+    'Entrada gratuïta abonant l’entrada del recinte del Poble Espanyol',
+    // An exception carve-out for priced activities.
+    'Entrada gratuïta (excepte activitats amb preu indicat).',
+    // A reservation requirement, not just "reserva prèvia".
+    'Entrada gratuïta amb reserva d’entrades.',
+  ];
+  for (const text of restricted) {
+    assert.equal(inferFreeStatus({ text }), null, `expected unresolved for ${JSON.stringify(text)}`);
+  }
+});
+
+test('an "excepte" in an unrelated scheduling clause is conservatively treated the same as a pricing exception', () => {
+  // Real production text (plan IDs 496/497): "excepte" here qualifies a
+  // guided-visit SCHEDULE, not the price, so this event is very likely
+  // genuinely free. The helper cannot reliably distinguish a scheduling
+  // "excepte" from a pricing one without real NLP, so — by design — it
+  // conservatively stays unresolved (null) rather than risk a false FREE on
+  // the pricing case. This is a deliberate, accepted trade-off, not a bug.
+  const text = 'Entrada gratuïta Horaris: De dimarts a divendres de 17 a 20 h Dissabtes de '
+    + '10 a 14 h i de 17 a 20 h Diumenges de 10 a 14 h Tancat tots els dilluns, el mes '
+    + 'd’agost, i els dies 1 i 6 de gener, i el 25 i 26 de desembre. Visites guiades: '
+    + 'Tots els diumenges, excepte l’últim diumenge de mes: exposició permanent a les 12 h '
+    + 'i exposició temporal a les 13 h.';
+  assert.equal(inferFreeStatus({ text }), null);
+});
+
+test('never infers globally free from bounded prerequisite/eligibility wording (cross-review hypotheticals)', () => {
+  // Round-3 cross-review proposed these as plausible future risks; none were
+  // present in actual production data at review time, but the patterns are
+  // added pre-emptively since they clearly represent a prerequisite,
+  // eligibility condition, or optional paid add-on, and are narrowly scoped
+  // to avoid broad false positives (e.g. "targeta" alone is NOT a keyword —
+  // only "targeta de soci/club/membre/fidelitat" is, since bare "targeta"
+  // could just mean an unrelated payment card).
+  const restricted = [
+    'Entrada gratuïta presentant el tiquet de compra.',
+    'Accés gratuït amb la targeta de soci del club.',
+    'Entrada gratuïta si vens disfressat.',
+    'Entrada gratuïta en adquirir l’audioguia.',
+  ];
+  for (const text of restricted) {
+    assert.equal(inferFreeStatus({ text }), null, `expected unresolved for ${JSON.stringify(text)}`);
+  }
+});
+
 test('an explicit non-zero price overrides an unreliable upstream free flag', () => {
   assert.equal(
     inferFreeStatus({ flag: 1, text: 'Preu: 16€ per família/grup (màxim 5 persones)' }),
