@@ -1,6 +1,13 @@
 import { Router } from 'express';
 import { TicketmasterMediaError } from '../ticketmaster/imageProxy.js';
 
+function sendMediaError(response, error) {
+  if (Number.isFinite(error.retryAfterSeconds)) {
+    response.set('Retry-After', String(error.retryAfterSeconds));
+  }
+  return response.status(error.status).json({ error: { code: error.code, message: error.message } });
+}
+
 export function createMediaRouter({
   repository, proxy, enabled, feverProxy, feverEnabled = false, gencatProxy, gencatEnabled = true,
 }) {
@@ -25,9 +32,7 @@ export function createMediaRouter({
       });
       return response.status(200).send(media.data);
     } catch (error) {
-      if (error instanceof TicketmasterMediaError) {
-        return response.status(error.status).json({ error: { code: error.code, message: error.message } });
-      }
+      if (error instanceof TicketmasterMediaError) return sendMediaError(response, error);
       throw error;
     }
   });
@@ -40,7 +45,7 @@ export function createMediaRouter({
       response.set({ 'Cache-Control': 'public, max-age=3600', 'Content-Type': media.contentType, 'Content-Length': String(media.data.length), 'X-Content-Type-Options': 'nosniff', 'X-Tenspla-Cache': media.cacheStatus });
       return response.status(200).send(media.data);
     } catch (error) {
-      if (error instanceof TicketmasterMediaError) return response.status(error.status).json({ error: { code: error.code, message: error.message } });
+      if (error instanceof TicketmasterMediaError) return sendMediaError(response, error);
       throw error;
     }
   });
@@ -59,9 +64,7 @@ export function createMediaRouter({
       });
       return response.status(200).send(media.data);
     } catch (error) {
-      if (error instanceof TicketmasterMediaError) {
-        return response.status(error.status).json({ error: { code: error.code, message: error.message } });
-      }
+      if (error instanceof TicketmasterMediaError) return sendMediaError(response, error);
       throw error;
     }
   });

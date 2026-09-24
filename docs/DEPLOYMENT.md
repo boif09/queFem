@@ -53,6 +53,8 @@ TICKETMASTER_IMAGE_METADATA_REFRESH_HOURS=24
 TICKETMASTER_IMAGE_REQUEST_TIMEOUT_MS=15000
 TICKETMASTER_IMAGE_MAX_BYTES=10485760
 MEDIA_REMOTE_FETCH_CONCURRENCY=4
+MEDIA_REMOTE_FETCH_QUEUE_DEPTH=24
+MEDIA_REMOTE_FETCH_QUEUE_WAIT_MS=6000
 ```
 
 `TICKETMASTER_IMAGES_ENABLED` es el único feature flag de esta función y su valor seguro por
@@ -72,11 +74,15 @@ El cron debe ejecutarse con ese mismo usuario o el directorio debe prepararse pr
 propietario y permisos compatibles; la aplicación no intenta elevar privilegios.
 La limpieza se aplica al llenar la caché y al terminar el sync: elimina primero huérfanos y
 expirados y, si aún supera 512 MB, las entradas más antiguas. El proxy aplica timeout de 15
-segundos y un máximo de 10 MiB por imagen. Ticketmaster y Fever comparten además un límite
-aplicativo de cuatro descargas remotas simultáneas por proceso. El valor
-`MEDIA_REMOTE_FETCH_CONCURRENCY` acepta enteros entre 1 y 16; cuando se alcanza, una nueva
-cache miss distinta falla temporalmente con HTTP 503 en lugar de crear una cola sin límite.
-Los hits de caché y los consumidores concurrentes de un mismo ID no ocupan plazas adicionales.
+segundos y un máximo de 10 MiB por imagen. Ticketmaster, Fever y Gencat comparten además un
+límite aplicativo de cuatro descargas remotas simultáneas por proceso (`MEDIA_REMOTE_FETCH_CONCURRENCY`,
+entero entre 1 y 16). Una cache miss que llega con el límite ocupado espera en una cola FIFO
+acotada (`MEDIA_REMOTE_FETCH_QUEUE_DEPTH`, por defecto 24, entre 0 y 64) hasta un tiempo máximo
+(`MEDIA_REMOTE_FETCH_QUEUE_WAIT_MS`, por defecto 6000 ms, entre 0 y 20000); solo si la cola está
+llena o se agota la espera responde HTTP 503 `MEDIA_CAPACITY` (con cabecera `Retry-After`), en vez
+de fallar de inmediato solo por haber más de cuatro peticiones simultáneas.
+Los hits de caché y los consumidores concurrentes de un mismo ID no ocupan plazas de concurrencia
+ni de cola.
 
 El comando utiliza un lock atómico dentro de la caché. Una segunda ejecución sale correctamente
 sin sincronizar; un lock cuyo PID ya no existe se recupera automáticamente.

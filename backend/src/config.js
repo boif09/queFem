@@ -3,6 +3,10 @@ import { fileURLToPath } from 'node:url';
 import {
   DEFAULT_MEDIA_REMOTE_FETCH_CONCURRENCY,
   MAXIMUM_MEDIA_REMOTE_FETCH_CONCURRENCY,
+  DEFAULT_MEDIA_REMOTE_FETCH_QUEUE_DEPTH,
+  MAXIMUM_MEDIA_REMOTE_FETCH_QUEUE_DEPTH,
+  DEFAULT_MEDIA_REMOTE_FETCH_QUEUE_WAIT_MS,
+  MAXIMUM_MEDIA_REMOTE_FETCH_QUEUE_WAIT_MS,
 } from './ticketmaster/imageProxy.js';
 import { DEFAULT_GENCAT_HISTORICAL_IMAGE_RESOLUTION_BUDGET } from './gencat/imagePolicy.js';
 
@@ -77,6 +81,18 @@ export function loadConfig(env = process.env) {
       DEFAULT_MEDIA_REMOTE_FETCH_CONCURRENCY,
       1,
       MAXIMUM_MEDIA_REMOTE_FETCH_CONCURRENCY,
+    ),
+    mediaRemoteFetchQueueDepth: boundedInteger(
+      env.MEDIA_REMOTE_FETCH_QUEUE_DEPTH,
+      DEFAULT_MEDIA_REMOTE_FETCH_QUEUE_DEPTH,
+      0,
+      MAXIMUM_MEDIA_REMOTE_FETCH_QUEUE_DEPTH,
+    ),
+    mediaRemoteFetchQueueWaitMs: boundedInteger(
+      env.MEDIA_REMOTE_FETCH_QUEUE_WAIT_MS,
+      DEFAULT_MEDIA_REMOTE_FETCH_QUEUE_WAIT_MS,
+      0,
+      MAXIMUM_MEDIA_REMOTE_FETCH_QUEUE_WAIT_MS,
     ),
     eventRetentionDays: nonNegativeInteger(env.EVENT_RETENTION_DAYS, 0),
     inactivePlanRetentionDays: positiveInteger(env.INACTIVE_PLAN_RETENTION_DAYS, 7),

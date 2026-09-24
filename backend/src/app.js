@@ -12,6 +12,8 @@ import { PlanSourceImageRepository } from './db/repositories/planSourceImage.rep
 import { TicketmasterImageCache } from './ticketmaster/imageCache.js';
 import {
   DEFAULT_MEDIA_REMOTE_FETCH_CONCURRENCY,
+  DEFAULT_MEDIA_REMOTE_FETCH_QUEUE_DEPTH,
+  DEFAULT_MEDIA_REMOTE_FETCH_QUEUE_WAIT_MS,
   MediaRemoteFetchLimiter,
   TicketmasterImageProxy,
   validateFeverImageUrl,
@@ -37,6 +39,8 @@ export function createApp({
   gencatImageCacheMaxMb = 512, gencatImageRequestTimeoutMs = 15_000,
   gencatImageMaximumBytes = 10 * 1024 * 1024, gencatImageFetchImpl,
   mediaRemoteFetchConcurrency = DEFAULT_MEDIA_REMOTE_FETCH_CONCURRENCY,
+  mediaRemoteFetchQueueDepth = DEFAULT_MEDIA_REMOTE_FETCH_QUEUE_DEPTH,
+  mediaRemoteFetchQueueWaitMs = DEFAULT_MEDIA_REMOTE_FETCH_QUEUE_WAIT_MS,
   fallbackImageLibrary,
   seoTemplatePath,
   seoTemplate,
@@ -58,7 +62,11 @@ export function createApp({
     fallbackImageLibrary: resolvedFallbackImageLibrary,
   });
   const imageRepository = new PlanSourceImageRepository(db);
-  const mediaRemoteFetchLimiter = new MediaRemoteFetchLimiter(mediaRemoteFetchConcurrency);
+  const mediaRemoteFetchLimiter = new MediaRemoteFetchLimiter(mediaRemoteFetchConcurrency, {
+    maxQueueDepth: mediaRemoteFetchQueueDepth,
+    maxQueueWaitMs: mediaRemoteFetchQueueWaitMs,
+    logger,
+  });
   const imageCache = new TicketmasterImageCache({
     directory: ticketmasterImageCachePath || `${process.cwd()}/data/cache/ticketmaster-images`,
     ttlHours: ticketmasterImageCacheTtlHours,
