@@ -40,6 +40,16 @@
       "reason": "Phase 4C.4 batch consolidation, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 6 occurrences, 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 238 days (longest of this batch, still within the 300-day ceiling). Canonical plan 2682 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group.",
       "reviewedAt": "2026-09-28",
       "reviewer": "project-owner"
+    },
+    {
+      "groupKey": "gencat-agenda|salvador-pages-i-obrera|nau-gaudi",
+      "source": "gencat-agenda",
+      "normalizedTitle": "salvador-pages-i-obrera",
+      "venueIdentity": "nau-gaudi",
+      "decision": "ACCEPT",
+      "reason": "Phase 4C.5 batch consolidation, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 3 occurrences, 2/2 usable strong signals (description, image) positively agree, ticket signal not usable (no ticket URL present on any member), no signal disagrees, span 70 days. Canonical plan 1581 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group.",
+      "reviewedAt": "2026-09-28",
+      "reviewer": "project-owner"
     }
   ]
 }
