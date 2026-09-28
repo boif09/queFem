@@ -66,7 +66,14 @@ test('dry-run detects the group, requires an ACCEPT decision, and reports zero p
       const { planIds } = insertThreeOccurrencePlans(db);
       const canonicalPlanId = Math.min(...planIds);
 
-      const withoutDecision = computeConsolidationPlan(db, { groupKey: GROUP_KEY, canonicalPlanId });
+      // Explicit empty decisions file, NOT the real shipped default path —
+      // the real data-policy/recurring-production-decisions.json legitimately
+      // carries a real ACCEPT for this exact groupKey since Phase 4C.3B (the
+      // production pilot), so this "no decision yet" case must be isolated
+      // from that real, evolving file rather than relying on the default.
+      const emptyDecisionsPath = path.join(dir, 'empty-decisions.json');
+      fs.writeFileSync(emptyDecisionsPath, JSON.stringify({ version: 1, decisions: [] }));
+      const withoutDecision = computeConsolidationPlan(db, { groupKey: GROUP_KEY, canonicalPlanId, decisionsPath: emptyDecisionsPath });
       assert.equal(withoutDecision.ok, false);
       assert.ok(withoutDecision.problems.some((p) => p.includes('No human ACCEPT decision')));
 

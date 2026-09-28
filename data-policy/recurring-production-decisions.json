@@ -1,4 +1,15 @@
 {
   "version": 1,
-  "decisions": []
+  "decisions": [
+    {
+      "groupKey": "gencat-agenda|gran-gala-flamenc|palau-de-la-musica-catalana",
+      "source": "gencat-agenda",
+      "normalizedTitle": "gran-gala-flamenc",
+      "venueIdentity": "palau-de-la-musica-catalana",
+      "decision": "ACCEPT",
+      "reason": "Phase 4C.3B production pilot, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 14 occurrences, 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 89 days. Canonical plan 1198 (lowest current id). Legacy public ids 1196 and 1197, confirmed to no longer have a plans row (removed by retention before consolidation), are authorized as --legacy-alias-id values backed by the original Phase 4C production audit that recorded the group's full original id range (1196-1211) before any of it was purged.",
+      "reviewedAt": "2026-09-28",
+      "reviewer": "project-owner"
+    }
+  ]
 }

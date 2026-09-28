@@ -7,10 +7,17 @@ import {
 import { RECURRING_PRODUCTION_DECISIONS_PATH } from '../backend/src/deduplication/recurringProductionDecisions.js';
 import { readFileSync } from 'node:fs';
 
-test('the shipped decision file is empty by default — no ACCEPT decisions are pre-populated from the audit', () => {
+test('the shipped decision file validates, and is never auto-populated from the audit — only ever from explicit human review', () => {
   const payload = JSON.parse(readFileSync(RECURRING_PRODUCTION_DECISIONS_PATH, 'utf8'));
   assert.equal(payload.version, 1);
-  assert.deepEqual(payload.decisions, []);
+  assert.ok(Array.isArray(payload.decisions));
+  // As of Phase 4C.3B, this file legitimately carries the human-authorized
+  // ACCEPT decision for the Gran Gala Flamenc pilot — this is a real
+  // decision recorded through git, not a placeholder. Any entry present
+  // must still satisfy the full validator (this is the actual regression
+  // guard: the shipped file itself must always be structurally valid).
+  const validated = validateRecurringProductionDecisions(payload);
+  assert.equal(validated.decisions.length, payload.decisions.length);
 });
 
 test('a valid decision entry round-trips correctly', () => {
@@ -85,7 +92,9 @@ test('rejects a duplicate groupKey', () => {
   assert.throws(() => validateRecurringProductionDecisions({ version: 1, decisions: [entry, entry] }), /Duplicate/);
 });
 
-test('decisionsByGroupKey loads the shipped (empty) file without throwing', () => {
+test('decisionsByGroupKey loads the shipped file without throwing, keyed correctly by groupKey', () => {
   const map = decisionsByGroupKey();
-  assert.equal(map.size, 0);
+  const ganGalaGroupKey = 'gencat-agenda|gran-gala-flamenc|palau-de-la-musica-catalana';
+  assert.ok(map.size >= 1, 'the shipped file has at least the Gran Gala Flamenc pilot decision (Phase 4C.3B)');
+  assert.equal(map.get(ganGalaGroupKey)?.decision, 'ACCEPT');
 });
