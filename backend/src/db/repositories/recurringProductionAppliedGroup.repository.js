@@ -20,6 +20,25 @@ export class RecurringProductionAppliedGroupRepository {
     return this.findCanonical.get(groupKey)?.canonical_plan_id ?? null;
   }
 
+  // Phase 4C.6B fallback for multi-venue groups (Memoria en temps de
+  // guerra..., Espais de poder...): a genuinely new Gencat record for an
+  // already-applied group won't always match the EXACT (source, title, venue)
+  // key the group was originally applied under, because each raw record's own
+  // `espai` differs per venue leg while the applied group's key is fixed to
+  // whichever single venue the canonical plan ended up with. Matching by
+  // title alone is only safe when it is unambiguous: if the same title was
+  // ever separately applied under a genuinely DIFFERENT venue as its own,
+  // distinct production, this refuses to guess (fail-closed) rather than
+  // risk misattributing a record to the wrong production.
+  findCanonicalPlanIdByTitle(source, normalizedTitle) {
+    const rows = this.db.prepare('SELECT group_key, canonical_plan_id FROM recurring_production_applied_groups').all();
+    const matches = rows.filter((row) => {
+      const [rowSource, rowTitle] = row.group_key.split('|');
+      return rowSource === source && rowTitle === normalizedTitle;
+    });
+    return matches.length === 1 ? matches[0].canonical_plan_id : null;
+  }
+
   isApplied(groupKey) {
     return Boolean(this.isAppliedStmt.get(groupKey));
   }

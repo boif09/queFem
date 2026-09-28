@@ -3,6 +3,8 @@ import { BaseImporter } from './baseImporter.js';
 import { canonicalJson } from '../db/repositories/plan.repository.js';
 import { RecurringProductionAppliedGroupRepository } from '../db/repositories/recurringProductionAppliedGroup.repository.js';
 import { normalizeVenueIdentity } from '../deduplication/recurringProductionDetector.js';
+import { maintainRecurringOccurrence } from '../deduplication/recurringOccurrenceMaintenance.js';
+import { PlanOccurrenceRepository } from '../db/repositories/planOccurrence.repository.js';
 import { PlanSourceImageRepository } from '../db/repositories/planSourceImage.repository.js';
 import { normalizeForFingerprint } from '../normalizers/text.normalizer.js';
 import {
@@ -59,12 +61,12 @@ function approvedSourcePayload(record) {
 // Must compute the identical groupKey the detector uses (source|normalizedTitle|venueIdentity)
 // — see deduplication/recurringProductionDetector.js buildCandidateGroups() — so an
 // applied-groups entry written from a detector run always matches at import time.
-function recurringGroupKey(sourceKey, plan) {
+function recurringGroupIdentity(plan) {
   if (!plan.original_title || !plan.venue_name) return null;
   const normalizedTitle = normalizeForFingerprint(plan.original_title, { removeArticles: true });
   const venueIdentity = normalizeVenueIdentity(plan.venue_name);
   if (!normalizedTitle || !venueIdentity) return null;
-  return `${sourceKey}|${normalizedTitle}|${venueIdentity}`;
+  return { normalizedTitle, venueIdentity };
 }
 
 function historicalImagePriority(state, cutoff) {
@@ -173,6 +175,12 @@ export class GencatAgendaImporter extends BaseImporter {
     // earlier JSON-file-based mapping that could commit separately from the
     // DB transaction (Phase 4C.3A atomicity hardening).
     this.appliedRecurringGroups = new RecurringProductionAppliedGroupRepository(db);
+    // Phase 4C.6B: maintains plan_occurrences for records that arrive AFTER a
+    // recurring group has already been consolidated (see afterPersist()) —
+    // the one-off consolidation script only ever runs once per group, so
+    // without this a brand new future occurrence would attach to the correct
+    // canonical plan but never get an occurrence row.
+    this.occurrences = new PlanOccurrenceRepository(db);
   }
 
   async run() {
@@ -253,8 +261,23 @@ export class GencatAgendaImporter extends BaseImporter {
   }
 
   getTargetPlanId(record, normalized) {
-    const groupKey = recurringGroupKey(this.getSourceId(), normalized.plan);
-    return groupKey ? this.appliedRecurringGroups.findCanonicalPlanId(groupKey) : null;
+    return this.resolveAppliedCanonicalPlanId(normalized.plan);
+  }
+
+  // Shared by getTargetPlanId() (routes a new plan_sources row at persist
+  // time) and afterPersist() (decides whether to maintain a plan_occurrence,
+  // Phase 4C.6B) so the two can never disagree about which records belong to
+  // an applied group. Tries the exact (source, title, venue) key first —
+  // unchanged behavior for every single-venue group — then falls back to an
+  // unambiguous title-only match for multi-venue groups (see
+  // RecurringProductionAppliedGroupRepository.findCanonicalPlanIdByTitle()).
+  resolveAppliedCanonicalPlanId(plan) {
+    const identity = recurringGroupIdentity(plan);
+    if (!identity) return null;
+    const exactGroupKey = `${this.getSourceId()}|${identity.normalizedTitle}|${identity.venueIdentity}`;
+    const exactMatch = this.appliedRecurringGroups.findCanonicalPlanId(exactGroupKey);
+    if (exactMatch) return exactMatch;
+    return this.appliedRecurringGroups.findCanonicalPlanIdByTitle(this.getSourceId(), identity.normalizedTitle);
   }
 
   getExternalId(record) {
@@ -310,14 +333,37 @@ export class GencatAgendaImporter extends BaseImporter {
   }
 
   async afterPersist(record, normalized, source, sourceRecordId, outcome, prepared) {
-    if (!prepared || prepared.action === 'defer') return;
+    // Image resolution only (independent of recurring-occurrence maintenance
+    // below): skipped entirely when images are deferred, or when
+    // prepareRecord() returned null because images are disabled — that must
+    // NOT also skip occurrence maintenance, which has nothing to do with
+    // images (self-review finding, Phase 4C.6B: the original code's single
+    // early `if (!prepared || ...) return;` guarded both concerns at once).
+    if (prepared && prepared.action !== 'defer') {
+      const sourceRecord = this.plans.getSourceRecord(source.id, sourceRecordId);
+      if (!sourceRecord) throw new Error('No s’ha trobat la procedència Gencat acabada de persistir.');
+      this.sourceImages.persistSelections(
+        sourceRecord.id,
+        prepared.action === 'persist' ? prepared.selections : {},
+        this.now().toISOString(),
+      );
+    }
+
+    // Recurring-occurrence maintenance (Phase 4C.6B): only for records that
+    // resolve to an applied group's canonical plan (same resolution
+    // getTargetPlanId() used to route this record's plan_sources row in the
+    // first place) — ordinary, non-applied Gencat records are completely
+    // unaffected.
+    if (!this.resolveAppliedCanonicalPlanId(normalized.plan)) return;
     const sourceRecord = this.plans.getSourceRecord(source.id, sourceRecordId);
-    if (!sourceRecord) throw new Error('No s’ha trobat la procedència Gencat acabada de persistir.');
-    this.sourceImages.persistSelections(
-      sourceRecord.id,
-      prepared.action === 'persist' ? prepared.selections : {},
-      this.now().toISOString(),
-    );
+    if (!sourceRecord) return;
+    maintainRecurringOccurrence(this.db, this.occurrences, {
+      planId: sourceRecord.plan_id,
+      sourceKey: this.getSourceId(),
+      sourceRecordId,
+      localDate: normalized.plan.start_date,
+      seenAt: this.now().toISOString(),
+    });
   }
 
   getSourceUrl(record) {

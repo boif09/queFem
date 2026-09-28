@@ -46,9 +46,21 @@ import { PlanOccurrenceRepository } from '../backend/src/db/repositories/planOcc
 import { RecurringProductionAppliedGroupRepository } from '../backend/src/db/repositories/recurringProductionAppliedGroup.repository.js';
 import { detectRecurringProductionCandidates } from '../backend/src/deduplication/recurringProductionDetector.js';
 import { decisionsByGroupKey } from '../backend/src/deduplication/recurringProductionDecisions.js';
+import { groupSourceRowsIntoOccurrences } from '../backend/src/deduplication/recurringOccurrenceIdentity.js';
 import { loadCandidateRecords } from '../backend/src/jobs/detectRecurringProductions.js';
 
 const OCCURRENCE_TIMEZONE = 'Europe/Madrid';
+
+// Phase 4C.6B: the real-session identity (sessionIdentifier) and batch
+// grouping logic (groupSourceRowsIntoOccurrences) now live in
+// backend/src/deduplication/recurringOccurrenceIdentity.js, shared with
+// GencatAgendaImporter's ongoing occurrence maintenance
+// (recurringOccurrenceMaintenance.js) for records that arrive AFTER this
+// script has already consolidated a group — so the one-off batch collapse
+// done here and the incremental maintenance done on every future import can
+// never drift apart on what counts as "the same real session". Re-exported
+// here so existing callers/tests importing it from this script keep working.
+export { groupSourceRowsIntoOccurrences };
 
 // Pure, read-only: re-derives the exact group (by groupKey) from CURRENT
 // data and validates every precondition. Used identically for --dry-run and
@@ -182,11 +194,12 @@ export function computeConsolidationPlan(db, { groupKey, canonicalPlanId, decisi
     problems.push('Internal inconsistency computing expected plan count.');
   }
 
-  const occurrences = sourceRows.map((row) => ({
-    planSourceId: row.plan_source_id,
-    occurrenceKey: row.source_record_id,
-    localDate: row.plan_start_date,
-  }));
+  // Group plan_sources rows into REAL occurrences (Phase 4C.6): every row is
+  // still relinked to the canonical plan below (provenance/attribution/images
+  // are untouched), but multiple rows that are really the same session
+  // collapse into exactly one plan_occurrence — see
+  // groupSourceRowsIntoOccurrences()/sessionIdentifier() above.
+  const occurrences = groupSourceRowsIntoOccurrences(sourceRows);
   if (occurrences.some((o) => !o.localDate)) {
     problems.push('At least one member plan has a null start_date; cannot derive an occurrence date for it.');
   }
@@ -231,6 +244,9 @@ function printPlanReport(plan) {
   console.log(`Total aliases (${plan.allAliasPlanIds.length}): ${plan.allAliasPlanIds.join(', ')}`);
   console.log(`plan_sources to relink: ${plan.sourceRows.length}`);
   console.log(`plan_occurrences to create: ${plan.occurrences.length}`);
+  if (plan.occurrences.length !== plan.sourceRows.length) {
+    console.log(`  (${plan.sourceRows.length - plan.occurrences.length} plan_sources row(s) collapsed into an existing real session — same session, multiple venue filings.)`);
+  }
   console.log(`Canonical start_date/end_date after: ${plan.canonicalDates.start_date} .. ${plan.canonicalDates.end_date}`);
   if (plan.problems.length) {
     console.log('PROBLEMS (would abort with zero writes):');

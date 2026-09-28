@@ -9,7 +9,7 @@ import { normalizeVenueIdentity } from '../backend/src/deduplication/recurringPr
 import { PlanAliasRepository } from '../backend/src/db/repositories/planAlias.repository.js';
 import { PlanOccurrenceRepository } from '../backend/src/db/repositories/planOccurrence.repository.js';
 import { RecurringProductionAppliedGroupRepository } from '../backend/src/db/repositories/recurringProductionAppliedGroup.repository.js';
-import { computeConsolidationPlan, applyConsolidation } from '../scripts/consolidate-recurring-group.js';
+import { computeConsolidationPlan, applyConsolidation, groupSourceRowsIntoOccurrences } from '../scripts/consolidate-recurring-group.js';
 
 const NOW = '2026-09-24T10:00:00.000Z';
 const TITLE = 'Gran Gala Flamenc';
@@ -50,6 +50,18 @@ function insertGencatSource(db, planId, recordId, { images = '/x/a.jpg,/x/b.jpg'
     INSERT INTO plan_sources (plan_id, source_id, source_record_id, source_payload_json, imported_at, last_seen_at)
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(planId, source.id, recordId, JSON.stringify({ imatges: images }), NOW, NOW).lastInsertRowid);
+}
+
+function randomHex16() {
+  return Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+}
+
+// Mimics Gencat's own getExternalId() scheme (`${codi}@${16-hex-char hash}`,
+// see importers/gencatAgenda.importer.js) so tests can construct multi-venue
+// "same real session, different venue" plan_sources rows the way production
+// actually produces them (Phase 4C.6).
+function insertGencatSourceWithCodi(db, planId, codi, { images = '/x/a.jpg' } = {}) {
+  return insertGencatSource(db, planId, `${codi}@${randomHex16()}`, { images });
 }
 
 function insertThreeOccurrencePlans(db) {
@@ -807,5 +819,271 @@ test('occurrence upsert for an already-existing plan_source/occurrence_key pair 
     assert.equal(outcome1, 'inserted');
     assert.equal(outcome2, 'unchanged');
     assert.equal(db.prepare('SELECT COUNT(*) n FROM plan_occurrences').get().n, 1);
+  });
+});
+
+// ============================================================================
+// Phase 4C.6 — multi-venue real-session occurrence collapsing.
+//
+// Gencat republishes ONE real tour session that visits several venues as
+// several plan_sources rows sharing the same bare "codi" (see
+// sessionIdentifier()/groupSourceRowsIntoOccurrences() in
+// scripts/consolidate-recurring-group.js). These tests cover the pure
+// grouping algorithm directly (fast, no DB) plus the surrounding DB-level
+// behavior (relink preservation, rollback). Every row below that shares a
+// codi uses a FRESH random 16-hex suffix (via insertGencatSourceWithCodi /
+// randomHex16), mirroring how production data actually looks.
+// ============================================================================
+
+test('Phase 4C.6 — 3 different real sessions, one source each -> 3 occurrences (test A)', () => {
+  const rows = [
+    { plan_source_id: 1, source_key: 'gencat-agenda', source_record_id: `20260605031@${randomHex16()}`, plan_start_date: '2026-10-01' },
+    { plan_source_id: 2, source_key: 'gencat-agenda', source_record_id: `20260605032@${randomHex16()}`, plan_start_date: '2026-11-01' },
+    { plan_source_id: 3, source_key: 'gencat-agenda', source_record_id: `20260605033@${randomHex16()}`, plan_start_date: '2026-12-01' },
+  ];
+  const occurrences = groupSourceRowsIntoOccurrences(rows);
+  assert.equal(occurrences.length, 3);
+  assert.deepEqual(occurrences.map((o) => o.localDate).sort(), ['2026-10-01', '2026-11-01', '2026-12-01']);
+});
+
+test('Phase 4C.6 — same real session, 2 venue variants -> 1 occurrence (test B)', () => {
+  const codi = '20260605043';
+  const rows = [
+    { plan_source_id: 10, source_key: 'gencat-agenda', source_record_id: `${codi}@${randomHex16()}`, plan_start_date: '2026-10-31' },
+    { plan_source_id: 11, source_key: 'gencat-agenda', source_record_id: `${codi}@${randomHex16()}`, plan_start_date: '2026-10-31' },
+  ];
+  const occurrences = groupSourceRowsIntoOccurrences(rows);
+  assert.equal(occurrences.length, 1);
+  assert.equal(occurrences[0].planSourceId, 10);
+  assert.equal(occurrences[0].occurrenceKey, codi);
+  assert.equal(occurrences[0].localDate, '2026-10-31');
+});
+
+test('Phase 4C.6 — same real session, 3 venue variants -> 1 occurrence (test C)', () => {
+  const codi = '20260605031';
+  const rows = [
+    { plan_source_id: 20, source_key: 'gencat-agenda', source_record_id: `${codi}@${randomHex16()}`, plan_start_date: '2026-10-01' },
+    { plan_source_id: 21, source_key: 'gencat-agenda', source_record_id: `${codi}@${randomHex16()}`, plan_start_date: '2026-10-01' },
+    { plan_source_id: 22, source_key: 'gencat-agenda', source_record_id: `${codi}@${randomHex16()}`, plan_start_date: '2026-10-01' },
+  ];
+  const occurrences = groupSourceRowsIntoOccurrences(rows);
+  assert.equal(occurrences.length, 1);
+  assert.equal(occurrences[0].planSourceId, 20);
+});
+
+test('Phase 4C.6 — two genuinely different sessions on the SAME date -> 2 occurrences, NOT collapsed (test D)', () => {
+  const rows = [
+    { plan_source_id: 30, source_key: 'gencat-agenda', source_record_id: `20260605050@${randomHex16()}`, plan_start_date: '2026-10-31' },
+    { plan_source_id: 31, source_key: 'gencat-agenda', source_record_id: `20260605051@${randomHex16()}`, plan_start_date: '2026-10-31' },
+  ];
+  const occurrences = groupSourceRowsIntoOccurrences(rows);
+  assert.equal(occurrences.length, 2, 'a date-only dedupe would wrongly collapse these two distinct codis into one');
+  assert.deepEqual(occurrences.map((o) => o.occurrenceKey).sort(), ['20260605050', '20260605051']);
+});
+
+test('Phase 4C.6 — representative plan_source selection is deterministic (lowest id), regardless of input order (test F)', () => {
+  const codi = '20260605099';
+  const rows = [
+    { plan_source_id: 30, source_key: 'gencat-agenda', source_record_id: `${codi}@${randomHex16()}`, plan_start_date: '2026-10-31' },
+    { plan_source_id: 28, source_key: 'gencat-agenda', source_record_id: `${codi}@${randomHex16()}`, plan_start_date: '2026-10-31' },
+    { plan_source_id: 29, source_key: 'gencat-agenda', source_record_id: `${codi}@${randomHex16()}`, plan_start_date: '2026-10-31' },
+  ];
+  const occurrences = groupSourceRowsIntoOccurrences(rows);
+  assert.equal(occurrences.length, 1);
+  assert.equal(occurrences[0].planSourceId, 28);
+});
+
+test('Phase 4C.6 — grouping is a pure, deterministic function: rerunning it on the same input is a no-op (test G)', () => {
+  const codi = '20260605043';
+  const rows = [
+    { plan_source_id: 40, source_key: 'gencat-agenda', source_record_id: `20260605031@${randomHex16()}`, plan_start_date: '2026-10-01' },
+    { plan_source_id: 41, source_key: 'gencat-agenda', source_record_id: `${codi}@${randomHex16()}`, plan_start_date: '2026-10-31' },
+    { plan_source_id: 42, source_key: 'gencat-agenda', source_record_id: `${codi}@${randomHex16()}`, plan_start_date: '2026-10-31' },
+  ];
+  assert.deepEqual(groupSourceRowsIntoOccurrences(rows), groupSourceRowsIntoOccurrences(rows));
+});
+
+function insertMultiVenuePlans(db, { variantsPerDate = [2, 2, 2] } = {}) {
+  const dates = ['2026-10-31', '2026-11-14', '2026-12-12'];
+  const planIds = [];
+  const planSourceIdsByPlan = [];
+  const codisByDate = [];
+  dates.forEach((startDate, i) => {
+    const planId = insertPlan(db, { startDate });
+    planIds.push(planId);
+    const codi = `2026060504${i}`;
+    codisByDate.push(codi);
+    const count = variantsPerDate[i] ?? 2;
+    const ids = [];
+    for (let v = 0; v < count; v += 1) ids.push(insertGencatSourceWithCodi(db, planId, codi));
+    planSourceIdsByPlan.push(ids);
+  });
+  return { planIds, planSourceIdsByPlan, codisByDate, dates };
+}
+
+test('Phase 4C.6 — apply relinks EVERY venue-variant plan_source to canonical even though they collapse into one occurrence each (test E)', () => {
+  withTestDatabase((db) => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'quefem-decisions-'));
+    try {
+      const { planIds, planSourceIdsByPlan } = insertMultiVenuePlans(db, { variantsPerDate: [3, 2, 2] });
+      const canonicalPlanId = Math.min(...planIds);
+      const decisionsPath = writeDecisionsFile(dir);
+      const precheck = computeConsolidationPlan(db, { groupKey: GROUP_KEY, canonicalPlanId, decisionsPath });
+      assert.equal(precheck.ok, true, precheck.problems.join(' | '));
+      assert.equal(precheck.sourceRows.length, 7, '3+2+2 raw plan_sources rows');
+      assert.equal(precheck.occurrences.length, 3, 'but only 3 real sessions');
+
+      applyConsolidation(db, precheck, { decisionsPath });
+
+      const allSourceIds = planSourceIdsByPlan.flat();
+      for (const id of allSourceIds) {
+        assert.equal(
+          db.prepare('SELECT plan_id FROM plan_sources WHERE id = ?').get(id).plan_id,
+          canonicalPlanId,
+          `plan_source ${id} must be relinked for provenance even though it did not generate its own occurrence`,
+        );
+      }
+      const occurrenceCount = db.prepare(`SELECT COUNT(*) n FROM plan_occurrences WHERE plan_source_id IN (${allSourceIds.join(',')})`).get().n;
+      assert.equal(occurrenceCount, 3, 'exactly one occurrence per real session, not per plan_source row');
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+test('Phase 4C.6 — the occurrence for a collapsed session is attached to its lowest-id plan_source, confirmed end-to-end through apply', () => {
+  withTestDatabase((db) => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'quefem-decisions-'));
+    try {
+      const { planIds, planSourceIdsByPlan } = insertMultiVenuePlans(db);
+      const canonicalPlanId = Math.min(...planIds);
+      const decisionsPath = writeDecisionsFile(dir);
+      const precheck = computeConsolidationPlan(db, { groupKey: GROUP_KEY, canonicalPlanId, decisionsPath });
+      applyConsolidation(db, precheck, { decisionsPath });
+
+      for (const sourceIds of planSourceIdsByPlan) {
+        const expectedRepresentative = Math.min(...sourceIds);
+        const occurrence = db.prepare(`SELECT plan_source_id FROM plan_occurrences WHERE plan_source_id IN (${sourceIds.join(',')})`).get();
+        assert.equal(occurrence.plan_source_id, expectedRepresentative);
+      }
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+test('Phase 4C.6 — a future venue-variant row for an already-known session does not duplicate its occurrence (test H)', () => {
+  withTestDatabase((db) => {
+    const codi = '20260605077';
+    const planId = insertPlan(db, { startDate: '2026-10-31' });
+    const firstVariant = insertGencatSourceWithCodi(db, planId, codi);
+    const secondVariant = insertGencatSourceWithCodi(db, planId, codi);
+    const loadRow = (id) => db.prepare(`
+      SELECT ps.id AS plan_source_id, s.key AS source_key, ps.source_record_id, p.start_date AS plan_start_date
+      FROM plan_sources ps JOIN sources s ON s.id = ps.source_id JOIN plans p ON p.id = ps.plan_id WHERE ps.id = ?
+    `).get(id);
+
+    const repository = new PlanOccurrenceRepository(db);
+    const occurrencesBefore = groupSourceRowsIntoOccurrences([firstVariant, secondVariant].map(loadRow));
+    assert.equal(occurrencesBefore.length, 1);
+    for (const occ of occurrencesBefore) {
+      repository.upsert(occ.planSourceId, { occurrenceKey: occ.occurrenceKey, localDate: occ.localDate, timezone: 'Europe/Madrid', status: 'active' });
+    }
+    assert.equal(db.prepare('SELECT COUNT(*) n FROM plan_occurrences').get().n, 1);
+
+    // Simulate a future import discovering a THIRD venue variant for the exact same session.
+    const thirdVariant = insertGencatSourceWithCodi(db, planId, codi);
+    const occurrencesAfter = groupSourceRowsIntoOccurrences([firstVariant, secondVariant, thirdVariant].map(loadRow));
+    assert.equal(occurrencesAfter.length, 1, 'still exactly one real session');
+    assert.equal(occurrencesAfter[0].planSourceId, firstVariant, 'the representative stays the original lowest id even after a new variant arrives');
+    for (const occ of occurrencesAfter) {
+      repository.upsert(occ.planSourceId, { occurrenceKey: occ.occurrenceKey, localDate: occ.localDate, timezone: 'Europe/Madrid', status: 'active' });
+    }
+    assert.equal(db.prepare('SELECT COUNT(*) n FROM plan_occurrences').get().n, 1, 'no duplicate occurrence was created for the new venue variant');
+  });
+});
+
+test('Phase 4C.6 — a future genuinely new session creates exactly one new occurrence without touching the existing one (test I)', () => {
+  withTestDatabase((db) => {
+    const loadRow = (id) => db.prepare(`
+      SELECT ps.id AS plan_source_id, s.key AS source_key, ps.source_record_id, p.start_date AS plan_start_date
+      FROM plan_sources ps JOIN sources s ON s.id = ps.source_id JOIN plans p ON p.id = ps.plan_id WHERE ps.id = ?
+    `).get(id);
+    const repository = new PlanOccurrenceRepository(db);
+
+    const plan1 = insertPlan(db, { startDate: '2026-10-31' });
+    const variant1 = insertGencatSourceWithCodi(db, plan1, '20260605081');
+    for (const occ of groupSourceRowsIntoOccurrences([loadRow(variant1)])) {
+      repository.upsert(occ.planSourceId, { occurrenceKey: occ.occurrenceKey, localDate: occ.localDate, timezone: 'Europe/Madrid', status: 'active' });
+    }
+    assert.equal(db.prepare('SELECT COUNT(*) n FROM plan_occurrences').get().n, 1);
+
+    // A future import brings a genuinely NEW session: different codi, different date.
+    const plan2 = insertPlan(db, { startDate: '2026-12-05' });
+    const variant2 = insertGencatSourceWithCodi(db, plan2, '20260605082');
+    const occurrencesAfter = groupSourceRowsIntoOccurrences([variant1, variant2].map(loadRow));
+    assert.equal(occurrencesAfter.length, 2, 'the pre-existing session and the new one both count, independently');
+    for (const occ of occurrencesAfter) {
+      repository.upsert(occ.planSourceId, { occurrenceKey: occ.occurrenceKey, localDate: occ.localDate, timezone: 'Europe/Madrid', status: 'active' });
+    }
+    assert.equal(db.prepare('SELECT COUNT(*) n FROM plan_occurrences').get().n, 2, 'exactly one new occurrence was added; the existing one was neither duplicated nor lost');
+  });
+});
+
+test('Phase 4C.6 — rollback of a multi-venue consolidation restores exact pre-consolidation state (test J)', () => {
+  withTestDatabase((db) => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'quefem-decisions-'));
+    try {
+      const { planIds, planSourceIdsByPlan } = insertMultiVenuePlans(db);
+      const canonicalPlanId = Math.min(...planIds);
+      const allSourceIds = planSourceIdsByPlan.flat();
+      const aliasPlanIds = planIds.filter((id) => id !== canonicalPlanId);
+      const decisionsPath = writeDecisionsFile(dir);
+
+      const before = db.prepare(`SELECT id, status, permanent, inactive_at, start_date, end_date FROM plans WHERE id IN (${planIds.join(',')}) ORDER BY id`).all();
+      const beforeSourceLinks = db.prepare(`SELECT id, plan_id FROM plan_sources WHERE id IN (${allSourceIds.join(',')}) ORDER BY id`).all();
+
+      const precheck = computeConsolidationPlan(db, { groupKey: GROUP_KEY, canonicalPlanId, decisionsPath });
+      let capturedSnapshots;
+      let capturedExtra;
+      applyConsolidation(db, precheck, {
+        decisionsPath,
+        beforeWrite: (_plan, snapshots, extra) => { capturedSnapshots = snapshots; capturedExtra = extra; },
+      });
+      assert.equal(db.prepare(`SELECT COUNT(*) n FROM plan_occurrences WHERE plan_source_id IN (${allSourceIds.join(',')})`).get().n, 3);
+
+      db.transaction(() => {
+        for (const s of capturedSnapshots) {
+          db.prepare('UPDATE plans SET status=?, permanent=?, inactive_at=?, start_date=?, end_date=? WHERE id=?')
+            .run(s.status, s.permanent, s.inactive_at, s.start_date, s.end_date, s.id);
+        }
+        for (const link of beforeSourceLinks) {
+          db.prepare('UPDATE plan_sources SET plan_id=? WHERE id=?').run(link.plan_id, link.id);
+        }
+        for (const { planSourceId, occurrenceKey, before: beforeOcc } of capturedExtra.occurrenceBeforeSnapshots) {
+          if (beforeOcc) {
+            db.prepare(`
+              UPDATE plan_occurrences SET starts_at=?, ends_at=?, local_date=?, local_time=?, timezone=?, status=?, last_seen_at=?, updated_at=?
+              WHERE plan_source_id=? AND occurrence_key=?
+            `).run(beforeOcc.starts_at, beforeOcc.ends_at, beforeOcc.local_date, beforeOcc.local_time, beforeOcc.timezone, beforeOcc.status, beforeOcc.last_seen_at, beforeOcc.updated_at, planSourceId, occurrenceKey);
+          } else {
+            db.prepare('DELETE FROM plan_occurrences WHERE plan_source_id=? AND occurrence_key=?').run(planSourceId, occurrenceKey);
+          }
+        }
+        db.prepare(`DELETE FROM plan_aliases WHERE alias_plan_id IN (${aliasPlanIds.join(',')})`).run();
+        db.prepare('DELETE FROM recurring_production_applied_groups WHERE group_key = ?').run(GROUP_KEY);
+      })();
+
+      const after = db.prepare(`SELECT id, status, permanent, inactive_at, start_date, end_date FROM plans WHERE id IN (${planIds.join(',')}) ORDER BY id`).all();
+      assert.deepEqual(after, before);
+      const afterSourceLinks = db.prepare(`SELECT id, plan_id FROM plan_sources WHERE id IN (${allSourceIds.join(',')}) ORDER BY id`).all();
+      assert.deepEqual(afterSourceLinks, beforeSourceLinks);
+      assert.equal(db.prepare(`SELECT COUNT(*) n FROM plan_occurrences WHERE plan_source_id IN (${allSourceIds.join(',')})`).get().n, 0);
+      assert.equal(db.prepare('SELECT COUNT(*) n FROM plan_aliases').get().n, 0);
+      assert.equal(db.prepare('SELECT COUNT(*) n FROM recurring_production_applied_groups').get().n, 0);
+      assert.equal(db.pragma('integrity_check', { simple: true }), 'ok');
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
