@@ -10,6 +10,36 @@
       "reason": "Phase 4C.3B production pilot, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 14 occurrences, 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 89 days. Canonical plan 1198 (lowest current id). Legacy public ids 1196 and 1197, confirmed to no longer have a plans row (removed by retention before consolidation), are authorized as --legacy-alias-id values backed by the original Phase 4C production audit that recorded the group's full original id range (1196-1211) before any of it was purged.",
       "reviewedAt": "2026-09-28",
       "reviewer": "project-owner"
+    },
+    {
+      "groupKey": "gencat-agenda|barcelona-guitar-trio-dance|palau-de-la-musica-catalana",
+      "source": "gencat-agenda",
+      "normalizedTitle": "barcelona-guitar-trio-dance",
+      "venueIdentity": "palau-de-la-musica-catalana",
+      "decision": "ACCEPT",
+      "reason": "Phase 4C.4 batch consolidation, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 8 occurrences, 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 90 days. Canonical plan 1156 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group.",
+      "reviewedAt": "2026-09-28",
+      "reviewer": "project-owner"
+    },
+    {
+      "groupKey": "gencat-agenda|gran-gala-flamenco|teatre-poliorama",
+      "source": "gencat-agenda",
+      "normalizedTitle": "gran-gala-flamenco",
+      "venueIdentity": "teatre-poliorama",
+      "decision": "ACCEPT",
+      "reason": "Phase 4C.4 batch consolidation, explicitly authorized. This is a DISTINCT production from Gran Gala Flamenc (Phase 4C.3B, canonical plan 1198, venue Palau de la Musica Catalana): confirmed by its own separate groupKey and a different venue (Teatre Poliorama). Detector confirms SAFE_AUTOMATIC against current production data: 9 occurrences, 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 64 days. Canonical plan 2653 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group.",
+      "reviewedAt": "2026-09-28",
+      "reviewer": "project-owner"
+    },
+    {
+      "groupKey": "gencat-agenda|magic-pablo-gran-repte|teatre-poliorama",
+      "source": "gencat-agenda",
+      "normalizedTitle": "magic-pablo-gran-repte",
+      "venueIdentity": "teatre-poliorama",
+      "decision": "ACCEPT",
+      "reason": "Phase 4C.4 batch consolidation, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 6 occurrences, 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 238 days (longest of this batch, still within the 300-day ceiling). Canonical plan 2682 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group.",
+      "reviewedAt": "2026-09-28",
+      "reviewer": "project-owner"
     }
   ]
 }
