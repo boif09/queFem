@@ -18,7 +18,7 @@ export function assertInactiveRetentionSchema(db) {
     if (!planColumns.has(column)) throw new Error(`Schema incompatible: falta plans.${column}.`);
   }
 
-  const allowedDependencies = new Set(['plan_categories', 'plan_sources']);
+  const allowedDependencies = new Set(['plan_categories', 'plan_sources', 'plan_aliases', 'recurring_production_applied_groups']);
   const tables = db.prepare(`
     SELECT name FROM sqlite_master
     WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
@@ -45,7 +45,11 @@ export function inspectInactivePlans(db, { retentionDays, now = new Date() }) {
       p.id,
       COALESCE(p.title_ca, p.title_es, p.original_title, 'sense títol') title,
       p.inactive_at,
-      (SELECT COUNT(*) FROM plan_sources ps WHERE ps.plan_id = p.id) source_count
+      (SELECT COUNT(*) FROM plan_sources ps WHERE ps.plan_id = p.id) source_count,
+      (
+        EXISTS (SELECT 1 FROM plan_aliases pa WHERE pa.alias_plan_id = p.id OR pa.canonical_plan_id = p.id)
+        OR EXISTS (SELECT 1 FROM recurring_production_applied_groups rpag WHERE rpag.canonical_plan_id = p.id)
+      ) is_alias
     FROM plans p
     WHERE p.status = 'inactive'
     ORDER BY p.inactive_at, p.id
@@ -58,10 +62,36 @@ export function inspectInactivePlans(db, { retentionDays, now = new Date() }) {
     tooRecent: 0,
     stillHaveSources: 0,
     missingInactiveAt: 0,
+    // A plan referenced by plan_aliases on EITHER side — as the alias
+    // (alias_plan_id) or as the redirect target (canonical_plan_id) — must
+    // NEVER be hard-deleted, even once it has zero plan_sources. Deleting an
+    // alias would break the /plans/:oldId -> canonical 301 the whole
+    // consolidation feature exists to provide; deleting a canonical would
+    // violate the plan_aliases -> plans foreign key AND destroy the target
+    // every alias for that group redirects to (a canonical can in principle
+    // also end up status='inactive'/zero-sources, e.g. via an unrelated
+    // admin correction — cross-review finding). Checked separately from
+    // stillHaveSources because such a plan has exactly zero sources by
+    // design (all relinked onto/from it) and would otherwise pass that
+    // check straight through to deletion.
+    //
+    // recurring_production_applied_groups.canonical_plan_id is checked
+    // DIRECTLY too, not only transitively through plan_aliases — a
+    // consolidated group always has aliases in the normal apply path, but
+    // nothing at the schema level ties the two tables together, so a
+    // canonical plan could in principle still be mapped here after its
+    // alias rows were removed by some other, unrelated operation (second
+    // cross-review round finding: the earlier "transitively covered by
+    // plan_aliases" reasoning was not actually schema-guaranteed).
+    isRecurringAlias: 0,
     eligible: [],
   };
 
   for (const row of rows) {
+    if (row.is_alias) {
+      summary.isRecurringAlias += 1;
+      continue;
+    }
     if (row.source_count > 0) {
       summary.stillHaveSources += 1;
       continue;
@@ -96,12 +126,17 @@ export function deleteOrphanPlanWithinTransaction(
   assertInactiveRetentionSchema(db);
   const plan = db.prepare(`
     SELECT id, status, inactive_at,
-      (SELECT COUNT(*) FROM plan_sources WHERE plan_id = plans.id) source_count
+      (SELECT COUNT(*) FROM plan_sources WHERE plan_id = plans.id) source_count,
+      (
+        EXISTS (SELECT 1 FROM plan_aliases WHERE alias_plan_id = plans.id OR canonical_plan_id = plans.id)
+        OR EXISTS (SELECT 1 FROM recurring_production_applied_groups WHERE canonical_plan_id = plans.id)
+      ) is_alias
     FROM plans
     WHERE id = ?
   `).get(planId);
   if (!plan) throw new Error(`El pla ${planId} no existeix.`);
   if (plan.status !== 'inactive') throw new Error(`El pla ${planId} no està inactive.`);
+  if (plan.is_alias) throw new Error(`El pla ${planId} és un àlies de consolidació permanent i no es pot eliminar.`);
   if (plan.source_count !== 0) throw new Error(`El pla ${planId} encara té procedències.`);
   if (inactiveAtCutoff !== null && (
     plan.inactive_at === null

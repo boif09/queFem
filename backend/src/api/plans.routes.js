@@ -6,7 +6,7 @@ import {
   validatePlansQuery,
 } from './validation.js';
 
-export function createPlansRouter(repository, defaultLanguage) {
+export function createPlansRouter(repository, defaultLanguage, { aliasRepository = null } = {}) {
   const router = Router();
 
   router.get('/', (request, response) => {
@@ -23,10 +23,18 @@ export function createPlansRouter(repository, defaultLanguage) {
     });
   });
 
+  // Alias ids are resolved transparently (not via HTTP redirect): this is a
+  // JSON API consumed by our own frontend, not by third-party integrators,
+  // and a 301 on a fetch() would hide the id change from client-side
+  // routing without any code to react to it. The public HTML route
+  // (seo.routes.js) is the one that MUST issue a real 301, since that is
+  // what search engine crawlers require.
   router.get('/:id', (request, response) => {
     rejectUnknownParameters(request.query, new Set(['lang']));
-    const id = validatePlanId(request.params.id);
+    const requestedId = validatePlanId(request.params.id);
     const language = validateLanguage(request.query.lang, defaultLanguage);
+    const canonicalId = aliasRepository?.findCanonicalId(requestedId);
+    const id = canonicalId !== null && canonicalId !== undefined ? canonicalId : requestedId;
     const plan = repository.findById(id, language);
     if (!plan) {
       return response.status(404).json({

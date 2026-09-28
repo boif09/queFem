@@ -23,7 +23,7 @@ function planMetadata(plan) {
   return { title, description, canonicalPath, jsonLd: buildEventJsonLd(plan, `${PUBLIC_ORIGIN}${canonicalPath}`, description) };
 }
 
-export function createSeoRouter(repository, { templatePath = path.resolve(process.cwd(), 'frontend/dist/index.html'), template = null } = {}) {
+export function createSeoRouter(repository, { templatePath = path.resolve(process.cwd(), 'frontend/dist/index.html'), template = null, aliasRepository = null } = {}) {
   const router = Router();
   const readTemplate = () => template ?? fs.readFileSync(templatePath, 'utf8');
   const withTemplate = (handler) => (request, response, next) => {
@@ -48,6 +48,11 @@ export function createSeoRouter(repository, { templatePath = path.resolve(proces
   router.get('/plans/:id', withTemplate((request, response, html) => {
     let id;
     try { id = validatePlanId(request.params.id); } catch { return sendHtml(response, 404, notFoundHtml(html)); }
+    const canonicalId = aliasRepository?.findCanonicalId(id);
+    if (canonicalId !== null && canonicalId !== undefined) {
+      const query = new URLSearchParams(request.query).toString();
+      return response.redirect(301, `/plans/${canonicalId}${query ? `?${query}` : ''}`);
+    }
     const plan = repository.findById(id, 'ca');
     if (!plan) return sendHtml(response, 404, notFoundHtml(html));
     const event = plan.kind === 'event';

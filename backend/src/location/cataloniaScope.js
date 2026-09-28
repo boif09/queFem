@@ -1,3 +1,5 @@
+import { planAliasProtectedWhere } from '../db/planAliasGuard.js';
+
 const OUTSIDE_CATALONIA_PATTERNS = [
   /^fora (?:de |d |del |de l )?(?:catalunya|cataluna|espanya|espana|estat espanyol|estado espanol)$/,
   /^fuera (?:de |del )?(?:catalunya|cataluna|espanya|espana|estat espanyol|estado espanol)$/,
@@ -45,17 +47,26 @@ export function countOutsideCataloniaPlans(db) {
 }
 
 export function purgeOutsideCataloniaPlans(db) {
-  const outsideWhere = outsideCataloniaWhere();
+  // A plan referenced by plan_aliases (alias or canonical side) is never
+  // hard-deleted by any purge path — see db/planAliasGuard.js. `summary.plans`
+  // reports what was ACTUALLY deleted (guarded); `protectedByAlias` makes the
+  // raw geography-match count still visible for observability, so a caller
+  // logging "Purged N plans" is never misleading about a protected plan
+  // that was left in place (cross-review finding).
+  const outsideWhere = `${outsideCataloniaWhere()} AND ${planAliasProtectedWhere()}`;
   const countLinks = (table) => db.prepare(`
     SELECT COUNT(*) AS count FROM ${table}
     WHERE plan_id IN (SELECT id FROM plans WHERE ${outsideWhere})
   `).get().count;
+  const rawMatchCount = countOutsideCataloniaPlans(db);
+  const eligiblePlans = db.prepare(`SELECT COUNT(*) AS count FROM plans WHERE ${outsideWhere}`).get().count;
   const summary = {
-    plans: countOutsideCataloniaPlans(db),
+    plans: eligiblePlans,
+    protectedByAlias: rawMatchCount - eligiblePlans,
     planSources: countLinks('plan_sources'),
     planCategories: countLinks('plan_categories'),
   };
-  if (summary.plans === 0) return summary;
+  if (eligiblePlans === 0) return summary;
 
   db.transaction(() => {
     db.prepare(`

@@ -41,8 +41,10 @@ export async function importGencat(config = loadConfig(), {
       const expiredSummary = purgeExpiredPlans(db, { retentionDays: config.eventRetentionDays });
       const outsideSummary = purgeOutsideCataloniaPlans(db);
       if (invalidSummary.plans > 0) logger.log(`Purged temporally invalid: ${invalidSummary.plans} plans`);
+      if (invalidSummary.protectedByAlias > 0) logger.log(`Kept ${invalidSummary.protectedByAlias} temporally-invalid plan(s) protected as recurring-consolidation aliases`);
       if (expiredSummary.plans > 0) logger.log(`Purged expired: ${expiredSummary.plans} plans older than ${expiredSummary.cutoff}`);
       if (outsideSummary.plans > 0) logger.log(`Purged outside Catalonia: ${outsideSummary.plans} plans`);
+      if (outsideSummary.protectedByAlias > 0) logger.log(`Kept ${outsideSummary.protectedByAlias} outside-Catalonia plan(s) protected as recurring-consolidation aliases`);
       const importer = new GencatAgendaImporter({
         db,
         pageSize: config.gencatPageSize,

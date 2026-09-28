@@ -82,7 +82,7 @@ test('purges invalid dates and keeps valid and permanent plans', () => {
 
     assert.deepEqual(purgeTemporallyInvalidPlans(db, {
       now: new Date('2026-08-17T12:00:00.000Z'),
-    }), { plans: 1, planSources: 1, planCategories: 0 });
+    }), { plans: 1, protectedByAlias: 0, planSources: 1, planCategories: 0 });
     assert.deepEqual(
       db.prepare('SELECT id FROM plans ORDER BY id').all().map(({ id }) => id),
       [validId, permanentId],

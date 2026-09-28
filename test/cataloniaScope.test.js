@@ -50,7 +50,7 @@ test('purges only plans explicitly marked outside Catalonia', () => {
     `).run(outsideId, sourceId, '2026-08-17T10:00:00.000Z', '2026-08-17T10:00:00.000Z');
 
     assert.deepEqual(purgeOutsideCataloniaPlans(db), {
-      plans: 1, planSources: 1, planCategories: 0,
+      plans: 1, protectedByAlias: 0, planSources: 1, planCategories: 0,
     });
     assert.deepEqual(db.prepare('SELECT id FROM plans').all(), [{ id: validId }]);
     assert.deepEqual(db.pragma('foreign_key_check'), []);

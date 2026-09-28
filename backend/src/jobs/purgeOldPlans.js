@@ -35,6 +35,8 @@ function printSummary(summary) {
   console.log(`Expired plans deleted: ${summary.expired.plans}`);
   console.log(`Outside Catalonia plans deleted: ${summary.outsideCatalonia.plans}`);
   console.log(`Temporally invalid plans deleted: ${summary.temporallyInvalid.plans}`);
+  const protectedByAlias = summary.outsideCatalonia.protectedByAlias + summary.temporallyInvalid.protectedByAlias;
+  if (protectedByAlias > 0) console.log(`Kept as recurring-consolidation aliases (not deleted): ${protectedByAlias}`);
   console.log(`Plan sources deleted: ${
     summary.expired.planSources
     + summary.outsideCatalonia.planSources

@@ -1,4 +1,5 @@
 import { effectiveOccurrenceEndDate } from '../occurrences/occurrenceSql.js';
+import { planAliasProtectedWhere } from '../db/planAliasGuard.js';
 
 const CATALONIA_TIME_ZONE = 'Europe/Madrid';
 const DATE_FORMATTER = new Intl.DateTimeFormat('en-CA', {
@@ -19,6 +20,7 @@ export function expiredPlanWhere(alias = '', { enabledOnly = false } = {}) {
     ${prefix}permanent = 0
     AND ${effectiveEndDate} IS NOT NULL
     AND ${effectiveEndDate} < ?
+    AND ${planAliasProtectedWhere(alias)}
   `;
 }
 

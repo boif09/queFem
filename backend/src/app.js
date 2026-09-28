@@ -7,6 +7,7 @@ import { createSourcesRouter } from './api/sources.routes.js';
 import { createSitemapRouter } from './api/sitemap.routes.js';
 import { createSeoRouter } from './api/seo.routes.js';
 import { ValidationError } from './api/validation.js';
+import { PlanAliasRepository } from './db/repositories/planAlias.repository.js';
 import { PlanQueryRepository } from './db/repositories/planQuery.repository.js';
 import { PlanSourceImageRepository } from './db/repositories/planSourceImage.repository.js';
 import { TicketmasterImageCache } from './ticketmaster/imageCache.js';
@@ -62,6 +63,7 @@ export function createApp({
     fallbackImageLibrary: resolvedFallbackImageLibrary,
   });
   const imageRepository = new PlanSourceImageRepository(db);
+  const aliasRepository = new PlanAliasRepository(db);
   const mediaRemoteFetchLimiter = new MediaRemoteFetchLimiter(mediaRemoteFetchConcurrency, {
     maxQueueDepth: mediaRemoteFetchQueueDepth,
     maxQueueWaitMs: mediaRemoteFetchQueueWaitMs,
@@ -94,13 +96,13 @@ export function createApp({
   });
 
   app.disable('x-powered-by');
-  app.use(createSeoRouter(repository, { templatePath: seoTemplatePath, template: seoTemplate }));
+  app.use(createSeoRouter(repository, { templatePath: seoTemplatePath, template: seoTemplate, aliasRepository }));
   app.use('/api/sitemap.xml', createSitemapRouter(repository));
   app.use('/api/media', createMediaRouter({
     repository: imageRepository, proxy: imageProxy, enabled: ticketmasterImagesEnabled,
     feverProxy, feverEnabled: feverImagesEnabled, gencatProxy, gencatEnabled: gencatImagesEnabled,
   }));
-  app.use('/api/plans', createPlansRouter(repository, defaultLanguage));
+  app.use('/api/plans', createPlansRouter(repository, defaultLanguage, { aliasRepository }));
   app.use('/api/categories', createCategoriesRouter(repository));
   app.use('/api/sources', createSourcesRouter(repository));
   app.use('/api', createLocationsRouter(repository));

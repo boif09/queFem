@@ -54,6 +54,15 @@ export class BaseImporter {
     return null;
   }
 
+  // Overridden by importers that consult an applied-recurring-group mapping
+  // (see db/repositories/recurringProductionAppliedGroup.repository.js) so a
+  // NEW source record for an already-consolidated recurring production attaches to the
+  // existing canonical plan instead of creating a new fragmented plan row.
+  // Returning null/undefined preserves the default fingerprint-based lookup.
+  getTargetPlanId() {
+    return null;
+  }
+
   async afterPersist() {}
 
   getInvalidIssue() {
@@ -110,6 +119,7 @@ export class BaseImporter {
 
           const sourceRecordId = this.getExternalId(record);
           const prepared = await this.prepareRecord(record, normalized, source, sourceRecordId);
+          const targetPlanId = this.getTargetPlanId(record, normalized, sourceRecordId) || null;
           const outcome = this.plans.persist({
             ...normalized,
             sourceId: source.id,
@@ -118,6 +128,7 @@ export class BaseImporter {
             sourceCreatedAt: this.getSourceCreatedAt(record),
             sourceUpdatedAt: this.getSourceUpdatedAt(record),
             sourcePayload: this.getSourcePayload(record, source),
+            targetPlanId,
           });
           await this.afterPersist(record, normalized, source, sourceRecordId, outcome, prepared);
           summary[outcome] += 1;

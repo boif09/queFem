@@ -1,4 +1,5 @@
 import { anyOccurrenceExists } from '../occurrences/occurrenceSql.js';
+import { planAliasProtectedWhere } from '../db/planAliasGuard.js';
 
 const CATALONIA_TIME_ZONE = 'Europe/Madrid';
 const MAX_FUTURE_YEARS = 10;
@@ -103,18 +104,26 @@ export function countTemporallyInvalidPlans(db, { now = new Date() } = {}) {
 }
 
 export function purgeTemporallyInvalidPlans(db, { now = new Date() } = {}) {
-  const invalidWhere = temporallyInvalidWhere();
+  // A plan referenced by plan_aliases is never hard-deleted by any purge
+  // path — see db/planAliasGuard.js. `summary.plans` reports what was
+  // ACTUALLY deleted (guarded); `protectedByAlias` keeps the raw match count
+  // visible too, so a caller logging "Purged N plans" is never misleading
+  // about a protected plan left in place (cross-review finding).
+  const invalidWhere = `${temporallyInvalidWhere()} AND ${planAliasProtectedWhere()}`;
   const currentYear = currentYearInCatalonia(now);
   const countLinks = (table) => db.prepare(`
     SELECT COUNT(*) AS count FROM ${table}
     WHERE plan_id IN (SELECT id FROM plans WHERE ${invalidWhere})
   `).get(currentYear).count;
+  const rawMatchCount = countTemporallyInvalidPlans(db, { now });
+  const eligiblePlans = db.prepare(`SELECT COUNT(*) AS count FROM plans WHERE ${invalidWhere}`).get(currentYear).count;
   const summary = {
-    plans: countTemporallyInvalidPlans(db, { now }),
+    plans: eligiblePlans,
+    protectedByAlias: rawMatchCount - eligiblePlans,
     planSources: countLinks('plan_sources'),
     planCategories: countLinks('plan_categories'),
   };
-  if (summary.plans === 0) return summary;
+  if (eligiblePlans === 0) return summary;
 
   db.transaction(() => {
     db.prepare(`

@@ -28,6 +28,7 @@ export function printInactivePurgeSummary(summary, { dryRun = false } = {}) {
   console.log(`Eligible for purge: ${summary.eligibleForPurge}`);
   console.log(`Too recent: ${summary.tooRecent}`);
   console.log(`Still have sources: ${summary.stillHaveSources}`);
+  console.log(`Recurring-consolidation aliases (never purged): ${summary.isRecurringAlias}`);
   console.log(`Missing inactive_at: ${summary.missingInactiveAt}`);
   console.log(`${dryRun ? 'Would delete' : 'Deleted'}: ${dryRun ? summary.eligibleForPurge : summary.deleted}`);
   for (const plan of summary.eligible) {

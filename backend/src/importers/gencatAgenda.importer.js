@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto';
 import { BaseImporter } from './baseImporter.js';
 import { canonicalJson } from '../db/repositories/plan.repository.js';
+import { RecurringProductionAppliedGroupRepository } from '../db/repositories/recurringProductionAppliedGroup.repository.js';
+import { normalizeVenueIdentity } from '../deduplication/recurringProductionDetector.js';
 import { PlanSourceImageRepository } from '../db/repositories/planSourceImage.repository.js';
+import { normalizeForFingerprint } from '../normalizers/text.normalizer.js';
 import {
   GencatImageMetadataResolver,
   gencatImageUrl,
@@ -51,6 +54,17 @@ function approvedSourcePayload(record) {
     payload.descripcio_html = payload.descripcio_html.replace(/<img\b[^>]*>/gi, '');
   }
   return payload;
+}
+
+// Must compute the identical groupKey the detector uses (source|normalizedTitle|venueIdentity)
+// — see deduplication/recurringProductionDetector.js buildCandidateGroups() — so an
+// applied-groups entry written from a detector run always matches at import time.
+function recurringGroupKey(sourceKey, plan) {
+  if (!plan.original_title || !plan.venue_name) return null;
+  const normalizedTitle = normalizeForFingerprint(plan.original_title, { removeArticles: true });
+  const venueIdentity = normalizeVenueIdentity(plan.venue_name);
+  if (!normalizedTitle || !venueIdentity) return null;
+  return `${sourceKey}|${normalizedTitle}|${venueIdentity}`;
 }
 
 function historicalImagePriority(state, cutoff) {
@@ -152,6 +166,13 @@ export class GencatAgendaImporter extends BaseImporter {
     this.historicalImageResolutions = 0;
     this.deferredHistoricalImageResolutions = 0;
     this.sourceImages = new PlanSourceImageRepository(db);
+    // Authoritative DB-backed lookup (see migrations/015_...sql) — written
+    // only inside scripts/consolidate-recurring-group.js's single
+    // consolidation transaction, so it can never be out of step with the
+    // plan_sources relink/occurrences/aliases it accompanies. Replaces an
+    // earlier JSON-file-based mapping that could commit separately from the
+    // DB transaction (Phase 4C.3A atomicity hardening).
+    this.appliedRecurringGroups = new RecurringProductionAppliedGroupRepository(db);
   }
 
   async run() {
@@ -229,6 +250,11 @@ export class GencatAgendaImporter extends BaseImporter {
 
   normalize(record) {
     return normalizePlan(record);
+  }
+
+  getTargetPlanId(record, normalized) {
+    const groupKey = recurringGroupKey(this.getSourceId(), normalized.plan);
+    return groupKey ? this.appliedRecurringGroups.findCanonicalPlanId(groupKey) : null;
   }
 
   getExternalId(record) {
