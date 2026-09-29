@@ -70,6 +70,36 @@
       "reason": "Phase 4C.7 multi-venue batch consolidation, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 3 real-session occurrences (6 raw plan_sources, 2 venue variants per real date: Torre Bellesguard, Museu Monestir de Pedralbes), 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 42 days. Canonical plan 2356 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group. Multi-venue occurrence collapsing validated the same way as the Memoria group in this same batch.",
       "reviewedAt": "2026-09-29",
       "reviewer": "project-owner"
+    },
+    {
+      "groupKey": "gencat-agenda|mati-musical-per-a-embarassades|l-auditori",
+      "source": "gencat-agenda",
+      "normalizedTitle": "mati-musical-per-a-embarassades",
+      "venueIdentity": "l-auditori",
+      "decision": "ACCEPT",
+      "reason": "Phase 4C.8 final SAFE Gencat batch, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 3 occurrences, 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 189 days. Ordinary structure confirmed: exactly 1 plan_source per plan (no multi-venue collapsing needed). Canonical plan 2947 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group.",
+      "reviewedAt": "2026-09-29",
+      "reviewer": "project-owner"
+    },
+    {
+      "groupKey": "gencat-agenda|concert-per-a-nadons|l-auditori",
+      "source": "gencat-agenda",
+      "normalizedTitle": "concert-per-a-nadons",
+      "venueIdentity": "l-auditori",
+      "decision": "ACCEPT",
+      "reason": "Phase 4C.8 final SAFE Gencat batch, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 3 occurrences, 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 196 days. Ordinary structure confirmed: exactly 1 plan_source per plan. Canonical plan 2990 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group.",
+      "reviewedAt": "2026-09-29",
+      "reviewer": "project-owner"
+    },
+    {
+      "groupKey": "gencat-agenda|concert-carillo-palau-generalitat|carillo-del-palau-de-la-generalitat-de-catalunya",
+      "source": "gencat-agenda",
+      "normalizedTitle": "concert-carillo-palau-generalitat",
+      "venueIdentity": "carillo-del-palau-de-la-generalitat-de-catalunya",
+      "decision": "ACCEPT",
+      "reason": "Phase 4C.8 final SAFE Gencat batch, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 3 occurrences, 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 63 days. Ordinary structure confirmed: exactly 1 plan_source per plan. Canonical plan 4673 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group.",
+      "reviewedAt": "2026-09-29",
+      "reviewer": "project-owner"
     }
   ]
 }
