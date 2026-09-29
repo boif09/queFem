@@ -50,6 +50,26 @@
       "reason": "Phase 4C.5 batch consolidation, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 3 occurrences, 2/2 usable strong signals (description, image) positively agree, ticket signal not usable (no ticket URL present on any member), no signal disagrees, span 70 days. Canonical plan 1581 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group.",
       "reviewedAt": "2026-09-28",
       "reviewer": "project-owner"
+    },
+    {
+      "groupKey": "gencat-agenda|memoria-en-temps-guerra-visita-guiada-a-torre-bellesguard-pati-llimona-i-basilica-sants-just-i-pastor|torre-bellesguard",
+      "source": "gencat-agenda",
+      "normalizedTitle": "memoria-en-temps-guerra-visita-guiada-a-torre-bellesguard-pati-llimona-i-basilica-sants-just-i-pastor",
+      "venueIdentity": "torre-bellesguard",
+      "decision": "ACCEPT",
+      "reason": "Phase 4C.7 multi-venue batch consolidation, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 3 real-session occurrences (9 raw plan_sources, 3 venue variants per real date: Torre Bellesguard, Pati Llimona, Basilica dels Sants Just i Pastor), 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 63 days. Canonical plan 2344 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group. Multi-venue occurrence collapsing (one occurrence per real session, not per plan_source) validated in Phase 4C.6/4C.6B/4C.6D against production copies and now proven live via Phase 4C.6D shadow mode.",
+      "reviewedAt": "2026-09-29",
+      "reviewer": "project-owner"
+    },
+    {
+      "groupKey": "gencat-agenda|espais-poder-visita-guiada-a-torre-bellesguard-i-monestir-pedralbes|torre-bellesguard",
+      "source": "gencat-agenda",
+      "normalizedTitle": "espais-poder-visita-guiada-a-torre-bellesguard-i-monestir-pedralbes",
+      "venueIdentity": "torre-bellesguard",
+      "decision": "ACCEPT",
+      "reason": "Phase 4C.7 multi-venue batch consolidation, explicitly authorized. Detector confirms SAFE_AUTOMATIC against current production data: 3 real-session occurrences (6 raw plan_sources, 2 venue variants per real date: Torre Bellesguard, Museu Monestir de Pedralbes), 3/3 strong signals (ticket, description, image) positively agree, zero disagreements, span 42 days. Canonical plan 2356 (lowest current id). No legacy alias ids authorized: no verified prior evidence of any historical deleted public id for this group. Multi-venue occurrence collapsing validated the same way as the Memoria group in this same batch.",
+      "reviewedAt": "2026-09-29",
+      "reviewer": "project-owner"
     }
   ]
 }
