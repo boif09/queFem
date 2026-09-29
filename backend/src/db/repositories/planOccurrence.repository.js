@@ -138,6 +138,17 @@ export class PlanOccurrenceRepository {
     return 'updated';
   }
 
+  // Phase 4C.6C: retires ONE specific occurrence by id, independent of which
+  // plan_source_id it belongs to — unlike reconcile()/upsert(), which are
+  // both scoped to a single plan_source_id. Needed because a recurring
+  // group's occurrences are scattered across many representative
+  // plan_source_ids under one canonical plan (see
+  // recurringOccurrenceReconciliation.js), so "retire the stale ones" cannot
+  // be expressed as a single plan_source_id's reconcile() call.
+  retireById(occurrenceId, seenAt = new Date().toISOString()) {
+    return this.retire.run(seenAt, occurrenceId).changes;
+  }
+
   hasActiveForPlanSource(planSourceId) {
     return Boolean(this.db.prepare(`
       SELECT 1 FROM plan_occurrences

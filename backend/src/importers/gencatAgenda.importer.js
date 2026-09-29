@@ -4,6 +4,7 @@ import { canonicalJson } from '../db/repositories/plan.repository.js';
 import { RecurringProductionAppliedGroupRepository } from '../db/repositories/recurringProductionAppliedGroup.repository.js';
 import { normalizeVenueIdentity } from '../deduplication/recurringProductionDetector.js';
 import { maintainRecurringOccurrence } from '../deduplication/recurringOccurrenceMaintenance.js';
+import { sessionIdentifier } from '../deduplication/recurringOccurrenceIdentity.js';
 import { PlanOccurrenceRepository } from '../db/repositories/planOccurrence.repository.js';
 import { PlanSourceImageRepository } from '../db/repositories/planSourceImage.repository.js';
 import { normalizeForFingerprint } from '../normalizers/text.normalizer.js';
@@ -181,11 +182,19 @@ export class GencatAgendaImporter extends BaseImporter {
     // without this a brand new future occurrence would attach to the correct
     // canonical plan but never get an occurrence row.
     this.occurrences = new PlanOccurrenceRepository(db);
+    // Phase 4C.6D: accumulates, for THIS run only, every real-session identity
+    // seen per applied-group canonical plan id — canonicalPlanId -> Set<sessionId>.
+    // Populated in afterPersist() alongside the (already-computed, for
+    // maintainRecurringOccurrence) session identity, so shadow/stale
+    // reconciliation never needs a second live feed fetch to know what was
+    // seen this batch.
+    this.seenRecurringSessions = new Map();
   }
 
   async run() {
     this.historicalImageResolutions = 0;
     this.deferredHistoricalImageResolutions = 0;
+    this.seenRecurringSessions = new Map();
     return super.run();
   }
 
@@ -354,9 +363,16 @@ export class GencatAgendaImporter extends BaseImporter {
     // getTargetPlanId() used to route this record's plan_sources row in the
     // first place) — ordinary, non-applied Gencat records are completely
     // unaffected.
-    if (!this.resolveAppliedCanonicalPlanId(normalized.plan)) return;
+    const canonicalPlanId = this.resolveAppliedCanonicalPlanId(normalized.plan);
+    if (!canonicalPlanId) return;
     const sourceRecord = this.plans.getSourceRecord(source.id, sourceRecordId);
     if (!sourceRecord) return;
+    // Phase 4C.6D: record this session as "seen this run" for shadow/stale
+    // reconciliation, BEFORE calling maintainRecurringOccurrence — tracking
+    // must reflect every record this run classified as belonging to the
+    // group, independent of whatever maintainRecurringOccurrence itself does.
+    if (!this.seenRecurringSessions.has(canonicalPlanId)) this.seenRecurringSessions.set(canonicalPlanId, new Set());
+    this.seenRecurringSessions.get(canonicalPlanId).add(sessionIdentifier(this.getSourceId(), sourceRecordId));
     maintainRecurringOccurrence(this.db, this.occurrences, {
       planId: sourceRecord.plan_id,
       sourceKey: this.getSourceId(),

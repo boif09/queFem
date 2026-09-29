@@ -44,6 +44,7 @@
     "fallback-images:validate": "node scripts/prepareFallbackImages.js --validate",
     "fallback-images:build": "npm run fallback-images:fetch && npm run fallback-images:prepare -- --input data/fallback-image-originals && npm run fallback-images:validate",
     "ticketmaster:remove": "node backend/src/jobs/removeTicketmasterEvent.js",
+    "recurring:reconcile:gencat": "node scripts/reconcile-recurring-occurrences.js",
     "start": "node backend/src/server.js",
     "dev": "node --watch backend/src/server.js",
     "dev:backend": "node --watch backend/src/server.js",
