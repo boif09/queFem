@@ -533,11 +533,22 @@ export class PlanQueryRepository {
       conditions.push('province = ? COLLATE NOCASE');
       parameters.push(province);
     }
+    // Gencat only ever supplies a de-accented URL slug for comarca (e.g.
+    // "barcelones"), which cannot be losslessly restored to the correct
+    // Catalan spelling ("Barcelonès") at import time — other sources (Fever,
+    // DIBA) publish the properly accented name directly. Grouping by the raw
+    // column with COLLATE NOCASE only folds case, not accents, so both
+    // spellings used to survive as separate rows. normalize_location()
+    // (already registered on this connection, already used by the main plan
+    // filter below) folds both case and accents, matching them into one
+    // group; MAX(comarca) deterministically picks the accented spelling as
+    // the representative, since accented vowels always sort after their
+    // unaccented counterpart under SQLite's default byte comparison.
     return this.db.prepare(`
-      SELECT comarca, MIN(province) province
+      SELECT MAX(comarca) AS comarca, MIN(province) province
       FROM plans
       WHERE ${conditions.join(' AND ')}
-      GROUP BY comarca COLLATE NOCASE
+      GROUP BY normalize_location(comarca)
       ORDER BY comarca COLLATE NOCASE
     `).all(...parameters);
   }
@@ -553,11 +564,15 @@ export class PlanQueryRepository {
       parameters.push(province);
     }
     if (comarca) {
-      conditions.push('comarca = ? COLLATE NOCASE');
+      // Accent-insensitive to match findComarques()'s now-deduplicated
+      // output: a comarca selected from that list must still match every
+      // plan whose raw comarca column has the other (accented/unaccented)
+      // spelling, not just plans matching that exact string.
+      conditions.push('normalize_location(comarca) = normalize_location(?)');
       parameters.push(comarca);
     }
     return this.db.prepare(`
-      SELECT municipality, MIN(comarca) comarca, MIN(province) province
+      SELECT municipality, MAX(comarca) comarca, MIN(province) province
       FROM plans
       WHERE ${conditions.join(' AND ')}
       GROUP BY municipality COLLATE NOCASE
