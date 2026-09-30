@@ -273,7 +273,7 @@ La automatización, la configuración de `rclone` y sus credenciales viven fuera
 
 ## Cabeceras de seguridad de Nginx
 
-La configuración externa aplicada incluye HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy` y `server_tokens off`. Observado en el servidor el 2026-09-30: también se envía una cabecera `Content-Security-Policy` **obligatoria** (no `Report-Only`) con `frame-ancestors 'none'`. El propietario confirmó el mismo día que es el estado deseado y debe mantenerse; el comentario «modo monitorización» de la configuración de Nginx está desfasado.
+La configuración externa aplicada incluye HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy` y `server_tokens off`. Observado en el servidor el 2026-09-30: también se envía una cabecera `Content-Security-Policy` **obligatoria** (no `Report-Only`) con `frame-ancestors 'none'`. El propietario confirmó el mismo día que es el estado deseado y debe mantenerse; el comentario de la configuración de Nginx ya lo refleja.
 
 El widget incrustable tiene una excepción aplicada el 2026-09-30: `location ^~ /embed/` hacia el
 backend, sin `X-Frame-Options` ni la CSP del sitio, porque Express envía `frame-ancestors` por
