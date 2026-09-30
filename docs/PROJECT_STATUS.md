@@ -27,7 +27,8 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
-- Widget d'agenda incrustable B2B, F1 completada localmente y no desplegada: migración `017`
+- Widget d'agenda incrustable B2B, F1 desplegada en producción el 2026-09-30 con la `location /embed/`
+  de Nginx aplicada y verificada desde un origen autorizado y otro no autorizado: migración `017`
   (`sources.allows_syndication` solo para Gencat y DIBA, `embed_widgets`, `embed_widget_usage_daily`),
   rutas `/embed/v1/loader.js` y `/embed/v1/w/:key`, CSP por widget con `frame-ancestors`, contadores
   de uso agregados, nombres oficiales ICGC, CLI `embed:widgets` y tests. Validación previa (F0):
@@ -81,9 +82,8 @@ M1 está activo. El siguiente paso operativo es desplegar M2 manteniendo `allows
 
 ## OPERATOR / PRODUCTION
 
-- Widget B2B: desplegar el código (aplica la migración `017`), añadir con autorización la `location /embed/` de Nginx descrita en [`EMBED_WIDGET.md`](EMBED_WIDGET.md), probar desde un dominio autorizado y otro no autorizado y crear los widgets de los pilotos con `embed:widgets`. Antes de cobrar, revisar el aviso legal.
-
-- Preparar y probar una CSP en modo `Content-Security-Policy-Report-Only`, revisar los reportes y decidir posteriormente si se activa como obligatoria. Requiere autorización e intervención sobre Nginx.
+- Widget B2B: crear los widgets de los pilotos con `embed:widgets` cuando haya acuerdo. Antes de cobrar, revisar el aviso legal.
+- CSP del sitio: el servidor ya envía una `Content-Security-Policy` obligatoria (observado el 2026-09-30), aunque el comentario de Nginx habla de monitorización. Confirmar si es el estado deseado o si debería ser `Report-Only`.
 - Verificar la configuración efectiva de Nginx, PM2 y cron antes de cualquier operación que dependa de ella.
 - Verificar las últimas ejecuciones y la restaurabilidad de los backups, la copia externa mediante `rclone` y las rotaciones de logs cuando una intervención operativa lo requiera.
 - Revisar periódicamente cobertura, indexación y errores concretos en Google Search Console.
@@ -115,7 +115,8 @@ M1 está activo. El siguiente paso operativo es desplegar M2 manteniendo `allows
 | Logrotate | Confirmado externamente y verificado | Revisar configuración efectiva y rotaciones si se va a modificar |
 | Ticketmaster en producción | Activo según el estado confirmado | Verificar cron y configuración efectiva antes de operar |
 | DIBA en producción | Tres fuentes activas, imágenes deshabilitadas y sin cron | Desplegar/verificar M2 antes de instalar el cron por separado |
-| CSP | No aplicada según el último estado confirmado | Requiere prueba Report-Only y autorización |
+| CSP | Cabecera obligatoria observada el 2026-09-30 (comentario de Nginx: «monitorización») | Confirmar estado deseado; `/embed/` usa su propia CSP |
+| Widget B2B (`/embed/`) | Desplegado y verificado el 2026-09-30; sin widgets de clientes | Revisar `embed:widgets -- list` antes de operar |
 
 El roadmap operativo separa AUTONOMOUS WORK, PRODUCT DECISIONS, OPERATOR / PRODUCTION, BLOCKED y LATER / TECHNICAL DEBT. No existe una definición fiable de prioridades `P1`, `P2`, etc.; no deben usarse para decidir trabajo actual.
 

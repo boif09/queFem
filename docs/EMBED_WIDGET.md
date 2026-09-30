@@ -1,7 +1,8 @@
 # Widget d'agenda incrustable (B2B)
 
-Estado: **F1 implementada y verificada en local; no desplegada.** El despliegue necesita la
-configuración de Nginx descrita al final y autorización explícita.
+Estado: **F1 desplegada en producción el 2026-09-30** (commit `8456c8a`, migración `017`, `location
+/embed/` de Nginx aplicada). Verificada con un widget temporal desde un origen autorizado y otro no
+autorizado; ese widget quedó revocado. No hay widgets de clientes creados todavía.
 
 ## Qué es
 
@@ -130,26 +131,35 @@ se sirven las imágenes genéricas de `frontend/public/media`. Para probar el ai
 anfitriona debe estar en otro origen (por ejemplo `http://localhost:5500`) incluido en la lista del
 widget.
 
-## Despliegue pendiente (Nginx)
+## Nginx en producción
 
-Ahora Nginx envía `X-Frame-Options: DENY` en todo el sitio y solo redirige `/api` al backend. Antes de
-activar el widget hay que añadir una `location /embed/` que redirija a Express **sin**
-`X-Frame-Options`. En Nginx, un `add_header` dentro de una `location` anula los del bloque `server`;
-por eso hay que repetir allí las cabeceras que sí deben mantenerse. Propuesta (no aplicada):
+El bloque `server` de `tenspla.cat` envía `X-Frame-Options: DENY` y una `Content-Security-Policy`
+obligatoria con `frame-ancestors 'none'` y `style-src 'self'`. Si `/embed/` las heredara, el navegador
+bloquearía el widget. En Nginx, un `add_header` dentro de una `location` anula todos los del
+`server`; por eso la `location` del widget declara las suyas y repite solo HSTS y Permissions-Policy.
+Aplicada el 2026-09-30 en `/etc/nginx/sites-available/tenspla`, antes del fallback de React Router
+(copia previa en `/root/nginx-backups/tenspla.20260930T100641Z.before-embed`):
 
 ```nginx
 location ^~ /embed/ {
+    limit_req zone=tenspla_plans burst=20 nodelay;
+
     proxy_pass http://127.0.0.1:3014;
     proxy_http_version 1.1;
+
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Repetir aquí HSTS y Permissions-Policy con los valores exactos del bloque server.
-    # Sin X-Frame-Options: Express envía frame-ancestors por widget.
-    # Sin Referrer-Policy ni X-Content-Type-Options globales: Express envía las suyas.
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
 }
 ```
 
-Los valores de las cabeceras repetidas deben copiarse de la configuración efectiva del servidor. Verificar con `nginx -t` y probar desde un dominio autorizado y otro no autorizado.
+Si cambian las cabeceras de seguridad del `server`, hay que actualizar también las repetidas aquí.
+Comprobación: `curl -sI https://tenspla.cat/embed/v1/loader.js` no debe devolver `X-Frame-Options`
+ni la CSP del sitio, y `https://tenspla.cat/` debe seguir devolviéndolas.
 
 ## Pendiente (F2 y siguientes)
 
