@@ -113,8 +113,9 @@ radio.
 ## Página pública `/widget`
 
 `frontend/src/pages/WidgetPage.jsx` explica el widget en catalán y castellano, incrusta dos ejemplos
-reales y remite a `contacte@tenspla.cat` para pedirlo. No menciona precios ni condiciones. Está en el
-pie de todas las páginas y en el sitemap.
+reales y remite a `contacte@tenspla.cat` para pedirlo. No menciona precios ni condiciones. Se enlaza
+como «Tens una web?» / «¿Tienes una web?» en el menú superior (en lugar de «Fonts», que sigue en el
+pie) y en la barra inferior del móvil, además de en el pie y el sitemap.
 
 Los ejemplos son widgets normales con claves públicas fijas, creados en cada entorno con `--key` y
 autorizados solo para el propio sitio (`https://tenspla.cat` en producción, `http://localhost:5173`
