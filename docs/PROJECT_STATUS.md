@@ -27,6 +27,13 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
+- Widget d'agenda incrustable B2B, F1 completada localmente y no desplegada: migración `017`
+  (`sources.allows_syndication` solo para Gencat y DIBA, `embed_widgets`, `embed_widget_usage_daily`),
+  rutas `/embed/v1/loader.js` y `/embed/v1/w/:key`, CSP por widget con `frame-ancestors`, contadores
+  de uso agregados, nombres oficiales ICGC, CLI `embed:widgets` y tests. Validación previa (F0):
+  cobertura suficiente a escala comarcal y de ciudad mediana, no de municipio pequeño; maqueta para
+  pilotos Bages / Baix Empordà. Ver [`EMBED_WIDGET.md`](EMBED_WIDGET.md).
+
 - P2.2 prepara localmente las landings editoriales `/avui` y `/cap-de-setmana`: reutilizan visibilidad, occurrences y ranking de `/api/plans`, calculan el calendario con `Europe/Madrid`, reciben HTML SEO inicial determinista y se incorporan al sitemap. El cambio documenta las locations Nginx necesarias, pero no las aplica ni despliega estas rutas en producción.
 
 - DIBA M0 y M1/M1.1/M1.2/M1.3 completados localmente: integración selectiva de `actesturisme_ca`, `escenari` y `actesmuseus`, con procedencias operativas separadas `diba-tourisme`, `diba-escenari` y `diba-museus`. La primera importación local real terminó correctamente con fuentes desactivadas: 710 procedencias elegibles, 613 planes solo-DIBA, 74 planes públicos con procedencia DIBA añadida, 6 matches Turismo→Museos, 21 ambiguos, 28 municipios de Turismo sin resolver y cero retiradas. M1.3 hace fiel el overlay de repeat dry-run y protege la salud semántica del subconjunto accionable. No hay cron ni activación pública. Bibliotecas, agenda general, exposiciones, parques y agregaciones genéricas continúan excluidos.
@@ -73,6 +80,8 @@ M1 está activo. El siguiente paso operativo es desplegar M2 manteniendo `allows
 - Decidir si se quiere automatizar la purga de planes inactivos y aprobar su política operativa antes de preparar cualquier activación.
 
 ## OPERATOR / PRODUCTION
+
+- Widget B2B: desplegar el código (aplica la migración `017`), añadir con autorización la `location /embed/` de Nginx descrita en [`EMBED_WIDGET.md`](EMBED_WIDGET.md), probar desde un dominio autorizado y otro no autorizado y crear los widgets de los pilotos con `embed:widgets`. Antes de cobrar, revisar el aviso legal.
 
 - Preparar y probar una CSP en modo `Content-Security-Policy-Report-Only`, revisar los reportes y decidir posteriormente si se activa como obligatoria. Requiere autorización e intervención sobre Nginx.
 - Verificar la configuración efectiva de Nginx, PM2 y cron antes de cualquier operación que dependa de ella.

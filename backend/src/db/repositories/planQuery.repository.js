@@ -14,6 +14,10 @@ import { normalizeFeverPrice } from '../../fever/publicationPolicy.js';
 
 const QUALITY_THRESHOLD = 35;
 
+function occurrenceScope(syndicatedOnly) {
+  return syndicatedOnly ? 'syndicated' : true;
+}
+
 function localizedExpressions(language) {
   if (language === 'es') {
     return {
@@ -71,7 +75,10 @@ export class PlanQueryRepository {
     this.fallbackImageLibrary = fallbackImageLibrary;
   }
 
-  visiblePlanConditions(alias = 'p') {
+  // syndicatedOnly (embed widget): occurrences from non-syndicable sources such as Fever or
+  // Ticketmaster must neither make a plan visible nor supply its dates.
+  visiblePlanConditions(alias = 'p', { syndicatedOnly = false } = {}) {
+    const scope = occurrenceScope(syndicatedOnly);
     const now = this.now();
     return {
       clauses: [
@@ -81,11 +88,11 @@ export class PlanQueryRepository {
           JOIN sources visibility_s ON visibility_s.id = visibility_ps.source_id
           WHERE visibility_ps.plan_id = ${alias}.id AND visibility_s.enabled = 1
         )`,
-        `(${activeOccurrenceExists(alias, '', { enabledOnly: true })} OR NOT (${anyOccurrenceExists(alias, { enabledOnly: true })}))`,
+        `(${activeOccurrenceExists(alias, '', { enabledOnly: scope })} OR NOT (${anyOccurrenceExists(alias, { enabledOnly: scope })}))`,
         `${alias}.quality_score >= ?`,
-        retainedPlanWhere(alias, { enabledOnly: true }),
+        retainedPlanWhere(alias, { enabledOnly: scope }),
         `NOT (${outsideCataloniaWhere(alias)})`,
-        `NOT (${temporallyInvalidWhere(alias, { enabledOnly: true })})`,
+        `NOT (${temporallyInvalidWhere(alias, { enabledOnly: scope })})`,
       ],
       parameters: [
         QUALITY_THRESHOLD,
@@ -96,7 +103,16 @@ export class PlanQueryRepository {
   }
 
   buildWhere(filters) {
-    const { clauses, parameters } = this.visiblePlanConditions();
+    const scope = occurrenceScope(filters.syndicatedOnly);
+    const { clauses, parameters } = this.visiblePlanConditions('p', { syndicatedOnly: Boolean(filters.syndicatedOnly) });
+    // Internal only (embed widget): never reachable from validatePlansQuery.
+    if (filters.syndicatedOnly) {
+      clauses.push(`EXISTS (
+        SELECT 1 FROM plan_sources syndication_ps
+        JOIN sources syndication_s ON syndication_s.id = syndication_ps.source_id
+        WHERE syndication_ps.plan_id = p.id AND syndication_s.enabled = 1 AND syndication_s.allows_syndication = 1
+      )`);
+    }
     if (filters.q !== undefined) {
       clauses.push(`(
         instr(normalize_location(p.original_title), normalize_location(?)) > 0 OR
@@ -148,16 +164,16 @@ export class PlanQueryRepository {
       parameters.push(...filters.categories);
     }
 
-    const hasAnyOccurrences = anyOccurrenceExists('p', { enabledOnly: true });
+    const hasAnyOccurrences = anyOccurrenceExists('p', { enabledOnly: scope });
     if (filters.editorial === 'home-upcoming') {
       clauses.push(`(
-        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: scope })}
         OR (NOT (${hasAnyOccurrences}) AND p.start_date IS NOT NULL AND p.start_date >= ?)
       )`);
       parameters.push(filters.dateFrom, filters.dateFrom);
     } else if (filters.date) {
       clauses.push(`(
-        ${activeOccurrencePlanIds('AND occurrence_o.local_date = ?', { enabledOnly: true })}
+        ${activeOccurrencePlanIds('AND occurrence_o.local_date = ?', { enabledOnly: scope })}
         OR (NOT (${hasAnyOccurrences}) AND (
           p.permanent = 1 OR
           (p.start_date IS NOT NULL AND p.end_date IS NOT NULL AND p.start_date <= ? AND p.end_date >= ?)
@@ -166,7 +182,7 @@ export class PlanQueryRepository {
       parameters.push(filters.date, filters.date, filters.date);
     } else if (filters.dateFrom && filters.dateTo) {
       clauses.push(`(
-        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: true })}
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: scope })}
         OR (NOT (${hasAnyOccurrences}) AND (
           p.permanent = 1 OR
           (p.start_date IS NOT NULL AND p.end_date IS NOT NULL AND p.start_date <= ? AND p.end_date >= ?)
@@ -175,13 +191,13 @@ export class PlanQueryRepository {
       parameters.push(filters.dateFrom, filters.dateTo, filters.dateTo, filters.dateFrom);
     } else if (filters.dateFrom) {
       clauses.push(`(
-        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: scope })}
         OR (NOT (${hasAnyOccurrences}) AND (p.permanent = 1 OR (p.end_date IS NOT NULL AND p.end_date >= ?)))
       )`);
       parameters.push(filters.dateFrom, filters.dateFrom);
     } else if (filters.dateTo) {
       clauses.push(`(
-        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date <= ?', { enabledOnly: true })}
+        ${activeOccurrenceExists('p', 'AND occurrence_o.local_date <= ?', { enabledOnly: scope })}
         OR (NOT (${hasAnyOccurrences}) AND (p.permanent = 1 OR (p.start_date IS NOT NULL AND p.start_date <= ?)))
       )`);
       parameters.push(filters.dateTo, filters.dateTo);
@@ -195,12 +211,13 @@ export class PlanQueryRepository {
     const where = this.buildWhere(filters);
     let orderBy;
     let orderParameters = [];
-    const hasAnyOccurrences = anyOccurrenceExists('p', { enabledOnly: true });
+    const scope = occurrenceScope(filters.syndicatedOnly);
+    const hasAnyOccurrences = anyOccurrenceExists('p', { enabledOnly: scope });
     if (filters.editorial === 'home-weekend') {
       orderBy = `
         CASE WHEN ${hasAnyOccurrences} THEN 0 WHEN p.start_date BETWEEN ? AND ? THEN 0 ELSE 1 END ASC,
         CASE
-          WHEN ${hasAnyOccurrences} THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: true })}
+          WHEN ${hasAnyOccurrences} THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: scope })}
           WHEN p.start_date BETWEEN ? AND ? THEN p.start_date
         END ASC,
         CASE WHEN NOT (${hasAnyOccurrences}) AND p.start_date < ? THEN p.start_date END DESC,
@@ -213,15 +230,15 @@ export class PlanQueryRepository {
       ];
     } else if (filters.editorial === 'home-upcoming') {
       orderBy = `CASE WHEN ${hasAnyOccurrences}
-        THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
+        THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: scope })}
         ELSE p.start_date END ASC, p.id ASC`;
       orderParameters = [filters.dateFrom];
     } else if (filters.dateFrom && filters.dateTo) {
       const rangeOccurrenceExists = activeOccurrenceExists(
-        'p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: true },
+        'p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: scope },
       );
       const rangeOccurrenceDate = activeOccurrenceDate(
-        'p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: true },
+        'p', 'AND occurrence_o.local_date BETWEEN ? AND ?', { enabledOnly: scope },
       );
       const rangeTier = `CASE
         WHEN p.start_date BETWEEN ? AND ? THEN 0
@@ -257,10 +274,10 @@ export class PlanQueryRepository {
           p.id ASC`
         : `p.permanent ASC,
           CASE WHEN ${hasAnyOccurrences}
-            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: scope })}
             ELSE p.start_date END IS NULL ASC,
           CASE WHEN ${hasAnyOccurrences}
-            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: scope })}
             ELSE p.start_date END ASC,
           p.id ASC`;
       const today = retentionCutoff(0, this.now());
@@ -268,10 +285,10 @@ export class PlanQueryRepository {
         date: dateOrder,
         quality: `p.quality_score DESC,
           CASE WHEN ${hasAnyOccurrences}
-            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: scope })}
             ELSE p.start_date END IS NULL ASC,
           CASE WHEN ${hasAnyOccurrences}
-            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: true })}
+            THEN ${activeOccurrenceDate('p', 'AND occurrence_o.local_date >= ?', { enabledOnly: scope })}
             ELSE p.start_date END ASC,
           p.id ASC`,
         title: `${text.title} COLLATE NOCASE ASC, p.id ASC`,
@@ -298,7 +315,7 @@ export class PlanQueryRepository {
         p.indoor, p.outdoor, p.featured, p.quality_score,
         (SELECT o.local_date || char(31) || COALESCE(o.local_time, '')
           FROM plan_occurrences o JOIN plan_sources ops ON ops.id=o.plan_source_id JOIN sources os ON os.id=ops.source_id
-          WHERE ops.plan_id=p.id AND os.enabled=1 AND o.status='active' AND o.local_date>=? ORDER BY o.local_date,o.local_time LIMIT 1) next_occurrence
+          WHERE ops.plan_id=p.id AND os.enabled=1 ${filters.syndicatedOnly ? 'AND os.allows_syndication=1' : ''} AND o.status='active' AND o.local_date>=? ORDER BY o.local_date,o.local_time LIMIT 1) next_occurrence
       FROM plans p
       WHERE ${where.sql}
       ORDER BY ${orderBy}
@@ -307,10 +324,26 @@ export class PlanQueryRepository {
 
     const plans = rows.map(mapPlan);
     this.attachCategories(plans, filters.lang);
-    this.attachImages(plans, 'card', filters.lang);
-    this.attachCommerce(plans);
+    this.attachImages(plans, 'card', filters.lang, { syndicatedOnly: Boolean(filters.syndicatedOnly) });
+    // Affiliate commerce belongs to tenspla.cat; it is never syndicated to third-party sites.
+    if (!filters.syndicatedOnly) this.attachCommerce(plans);
     for (const plan of plans) delete plan.fingerprint;
     return { plans, total };
+  }
+
+  syndicationAttributions(planIds) {
+    if (!planIds.length) return [];
+    return this.db.prepare(`SELECT DISTINCT s.attribution_text
+      FROM plan_sources ps JOIN sources s ON s.id = ps.source_id
+      WHERE ps.plan_id IN (${planIds.map(() => '?').join(', ')})
+        AND s.enabled = 1 AND s.allows_syndication = 1 AND s.attribution_text IS NOT NULL
+      ORDER BY s.attribution_text`).pluck().all(...planIds);
+  }
+
+  latestSyndicatedImportAt() {
+    return this.db.prepare(`SELECT MAX(r.finished_at) FROM import_runs r
+      JOIN sources s ON s.id = r.source_id
+      WHERE r.status = 'completed' AND s.enabled = 1 AND s.allows_syndication = 1`).pluck().get() || null;
   }
 
   attachCommerce(plans) {
@@ -327,7 +360,7 @@ export class PlanQueryRepository {
     for (const plan of plans) if (byPlan.has(plan.id)) plan.commerce = byPlan.get(plan.id);
   }
 
-  attachImages(plans, role, language = 'ca') {
+  attachImages(plans, role, language = 'ca', { syndicatedOnly = false } = {}) {
     for (const plan of plans) plan.image = null;
     if (plans.length === 0) return;
     const placeholders = plans.map(() => '?').join(', ');
@@ -361,11 +394,13 @@ export class PlanQueryRepository {
             OR (s.key = 'fever' AND ? = 1)
             OR (s.key = 'gencat-agenda' AND ? = 1))
           AND s.enabled = 1
+          AND (? = 0 OR s.allows_syndication = 1)
       ) ranked
       WHERE image_rank = 1
     `).all(
       ...plans.map(({ id }) => id), role,
       Number(this.ticketmasterImagesEnabled), Number(this.feverImagesEnabled), Number(this.gencatImagesEnabled),
+      Number(syndicatedOnly),
     );
     const byPlan = new Map(rows.map((row) => [row.plan_id, {
       url: `/api/media/${row.source_key || 'ticketmaster'}/${row.image_id}`,

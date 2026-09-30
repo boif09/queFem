@@ -1,5 +1,6 @@
 import express from 'express';
 import { createCategoriesRouter } from './api/categories.routes.js';
+import { createEmbedRouter } from './api/embed.routes.js';
 import { createLocationsRouter } from './api/locations.routes.js';
 import { createMediaRouter } from './api/media.routes.js';
 import { createPlansRouter } from './api/plans.routes.js';
@@ -7,6 +8,7 @@ import { createSourcesRouter } from './api/sources.routes.js';
 import { createSitemapRouter } from './api/sitemap.routes.js';
 import { createSeoRouter } from './api/seo.routes.js';
 import { ValidationError } from './api/validation.js';
+import { EmbedWidgetRepository } from './db/repositories/embedWidget.repository.js';
 import { PlanAliasRepository } from './db/repositories/planAlias.repository.js';
 import { PlanQueryRepository } from './db/repositories/planQuery.repository.js';
 import { PlanSourceImageRepository } from './db/repositories/planSourceImage.repository.js';
@@ -21,6 +23,8 @@ import {
   validateGencatImageUrl,
 } from './ticketmaster/imageProxy.js';
 import { loadFallbackImageLibrary } from './images/fallbackImageLibrary.js';
+import { EmbedUsageRecorder } from './embed/usageRecorder.js';
+import { EmbedWidgetService } from './embed/widgetService.js';
 
 export function createApp({
   db,
@@ -45,6 +49,8 @@ export function createApp({
   fallbackImageLibrary,
   seoTemplatePath,
   seoTemplate,
+  placeNames,
+  embedUsageFlushIntervalMs = 60_000,
   now = () => new Date(),
   logger = console,
 }) {
@@ -106,6 +112,18 @@ export function createApp({
   app.use('/api/categories', createCategoriesRouter(repository));
   app.use('/api/sources', createSourcesRouter(repository));
   app.use('/api', createLocationsRouter(repository));
+
+  const embedWidgetRepository = new EmbedWidgetRepository(db, { now });
+  const embedUsageRecorder = new EmbedUsageRecorder({
+    repository: embedWidgetRepository, now, flushIntervalMs: embedUsageFlushIntervalMs, logger,
+  });
+  app.locals.embedUsageRecorder = embedUsageRecorder;
+  app.use('/embed', createEmbedRouter({
+    widgetRepository: embedWidgetRepository,
+    widgetService: new EmbedWidgetService({ planRepository: repository, ...(placeNames && { placeNames }), now }),
+    usageRecorder: embedUsageRecorder,
+    logger,
+  }));
 
   app.use((request, response) => {
     response.status(404).json({

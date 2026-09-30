@@ -23,8 +23,13 @@ Todo vive en un único paquete npm. El backend usa Node.js, Express 5 y `better-
 - `/api/media/ticketmaster/:imageId`
 - `/api/media/gencat/:imageId`
 - `/api/sitemap.xml`
+- `/embed/v1/loader.js` y `/embed/v1/w/:key` (widget incrustable B2B)
 
-La API no ofrece escritura. La consulta de planes limita `page` a 200, `limit` a 100, `q` a 100 caracteres y los filtros textuales a 120 caracteres. `category` acepta uno o varios slugs separados por comas y los combina con semántica OR; el filtro booleano `permanent` permite separar los bloques temporales y permanentes de la home. Los modos técnicos explícitos `editorial=home-weekend|home-upcoming`, usados solo por la home, priorizan antes de paginar los inicios dentro del fin de semana o exigen inicios desde hoy, respectivamente. En una búsqueda general con rango cerrado, el orden temporal prioriza los inicios del plan dentro del rango, después las occurrences activas dentro del rango y finalmente los solapamientos legacy que comenzaron antes; la inclusión occurrence-aware no cambia.
+La API no ofrece escritura. El widget incrustable reutiliza la consulta de planes en modo
+`syndicatedOnly` (solo procedencias con `sources.allows_syndication = 1`, sin comercio ni imágenes de
+fuentes no redistribuibles), genera HTML con CSP por widget (`frame-ancestors` con los orígenes
+contratados) y acumula en memoria contadores diarios de uso que vuelca a `embed_widget_usage_daily`;
+es la única escritura del proceso de la API. Detalle en [`EMBED_WIDGET.md`](EMBED_WIDGET.md). La consulta de planes limita `page` a 200, `limit` a 100, `q` a 100 caracteres y los filtros textuales a 120 caracteres. `category` acepta uno o varios slugs separados por comas y los combina con semántica OR; el filtro booleano `permanent` permite separar los bloques temporales y permanentes de la home. Los modos técnicos explícitos `editorial=home-weekend|home-upcoming`, usados solo por la home, priorizan antes de paginar los inicios dentro del fin de semana o exigen inicios desde hoy, respectivamente. En una búsqueda general con rango cerrado, el orden temporal prioriza los inicios del plan dentro del rango, después las occurrences activas dentro del rango y finalmente los solapamientos legacy que comenzaron antes; la inclusión occurrence-aware no cambia.
 
 ## SQLite
 

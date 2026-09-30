@@ -275,6 +275,10 @@ La automatización, la configuración de `rclone` y sus credenciales viven fuera
 
 La configuración externa aplicada incluye HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy` y `server_tokens off`. La CSP todavía no está aplicada: debe probarse primero como `Content-Security-Policy-Report-Only` y validarse manualmente antes de hacerla obligatoria.
 
+El widget incrustable necesita una excepción pendiente: una `location /embed/` hacia el backend sin
+`X-Frame-Options`, porque Express envía `frame-ancestors` por widget. La propuesta y sus
+comprobaciones están en [`EMBED_WIDGET.md`](EMBED_WIDGET.md); no está aplicada.
+
 Estas cabeceras no están gestionadas por Git ni por `deploy.sh`; verificar siempre la configuración efectiva del servidor y ejecutar `nginx -t` antes de recargar.
 
 ## Revisión legal previa a cambios de producto

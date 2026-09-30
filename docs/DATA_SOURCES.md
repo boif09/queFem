@@ -10,6 +10,10 @@ Images: reusable, as explicitly confirmed by the Generalitat / Departament de Cu
 2026-09-15. If the public `Peu d'imatge` contains text, Tens Pla? must reproduce that text; an
 existing blank footer positively means that no image credit is required.
 
+Syndication to third-party websites (embed widget): allowed, `allows_syndication=1`. The owner keeps
+a written confirmation from the Generalitat that the images may also be redistributed; the widget
+applies the same attribution rules as the tenspla.cat cards. See [`EMBED_WIDGET.md`](EMBED_WIDGET.md).
+
 The importer selects only the first usable `imatges` DAM path and resolves its footer from the
 matching carousel slide at `https://agenda.cultura.gencat.cat/ca/activitat.html/{codi}`. This is a
 narrow, approved `PUBLIC_BUT_FRAGILE` extraction contract, not general-purpose scraping. It fails
@@ -125,6 +129,14 @@ Type: official administrative cartography; data date 20/01/2026; source CRS EPSG
 License: Creative Commons Attribution 4.0 International (CC BY 4.0).
 Required attribution: Institut Cartogràfic i Geològic de Catalunya (ICGC).
 Scope: municipality point-in-polygon resolution, carrying official municipality, comarca and province codes/names from each municipal feature. The snapshot is updated explicitly from the official ICGC WFS and runtime resolution is fully local. See [`ICGC_GEOGRAPHY.md`](ICGC_GEOGRAPHY.md).
+The embed widget uses a derived official-names index (`npm run geography:icgc:names`) and always credits the ICGC.
+
+## Syndication to third-party websites (embed widget)
+
+`sources.allows_syndication` is a separate grant from `allows_commercial_use`. Approved on 2026-09-30:
+`gencat-agenda`, `diba-tourisme`, `diba-escenari` and `diba-museus` (DIBA images stay excluded by
+`allows_images=0`). Not approved: `fever` and `ticketmaster-discovery-feed`. A new source must not
+be syndicated without an explicit licence review. See [`EMBED_WIDGET.md`](EMBED_WIDGET.md).
 
 
 ## Surtdecasa

@@ -17,6 +17,7 @@ Ruta recomendada para una tarea: [`../AGENTS.md`](../AGENTS.md) → documento de
 - [`TICKETMASTER_REMOVAL.md`](TICKETMASTER_REMOVAL.md): retirada, dry-run, backup y purga de una procedencia Ticketmaster.
 - [`FEVER_NORMALIZATION.md`](FEVER_NORMALIZATION.md): contrato M3 de normalización Fever, parser de `Manufacturer`, zona horaria y dry-run sin persistencia.
 - [`ANALYTICS.md`](ANALYTICS.md): eventos Umami propios para clics de afiliación.
+- [`EMBED_WIDGET.md`](EMBED_WIDGET.md): widget de agenda incrustable B2B: fuentes redistribuibles, configuración, claves por dominio, uso, administración y despliegue pendiente.
 - [`DIBA_M0_DISCOVERY.md`](DIBA_M0_DISCOVERY.md): análisis read-only de viabilidad y solapamiento de DIBA.
 - [`DIBA_INTEGRATION.md`](DIBA_INTEGRATION.md): contrato M1 de importación selectiva, seguridad y activación futura de DIBA.
 - [`DIBA_M1_4B_POLICY.md`](DIBA_M1_4B_POLICY.md): política preactivación para consolidación, enlaces, sesiones, geografía, revisión y gates de DIBA M1.4C.

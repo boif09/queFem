@@ -1,0 +1,7584 @@
+{
+ "provider": "Institut Cartogràfic i Geològic de Catalunya (ICGC)",
+ "datasetDate": "2026-01-20",
+ "license": "CC BY 4.0",
+ "snapshotSha256": "5a5dceebcdc7ad9abef88006d50c944d885f2cc155bf5391b02cc2be1637c282",
+ "municipalities": [
+  {
+   "code": "080018",
+   "name": "Abrera",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080023",
+   "name": "Aguilar de Segarra",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080039",
+   "name": "Alella",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080044",
+   "name": "Alpens",
+   "comarcaCode": "43",
+   "comarca": "Lluçanès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080057",
+   "name": "l'Ametlla del Vallès",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080060",
+   "name": "Arenys de Mar",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080076",
+   "name": "Arenys de Munt",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080082",
+   "name": "Argençola",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080095",
+   "name": "Argentona",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080109",
+   "name": "Artés",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080116",
+   "name": "Avià",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080121",
+   "name": "Avinyó",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080137",
+   "name": "Avinyonet del Penedès",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080142",
+   "name": "Aiguafreda",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080155",
+   "name": "Badalona",
+   "comarcaCode": "13",
+   "comarca": "Barcelonès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080168",
+   "name": "Bagà",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080174",
+   "name": "Balenyà",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080180",
+   "name": "Balsareny",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080193",
+   "name": "Barcelona",
+   "comarcaCode": "13",
+   "comarca": "Barcelonès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080207",
+   "name": "Begues",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080214",
+   "name": "Bellprat",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080229",
+   "name": "Berga",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080235",
+   "name": "Bigues i Riells del Fai",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080240",
+   "name": "Borredà",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080253",
+   "name": "el Bruc",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080266",
+   "name": "el Brull",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080272",
+   "name": "les Cabanyes",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080288",
+   "name": "Cabrera d'Anoia",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080291",
+   "name": "Cabrera de Mar",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080305",
+   "name": "Cabrils",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080312",
+   "name": "Calaf",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080327",
+   "name": "Caldes d'Estrac",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080333",
+   "name": "Caldes de Montbui",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080348",
+   "name": "Calders",
+   "comarcaCode": "42",
+   "comarca": "Moianès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080351",
+   "name": "Calella",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080364",
+   "name": "Calonge de Segarra",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080370",
+   "name": "Calldetenes",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080386",
+   "name": "Callús",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080399",
+   "name": "Campins",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080403",
+   "name": "Canet de Mar",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080410",
+   "name": "Canovelles",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080425",
+   "name": "Cànoves i Samalús",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080431",
+   "name": "Canyelles",
+   "comarcaCode": "17",
+   "comarca": "Garraf",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080446",
+   "name": "Capellades",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080459",
+   "name": "Capolat",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080462",
+   "name": "Cardedeu",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080478",
+   "name": "Cardona",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080484",
+   "name": "Carme",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080497",
+   "name": "Casserres",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080500",
+   "name": "Castellar del Riu",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080517",
+   "name": "Castellar del Vallès",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080522",
+   "name": "Castellar de n'Hug",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080538",
+   "name": "Castellbell i el Vilar",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080543",
+   "name": "Castellbisbal",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080556",
+   "name": "Castellcir",
+   "comarcaCode": "42",
+   "comarca": "Moianès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080569",
+   "name": "Castelldefels",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080575",
+   "name": "Castell de l'Areny",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080581",
+   "name": "Castellet i la Gornal",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080594",
+   "name": "Castellfollit del Boix",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080608",
+   "name": "Castellfollit de Riubregós",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080615",
+   "name": "Castellgalí",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080620",
+   "name": "Castellnou de Bages",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080636",
+   "name": "Castellolí",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080641",
+   "name": "Castellterçol",
+   "comarcaCode": "42",
+   "comarca": "Moianès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080654",
+   "name": "Castellví de la Marca",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080667",
+   "name": "Castellví de Rosanes",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080673",
+   "name": "Centelles",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080689",
+   "name": "Cervelló",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080692",
+   "name": "Collbató",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080706",
+   "name": "Collsuspina",
+   "comarcaCode": "42",
+   "comarca": "Moianès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080713",
+   "name": "Copons",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080728",
+   "name": "Corbera de Llobregat",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080734",
+   "name": "Cornellà de Llobregat",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080749",
+   "name": "Cubelles",
+   "comarcaCode": "17",
+   "comarca": "Garraf",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080752",
+   "name": "Dosrius",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080765",
+   "name": "Esparreguera",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080771",
+   "name": "Esplugues de Llobregat",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080787",
+   "name": "l'Espunyola",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080790",
+   "name": "l'Estany",
+   "comarcaCode": "42",
+   "comarca": "Moianès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080804",
+   "name": "Fígols",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080811",
+   "name": "Fogars de Montclús",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080826",
+   "name": "Fogars de la Selva",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080832",
+   "name": "Folgueroles",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080847",
+   "name": "Fonollosa",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080850",
+   "name": "Font-rubí",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080863",
+   "name": "les Franqueses del Vallès",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080879",
+   "name": "Gallifa",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080885",
+   "name": "la Garriga",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080898",
+   "name": "Gavà",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080902",
+   "name": "Gaià",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080919",
+   "name": "Gelida",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080924",
+   "name": "Gironella",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080930",
+   "name": "Gisclareny",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080945",
+   "name": "la Granada",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080958",
+   "name": "Granera",
+   "comarcaCode": "42",
+   "comarca": "Moianès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080961",
+   "name": "Granollers",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080977",
+   "name": "Gualba",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080983",
+   "name": "Sant Salvador de Guardiola",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "080996",
+   "name": "Guardiola de Berguedà",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081000",
+   "name": "Gurb",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081017",
+   "name": "l'Hospitalet de Llobregat",
+   "comarcaCode": "13",
+   "comarca": "Barcelonès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081022",
+   "name": "Igualada",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081038",
+   "name": "Jorba",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081043",
+   "name": "la Llacuna",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081056",
+   "name": "la Llagosta",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081069",
+   "name": "Llinars del Vallès",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081075",
+   "name": "Lliçà d'Amunt",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081081",
+   "name": "Lliçà de Vall",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081094",
+   "name": "Lluçà",
+   "comarcaCode": "43",
+   "comarca": "Lluçanès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081108",
+   "name": "Malgrat de Mar",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081115",
+   "name": "Malla",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081120",
+   "name": "Manlleu",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081136",
+   "name": "Manresa",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081141",
+   "name": "Martorell",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081154",
+   "name": "Martorelles",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081167",
+   "name": "les Masies de Roda",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081173",
+   "name": "les Masies de Voltregà",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081189",
+   "name": "el Masnou",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081192",
+   "name": "Masquefa",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081206",
+   "name": "Matadepera",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081213",
+   "name": "Mataró",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081228",
+   "name": "Mediona",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081234",
+   "name": "Molins de Rei",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081249",
+   "name": "Mollet del Vallès",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081252",
+   "name": "Montcada i Reixac",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081265",
+   "name": "Montgat",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081271",
+   "name": "Monistrol de Montserrat",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081287",
+   "name": "Monistrol de Calders",
+   "comarcaCode": "42",
+   "comarca": "Moianès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081290",
+   "name": "Muntanyola",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081304",
+   "name": "Montclar",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081311",
+   "name": "Montesquiu",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081326",
+   "name": "Montmajor",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081332",
+   "name": "Montmaneu",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081347",
+   "name": "Figaró-Montmany",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081350",
+   "name": "Montmeló",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081363",
+   "name": "Montornès del Vallès",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081379",
+   "name": "Montseny",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081385",
+   "name": "Moià",
+   "comarcaCode": "42",
+   "comarca": "Moianès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081398",
+   "name": "Mura",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081402",
+   "name": "Navarcles",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081419",
+   "name": "Navàs",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081424",
+   "name": "la Nou de Berguedà",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081430",
+   "name": "Òdena",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081445",
+   "name": "Olvan",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081458",
+   "name": "Olèrdola",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081461",
+   "name": "Olesa de Bonesvalls",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081477",
+   "name": "Olesa de Montserrat",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081483",
+   "name": "Olivella",
+   "comarcaCode": "17",
+   "comarca": "Garraf",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081496",
+   "name": "Olost",
+   "comarcaCode": "43",
+   "comarca": "Lluçanès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081509",
+   "name": "Orís",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081516",
+   "name": "Oristà",
+   "comarcaCode": "43",
+   "comarca": "Lluçanès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081521",
+   "name": "Orpí",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081537",
+   "name": "Òrrius",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081542",
+   "name": "Pacs del Penedès",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081555",
+   "name": "Palafolls",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081568",
+   "name": "Palau-solità i Plegamans",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081574",
+   "name": "Pallejà",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081580",
+   "name": "el Papiol",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081593",
+   "name": "Parets del Vallès",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081607",
+   "name": "Perafita",
+   "comarcaCode": "43",
+   "comarca": "Lluçanès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081614",
+   "name": "Piera",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081629",
+   "name": "els Hostalets de Pierola",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081635",
+   "name": "Pineda de Mar",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081640",
+   "name": "el Pla del Penedès",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081653",
+   "name": "la Pobla de Claramunt",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081666",
+   "name": "la Pobla de Lillet",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081672",
+   "name": "Polinyà",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081688",
+   "name": "Pontons",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081691",
+   "name": "el Prat de Llobregat",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081705",
+   "name": "els Prats de Rei",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081712",
+   "name": "Prats de Lluçanès",
+   "comarcaCode": "43",
+   "comarca": "Lluçanès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081727",
+   "name": "Premià de Mar",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081748",
+   "name": "Puigdàlber",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081751",
+   "name": "Puig-reig",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081764",
+   "name": "Pujalt",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081770",
+   "name": "la Quar",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081786",
+   "name": "Rajadell",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081799",
+   "name": "Rellinars",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081803",
+   "name": "Ripollet",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081810",
+   "name": "la Roca del Vallès",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081825",
+   "name": "el Pont de Vilomara i Rocafort",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081831",
+   "name": "Roda de Ter",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081846",
+   "name": "Rubí",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081859",
+   "name": "Rubió",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081878",
+   "name": "Sabadell",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081884",
+   "name": "Sagàs",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081897",
+   "name": "Sant Pere Sallavinera",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081901",
+   "name": "Saldes",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081918",
+   "name": "Sallent",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081923",
+   "name": "Santpedor",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081939",
+   "name": "Sant Iscle de Vallalta",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081944",
+   "name": "Sant Adrià de Besòs",
+   "comarcaCode": "13",
+   "comarca": "Barcelonès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081957",
+   "name": "Sant Agustí de Lluçanès",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081960",
+   "name": "Sant Andreu de la Barca",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081976",
+   "name": "Sant Andreu de Llavaneres",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081982",
+   "name": "Sant Antoni de Vilamajor",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "081995",
+   "name": "Sant Bartomeu del Grau",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082009",
+   "name": "Sant Boi de Llobregat",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082016",
+   "name": "Sant Boi de Lluçanès",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082021",
+   "name": "Sant Celoni",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082037",
+   "name": "Sant Cebrià de Vallalta",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082042",
+   "name": "Sant Climent de Llobregat",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082055",
+   "name": "Sant Cugat del Vallès",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082068",
+   "name": "Sant Cugat Sesgarrigues",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082074",
+   "name": "Sant Esteve de Palautordera",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082080",
+   "name": "Sant Esteve Sesrovires",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082093",
+   "name": "Sant Fost de Campsentelles",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082107",
+   "name": "Sant Feliu de Codines",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082114",
+   "name": "Sant Feliu de Llobregat",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082129",
+   "name": "Sant Feliu Sasserra",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082135",
+   "name": "Sant Fruitós de Bages",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082140",
+   "name": "Vilassar de Dalt",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082153",
+   "name": "Sant Hipòlit de Voltregà",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082166",
+   "name": "Sant Jaume de Frontanyà",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082172",
+   "name": "Sant Joan Despí",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082188",
+   "name": "Sant Joan de Vilatorrada",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082191",
+   "name": "Vilassar de Mar",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082205",
+   "name": "Sant Julià de Vilatorta",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082212",
+   "name": "Sant Just Desvern",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082227",
+   "name": "Sant Llorenç d'Hortons",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082233",
+   "name": "Sant Llorenç Savall",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082248",
+   "name": "Sant Martí de Centelles",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082251",
+   "name": "Sant Martí d'Albars",
+   "comarcaCode": "43",
+   "comarca": "Lluçanès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082264",
+   "name": "Sant Martí de Tous",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082270",
+   "name": "Sant Martí Sarroca",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082286",
+   "name": "Sant Martí Sesgueioles",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082299",
+   "name": "Sant Mateu de Bages",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082303",
+   "name": "Premià de Dalt",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082310",
+   "name": "Sant Pere de Ribes",
+   "comarcaCode": "17",
+   "comarca": "Garraf",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082325",
+   "name": "Sant Pere de Riudebitlles",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082331",
+   "name": "Sant Pere de Torelló",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082346",
+   "name": "Sant Pere de Vilamajor",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082359",
+   "name": "Sant Pol de Mar",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082362",
+   "name": "Sant Quintí de Mediona",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082378",
+   "name": "Sant Quirze de Besora",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082384",
+   "name": "Sant Quirze del Vallès",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082397",
+   "name": "Sant Quirze Safaja",
+   "comarcaCode": "42",
+   "comarca": "Moianès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082401",
+   "name": "Sant Sadurní d'Anoia",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082418",
+   "name": "Sant Sadurní d'Osormort",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082423",
+   "name": "Marganell",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082439",
+   "name": "Santa Cecília de Voltregà",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082444",
+   "name": "Santa Coloma de Cervelló",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082457",
+   "name": "Santa Coloma de Gramenet",
+   "comarcaCode": "13",
+   "comarca": "Barcelonès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082460",
+   "name": "Santa Eugènia de Berga",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082476",
+   "name": "Santa Eulàlia de Riuprimer",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082482",
+   "name": "Santa Eulàlia de Ronçana",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082495",
+   "name": "Santa Fe del Penedès",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082508",
+   "name": "Santa Margarida de Montbui",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082515",
+   "name": "Santa Margarida i els Monjos",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082520",
+   "name": "Barberà del Vallès",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082536",
+   "name": "Santa Maria de Besora",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082541",
+   "name": "l'Esquirol",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082554",
+   "name": "Santa Maria de Merlès",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082567",
+   "name": "Santa Maria de Martorelles",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082573",
+   "name": "Santa Maria de Miralles",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082589",
+   "name": "Santa Maria d'Oló",
+   "comarcaCode": "42",
+   "comarca": "Moianès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082592",
+   "name": "Santa Maria de Palautordera",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082606",
+   "name": "Santa Perpètua de Mogoda",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082613",
+   "name": "Santa Susanna",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082628",
+   "name": "Sant Vicenç de Castellet",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082634",
+   "name": "Sant Vicenç dels Horts",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082649",
+   "name": "Sant Vicenç de Montalt",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082652",
+   "name": "Sant Vicenç de Torelló",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082665",
+   "name": "Cerdanyola del Vallès",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082671",
+   "name": "Sentmenat",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082687",
+   "name": "Cercs",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082690",
+   "name": "Seva",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082704",
+   "name": "Sitges",
+   "comarcaCode": "17",
+   "comarca": "Garraf",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082711",
+   "name": "Sobremunt",
+   "comarcaCode": "43",
+   "comarca": "Lluçanès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082726",
+   "name": "Sora",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082732",
+   "name": "Subirats",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082747",
+   "name": "Súria",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082750",
+   "name": "Tavèrnoles",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082763",
+   "name": "Tagamanent",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082779",
+   "name": "Talamanca",
+   "comarcaCode": "07",
+   "comarca": "Bages",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082785",
+   "name": "Taradell",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082798",
+   "name": "Terrassa",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082802",
+   "name": "Tavertet",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082819",
+   "name": "Teià",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082824",
+   "name": "Tiana",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082830",
+   "name": "Tona",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082845",
+   "name": "Tordera",
+   "comarcaCode": "21",
+   "comarca": "Maresme",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082858",
+   "name": "Torelló",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082861",
+   "name": "la Torre de Claramunt",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082877",
+   "name": "Torrelavit",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082883",
+   "name": "Torrelles de Foix",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082896",
+   "name": "Torrelles de Llobregat",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082900",
+   "name": "Ullastrell",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082917",
+   "name": "Vacarisses",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082922",
+   "name": "Vallbona d'Anoia",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082938",
+   "name": "Vallcebre",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082943",
+   "name": "Vallgorguina",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082956",
+   "name": "Vallirana",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082969",
+   "name": "Vallromanes",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082975",
+   "name": "Veciana",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082981",
+   "name": "Vic",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "082994",
+   "name": "Vilada",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "083008",
+   "name": "Viladecavalls",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "083015",
+   "name": "Viladecans",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "083020",
+   "name": "Vilanova del Camí",
+   "comarcaCode": "06",
+   "comarca": "Anoia",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "083036",
+   "name": "Vilanova de Sau",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "083041",
+   "name": "Vilobí del Penedès",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "083054",
+   "name": "Vilafranca del Penedès",
+   "comarcaCode": "03",
+   "comarca": "Alt Penedès",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "083067",
+   "name": "Vilalba Sasserra",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "083073",
+   "name": "Vilanova i la Geltrú",
+   "comarcaCode": "17",
+   "comarca": "Garraf",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "083089",
+   "name": "Viver i Serrateix",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "089019",
+   "name": "Rupit i Pruit",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "089024",
+   "name": "Vilanova del Vallès",
+   "comarcaCode": "41",
+   "comarca": "Vallès Oriental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "089030",
+   "name": "Sant Julià de Cerdanyola",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "089045",
+   "name": "Badia del Vallès",
+   "comarcaCode": "40",
+   "comarca": "Vallès Occidental",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "089058",
+   "name": "la Palma de Cervelló",
+   "comarcaCode": "11",
+   "comarca": "Baix Llobregat",
+   "provinceCode": "08",
+   "province": "Barcelona"
+  },
+  {
+   "code": "170010",
+   "name": "Agullana",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170025",
+   "name": "Aiguaviva",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170031",
+   "name": "Albanyà",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170046",
+   "name": "Albons",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170059",
+   "name": "el Far d'Empordà",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170062",
+   "name": "Alp",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170078",
+   "name": "Amer",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170084",
+   "name": "Anglès",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170097",
+   "name": "Arbúcies",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170101",
+   "name": "Argelaguer",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170118",
+   "name": "l'Armentera",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170123",
+   "name": "Avinyonet de Puigventós",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170139",
+   "name": "Begur",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170144",
+   "name": "la Vajol",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170157",
+   "name": "Banyoles",
+   "comarcaCode": "28",
+   "comarca": "Pla de l'Estany",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170160",
+   "name": "Bàscara",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170182",
+   "name": "Bellcaire d'Empordà",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170195",
+   "name": "Besalú",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170209",
+   "name": "Bescanó",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170216",
+   "name": "Beuda",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170221",
+   "name": "la Bisbal d'Empordà",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170237",
+   "name": "Blanes",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170242",
+   "name": "Bolvir",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170255",
+   "name": "Bordils",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170268",
+   "name": "Borrassà",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170274",
+   "name": "Breda",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170280",
+   "name": "Brunyola i Sant Martí Sapresa",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170293",
+   "name": "Boadella i les Escaules",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170307",
+   "name": "Cabanes",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170314",
+   "name": "Cabanelles",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170329",
+   "name": "Cadaqués",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170335",
+   "name": "Caldes de Malavella",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170340",
+   "name": "Calonge i Sant Antoni",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170353",
+   "name": "Camós",
+   "comarcaCode": "28",
+   "comarca": "Pla de l'Estany",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170366",
+   "name": "Campdevànol",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170372",
+   "name": "Campelles",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170388",
+   "name": "Campllong",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170391",
+   "name": "Camprodon",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170405",
+   "name": "Canet d'Adri",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170412",
+   "name": "Cantallops",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170427",
+   "name": "Capmany",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170433",
+   "name": "Queralbs",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170448",
+   "name": "Cassà de la Selva",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170464",
+   "name": "Castellfollit de la Roca",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170470",
+   "name": "Castelló d'Empúries",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170486",
+   "name": "Castell d'Aro, Platja d'Aro i s'Agaró",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170499",
+   "name": "Celrà",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170502",
+   "name": "Cervià de Ter",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170519",
+   "name": "Cistella",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170524",
+   "name": "Siurana",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170545",
+   "name": "Colera",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170558",
+   "name": "Colomers",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170561",
+   "name": "Cornellà del Terri",
+   "comarcaCode": "28",
+   "comarca": "Pla de l'Estany",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170577",
+   "name": "Corçà",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170583",
+   "name": "Crespià",
+   "comarcaCode": "28",
+   "comarca": "Pla de l'Estany",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170600",
+   "name": "Darnius",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170617",
+   "name": "Das",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170622",
+   "name": "l'Escala",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170638",
+   "name": "Espinelves",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170643",
+   "name": "Espolla",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170656",
+   "name": "Esponellà",
+   "comarcaCode": "28",
+   "comarca": "Pla de l'Estany",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170669",
+   "name": "Figueres",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170675",
+   "name": "Flaçà",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170681",
+   "name": "Foixà",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170694",
+   "name": "Fontanals de Cerdanya",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170708",
+   "name": "Fontanilles",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170715",
+   "name": "Fontcoberta",
+   "comarcaCode": "28",
+   "comarca": "Pla de l'Estany",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170736",
+   "name": "Fornells de la Selva",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170741",
+   "name": "Fortià",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170754",
+   "name": "Garrigàs",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170767",
+   "name": "Garrigoles",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170773",
+   "name": "Garriguella",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170789",
+   "name": "Ger",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170792",
+   "name": "Girona",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170806",
+   "name": "Gombrèn",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170813",
+   "name": "Gualta",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170828",
+   "name": "Guils de Cerdanya",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170834",
+   "name": "Hostalric",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170849",
+   "name": "Isòvol",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170852",
+   "name": "Jafre",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170865",
+   "name": "la Jonquera",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170871",
+   "name": "Juià",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170887",
+   "name": "Lladó",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170890",
+   "name": "Llagostera",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170904",
+   "name": "Llambilles",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170911",
+   "name": "Llanars",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170926",
+   "name": "Llançà",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170932",
+   "name": "Llers",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170947",
+   "name": "Llívia",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170950",
+   "name": "Lloret de Mar",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170963",
+   "name": "les Llosses",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170979",
+   "name": "Madremanya",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170985",
+   "name": "Maià de Montcal",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "170998",
+   "name": "Meranges",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171002",
+   "name": "Masarac i Vilarnadal",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171019",
+   "name": "Massanes",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171024",
+   "name": "Maçanet de Cabrenys",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171030",
+   "name": "Maçanet de la Selva",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171058",
+   "name": "Mieres",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171061",
+   "name": "Mollet de Peralada",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171077",
+   "name": "Molló",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171096",
+   "name": "Montagut i Oix",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171100",
+   "name": "Mont-ras",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171117",
+   "name": "Navata",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171122",
+   "name": "Ogassa",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171143",
+   "name": "Olot",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171156",
+   "name": "Ordis",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171169",
+   "name": "Osor",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171175",
+   "name": "Palafrugell",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171181",
+   "name": "Palamós",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171194",
+   "name": "Palau de Santa Eulàlia",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171208",
+   "name": "Palau-saverdera",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171215",
+   "name": "Palau-sator",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171236",
+   "name": "Palol de Revardit",
+   "comarcaCode": "28",
+   "comarca": "Pla de l'Estany",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171241",
+   "name": "Pals",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171254",
+   "name": "Pardines",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171267",
+   "name": "Parlavà",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171289",
+   "name": "Pau",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171292",
+   "name": "Pedret i Marzà",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171306",
+   "name": "la Pera",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171328",
+   "name": "Peralada",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171334",
+   "name": "les Planes d'Hostoles",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171349",
+   "name": "Planoles",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171352",
+   "name": "Pont de Molins",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171365",
+   "name": "Pontós",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171371",
+   "name": "Porqueres",
+   "comarcaCode": "28",
+   "comarca": "Pla de l'Estany",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171387",
+   "name": "Portbou",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171390",
+   "name": "les Preses",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171404",
+   "name": "el Port de la Selva",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171411",
+   "name": "Puigcerdà",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171426",
+   "name": "Quart",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171432",
+   "name": "Rabós",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171447",
+   "name": "Regencós",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171450",
+   "name": "Ribes de Freser",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171463",
+   "name": "Riells i Viabrea",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171479",
+   "name": "Ripoll",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171485",
+   "name": "Riudarenes",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171498",
+   "name": "Riudaura",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171501",
+   "name": "Riudellots de la Selva",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171518",
+   "name": "Riumors",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171523",
+   "name": "Roses",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171539",
+   "name": "Rupià",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171544",
+   "name": "Sales de Llierca",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171557",
+   "name": "Salt",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171576",
+   "name": "Sant Andreu Salou",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171582",
+   "name": "Sant Climent Sescebes",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171595",
+   "name": "Sant Feliu de Buixalleu",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171609",
+   "name": "Sant Feliu de Guíxols",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171616",
+   "name": "Sant Feliu de Pallerols",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171621",
+   "name": "Sant Ferriol",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171637",
+   "name": "Sant Gregori",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171642",
+   "name": "Sant Hilari Sacalm",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171655",
+   "name": "Sant Jaume de Llierca",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171668",
+   "name": "Sant Jordi Desvalls",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171674",
+   "name": "Sant Joan de les Abadesses",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171680",
+   "name": "Sant Joan de Mollet",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171693",
+   "name": "Sant Julià de Ramis",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171707",
+   "name": "Vallfogona de Ripollès",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171714",
+   "name": "Sant Llorenç de la Muga",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171729",
+   "name": "Sant Martí de Llémena",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171735",
+   "name": "Sant Martí Vell",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171740",
+   "name": "Sant Miquel de Campmajor",
+   "comarcaCode": "28",
+   "comarca": "Pla de l'Estany",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171753",
+   "name": "Sant Miquel de Fluvià",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171766",
+   "name": "Sant Mori",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171772",
+   "name": "Sant Pau de Segúries",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171788",
+   "name": "Sant Pere Pescador",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171805",
+   "name": "Santa Coloma de Farners",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171812",
+   "name": "Santa Cristina d'Aro",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171827",
+   "name": "Santa Llogaia d'Àlguema",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171833",
+   "name": "Sant Aniol de Finestres",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171848",
+   "name": "Santa Pau",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171851",
+   "name": "Sant Joan les Fonts",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171864",
+   "name": "Sarrià de Ter",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171870",
+   "name": "Saus, Camallera i Llampaies",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171886",
+   "name": "la Selva de Mar",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171899",
+   "name": "la Cellera de Ter",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171903",
+   "name": "Serinyà",
+   "comarcaCode": "28",
+   "comarca": "Pla de l'Estany",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171910",
+   "name": "Serra de Daró",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171925",
+   "name": "Setcases",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171931",
+   "name": "Sils",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171946",
+   "name": "Susqueda",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171959",
+   "name": "la Tallada d'Empordà",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171962",
+   "name": "Terrades",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171978",
+   "name": "Torrent",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171984",
+   "name": "Torroella de Fluvià",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "171997",
+   "name": "Torroella de Montgrí",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172001",
+   "name": "Tortellà",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172018",
+   "name": "Toses",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172023",
+   "name": "Tossa de Mar",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172039",
+   "name": "Ultramort",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172044",
+   "name": "Ullà",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172057",
+   "name": "Ullastret",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172060",
+   "name": "Urús",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172076",
+   "name": "la Vall d'en Bas",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172082",
+   "name": "la Vall de Bianya",
+   "comarcaCode": "19",
+   "comarca": "Garrotxa",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172095",
+   "name": "Vall-llobrega",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172109",
+   "name": "Ventalló",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172116",
+   "name": "Verges",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172121",
+   "name": "Vidrà",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172137",
+   "name": "Vidreres",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172142",
+   "name": "Vilabertran",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172155",
+   "name": "Vilablareix",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172168",
+   "name": "Viladasens",
+   "comarcaCode": "20",
+   "comarca": "Gironès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172174",
+   "name": "Viladamat",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172180",
+   "name": "Vilademuls",
+   "comarcaCode": "28",
+   "comarca": "Pla de l'Estany",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172207",
+   "name": "Viladrau",
+   "comarcaCode": "24",
+   "comarca": "Osona",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172214",
+   "name": "Vilafant",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172229",
+   "name": "Vilaür",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172235",
+   "name": "Vilajuïga",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172240",
+   "name": "Vilallonga de Ter",
+   "comarcaCode": "31",
+   "comarca": "Ripollès",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172253",
+   "name": "Vilamacolum",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172266",
+   "name": "Vilamalla",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172272",
+   "name": "Vilamaniscle",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172288",
+   "name": "Vilanant",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172305",
+   "name": "Vila-sacra",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172327",
+   "name": "Vilopriu",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172333",
+   "name": "Vilobí d'Onyar",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "172348",
+   "name": "Biure",
+   "comarcaCode": "02",
+   "comarca": "Alt Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "179011",
+   "name": "Cruïlles, Monells i Sant Sadurní de l'Heura",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "179026",
+   "name": "Forallac",
+   "comarcaCode": "10",
+   "comarca": "Baix Empordà",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "179032",
+   "name": "Sant Julià del Llor i Bonmatí",
+   "comarcaCode": "34",
+   "comarca": "Selva",
+   "provinceCode": "17",
+   "province": "Girona"
+  },
+  {
+   "code": "250019",
+   "name": "Abella de la Conca",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250024",
+   "name": "Àger",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250030",
+   "name": "Agramunt",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250045",
+   "name": "els Alamús",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250058",
+   "name": "Alàs i Cerc",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250061",
+   "name": "l'Albagés",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250077",
+   "name": "Albatàrrec",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250083",
+   "name": "Albesa",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250096",
+   "name": "l'Albi",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250100",
+   "name": "Alcanó",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250117",
+   "name": "Alcarràs",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250122",
+   "name": "Alcoletge",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250138",
+   "name": "Alfarràs",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250143",
+   "name": "Alfés",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250156",
+   "name": "Algerri",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250169",
+   "name": "Alguaire",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250175",
+   "name": "Alins",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250194",
+   "name": "Almacelles",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250208",
+   "name": "Almatret",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250215",
+   "name": "Almenar",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250220",
+   "name": "Alòs de Balaguer",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250236",
+   "name": "Alpicat",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250241",
+   "name": "Alt Àneu",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250254",
+   "name": "Naut Aran",
+   "comarcaCode": "39",
+   "comarca": "Val d'Aran",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250273",
+   "name": "Anglesola",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250292",
+   "name": "Arbeca",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250306",
+   "name": "el Pont de Bar",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250313",
+   "name": "Arres",
+   "comarcaCode": "39",
+   "comarca": "Val d'Aran",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250328",
+   "name": "Arsèguel",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250334",
+   "name": "Artesa de Lleida",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250349",
+   "name": "Artesa de Segre",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250352",
+   "name": "la Sentiu de Sió",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250365",
+   "name": "Aspa",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250371",
+   "name": "les Avellanes i Santa Linya",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250387",
+   "name": "Aitona",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250390",
+   "name": "Baix Pallars",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250404",
+   "name": "Balaguer",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250411",
+   "name": "Barbens",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250426",
+   "name": "la Baronia de Rialb",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250432",
+   "name": "la Vall de Boí",
+   "comarcaCode": "05",
+   "comarca": "Alta Ribagorça",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250447",
+   "name": "Bassella",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250450",
+   "name": "Bausen",
+   "comarcaCode": "39",
+   "comarca": "Val d'Aran",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250463",
+   "name": "Belianes",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250479",
+   "name": "Bellcaire d'Urgell",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250485",
+   "name": "Bell-lloc d'Urgell",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250498",
+   "name": "Bellmunt d'Urgell",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250501",
+   "name": "Bellpuig",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250518",
+   "name": "Bellver de Cerdanya",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250523",
+   "name": "Bellvís",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250539",
+   "name": "Benavent de Segrià",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250557",
+   "name": "Biosca",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250560",
+   "name": "Bovera",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250576",
+   "name": "Es Bòrdes",
+   "comarcaCode": "39",
+   "comarca": "Val d'Aran",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250582",
+   "name": "les Borges Blanques",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250595",
+   "name": "Bossòst",
+   "comarcaCode": "39",
+   "comarca": "Val d'Aran",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250609",
+   "name": "Cabanabona",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250616",
+   "name": "Cabó",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250621",
+   "name": "Camarasa",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250637",
+   "name": "Canejan",
+   "comarcaCode": "39",
+   "comarca": "Val d'Aran",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250642",
+   "name": "Castellar de la Ribera",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250674",
+   "name": "Castelldans",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250680",
+   "name": "Castellnou de Seana",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250693",
+   "name": "Castelló de Farfanya",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250707",
+   "name": "Castellserà",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250714",
+   "name": "Cava",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250729",
+   "name": "Cervera",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250735",
+   "name": "Cervià de les Garrigues",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250740",
+   "name": "Ciutadilla",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250753",
+   "name": "Clariana de Cardener",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250766",
+   "name": "el Cogul",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250772",
+   "name": "Coll de Nargó",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250788",
+   "name": "Corbins",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250791",
+   "name": "Cubells",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250812",
+   "name": "l'Espluga Calba",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250827",
+   "name": "Espot",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250851",
+   "name": "Estaràs",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250864",
+   "name": "Esterri d'Àneu",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250870",
+   "name": "Esterri de Cardós",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250886",
+   "name": "Estamariu",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250899",
+   "name": "Farrera",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250925",
+   "name": "la Floresta",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250931",
+   "name": "Fondarella",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250946",
+   "name": "Foradada",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250962",
+   "name": "la Fuliola",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250978",
+   "name": "Fulleda",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250984",
+   "name": "Gavet de la Conca",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "250997",
+   "name": "Golmés",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251001",
+   "name": "Gósol",
+   "comarcaCode": "14",
+   "comarca": "Berguedà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251018",
+   "name": "la Granadella",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251023",
+   "name": "la Granja d'Escarp",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251039",
+   "name": "Granyanella",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251044",
+   "name": "Granyena de Segarra",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251057",
+   "name": "Granyena de les Garrigues",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251095",
+   "name": "Guimerà",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251109",
+   "name": "Guissona",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251116",
+   "name": "Guixers",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251121",
+   "name": "Ivars de Noguera",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251137",
+   "name": "Ivars d'Urgell",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251142",
+   "name": "Ivorra",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251155",
+   "name": "Isona i Conca Dellà",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251180",
+   "name": "Juncosa",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251193",
+   "name": "Juneda",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251207",
+   "name": "Lleida",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251214",
+   "name": "Les",
+   "comarcaCode": "39",
+   "comarca": "Val d'Aran",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251229",
+   "name": "Linyola",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251235",
+   "name": "Lladorre",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251240",
+   "name": "Lladurs",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251253",
+   "name": "Llardecans",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251266",
+   "name": "Llavorsí",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251272",
+   "name": "Lles de Cerdanya",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251288",
+   "name": "Llimiana",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251291",
+   "name": "Llobera",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251305",
+   "name": "Maldà",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251312",
+   "name": "Massalcoreig",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251327",
+   "name": "Massoteres",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251333",
+   "name": "Maials",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251348",
+   "name": "Menàrguens",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251351",
+   "name": "Miralcamp",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251364",
+   "name": "la Molsosa",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251370",
+   "name": "Mollerussa",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251386",
+   "name": "Montgai",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251399",
+   "name": "Montellà i Martinet",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251403",
+   "name": "Montferrer i Castellbò",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251410",
+   "name": "Montoliu de Segarra",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251425",
+   "name": "Montoliu de Lleida",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251431",
+   "name": "Montornès de Segarra",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251459",
+   "name": "Nalec",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251462",
+   "name": "Navès",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251484",
+   "name": "Odèn",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251497",
+   "name": "Oliana",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251500",
+   "name": "Oliola",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251517",
+   "name": "Olius",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251522",
+   "name": "les Oluges",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251538",
+   "name": "els Omellons",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251543",
+   "name": "els Omells de na Gaia",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251556",
+   "name": "Organyà",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251569",
+   "name": "Os de Balaguer",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251575",
+   "name": "Ossó de Sió",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251581",
+   "name": "el Palau d'Anglesola",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251615",
+   "name": "Conca de Dalt",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251636",
+   "name": "la Coma i la Pedra",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251641",
+   "name": "Penelles",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251654",
+   "name": "Peramola",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251667",
+   "name": "Pinell de Solsonès",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251673",
+   "name": "Pinós",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251689",
+   "name": "el Poal",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251692",
+   "name": "la Pobla de Cérvoles",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251706",
+   "name": "Bellaguarda",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251713",
+   "name": "la Pobla de Segur",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251728",
+   "name": "Ponts",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251734",
+   "name": "el Pont de Suert",
+   "comarcaCode": "05",
+   "comarca": "Alta Ribagorça",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251749",
+   "name": "la Portella",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251752",
+   "name": "Prats i Sansor",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251765",
+   "name": "Preixana",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251771",
+   "name": "Preixens",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251790",
+   "name": "Prullans",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251804",
+   "name": "Puiggròs",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251811",
+   "name": "Puigverd d'Agramunt",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251826",
+   "name": "Puigverd de Lleida",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251832",
+   "name": "Rialp",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251850",
+   "name": "Ribera d'Urgellet",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251863",
+   "name": "Riner",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251898",
+   "name": "Rosselló",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251902",
+   "name": "Salàs de Pallars",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251919",
+   "name": "Sanaüja",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251924",
+   "name": "Sant Guim de Freixenet",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251930",
+   "name": "Sant Llorenç de Morunys",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251945",
+   "name": "Sant Ramon",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251961",
+   "name": "Sant Esteve de la Sarga",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "251977",
+   "name": "Sant Guim de la Plana",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252000",
+   "name": "Sarroca de Lleida",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252017",
+   "name": "Sarroca de Bellera",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252022",
+   "name": "Senterada",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252038",
+   "name": "la Seu d'Urgell",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252043",
+   "name": "Seròs",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252056",
+   "name": "Sidamon",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252069",
+   "name": "el Soleràs",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252075",
+   "name": "Solsona",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252081",
+   "name": "Soriguera",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252094",
+   "name": "Sort",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252108",
+   "name": "Soses",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252115",
+   "name": "Sudanell",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252120",
+   "name": "Sunyer",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252154",
+   "name": "Talarn",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252167",
+   "name": "Talavera",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252173",
+   "name": "Tàrrega",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252189",
+   "name": "Tarrés",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252192",
+   "name": "Tarroja de Segarra",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252206",
+   "name": "Térmens",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252213",
+   "name": "Tírvia",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252228",
+   "name": "Tiurana",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252234",
+   "name": "Torà",
+   "comarcaCode": "35",
+   "comarca": "Solsonès",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252249",
+   "name": "els Torms",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252252",
+   "name": "Tornabous",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252265",
+   "name": "Torrebesses",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252271",
+   "name": "la Torre de Cabdella",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252287",
+   "name": "Torrefarrera",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252304",
+   "name": "Torregrossa",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252311",
+   "name": "Torrelameu",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252326",
+   "name": "Torres de Segre",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252332",
+   "name": "Torre-serona",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252347",
+   "name": "Tremp",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252385",
+   "name": "Vallbona de les Monges",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252398",
+   "name": "les Valls de Valira",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252402",
+   "name": "Vallfogona de Balaguer",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252424",
+   "name": "Verdú",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252430",
+   "name": "Vielha e Mijaran",
+   "comarcaCode": "39",
+   "comarca": "Val d'Aran",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252445",
+   "name": "Vilagrassa",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252458",
+   "name": "Vilaller",
+   "comarcaCode": "05",
+   "comarca": "Alta Ribagorça",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252477",
+   "name": "Vilamòs",
+   "comarcaCode": "39",
+   "comarca": "Val d'Aran",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252483",
+   "name": "Vilanova de Bellpuig",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252496",
+   "name": "Vilanova de l'Aguda",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252509",
+   "name": "Vilanova de Meià",
+   "comarcaCode": "23",
+   "comarca": "Noguera",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252516",
+   "name": "Vilanova de Segrià",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252521",
+   "name": "Vila-sana",
+   "comarcaCode": "27",
+   "comarca": "Pla d'Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252537",
+   "name": "el Vilosell",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252542",
+   "name": "Vilanova de la Barca",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "252555",
+   "name": "Vinaixa",
+   "comarcaCode": "18",
+   "comarca": "Garrigues",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259010",
+   "name": "Vall de Cardós",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259025",
+   "name": "Sant Martí de Riucorb",
+   "comarcaCode": "38",
+   "comarca": "Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259031",
+   "name": "la Guingueta d'Àneu",
+   "comarcaCode": "26",
+   "comarca": "Pallars Sobirà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259046",
+   "name": "Castell de Mur",
+   "comarcaCode": "25",
+   "comarca": "Pallars Jussà",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259059",
+   "name": "Ribera d'Ondara",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259062",
+   "name": "les Valls d'Aguilar",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259078",
+   "name": "Torrefeta i Florejacs",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259084",
+   "name": "Fígols i Alinyà",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259097",
+   "name": "la Vansa i Fórnols",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259101",
+   "name": "Josa i Tuixén",
+   "comarcaCode": "04",
+   "comarca": "Alt Urgell",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259118",
+   "name": "els Plans de Sió",
+   "comarcaCode": "32",
+   "comarca": "Segarra",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259123",
+   "name": "Gimenells i el Pla de la Font",
+   "comarcaCode": "33",
+   "comarca": "Segrià",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "259139",
+   "name": "Riu de Cerdanya",
+   "comarcaCode": "15",
+   "comarca": "Cerdanya",
+   "provinceCode": "25",
+   "province": "Lleida"
+  },
+  {
+   "code": "430017",
+   "name": "Aiguamúrcia",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430022",
+   "name": "Albinyana",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430038",
+   "name": "l'Albiol",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430043",
+   "name": "Alcanar",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430056",
+   "name": "Alcover",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430069",
+   "name": "Aldover",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430075",
+   "name": "l'Aleixar",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430081",
+   "name": "Alfara de Carles",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430094",
+   "name": "Alforja",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430108",
+   "name": "Alió",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430115",
+   "name": "Almoster",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430120",
+   "name": "Altafulla",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430136",
+   "name": "l'Ametlla de Mar",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430141",
+   "name": "Amposta",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430154",
+   "name": "Arbolí",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430167",
+   "name": "l'Arboç",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430173",
+   "name": "l'Argentera",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430189",
+   "name": "Arnes",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430192",
+   "name": "Ascó",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430206",
+   "name": "Banyeres del Penedès",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430213",
+   "name": "Barberà de la Conca",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430228",
+   "name": "Batea",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430234",
+   "name": "Bellmunt del Priorat",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430249",
+   "name": "Bellvei",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430252",
+   "name": "Benifallet",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430265",
+   "name": "Benissanet",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430271",
+   "name": "la Bisbal de Montsant",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430287",
+   "name": "la Bisbal del Penedès",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430290",
+   "name": "Blancafort",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430304",
+   "name": "Bonastre",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430311",
+   "name": "les Borges del Camp",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430326",
+   "name": "Bot",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430332",
+   "name": "Botarell",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430347",
+   "name": "Bràfim",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430350",
+   "name": "Cabacés",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430363",
+   "name": "Cabra del Camp",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430379",
+   "name": "Calafell",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430385",
+   "name": "Cambrils",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430398",
+   "name": "Capafonts",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430402",
+   "name": "Capçanes",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430419",
+   "name": "Caseres",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430424",
+   "name": "Castellvell del Camp",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430430",
+   "name": "el Catllar",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430445",
+   "name": "la Sénia",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430458",
+   "name": "Colldejou",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430461",
+   "name": "Conesa",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430477",
+   "name": "Constantí",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430483",
+   "name": "Corbera d'Ebre",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430496",
+   "name": "Cornudella de Montsant",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430509",
+   "name": "Creixell",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430516",
+   "name": "Cunit",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430521",
+   "name": "Xerta",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430537",
+   "name": "Duesaigües",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430542",
+   "name": "l'Espluga de Francolí",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430555",
+   "name": "Falset",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430568",
+   "name": "la Fatarella",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430574",
+   "name": "la Febró",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430580",
+   "name": "la Figuera",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430593",
+   "name": "Figuerola del Camp",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430607",
+   "name": "Flix",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430614",
+   "name": "Forès",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430629",
+   "name": "Freginals",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430635",
+   "name": "la Galera",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430640",
+   "name": "Gandesa",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430653",
+   "name": "Garcia",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430666",
+   "name": "els Garidells",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430672",
+   "name": "Ginestar",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430688",
+   "name": "Godall",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430691",
+   "name": "Gratallops",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430705",
+   "name": "els Guiamets",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430712",
+   "name": "Horta de Sant Joan",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430727",
+   "name": "el Lloar",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430733",
+   "name": "Llorac",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430748",
+   "name": "Llorenç del Penedès",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430751",
+   "name": "Margalef",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430764",
+   "name": "Marçà",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430770",
+   "name": "Mas de Barberans",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430786",
+   "name": "Masdenverge",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430799",
+   "name": "Masllorenç",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430803",
+   "name": "la Masó",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430810",
+   "name": "Maspujols",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430825",
+   "name": "el Masroig",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430831",
+   "name": "el Milà",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430846",
+   "name": "Miravet",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430859",
+   "name": "el Molar",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430862",
+   "name": "Montblanc",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430884",
+   "name": "Montbrió del Camp",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430897",
+   "name": "Montferri",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430901",
+   "name": "el Montmell",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430918",
+   "name": "Mont-ral",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430923",
+   "name": "Mont-roig del Camp",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430939",
+   "name": "Móra d'Ebre",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430944",
+   "name": "Móra la Nova",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430957",
+   "name": "el Morell",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430960",
+   "name": "la Morera de Montsant",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430976",
+   "name": "la Nou de Gaià",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430982",
+   "name": "Nulles",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "430995",
+   "name": "la Palma d'Ebre",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431009",
+   "name": "els Pallaresos",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431016",
+   "name": "Passanant i Belltall",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431021",
+   "name": "Paüls",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431037",
+   "name": "Perafort",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431042",
+   "name": "el Perelló",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431055",
+   "name": "les Piles de Gaià",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431068",
+   "name": "el Pinell de Brai",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431074",
+   "name": "Pira",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431080",
+   "name": "el Pla de Santa Maria",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431093",
+   "name": "la Pobla de Mafumet",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431107",
+   "name": "la Pobla de Massaluca",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431114",
+   "name": "la Pobla de Montornès",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431129",
+   "name": "Poboleda",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431135",
+   "name": "el Pont d'Armentera",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431140",
+   "name": "Porrera",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431153",
+   "name": "Pradell de la Teixeta",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431166",
+   "name": "Prades",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431172",
+   "name": "Prat de Comte",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431188",
+   "name": "Pratdip",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431191",
+   "name": "Puigpelat",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431205",
+   "name": "Querol",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431212",
+   "name": "Rasquera",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431227",
+   "name": "Renau",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431233",
+   "name": "Reus",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431248",
+   "name": "la Riba",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431251",
+   "name": "Riba-roja d'Ebre",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431264",
+   "name": "la Riera de Gaià",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431270",
+   "name": "Riudecanyes",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431286",
+   "name": "Riudecols",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431299",
+   "name": "Riudoms",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431303",
+   "name": "Rocafort de Queralt",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431310",
+   "name": "Roda de Berà",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431325",
+   "name": "Rodonyà",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431331",
+   "name": "Roquetes",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431346",
+   "name": "el Rourell",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431359",
+   "name": "Salomó",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431362",
+   "name": "la Ràpita",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431378",
+   "name": "Sant Jaume dels Domenys",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431384",
+   "name": "Santa Bàrbara",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431397",
+   "name": "Santa Coloma de Queralt",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431401",
+   "name": "Santa Oliva",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431418",
+   "name": "Pontils",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431423",
+   "name": "Sarral",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431439",
+   "name": "Savallà del Comtat",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431444",
+   "name": "la Secuita",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431457",
+   "name": "la Selva del Camp",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431460",
+   "name": "Senan",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431476",
+   "name": "Solivella",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431482",
+   "name": "Tarragona",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431495",
+   "name": "Tivenys",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431508",
+   "name": "Tivissa",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431515",
+   "name": "la Torre de Fontaubella",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431520",
+   "name": "la Torre de l'Espanyol",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431536",
+   "name": "Torredembarra",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431541",
+   "name": "Torroja del Priorat",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431554",
+   "name": "Tortosa",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431567",
+   "name": "Ulldecona",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431573",
+   "name": "Ulldemolins",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431589",
+   "name": "Vallclara",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431592",
+   "name": "Vallfogona de Riucorb",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431606",
+   "name": "Vallmoll",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431613",
+   "name": "Valls",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431628",
+   "name": "Vandellòs i l'Hospitalet de l'Infant",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431634",
+   "name": "el Vendrell",
+   "comarcaCode": "12",
+   "comarca": "Baix Penedès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431649",
+   "name": "Vespella de Gaià",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431652",
+   "name": "Vilabella",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431665",
+   "name": "Vilallonga del Camp",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431671",
+   "name": "Vilanova d'Escornalbou",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431687",
+   "name": "Vilanova de Prades",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431690",
+   "name": "Vilaplana",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431704",
+   "name": "Vila-rodona",
+   "comarcaCode": "01",
+   "comarca": "Alt Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431711",
+   "name": "Vila-seca",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431726",
+   "name": "Vilaverd",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431732",
+   "name": "la Vilella Alta",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431747",
+   "name": "la Vilella Baixa",
+   "comarcaCode": "29",
+   "comarca": "Priorat",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431750",
+   "name": "Vilalba dels Arcs",
+   "comarcaCode": "37",
+   "comarca": "Terra Alta",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431763",
+   "name": "Vimbodí i Poblet",
+   "comarcaCode": "16",
+   "comarca": "Conca de Barberà",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431779",
+   "name": "Vinebre",
+   "comarcaCode": "30",
+   "comarca": "Ribera d'Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "431785",
+   "name": "Vinyols i els Arcs",
+   "comarcaCode": "08",
+   "comarca": "Baix Camp",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "439018",
+   "name": "Deltebre",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "439023",
+   "name": "Sant Jaume d'Enveja",
+   "comarcaCode": "22",
+   "comarca": "Montsià",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "439039",
+   "name": "Camarles",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "439044",
+   "name": "l'Aldea",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "439057",
+   "name": "Salou",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "439060",
+   "name": "l'Ampolla",
+   "comarcaCode": "09",
+   "comarca": "Baix Ebre",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  },
+  {
+   "code": "439076",
+   "name": "la Canonja",
+   "comarcaCode": "36",
+   "comarca": "Tarragonès",
+   "provinceCode": "43",
+   "province": "Tarragona"
+  }
+ ]
+}

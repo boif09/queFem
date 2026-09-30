@@ -33,6 +33,8 @@
     "diba:prod:reconcile:apply": "node scripts/dibaProductionApply.js",
     "fever:normalize:dry-run": "node backend/src/jobs/dryRunFeverNormalization.js",
     "geography:icgc:update": "node backend/src/jobs/updateIcgcGeography.js",
+    "geography:icgc:names": "node scripts/buildIcgcMunicipalityNames.js",
+    "embed:widgets": "node backend/src/jobs/embedWidgets.js",
     "fever:geography:dry-run": "node backend/src/jobs/dryRunFeverGeography.js",
     "fever:import:temp": "node backend/src/jobs/importFeverTemp.js",
     "fever:import": "node backend/src/jobs/importFever.js",

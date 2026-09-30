@@ -7,7 +7,9 @@ function enabledSourceJoin(enabledOnly) {
   return enabledOnly ? 'JOIN sources occurrence_s ON occurrence_s.id = occurrence_ps.source_id' : '';
 }
 
+// enabledOnly: false | true | 'syndicated' (enabled and approved for third-party syndication).
 function enabledSourceCondition(enabledOnly) {
+  if (enabledOnly === 'syndicated') return 'AND occurrence_s.enabled = 1 AND occurrence_s.allows_syndication = 1';
   return enabledOnly ? 'AND occurrence_s.enabled = 1' : '';
 }
 

@@ -15,12 +15,19 @@ Registro ligero de decisiones demostrables en documentación, configuración o c
   imágenes de Agenda Cultural Gencat pueden reutilizarse; se reproduce literalmente el
   `Peu d'imatge` no vacío y un pie existente vacío no exige crédito. La resolución pública es
   `PUBLIC_BUT_FRAGILE` y falla cerrada. Ticketmaster mantiene su política y activación separadas.
+- Widget incrustable B2B (2026-09-30): solo redistribuye a webs de terceros procedencias con
+  `allows_syndication = 1`, concedido únicamente a Gencat y DIBA; Fever y Ticketmaster quedan
+  excluidos aunque estén activos en tenspla.cat. Solo se exponen hechos (título, fecha, lugar,
+  categorías, gratuidad e imagen redistribuible), nunca descripciones, precios ni enlaces de
+  afiliación. El widget siempre muestra la marca y el enlace de Tens pla?, y el acceso se limita por
+  clave y lista de dominios. Ver [`EMBED_WIDGET.md`](EMBED_WIDGET.md).
 - La deduplicación multi-source es conservadora: una coincidencia dudosa se revisa, no se fusiona silenciosamente.
 - Los planes permanentes se conservan. Retirada y purga ofrecen dry-run y límites transaccionales.
 
 ## Arquitectura, privacidad y operación
 
-- SQLite es la persistencia canónica actual y la API pública es de solo lectura.
+- SQLite es la persistencia canónica actual y la API pública es de solo lectura. Única excepción: el
+  widget incrustable vuelca contadores diarios agregados por widget y origen, sin datos del visitante.
 - El backend escucha en `127.0.0.1` por defecto; Nginx es la capa pública en producción.
 - El frontend usa recursos locales/same-origin cuando es posible. Montserrat se empaqueta localmente.
 - OpenStreetMap no se carga hasta que el usuario activa el minimapa. La implementación no incorpora analítica ni seguimiento; la preferencia de idioma se guarda localmente.

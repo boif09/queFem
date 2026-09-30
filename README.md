@@ -59,6 +59,8 @@ No ejecutes la variante con escritura ni jobs de producción sin autorización. 
 | `npm run fever:discovery:dry-run` | Auditar el catálogo Fever/Impact sin abrir SQLite |
 | `npm run fever:normalize:dry-run` | Normalizar Fever y analizar sesiones en memoria, sin abrir SQLite |
 | `npm run geography:icgc:update` | Actualizar explícitamente el snapshot administrativo oficial ICGC |
+| `npm run geography:icgc:names` | Regenerar el índice de nombres oficiales ICGC del widget tras actualizar el snapshot |
+| `npm run embed:widgets -- list` | Administrar los widgets incrustables B2B; órdenes en [`docs/EMBED_WIDGET.md`](docs/EMBED_WIDGET.md) |
 | `npm run fever:geography:dry-run` | Resolver geografía Fever con el snapshot ICGC local, sin abrir SQLite |
 | `npm run fever:import:temp -- --database <ruta>` | Importar Fever únicamente en una SQLite temporal protegida (M4B) |
 | `npm run ticketmaster:images:sync` | Sincronizar metadata/caché de imágenes si el feature flag lo permite |

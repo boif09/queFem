@@ -40,6 +40,7 @@ const server = app.listen(config.port, config.host, () => {
 });
 
 function shutdown() {
+  app.locals.embedUsageRecorder.stop();
   server.close(() => {
     db.close();
     process.exit(0);
