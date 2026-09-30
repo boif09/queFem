@@ -26,7 +26,7 @@ export function PlanDetailPage() {
   const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
   const [state, setState] = useState({ status: 'loading', plan: null });
   const [reloadKey, setReloadKey] = useState(0);
-  const [detailImageFailed, setDetailImageFailed] = useState(false);
+  const [failedDetailImageUrl, setFailedDetailImageUrl] = useState(null);
   const lastPlanId = useRef(null);
 
   useEffect(() => {
@@ -37,8 +37,6 @@ export function PlanDetailPage() {
       .catch((error) => active && setState({ status: error.status === 404 ? 'not-found' : 'error', plan: null }));
     return () => { active = false; };
   }, [id, language, reloadKey]);
-
-  useEffect(() => setDetailImageFailed(false), [id, state.plan?.image?.url]);
 
   useEffect(() => {
     if (state.status !== 'success' || lastPlanId.current === state.plan.id) return;
@@ -56,6 +54,7 @@ export function PlanDetailPage() {
 
   const plan = state.plan;
   const primaryCategory = plan.categories?.[0];
+  const detailImageFailed = Boolean(plan.image?.url) && failedDetailImageUrl === plan.image.url;
   const occurrenceDate = plan.nextOccurrence && `${formatDate(plan.nextOccurrence.localDate, language)}${plan.nextOccurrence.localTime ? ` · ${plan.nextOccurrence.localTime}` : ''}`;
   const date = occurrenceDate || (plan.permanent
     ? t('plan.permanent')
@@ -101,7 +100,7 @@ export function PlanDetailPage() {
           <PlanVisual
             plan={plan}
             className="detail-visual"
-            onImageError={() => setDetailImageFailed(true)}
+            onImageError={setFailedDetailImageUrl}
           />
           {plan.image?.attribution && !detailImageFailed && (
             <figcaption className="image-attribution">{plan.image.attribution}</figcaption>

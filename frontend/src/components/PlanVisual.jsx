@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CategoryIcon } from './CategoryIcon.jsx';
 
@@ -14,14 +14,13 @@ export function PlanVisual({
   const primaryCategory = plan.categories?.[0];
   const category = primaryCategory?.slug || plan.kind;
   const image = plan.image?.url ? plan.image : null;
-  const [imageFailed, setImageFailed] = useState(false);
-
-  useEffect(() => setImageFailed(false), [image?.url]);
-
-  const canShowImage = Boolean(image?.url) && !imageFailed;
+  // Remember which URL failed instead of resetting a flag in an effect: an error that fires before
+  // the mount effect runs would otherwise be overwritten and leave a broken image on screen.
+  const [failedUrl, setFailedUrl] = useState(null);
+  const canShowImage = Boolean(image?.url) && failedUrl !== image.url;
   const handleImageError = () => {
-    setImageFailed(true);
-    onImageError?.();
+    setFailedUrl(image.url);
+    onImageError?.(image.url);
   };
 
   const visual = (

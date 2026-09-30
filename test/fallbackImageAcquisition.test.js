@@ -41,7 +41,9 @@ async function withAcquirer(callback, options = {}) {
   try {
     return await callback(directory, new PexelsFallbackAcquirer({ apiKey: API_KEY, outputDirectory: directory, retryAttempts: 1, delayMs: 0, ...options }));
   } finally {
-    await fs.rm(directory, { recursive: true, force: true });
+    // On Windows, antivirus scanners briefly hold freshly written files, so a recursive delete can
+    // fail with ENOTEMPTY/EBUSY; Node retries those codes when maxRetries is set.
+    await fs.rm(directory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
 }
 
