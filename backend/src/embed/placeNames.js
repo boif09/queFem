@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import { normalizeForFingerprint } from '../normalizers/text.normalizer.js';
 
-// Official municipality and comarca names derived from the ICGC snapshot by
+// Official municipality, comarca and province names derived from the ICGC snapshot by
 // `npm run geography:icgc:names`. Kept apart from the M4A resolver so the API never loads polygons.
 const INDEX_URL = new URL('./officialPlaceNames.json', import.meta.url);
 
@@ -11,8 +11,10 @@ export class OfficialPlaceNames {
     this.datasetDate = index.datasetDate;
     this.municipalities = new Map();
     this.comarques = new Map();
+    this.provinces = new Map();
     for (const entry of index.municipalities) {
       this.municipalities.set(normalizeForFingerprint(entry.name), entry);
+      this.provinces.set(normalizeForFingerprint(entry.province), { code: entry.provinceCode, name: entry.province });
       const comarcaKey = normalizeForFingerprint(entry.comarca);
       if (!this.comarques.has(comarcaKey)) {
         this.comarques.set(comarcaKey, {
@@ -32,6 +34,10 @@ export class OfficialPlaceNames {
 
   findComarca(name) {
     return this.comarques.get(normalizeForFingerprint(name ?? '')) || null;
+  }
+
+  findProvince(name) {
+    return this.provinces.get(normalizeForFingerprint(name ?? '')) || null;
   }
 
   // Sources such as DIBA publish names without accents ("Palamos"); show the official form.

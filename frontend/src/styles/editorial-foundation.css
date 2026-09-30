@@ -745,6 +745,7 @@
 }
 .widget-demo-switch button[aria-pressed="true"] { background: var(--color-text); color: var(--color-surface); }
 .widget-demo-switch button:focus-visible { outline: 3px solid var(--color-blue); outline-offset: 2px; }
+.widget-demo-intro .widget-demo-caption { color: var(--color-text); font-weight: 600; }
 .widget-demo-note { font-size: var(--text-body-sm); }
 .widget-demo-stage { padding: 20px; border-radius: 14px; background: rgba(26, 26, 26, 0.05); min-width: 0; }
 .widget-demo-frame { display: block; width: 100%; border: 0; }

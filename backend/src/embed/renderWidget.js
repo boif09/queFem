@@ -184,7 +184,7 @@ ${body}
 export function renderWidget({ widget, view, language, theme }) {
   const t = STRINGS[language];
   const { config } = widget;
-  const place = config.territory.municipality || config.territory.comarca;
+  const place = config.territory.municipality || config.territory.comarca || config.territory.province;
   const heading = config.title?.[language]
     || (config.territory.near ? t.headingNear(place) : t.heading(place));
   const key = widget.publicKey;
@@ -205,9 +205,11 @@ export function renderWidget({ widget, view, language, theme }) {
   }).join('');
 
   // A radius has no equivalent filter on tenspla.cat, so its link opens the surrounding comarca.
-  const moreFilters = config.territory.municipality && !config.territory.near
-    ? { municipality: config.territory.municipality }
-    : { comarca: config.territory.comarca };
+  const moreFilters = config.territory.province
+    ? { province: config.territory.province }
+    : config.territory.municipality && !config.territory.near
+      ? { municipality: config.territory.municipality }
+      : { comarca: config.territory.comarca };
   if (config.categories.length) moreFilters.category = config.categories.join(',');
   if (config.freeOnly) moreFilters.free = 'true';
   moreFilters.lang = language;

@@ -348,6 +348,28 @@ test('radius widgets show only nearby plans with their distance', () => withTest
   assert.match(html, /href="\/plans\?comarca=Baix\+Empord%C3%A0&amp;lang=ca/);
 }));
 
+test('province widgets show every plan in the province', () => withTestDatabase(async (db) => {
+  enableAllSources(db);
+  db.prepare("UPDATE plans SET province = 'Girona'").run();
+  insertPlan(db, { title: 'Pla de Manresa' });
+  insertPlan(db, { title: 'Pla de Vic', comarca: 'Osona', municipality: 'Vic' });
+  insertPlan(db, { title: 'Pla de Girona', comarca: 'Gironès', municipality: 'Girona' });
+  db.prepare("UPDATE plans SET province = 'Girona' WHERE title_ca = 'Pla de Girona'").run();
+  seedWidget(db, { config: { territory: { province: 'barcelona' } } });
+
+  const html = (await framed(request(appFor(db)), `/embed/v1/w/${KEY}`)).text;
+  assert.match(html, /Plans · Barcelona/);
+  assert.match(html, /Pla de Manresa/);
+  assert.match(html, /Pla de Vic/);
+  assert.doesNotMatch(html, /Pla de Girona/);
+  assert.match(html, /href="\/plans\?province=Barcelona&amp;lang=ca/);
+
+  const categorySlugs = new Set();
+  for (const territory of [{ province: 'Andorra' }, { province: 'Girona', comarca: 'Gironès' }, { province: 'Girona', near: { latitude: 41.9, longitude: 2.8, radiusKm: 5 }, municipality: 'Girona' }]) {
+    assert.throws(() => normalizeWidgetConfig({ territory }, { placeNames: PLACES, categorySlugs }), WidgetConfigError, JSON.stringify(territory));
+  }
+}));
+
 test('radius config is validated', () => {
   const categorySlugs = new Set();
   const normalized = normalizeWidgetConfig({

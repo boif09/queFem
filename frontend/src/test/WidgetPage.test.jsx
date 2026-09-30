@@ -24,8 +24,10 @@ describe('widget page', () => {
   it('explains the widget, embeds the live demo and offers the contact email', async () => {
     renderWidgetPage();
     expect(screen.getByRole('heading', { level: 1, name: 'L’agenda de Tens pla? a la teva web' })).toBeInTheDocument();
-    const frame = screen.getByTitle('Consell comarcal · Bages');
+    const frame = screen.getByTitle('Exemple en llista');
     expect(frame).toHaveAttribute('src', '/embed/v1/w/wgt_TensPlaDemoBages2026?lang=ca');
+    expect(screen.getByText('Plans de tota una comarca, el Bages, en format llista.')).toBeInTheDocument();
+    expect(screen.getByText(/un municipi, una comarca, una província o els plans a pocs km d’un punt/)).toBeInTheDocument();
 
     const mailLinks = screen.getAllByRole('link').filter((link) => link.getAttribute('href')?.startsWith('mailto:'));
     expect(mailLinks.length).toBeGreaterThan(0);
@@ -37,20 +39,23 @@ describe('widget page', () => {
     expect(screen.getByRole('link', { name: 'Agenda per a la teva web' })).toHaveAttribute('href', '/widget');
     expect(document.body.textContent).not.toMatch(/preu|pagament|gratu[iï]t|€/i);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Allotjament · Pals' }));
-    expect(screen.getByTitle('Allotjament · Pals')).toHaveAttribute('src', '/embed/v1/w/wgt_TensPlaDemoEmporda2026?lang=ca');
+    await userEvent.click(screen.getByRole('button', { name: 'Exemple en graella' }));
+    expect(screen.getByTitle('Exemple en graella')).toHaveAttribute('src', '/embed/v1/w/wgt_TensPlaDemoEmporda2026?lang=ca');
+    expect(screen.getByText(/Plans a menys de 15 km de Pals/)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/Consell comarcal|Allotjament ·/);
   });
 
   it('follows the Spanish interface language', async () => {
     await i18n.changeLanguage('es');
     renderWidgetPage();
     expect(screen.getByRole('heading', { level: 1, name: 'La agenda de Tens pla? en tu web' })).toBeInTheDocument();
-    expect(screen.getByTitle('Consell comarcal · Bages')).toHaveAttribute('src', '/embed/v1/w/wgt_TensPlaDemoBages2026?lang=es');
+    expect(screen.getByTitle('Ejemplo en lista')).toHaveAttribute('src', '/embed/v1/w/wgt_TensPlaDemoBages2026?lang=es');
+    expect(screen.getByRole('button', { name: 'Ejemplo en cuadrícula' })).toBeInTheDocument();
   });
 
   it('resizes the demo only for messages from its own frame', () => {
     renderWidgetPage();
-    const frame = screen.getByTitle('Consell comarcal · Bages');
+    const frame = screen.getByTitle('Exemple en llista');
     act(() => {
       window.dispatchEvent(new MessageEvent('message', { origin: 'https://evil.example', source: frame.contentWindow, data: { type: 'tenspla:resize', height: 900 } }));
     });

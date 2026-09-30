@@ -52,7 +52,7 @@ anfitriona no puede cambiarla; solo puede elegir idioma y tema.
 
 | Campo | Valores | Por defecto |
 | --- | --- | --- |
-| `territory` | `{ "comarca": "Bages" }`, `{ "municipality": "Pals" }` o radio (ver abajo) | obligatorio |
+| `territory` | `{ "municipality": "Pals" }`, `{ "comarca": "Bages" }`, `{ "province": "Girona" }` o radio (ver abajo) | obligatorio |
 | `territory.near` | `{ "latitude": 41.9711, "longitude": 3.1486, "radiusKm": 15 }` junto con `municipality`, que da nombre al lugar; radio de 1 a 50 km | — |
 | `territory.fallbackToComarca` | solo con municipio: amplía a la comarca si hay pocos planes | `true` |
 | `territory.fallbackMinimum` | umbral de la ampliación (1–24) | `3` |

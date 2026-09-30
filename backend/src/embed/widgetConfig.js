@@ -13,7 +13,7 @@ const CONFIG_KEYS = new Set([
   'territory', 'categories', 'freeOnly', 'sections', 'windowDays', 'limit',
   'layout', 'theme', 'accent', 'language', 'title',
 ]);
-const TERRITORY_KEYS = new Set(['comarca', 'municipality', 'fallbackToComarca', 'fallbackMinimum', 'near']);
+const TERRITORY_KEYS = new Set(['comarca', 'municipality', 'province', 'fallbackToComarca', 'fallbackMinimum', 'near']);
 const NEAR_KEYS = new Set(['latitude', 'longitude', 'radiusKm']);
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
@@ -129,7 +129,16 @@ function normalizeNear(raw, placeNames) {
 function normalizeTerritory(raw, placeNames) {
   if (!isPlainObject(raw)) throw new WidgetConfigError('territory és obligatori.');
   rejectUnknownKeys(raw, TERRITORY_KEYS, 'territory');
-  if (raw.near !== undefined) return normalizeNear(raw, placeNames);
+  if (raw.near !== undefined) {
+    if (raw.province !== undefined) throw new WidgetConfigError('Amb near només s’admet municipality (el nom del lloc).');
+    return normalizeNear(raw, placeNames);
+  }
+  if (raw.province !== undefined) {
+    if (Object.keys(raw).length > 1) throw new WidgetConfigError('province no es pot combinar amb altres camps de territory.');
+    const province = placeNames.findProvince(raw.province);
+    if (!province) throw new WidgetConfigError(`Província desconeguda: ${raw.province}`);
+    return { province: province.name };
+  }
   if (raw.municipality !== undefined) {
     const municipality = placeNames.findMunicipality(raw.municipality);
     if (!municipality) throw new WidgetConfigError(`Municipi desconegut a l’ICGC: ${raw.municipality}`);
@@ -153,7 +162,7 @@ function normalizeTerritory(raw, placeNames) {
     if (!comarca) throw new WidgetConfigError(`Comarca desconeguda a l’ICGC: ${raw.comarca}`);
     return { comarca: comarca.name };
   }
-  throw new WidgetConfigError('territory ha d’indicar comarca o municipality.');
+  throw new WidgetConfigError('territory ha d’indicar municipality, comarca, province o near.');
 }
 
 function normalizeTitle(raw) {

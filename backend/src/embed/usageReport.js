@@ -63,7 +63,7 @@ export function previousMonth(isoDate) {
 
 function describeTerritory(territory, t) {
   if (territory.near) return t.near(territory.municipality, String(territory.near.radiusKm).replace('.', ','));
-  return territory.municipality || territory.comarca;
+  return territory.municipality || territory.comarca || territory.province;
 }
 
 export function buildUsageReport({ widget, rows, month, language = widget.config.language }) {

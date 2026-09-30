@@ -69,6 +69,9 @@ export class EmbedWidgetService {
     if (territory.near) {
       return this.query(config, language, { near: territory.near }, { permanent });
     }
+    if (territory.province) {
+      return this.query(config, language, { province: territory.province }, { permanent });
+    }
     if (!territory.municipality) {
       return this.query(config, language, { comarca: territory.comarca }, { permanent });
     }

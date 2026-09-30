@@ -7,8 +7,8 @@ const CONTACT_EMAIL = 'contacte@tenspla.cat';
 // Public demo widgets, created in each environment with `npm run embed:widgets -- create --key ...`
 // and allowed only on tenspla.cat (see docs/EMBED_WIDGET.md).
 export const WIDGET_DEMOS = [
-  { id: 'comarca', key: 'wgt_TensPlaDemoBages2026' },
-  { id: 'stay', key: 'wgt_TensPlaDemoEmporda2026' },
+  { id: 'list', key: 'wgt_TensPlaDemoBages2026' },
+  { id: 'grid', key: 'wgt_TensPlaDemoEmporda2026' },
 ];
 
 const SNIPPET = `<div data-tenspla-widget="wgt_LA_TEVA_CLAU"></div>
@@ -70,6 +70,7 @@ export function WidgetPage() {
                 </button>
               ))}
             </div>
+            <p className="widget-demo-caption" aria-live="polite">{t(`widget.demoCaption.${demo.id}`)}</p>
             <p className="widget-demo-note">{t('widget.demoNote')}</p>
           </div>
           <div className="widget-demo-stage">
