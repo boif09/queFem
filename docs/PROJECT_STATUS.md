@@ -27,6 +27,10 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
+- Página pública `/widget` (CA/ES) publicada el 2026-09-30: explica el widget, muestra dos
+  ejemplos reales (Bages y Pals) y remite a `contacte@tenspla.cat`; enlazada desde el pie y el
+  sitemap. La CSP del sitio admite `frame-src 'self'`. Ver [`EMBED_WIDGET.md`](EMBED_WIDGET.md).
+
 - Widget d'agenda incrustable B2B, F1 desplegada en producción el 2026-09-30 con la `location /embed/`
   de Nginx aplicada y verificada desde un origen autorizado y otro no autorizado: migración `017`
   (`sources.allows_syndication` solo para Gencat y DIBA, `embed_widgets`, `embed_widget_usage_daily`),
@@ -115,7 +119,7 @@ M1 está activo. El siguiente paso operativo es desplegar M2 manteniendo `allows
 | Ticketmaster en producción | Activo según el estado confirmado | Verificar cron y configuración efectiva antes de operar |
 | DIBA en producción | Tres fuentes activas, imágenes deshabilitadas y sin cron | Desplegar/verificar M2 antes de instalar el cron por separado |
 | CSP | Obligatoria; confirmada por el propietario el 2026-09-30 | Mantener; `/embed/` usa su propia CSP |
-| Widget B2B (`/embed/`) | Desplegado y verificado el 2026-09-30; sin widgets de clientes | Revisar `embed:widgets -- list` antes de operar |
+| Widget B2B (`/embed/`) | Desplegado el 2026-09-30; solo los dos widgets de demostración de `/widget` | Revisar `embed:widgets -- list` antes de operar |
 
 El roadmap operativo separa AUTONOMOUS WORK, PRODUCT DECISIONS, OPERATOR / PRODUCTION, BLOCKED y LATER / TECHNICAL DEBT. No existe una definición fiable de prioridades `P1`, `P2`, etc.; no deben usarse para decidir trabajo actual.
 

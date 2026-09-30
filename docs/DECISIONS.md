@@ -30,7 +30,8 @@ Registro ligero de decisiones demostrables en documentación, configuración o c
   widget incrustable vuelca contadores diarios agregados por widget y origen, sin datos del visitante.
 - El backend escucha en `127.0.0.1` por defecto; Nginx es la capa pública en producción.
 - La `Content-Security-Policy` del sitio es obligatoria, no `Report-Only` (confirmado el 2026-09-30).
-  Solo `/embed/` tiene una CSP propia por widget.
+  Solo `/embed/` tiene una CSP propia por widget. `frame-src` admite `'self'` (demos de `/widget`) y
+  OpenStreetMap.
 - El frontend usa recursos locales/same-origin cuando es posible. Montserrat se empaqueta localmente.
 - OpenStreetMap no se carga hasta que el usuario activa el minimapa. La implementación no incorpora analítica ni seguimiento; la preferencia de idioma se guarda localmente.
 - Sincronización de datos y despliegue son procesos separados. Gencat usa cron externo. El estado actual de Ticketmaster y sus imágenes es temporal y operativo: cualquier activación en producción requiere aprobación específica, pero no se define aquí como una prohibición arquitectónica permanente.

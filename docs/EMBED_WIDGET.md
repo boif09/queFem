@@ -117,8 +117,10 @@ en local):
 | `wgt_TensPlaDemoBages2026` | `{"territory":{"comarca":"Bages"},"layout":"list","limit":6}` |
 | `wgt_TensPlaDemoEmporda2026` | `{"territory":{"municipality":"Pals"},"sections":["upcoming","permanent"],"layout":"grid","limit":6,"accent":"#1b6b4f","title":{"ca":"Plans a prop del mas","es":"Planes cerca del mas"}}` |
 
-La CSP del sitio debe permitir `frame-src 'self'` para que tenspla.cat pueda incrustar su propio
-widget.
+Publicada el 2026-09-30 con los dos widgets de demostración creados en producción. La CSP del sitio
+incluye desde ese día `frame-src 'self' https://www.openstreetmap.org` para que tenspla.cat pueda
+incrustar su propio widget (copia previa en
+`/root/nginx-backups/tenspla.20260930T104748Z.before-frame-src-self`).
 
 ## Administración
 
