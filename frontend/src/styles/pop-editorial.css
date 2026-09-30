@@ -271,7 +271,7 @@ h1, h2, h3, h4, h5, h6, strong, .legal-section h2, .prose { font-family: var(--f
 
 @media (max-width: 680px) {
   .site-shell { --mobile-nav-height: 104px; }
-  .site-shell.has-mobile-nav #main-content { padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); }
+  .site-shell.has-mobile-nav { padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); }
   .container { width: min(calc(100% - 40px), var(--container)); }
   .site-header { position: static; border-bottom: 1px solid #e5e2de; }
   .header-inner { min-height: 68px; }
@@ -328,6 +328,12 @@ h1, h2, h3, h4, h5, h6, strong, .legal-section h2, .prose { font-family: var(--f
   .content-section, .source-section, .practical-card { padding: 20px; }
   .practical-card { order: -1; }
   .source-card p { grid-template-columns: 1fr; }
-  .site-footer { display: none; }
+  /* Compact footer: the only way to reach sources, legal, privacy and contact on phones. */
+  .site-footer { padding: 26px 0 30px; }
+  .footer-inner { gap: 16px; }
+  .footer-logo { width: 118px; }
+  .footer-links { gap: 12px 18px; }
+  .footer-links a { padding-block: 4px; }
+  .has-mobile-nav .footer-social-links { display: none; }
   .fonts-page .narrow-container, .legal-container { width: min(calc(100% - 40px), 860px); }
 }
