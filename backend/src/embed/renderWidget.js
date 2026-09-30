@@ -5,6 +5,8 @@ const STRINGS = {
     weekdays: ['dg.', 'dl.', 'dt.', 'dc.', 'dj.', 'dv.', 'ds.'],
     months: ['gen.', 'febr.', 'març', 'abr.', 'maig', 'juny', 'jul.', 'ag.', 'set.', 'oct.', 'nov.', 'des.'],
     heading: (place) => `Plans · ${place}`,
+    headingNear: (place) => `Plans · ${place} i voltants`,
+    distance: (km) => `a ${String(km).replace('.', ',')} km`,
     until: 'Fins al', free: 'Gratuït', now: 'Ara', ongoing: 'en curs', always: 'Sempre', open: 'obert',
     sections: { upcoming: 'Propers dies', permanent: 'Per visitar' },
     empty: 'Ara mateix no hi ha plans publicats per a aquesta zona.',
@@ -17,6 +19,8 @@ const STRINGS = {
     weekdays: ['dom.', 'lun.', 'mar.', 'mié.', 'jue.', 'vie.', 'sáb.'],
     months: ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sept.', 'oct.', 'nov.', 'dic.'],
     heading: (place) => `Planes · ${place}`,
+    headingNear: (place) => `Planes · ${place} y alrededores`,
+    distance: (km) => `a ${String(km).replace('.', ',')} km`,
     until: 'Hasta el', free: 'Gratis', now: 'Ahora', ongoing: 'en curso', always: 'Siempre', open: 'abierto',
     sections: { upcoming: 'Próximos días', permanent: 'Para visitar' },
     empty: 'Ahora mismo no hay planes publicados para esta zona.',
@@ -89,7 +93,8 @@ function planItem(plan, { t, key, language }) {
     ? `<span class="img"><img src="${escapeHtml(plan.image.url)}" alt="${escapeHtml(plan.image.alt)}" loading="lazy" decoding="async"></span>`
     : '<span class="img none"></span>';
   const place = [plan.municipality, plan.venue].filter(Boolean).map(escapeHtml);
-  return `<li><a class="item" href="${escapeHtml(trackedUrl(`/plans/${plan.id}`, key))}" target="_blank" rel="noopener">
+  if (plan.distanceKm !== null && plan.distanceKm !== undefined) place.push(escapeHtml(t.distance(plan.distanceKm)));
+  return `<li><a class="item" href="${escapeHtml(trackedUrl(`/plans/${plan.id}`, key, { lang: language }))}" target="_blank" rel="noopener">
 ${image}${dateBlock(plan, t)}<span class="body"><span class="sr">${escapeHtml(accessibleDate(plan, t, language))}. </span><span class="title">${escapeHtml(plan.title)}</span>
 <span class="meta">${place.join(' · ')}</span>${chips.length ? `<span class="chips">${chips.join('')}</span>` : ''}</span></a></li>`;
 }
@@ -180,7 +185,8 @@ export function renderWidget({ widget, view, language, theme }) {
   const t = STRINGS[language];
   const { config } = widget;
   const place = config.territory.municipality || config.territory.comarca;
-  const heading = config.title?.[language] || t.heading(place);
+  const heading = config.title?.[language]
+    || (config.territory.near ? t.headingNear(place) : t.heading(place));
   const key = widget.publicKey;
   const context = { t, key, language };
   const multiple = view.sections.length > 1;
@@ -198,11 +204,13 @@ export function renderWidget({ widget, view, language, theme }) {
     return `<div${attributes}>${content}</div>`;
   }).join('');
 
-  const moreFilters = config.territory.municipality
+  // A radius has no equivalent filter on tenspla.cat, so its link opens the surrounding comarca.
+  const moreFilters = config.territory.municipality && !config.territory.near
     ? { municipality: config.territory.municipality }
     : { comarca: config.territory.comarca };
   if (config.categories.length) moreFilters.category = config.categories.join(',');
   if (config.freeOnly) moreFilters.free = 'true';
+  moreFilters.lang = language;
   const updated = formatUpdatedAt(view.updatedAt);
 
   const body = `<section class="w ${config.layout} ${theme}" data-key="${escapeHtml(key)}" aria-label="${escapeHtml(t.label)}">
@@ -210,7 +218,7 @@ export function renderWidget({ widget, view, language, theme }) {
 ${tabs}${panels}
 <a class="more" href="${escapeHtml(trackedUrl('/plans', key, moreFilters))}" target="_blank" rel="noopener">${t.more} →</a>
 <footer class="foot">
-<a class="brand" href="${escapeHtml(trackedUrl('/', key))}" target="_blank" rel="noopener">${t.by} <span class="logo">Tens pla<i>?</i></span></a>
+<a class="brand" href="${escapeHtml(trackedUrl('/', key, { lang: language }))}" target="_blank" rel="noopener">${t.by} <span class="logo">Tens pla<i>?</i></span></a>
 <span>${t.data} ${view.attributions.map(escapeHtml).join(' · ')}</span>
 ${updated ? `<span>${escapeHtml(t.updated(updated))}</span>` : ''}
 </footer>

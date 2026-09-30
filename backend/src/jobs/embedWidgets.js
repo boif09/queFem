@@ -10,6 +10,7 @@ import {
 } from '../embed/widgetConfig.js';
 import { OfficialPlaceNames } from '../embed/placeNames.js';
 import { retentionCutoff } from '../retention/eventRetention.js';
+import { buildUsageReport, monthRange, previousMonth } from '../embed/usageReport.js';
 
 const USAGE = `Ús: npm run embed:widgets -- <ordre> [opcions]
   list
@@ -19,9 +20,10 @@ const USAGE = `Ús: npm run embed:widgets -- <ordre> [opcions]
   suspend <clau> | activate <clau> | revoke <clau>
   rotate <clau>
   usage <clau> [--days 30]
+  report <clau> [--month AAAA-MM] [--lang ca|es]   (per defecte, el mes anterior)
   snippet <clau> [--base https://tenspla.cat]`;
 
-const VALUE_OPTIONS = new Set(['name', 'client', 'origins', 'config', 'notes', 'days', 'base', 'key']);
+const VALUE_OPTIONS = new Set(['name', 'client', 'origins', 'config', 'notes', 'days', 'base', 'key', 'month', 'lang']);
 
 export function parseArguments(args) {
   const [command, ...rest] = args;
@@ -147,6 +149,15 @@ export function runEmbedWidgetCommand(db, { command, key, options }, {
         .map(([origin, total]) => `  ${origin}: ${total.impressions} càrregues${total.rejected ? `, ${total.rejected} REBUTJADES` : ''}`);
       return `${widget.publicKey}: ús dels últims ${days} dies per origen\n${lines.join('\n')}`;
     }
+    case 'report': {
+      const widget = requireWidget();
+      if (options.lang !== undefined && !['ca', 'es'].includes(options.lang)) throw new Error('--lang ha de ser ca o es.');
+      const month = options.month ?? previousMonth(retentionCutoff(0, now()));
+      const { from, to } = monthRange(month);
+      return buildUsageReport({
+        widget, month, rows: repository.usageBetween(widget.id, from, to), language: options.lang,
+      });
+    }
     case 'snippet':
       return snippet(requireWidget().publicKey, options.base);
     default:
@@ -158,7 +169,7 @@ function main() {
   let db;
   try {
     const parsed = parseArguments(process.argv.slice(2));
-    const readOnly = ['list', 'show', 'usage', 'snippet'].includes(parsed.command);
+    const readOnly = ['list', 'show', 'usage', 'report', 'snippet'].includes(parsed.command);
     db = openDatabase(loadConfig().databasePath, readOnly ? { readonly: true } : {});
     if (!readOnly) migrate(db);
     console.log(runEmbedWidgetCommand(db, parsed));

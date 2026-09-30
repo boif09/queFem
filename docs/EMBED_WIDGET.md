@@ -52,7 +52,8 @@ anfitriona no puede cambiarla; solo puede elegir idioma y tema.
 
 | Campo | Valores | Por defecto |
 | --- | --- | --- |
-| `territory` | `{ "comarca": "Bages" }` o `{ "municipality": "Pals" }` | obligatorio |
+| `territory` | `{ "comarca": "Bages" }`, `{ "municipality": "Pals" }` o radio (ver abajo) | obligatorio |
+| `territory.near` | `{ "latitude": 41.9711, "longitude": 3.1486, "radiusKm": 15 }` junto con `municipality`, que da nombre al lugar; radio de 1 a 50 km | — |
 | `territory.fallbackToComarca` | solo con municipio: amplía a la comarca si hay pocos planes | `true` |
 | `territory.fallbackMinimum` | umbral de la ampliación (1–24) | `3` |
 | `categories` | slugs de `categories`, semántica OR | todas |
@@ -99,8 +100,15 @@ nuevos se agrupan en `other`. No guarda IPs ni datos
 del visitante. Los contadores se acumulan en memoria y se vuelcan a SQLite cada 60 s y al detener el
 servidor; es la única escritura que hace el proceso de la API.
 
-Los enlaces del widget abren tenspla.cat en una pestaña nueva con
-`utm_source=tenspla-widget&utm_medium=embed&utm_campaign=<clave>`, visibles en los pageviews de Umami.
+Los enlaces del widget abren tenspla.cat en una pestaña nueva con el idioma del widget (`lang=ca|es`)
+y `utm_source=tenspla-widget&utm_medium=embed&utm_campaign=<clave>`, visibles en los pageviews de
+Umami. tenspla.cat usa ese `lang` para la visita sin guardarlo; solo el selector de idioma guarda la
+preferencia.
+
+Con un territorio por radio, el widget muestra los planes con coordenadas a esa distancia del punto
+(los que no tienen coordenadas quedan fuera), indica «a X km» en cada plan y titula «Plans · {municipi}
+i voltants». «Veure tots els plans» abre la comarca del municipio, porque tenspla.cat no filtra por
+radio.
 
 ## Página pública `/widget`
 
@@ -115,7 +123,7 @@ en local):
 | Clave | Configuración |
 | --- | --- |
 | `wgt_TensPlaDemoBages2026` | `{"territory":{"comarca":"Bages"},"layout":"list","limit":6}` |
-| `wgt_TensPlaDemoEmporda2026` | `{"territory":{"municipality":"Pals"},"sections":["upcoming","permanent"],"layout":"grid","limit":6,"accent":"#1b6b4f","title":{"ca":"Plans a prop del mas","es":"Planes cerca del mas"}}` |
+| `wgt_TensPlaDemoEmporda2026` | `{"territory":{"near":{"latitude":41.9711,"longitude":3.1486,"radiusKm":15},"municipality":"Pals"},"sections":["upcoming","permanent"],"layout":"grid","limit":6,"accent":"#1b6b4f","title":{"ca":"Plans a prop del mas","es":"Planes cerca del mas"}}` |
 
 Publicada el 2026-09-30 con los dos widgets de demostración creados en producción. La CSP del sitio
 incluye desde ese día `frame-src 'self' https://www.openstreetmap.org` para que tenspla.cat pueda
@@ -137,8 +145,14 @@ npm run embed:widgets -- activate <clau>
 npm run embed:widgets -- rotate <clau>
 npm run embed:widgets -- revoke <clau>
 npm run embed:widgets -- usage <clau> --days 30
+npm run embed:widgets -- report <clau> --month 2026-10 --lang ca
 npm run embed:widgets -- snippet <clau>
 ```
+
+`report` genera en texto plano, listo para pegar en un correo al cliente, el resumen de un mes
+(por defecto el anterior): cargas totales, media diaria, cargas por web, días con más cargas e
+intentos bloqueados desde otras webs. `--lang` elige catalán o castellano; por defecto, el idioma del
+widget.
 
 `create` y `rotate` imprimen el código que hay que enviar al cliente. `rotate` invalida la clave
 anterior al momento. `revoke` es definitivo. En producción, estas órdenes escriben en la SQLite real
@@ -181,12 +195,12 @@ Si cambian las cabeceras de seguridad del `server`, hay que actualizar también 
 Comprobación: `curl -sI https://tenspla.cat/embed/v1/loader.js` no debe devolver `X-Frame-Options`
 ni la CSP del sitio, y `https://tenspla.cat/` debe seguir devolviéndolas.
 
-## Pendiente (F2 y siguientes)
+## Pendiente
+
+F2 (2026-09-30) añadió el territorio por radio, el informe mensual por cliente y `?lang` en
+tenspla.cat. Quedan fuera por decisión del propietario:
 
 - Informe `report-to` de CSP para registrar intentos bloqueados que no envían `Referer`.
-- Cuotas por plan comercial, informe mensual para el cliente y alertas de `rejected`.
-- Filtro por radio en km para alojamientos.
-- Que tenspla.cat respete `?lang=es` al abrir un plan desde un widget en castellano; hoy el idioma
-  del destino depende de la preferencia guardada por el visitante.
+- Cuotas por plan comercial y alertas automáticas de `rejected`.
 - Configurador visual y facturación, solo si los pilotos lo justifican.
 - Antes de cobrar: revisar el aviso legal ([`DEPLOYMENT.md`](DEPLOYMENT.md), revisión legal previa).

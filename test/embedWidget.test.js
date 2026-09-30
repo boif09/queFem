@@ -25,13 +25,15 @@ function insertPlan(db, values, sourceKeys = ['gencat-agenda']) {
   const planId = Number(db.prepare(`INSERT INTO plans (
       kind, fingerprint, original_language, original_title, title_ca, title_es, description_ca,
       start_date, end_date, permanent, is_free, province, comarca, municipality, venue_name,
-      quality_score, status, ticket_url, created_at, updated_at
+      quality_score, status, ticket_url, latitude, longitude, created_at, updated_at
     ) VALUES (
       'event', @fingerprint, 'ca', @title, @title, NULL, 'Descripció que no es redistribueix',
       @start_date, @end_date, @permanent, @is_free, 'Barcelona', @comarca, @municipality, @venue_name,
-      70, 'active', @ticket_url, @stamp, @stamp
+      70, 'active', @ticket_url, @latitude, @longitude, @stamp, @stamp
     )`).run({
     fingerprint: `fp-${values.title}`,
+    latitude: null,
+    longitude: null,
     start_date: '2026-09-20',
     end_date: '2026-09-20',
     permanent: 0,
@@ -157,7 +159,8 @@ test('widget renders only syndicated sources, escapes content and pins frame anc
   assert.match(html, /Generalitat de Catalunya\. Departament de Cultura/);
   assert.match(html, /Diputació de Barcelona — Dades obertes/);
   assert.match(html, /ICGC/);
-  assert.match(html, /utm_source=tenspla-widget&amp;utm_medium=embed&amp;utm_campaign=wgt_TestKey0123456789abcd/);
+  assert.match(html, /href="\/plans\/\d+\?lang=ca&amp;utm_source=tenspla-widget&amp;utm_medium=embed&amp;utm_campaign=wgt_TestKey0123456789abcd"/);
+  assert.match(html, /href="\/plans\?comarca=Bages&amp;lang=ca&amp;utm_source=tenspla-widget/);
 
   const csp = response.headers['content-security-policy'];
   assert.match(csp, new RegExp(`frame-ancestors ${ORIGIN}(;|$)`));
@@ -224,6 +227,7 @@ test('widget supports Spanish and permanent sections', () => withTestDatabase(as
   assert.match(html, /Planes · Bages/);
   assert.match(html, /Próximos días/);
   assert.match(html, /Para visitar/);
+  assert.match(html, /\?lang=es&amp;utm_source=/);
   assert.match(html, /Museu de la Tècnica/);
 }));
 
@@ -325,4 +329,73 @@ test('CLI creates, rotates, suspends and reports widgets', () => withTestDatabas
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
+}));
+
+test('radius widgets show only nearby plans with their distance', () => withTestDatabase(async (db) => {
+  enableAllSources(db);
+  // Point: Pals (41.9711, 3.1486). Palafrugell is ~6 km away, Girona ~28 km, Barcelona ~110 km.
+  insertPlan(db, { title: 'Festa a Palafrugell', comarca: 'Baix Empordà', municipality: 'Palafrugell', latitude: 41.9174, longitude: 3.1631 });
+  insertPlan(db, { title: 'Concert a Girona', comarca: 'Gironès', municipality: 'Girona', latitude: 41.9794, longitude: 2.8214 });
+  insertPlan(db, { title: 'Teatre a Barcelona', comarca: 'Barcelonès', municipality: 'Barcelona', latitude: 41.3874, longitude: 2.1686 });
+  insertPlan(db, { title: 'Sense coordenades', comarca: 'Baix Empordà', municipality: 'Pals' });
+  seedWidget(db, { config: { territory: { near: { latitude: 41.9711, longitude: 3.1486, radiusKm: 15 }, municipality: 'pals' } } });
+
+  const html = (await framed(request(appFor(db)), `/embed/v1/w/${KEY}`)).text;
+  assert.match(html, /Plans · Pals i voltants/);
+  assert.match(html, /Festa a Palafrugell/);
+  assert.match(html, /a 6,1 km|a 6,2 km/);
+  assert.doesNotMatch(html, /Concert a Girona|Teatre a Barcelona|Sense coordenades/);
+  assert.match(html, /href="\/plans\?comarca=Baix\+Empord%C3%A0&amp;lang=ca/);
+}));
+
+test('radius config is validated', () => {
+  const categorySlugs = new Set();
+  const normalized = normalizeWidgetConfig({
+    territory: { near: { latitude: 41.97113, longitude: 3.148612, radiusKm: 12.25 }, municipality: 'Pals' },
+  }, { placeNames: PLACES, categorySlugs });
+  assert.deepEqual(normalized.territory, {
+    near: { latitude: 41.97113, longitude: 3.148612, radiusKm: 12.3 }, municipality: 'Pals', comarca: 'Baix Empordà',
+  });
+  const invalid = [
+    { near: { latitude: 41.9, longitude: 3.1, radiusKm: 10 } },
+    { near: { latitude: 48.8, longitude: 2.3, radiusKm: 10 }, municipality: 'Pals' },
+    { near: { latitude: 41.9, longitude: 3.1, radiusKm: 80 }, municipality: 'Pals' },
+    { near: { latitude: '41.9', longitude: 3.1, radiusKm: 10 }, municipality: 'Pals' },
+    { near: { latitude: 41.9, longitude: 3.1, radiusKm: 10, zoom: 3 }, municipality: 'Pals' },
+    { near: { latitude: 41.9, longitude: 3.1, radiusKm: 10 }, municipality: 'Pals', comarca: 'Baix Empordà' },
+  ];
+  for (const territory of invalid) {
+    assert.throws(() => normalizeWidgetConfig({ territory }, { placeNames: PLACES, categorySlugs }), WidgetConfigError, JSON.stringify(territory));
+  }
+});
+
+test('monthly usage report summarises loads per domain for the client', () => withTestDatabase((db) => {
+  const widget = seedWidget(db);
+  const repository = new EmbedWidgetRepository(db);
+  repository.addUsage([
+    { widgetId: widget.id, usageDate: '2026-08-31', origin: ORIGIN, impressions: 999, rejected: 0 },
+    { widgetId: widget.id, usageDate: '2026-09-02', origin: ORIGIN, impressions: 1200, rejected: 0 },
+    { widgetId: widget.id, usageDate: '2026-09-03', origin: ORIGIN, impressions: 30, rejected: 0 },
+    { widgetId: widget.id, usageDate: '2026-09-03', origin: 'unknown', impressions: 10, rejected: 0 },
+    { widgetId: widget.id, usageDate: '2026-09-04', origin: 'https://copia.example', impressions: 0, rejected: 4 },
+  ]);
+  const run = (options) => runEmbedWidgetCommand(db, { command: 'report', key: KEY, options }, {
+    placeNames: PLACES, now: () => new Date('2026-10-02T09:00:00Z'),
+  });
+
+  const report = run({});
+  assert.match(report, /Període: setembre del? 2026/);
+  assert.match(report, /Territori: Bages/);
+  assert.match(report, /Càrregues de l’agenda: 1\.240/);
+  assert.match(report, /Mitjana diària: 41/);
+  assert.match(report, / {2}www\.consell-exemple\.cat: 1\.230\n {2}web sense identificar: 10/);
+  assert.match(report, /Dies amb més càrregues: 02\/09 \(1\.200\), 03\/09 \(40\)/);
+  assert.match(report, /Intents bloquejats des d’altres webs: 4/);
+  assert.doesNotMatch(report, /999/);
+
+  const spanish = run({ month: '2026-08', lang: 'es' });
+  assert.match(spanish, /Periodo: agosto de 2026/);
+  assert.match(spanish, /Cargas de la agenda: 999/);
+  assert.match(run({ month: '2026-07' }), /No s’ha registrat cap càrrega/);
+  assert.throws(() => run({ month: '2026-13' }), /AAAA-MM/);
 }));

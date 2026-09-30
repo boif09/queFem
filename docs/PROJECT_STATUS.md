@@ -27,6 +27,10 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
+- Widget B2B, F2 completada localmente y no desplegada: territorio por radio en km para
+  alojamientos (`territory.near`), informe mensual por cliente (`embed:widgets -- report`) y
+  `?lang=ca|es` en tenspla.cat para que las fichas abiertas desde un widget respeten su idioma.
+
 - Página pública `/widget` (CA/ES) publicada el 2026-09-30: explica el widget, muestra dos
   ejemplos reales (Bages y Pals) y remite a `contacte@tenspla.cat`; enlazada desde el pie y el
   sitemap. La CSP del sitio admite `frame-src 'self'`. Ver [`EMBED_WIDGET.md`](EMBED_WIDGET.md).

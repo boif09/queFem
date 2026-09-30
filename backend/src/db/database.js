@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import Database from 'better-sqlite3';
 import { isOutsideCatalonia } from '../location/cataloniaScope.js';
+import { distanceKm } from '../location/distance.js';
 import { isTemporallyInvalid } from '../quality/temporalCoherence.js';
 import { normalizeForFingerprint } from '../normalizers/text.normalizer.js';
 
@@ -18,6 +19,7 @@ export function openDatabase(databasePath, { readonly = false, configureJournal 
     }) ? 1 : 0
   ));
   db.function('normalize_location', { deterministic: true }, (value) => normalizeForFingerprint(value));
+  db.function('distance_km', { deterministic: true }, distanceKm);
   db.function(
     'is_temporally_invalid',
     { deterministic: true },

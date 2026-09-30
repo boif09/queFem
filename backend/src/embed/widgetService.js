@@ -1,5 +1,6 @@
 import { retentionCutoff } from '../retention/eventRetention.js';
 import { OfficialPlaceNames } from './placeNames.js';
+import { distanceKm } from '../location/distance.js';
 
 const ICGC_ATTRIBUTION = 'Institut Cartogràfic i Geològic de Catalunya (ICGC)';
 
@@ -11,7 +12,7 @@ function addDays(isoDate, days) {
 
 // Only facts leave tenspla.cat through the widget: title, dates, place, categories, a free flag and
 // a syndication-approved image. Descriptions, prices, ticket and affiliate links are never exposed.
-function toWidgetPlan(plan, placeNames, today) {
+function toWidgetPlan(plan, placeNames, today, near) {
   const date = plan.nextOccurrence?.localDate || plan.start_date || null;
   const image = plan.image && (plan.image.kind === 'official' || plan.image.kind === 'generic')
     ? { url: plan.image.url, alt: plan.image.kind === 'generic' ? plan.image.alt || '' : '' }
@@ -28,6 +29,9 @@ function toWidgetPlan(plan, placeNames, today) {
     free: plan.free === true,
     categories: (plan.categories || []).map(({ slug, name }) => ({ slug, name })),
     image,
+    distanceKm: near
+      ? Math.round(distanceKm(near.latitude, near.longitude, plan.latitude, plan.longitude) * 10) / 10
+      : null,
   };
 }
 
@@ -62,6 +66,9 @@ export class EmbedWidgetService {
 
   sectionPlans(config, language, permanent) {
     const { territory } = config;
+    if (territory.near) {
+      return this.query(config, language, { near: territory.near }, { permanent });
+    }
     if (!territory.municipality) {
       return this.query(config, language, { comarca: territory.comarca }, { permanent });
     }
@@ -85,7 +92,7 @@ export class EmbedWidgetService {
     const today = retentionCutoff(0, this.now());
     const sections = config.sections.map((id) => ({
       id,
-      plans: this.sectionPlans(config, language, id === 'permanent').map((plan) => toWidgetPlan(plan, this.placeNames, today)),
+      plans: this.sectionPlans(config, language, id === 'permanent').map((plan) => toWidgetPlan(plan, this.placeNames, today, config.territory.near)),
     }));
     const planIds = [...new Set(sections.flatMap(({ plans }) => plans.map(({ id }) => id)))];
     const view = {

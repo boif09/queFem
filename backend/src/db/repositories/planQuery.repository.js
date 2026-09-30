@@ -11,6 +11,7 @@ import {
   anyOccurrenceExists,
 } from '../../occurrences/occurrenceSql.js';
 import { normalizeFeverPrice } from '../../fever/publicationPolicy.js';
+import { boundingBox } from '../../location/distance.js';
 
 const QUALITY_THRESHOLD = 35;
 
@@ -112,6 +113,14 @@ export class PlanQueryRepository {
         JOIN sources syndication_s ON syndication_s.id = syndication_ps.source_id
         WHERE syndication_ps.plan_id = p.id AND syndication_s.enabled = 1 AND syndication_s.allows_syndication = 1
       )`);
+    }
+    // Internal only (embed widget): plans within radiusKm of a point; plans without coordinates are excluded.
+    if (filters.near) {
+      const { latitude, longitude, radiusKm } = filters.near;
+      const box = boundingBox(latitude, longitude, radiusKm);
+      clauses.push(`p.latitude BETWEEN ? AND ? AND p.longitude BETWEEN ? AND ?
+        AND distance_km(p.latitude, p.longitude, ?, ?) <= ?`);
+      parameters.push(box.minLatitude, box.maxLatitude, box.minLongitude, box.maxLongitude, latitude, longitude, radiusKm);
     }
     if (filters.q !== undefined) {
       clauses.push(`(

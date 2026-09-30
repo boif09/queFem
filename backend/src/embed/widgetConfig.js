@@ -13,7 +13,8 @@ const CONFIG_KEYS = new Set([
   'territory', 'categories', 'freeOnly', 'sections', 'windowDays', 'limit',
   'layout', 'theme', 'accent', 'language', 'title',
 ]);
-const TERRITORY_KEYS = new Set(['comarca', 'municipality', 'fallbackToComarca', 'fallbackMinimum']);
+const TERRITORY_KEYS = new Set(['comarca', 'municipality', 'fallbackToComarca', 'fallbackMinimum', 'near']);
+const NEAR_KEYS = new Set(['latitude', 'longitude', 'radiusKm']);
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
 export class WidgetConfigError extends Error {
@@ -91,9 +92,44 @@ function oneOf(value, name, allowed, fallback) {
   return value;
 }
 
+// Radius territory for lodgings: a point, a distance and the municipality that names the place
+// (heading and "see all plans" link). Catalonia's bounding box is checked loosely.
+function normalizeNear(raw, placeNames) {
+  const { near } = raw;
+  if (!isPlainObject(near)) throw new WidgetConfigError('near ha de ser {latitude, longitude, radiusKm}.');
+  rejectUnknownKeys(near, NEAR_KEYS, 'territory.near');
+  const { latitude, longitude, radiusKm } = near;
+  if (!Number.isFinite(latitude) || latitude < 40.4 || latitude > 42.95) {
+    throw new WidgetConfigError('near.latitude ha de ser un número dins de Catalunya (40.4–42.95).');
+  }
+  if (!Number.isFinite(longitude) || longitude < 0.1 || longitude > 3.4) {
+    throw new WidgetConfigError('near.longitude ha de ser un número dins de Catalunya (0.1–3.4).');
+  }
+  if (!Number.isFinite(radiusKm) || radiusKm < 1 || radiusKm > 50) {
+    throw new WidgetConfigError('near.radiusKm ha de ser entre 1 i 50.');
+  }
+  if (raw.comarca !== undefined || raw.fallbackToComarca !== undefined || raw.fallbackMinimum !== undefined) {
+    throw new WidgetConfigError('Amb near només s’admet municipality (el nom del lloc).');
+  }
+  const municipality = placeNames.findMunicipality(raw.municipality);
+  if (!municipality) {
+    throw new WidgetConfigError('Amb near cal indicar municipality, un municipi de l’ICGC que doni nom al lloc.');
+  }
+  return {
+    near: {
+      latitude: Math.round(latitude * 1e6) / 1e6,
+      longitude: Math.round(longitude * 1e6) / 1e6,
+      radiusKm: Math.round(radiusKm * 10) / 10,
+    },
+    municipality: municipality.name,
+    comarca: municipality.comarca,
+  };
+}
+
 function normalizeTerritory(raw, placeNames) {
   if (!isPlainObject(raw)) throw new WidgetConfigError('territory és obligatori.');
   rejectUnknownKeys(raw, TERRITORY_KEYS, 'territory');
+  if (raw.near !== undefined) return normalizeNear(raw, placeNames);
   if (raw.municipality !== undefined) {
     const municipality = placeNames.findMunicipality(raw.municipality);
     if (!municipality) throw new WidgetConfigError(`Municipi desconegut a l’ICGC: ${raw.municipality}`);

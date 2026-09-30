@@ -6,10 +6,22 @@ import caLegal from './locales/ca/legal.json';
 import esLegal from './locales/es/legal.json';
 
 export const LANGUAGE_STORAGE_KEY = 'quefem.language';
-const storedLanguage = typeof window !== 'undefined'
-  ? window.localStorage.getItem(LANGUAGE_STORAGE_KEY)
-  : null;
-const initialLanguage = ['ca', 'es'].includes(storedLanguage) ? storedLanguage : 'ca';
+const LANGUAGES = ['ca', 'es'];
+
+// An explicit ?lang= (links from the embed widget) wins for this visit but is never stored: only the
+// visitor's own choice in the language switcher is persisted.
+export function resolveInitialLanguage({ search = '', stored = null } = {}) {
+  const requested = new URLSearchParams(search).get('lang');
+  if (LANGUAGES.includes(requested)) return requested;
+  return LANGUAGES.includes(stored) ? stored : 'ca';
+}
+
+const initialLanguage = typeof window !== 'undefined'
+  ? resolveInitialLanguage({
+    search: window.location.search,
+    stored: window.localStorage.getItem(LANGUAGE_STORAGE_KEY),
+  })
+  : 'ca';
 
 i18n
   .use(initReactI18next)

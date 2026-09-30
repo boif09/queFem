@@ -76,6 +76,12 @@ export class EmbedWidgetRepository {
       ORDER BY usage_date, origin`).all(widgetId, sinceDate);
   }
 
+  usageBetween(widgetId, fromDate, toDate) {
+    return this.db.prepare(`SELECT usage_date AS usageDate, origin, impressions, rejected
+      FROM embed_widget_usage_daily WHERE widget_id = ? AND usage_date BETWEEN ? AND ?
+      ORDER BY usage_date, origin`).all(widgetId, fromDate, toDate);
+  }
+
   categorySlugs() {
     return new Set(this.db.prepare('SELECT slug FROM categories').pluck().all());
   }
