@@ -83,7 +83,6 @@ M1 está activo. El siguiente paso operativo es desplegar M2 manteniendo `allows
 ## OPERATOR / PRODUCTION
 
 - Widget B2B: crear los widgets de los pilotos con `embed:widgets` cuando haya acuerdo. Antes de cobrar, revisar el aviso legal.
-- CSP del sitio: el servidor ya envía una `Content-Security-Policy` obligatoria (observado el 2026-09-30), aunque el comentario de Nginx habla de monitorización. Confirmar si es el estado deseado o si debería ser `Report-Only`.
 - Verificar la configuración efectiva de Nginx, PM2 y cron antes de cualquier operación que dependa de ella.
 - Verificar las últimas ejecuciones y la restaurabilidad de los backups, la copia externa mediante `rclone` y las rotaciones de logs cuando una intervención operativa lo requiera.
 - Revisar periódicamente cobertura, indexación y errores concretos en Google Search Console.
@@ -115,7 +114,7 @@ M1 está activo. El siguiente paso operativo es desplegar M2 manteniendo `allows
 | Logrotate | Confirmado externamente y verificado | Revisar configuración efectiva y rotaciones si se va a modificar |
 | Ticketmaster en producción | Activo según el estado confirmado | Verificar cron y configuración efectiva antes de operar |
 | DIBA en producción | Tres fuentes activas, imágenes deshabilitadas y sin cron | Desplegar/verificar M2 antes de instalar el cron por separado |
-| CSP | Cabecera obligatoria observada el 2026-09-30 (comentario de Nginx: «monitorización») | Confirmar estado deseado; `/embed/` usa su propia CSP |
+| CSP | Obligatoria; confirmada por el propietario el 2026-09-30 | Mantener; `/embed/` usa su propia CSP |
 | Widget B2B (`/embed/`) | Desplegado y verificado el 2026-09-30; sin widgets de clientes | Revisar `embed:widgets -- list` antes de operar |
 
 El roadmap operativo separa AUTONOMOUS WORK, PRODUCT DECISIONS, OPERATOR / PRODUCTION, BLOCKED y LATER / TECHNICAL DEBT. No existe una definición fiable de prioridades `P1`, `P2`, etc.; no deben usarse para decidir trabajo actual.
