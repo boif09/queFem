@@ -27,7 +27,8 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
-- Widget B2B, F2 completada localmente y no desplegada: territorio por radio en km para
+- Widget B2B, F2 desplegada en producción el 2026-09-30 (el ejemplo de Pals de `/widget` usa un
+  radio de 15 km): territorio por radio en km para
   alojamientos (`territory.near`), informe mensual por cliente (`embed:widgets -- report`) y
   `?lang=ca|es` en tenspla.cat para que las fichas abiertas desde un widget respeten su idioma.
 
