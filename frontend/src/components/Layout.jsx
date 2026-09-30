@@ -45,6 +45,7 @@ export function Layout() {
     || pathname === '/cap-de-setmana'
     || pathname === '/fonts'
     || pathname === '/plans'
+    || pathname === '/widget'
     || pathname.startsWith('/plans/');
   return (
     <div className={`site-shell${showMobileNav ? ' has-mobile-nav' : ''}`}>
@@ -77,6 +78,7 @@ export function Layout() {
           <SocialLinks className="mobile-social-links" />
           <Link to="/"><span aria-hidden="true">⌂</span>{t('nav.home')}</Link>
           <Link to="/plans"><span aria-hidden="true">◇</span>{t('nav.exploreShort')}</Link>
+          <Link to="/widget"><span aria-hidden="true">▦</span>{t('nav.widget')}</Link>
         </nav>
       )}
     </div>

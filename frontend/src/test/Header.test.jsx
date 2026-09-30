@@ -15,4 +15,11 @@ describe('Header', () => {
     expect(screen.getByRole('link', { name: 'Avui' })).toHaveAttribute('href', '/avui');
     expect(screen.getByRole('link', { name: 'Cap de setmana' })).toHaveAttribute('href', '/cap-de-setmana');
   });
+
+  it('links the embeddable widget instead of the sources page', () => {
+    render(<MemoryRouter><Header /></MemoryRouter>);
+
+    expect(screen.getByRole('link', { name: 'Tens una web?' })).toHaveAttribute('href', '/widget');
+    expect(screen.queryByRole('link', { name: 'Fonts' })).not.toBeInTheDocument();
+  });
 });

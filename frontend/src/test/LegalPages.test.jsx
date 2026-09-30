@@ -135,7 +135,13 @@ describe('legal and privacy pages', () => {
     expect(home.container.querySelector('.mobile-social-links a[href="https://www.instagram.com/tenspla.cat"]')).toHaveAttribute('target', '_blank');
     expect(home.container.querySelector('.mobile-social-links a[href="https://www.tiktok.com/@tenspla.cat"]')).toHaveAttribute('rel', 'noopener noreferrer');
     expect(home.container.querySelector('.site-shell')).toHaveClass('has-mobile-nav');
+    expect(home.container.querySelector('.mobile-nav a[href="/widget"]')).toHaveTextContent('Tens una web?');
     home.unmount();
+
+    const widget = renderRoute('/widget');
+    expect(widget.container.querySelector('.mobile-nav')).toBeInTheDocument();
+    expect(widget.container.querySelector('.site-shell')).toHaveClass('has-mobile-nav');
+    widget.unmount();
 
     const results = renderRoute('/plans');
     expect(results.container.querySelector('.mobile-nav')).toBeInTheDocument();

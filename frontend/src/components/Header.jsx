@@ -17,7 +17,7 @@ export function Header() {
           <NavLink className={navClass} to="/avui">{t('nav.today')}</NavLink>
           <NavLink className={navClass} to="/cap-de-setmana">{t('nav.weekend')}</NavLink>
           <NavLink className={navClass} to="/plans">{t('nav.explore')}</NavLink>
-          <NavLink className={navClass} to="/fonts">{t('nav.sources')}</NavLink>
+          <NavLink className={navClass} to="/widget">{t('nav.widget')}</NavLink>
         </nav>
         <LanguageSwitcher />
       </div>
