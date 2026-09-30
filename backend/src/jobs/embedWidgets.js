@@ -6,7 +6,7 @@ import { openDatabase } from '../db/database.js';
 import { migrate } from '../db/migrate.js';
 import { EmbedWidgetRepository } from '../db/repositories/embedWidget.repository.js';
 import {
-  generateWidgetKey, normalizeOrigins, normalizeWidgetConfig, WidgetConfigError,
+  generateWidgetKey, isValidWidgetKey, normalizeOrigins, normalizeWidgetConfig, WidgetConfigError,
 } from '../embed/widgetConfig.js';
 import { OfficialPlaceNames } from '../embed/placeNames.js';
 import { retentionCutoff } from '../retention/eventRetention.js';
@@ -14,14 +14,14 @@ import { retentionCutoff } from '../retention/eventRetention.js';
 const USAGE = `Ús: npm run embed:widgets -- <ordre> [opcions]
   list
   show <clau>
-  create --name <nom> --origins <https://a.cat,https://www.a.cat> --config <fitxer.json> [--client <client>] [--notes <text>]
+  create --name <nom> --origins <https://a.cat,https://www.a.cat> --config <fitxer.json> [--client <client>] [--notes <text>] [--key <wgt_...>]
   update <clau> [--name ..] [--client ..] [--origins ..] [--config fitxer.json] [--notes ..]
   suspend <clau> | activate <clau> | revoke <clau>
   rotate <clau>
   usage <clau> [--days 30]
   snippet <clau> [--base https://tenspla.cat]`;
 
-const VALUE_OPTIONS = new Set(['name', 'client', 'origins', 'config', 'notes', 'days', 'base']);
+const VALUE_OPTIONS = new Set(['name', 'client', 'origins', 'config', 'notes', 'days', 'base', 'key']);
 
 export function parseArguments(args) {
   const [command, ...rest] = args;
@@ -86,8 +86,15 @@ export function runEmbedWidgetCommand(db, { command, key, options }, {
       return describe(requireWidget());
     case 'create': {
       if (!options.name || !options.origins || !options.config) throw new Error(USAGE);
+      // --key is only for well-known public demo widgets (the /widget page); clients get random keys.
+      if (options.key !== undefined && !isValidWidgetKey(options.key)) {
+        throw new WidgetConfigError('--key ha de tenir el format wgt_ seguit de 16 a 40 lletres o xifres.');
+      }
+      if (options.key !== undefined && repository.findByKey(options.key)) {
+        throw new WidgetConfigError(`Ja existeix un widget amb la clau ${options.key}.`);
+      }
       const widget = repository.create({
-        publicKey: randomKey(),
+        publicKey: options.key ?? randomKey(),
         name: options.name.trim(),
         clientName: options.client?.trim() || null,
         allowedOrigins: normalizeOrigins(options.origins.split(',')),

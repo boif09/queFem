@@ -121,7 +121,7 @@ el mapeo editorial, la preparación de binarios y la política de procedencia es
 
 ## Frontend
 
-`frontend/src/` contiene páginas, componentes, hooks, cliente API, i18n, SEO y estilos. Las rutas públicas incluyen home, resultados, detalle, fuentes y páginas legales/contacto CA/ES. El cliente usa `/api` same-origin salvo `VITE_API_URL`. El minimapa carga OpenStreetMap solo tras una acción voluntaria.
+`frontend/src/` contiene páginas, componentes, hooks, cliente API, i18n, SEO y estilos. Las rutas públicas incluyen home, resultados, detalle, fuentes, la presentación del widget incrustable (`/widget`) y páginas legales/contacto CA/ES. El cliente usa `/api` same-origin salvo `VITE_API_URL`. El minimapa carga OpenStreetMap solo tras una acción voluntaria.
 
 La búsqueda combina texto, fechas, provincia, comarca, municipio, categorías múltiples y gratuidad con aplicación inmediata; los filtros compartibles viven en la URL. El municipio usa un selector buscable con contexto territorial. El frontend guarda en `localStorage` la preferencia de idioma (`quefem.language`) y, tras acciones explícitas en los filtros, los niveles territoriales realmente seleccionados (`quefem.location`) para contextualizar la home; no usa GPS ni integra analítica o seguimiento. Los detalles y las decisiones de cobertura están en [`DISCOVERY_FILTERS_V2.md`](DISCOVERY_FILTERS_V2.md).
 

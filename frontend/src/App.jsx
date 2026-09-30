@@ -7,6 +7,7 @@ import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { PlanDetailPage } from './pages/PlanDetailPage.jsx';
 import { PlansPage } from './pages/PlansPage.jsx';
 import { ContactPage, LegalNoticePage, PrivacyPage, StoragePage } from './pages/LegalPages.jsx';
+import { WidgetPage } from './pages/WidgetPage.jsx';
 
 export function AppRoutes() {
   return (
@@ -18,6 +19,7 @@ export function AppRoutes() {
           <Route path="plans" element={<PlansPage />} />
           <Route path="plans/:id" element={<PlanDetailPage />} />
           <Route path="fonts" element={<FontsPage />} />
+          <Route path="widget" element={<WidgetPage />} />
           <Route path="legal" element={<LegalNoticePage />} />
           <Route path="privacitat" element={<PrivacyPage />} />
           <Route path="privacidad" element={<PrivacyPage />} />

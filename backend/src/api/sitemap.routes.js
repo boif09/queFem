@@ -25,6 +25,7 @@ export function createSitemapRouter(repository) {
       `${PUBLIC_ORIGIN}/avui`,
       `${PUBLIC_ORIGIN}/cap-de-setmana`,
       `${PUBLIC_ORIGIN}/fonts`,
+      `${PUBLIC_ORIGIN}/widget`,
       ...repository.findSitemapPlanIds().map((id) => `${PUBLIC_ORIGIN}/plans/${id}`),
     ];
     response.type('application/xml').send(buildSitemapXml(urls));

@@ -315,6 +315,13 @@ test('CLI creates, rotates, suspends and reports widgets', () => withTestDatabas
     assert.throws(() => runEmbedWidgetCommand(db, {
       command: 'create', options: { name: 'X', origins: 'http://a.cat', config: configFile },
     }, options), WidgetConfigError);
+
+    const demo = { name: 'Demo', origins: 'https://tenspla.cat', config: configFile, key: 'wgt_TensPlaDemoBages2026' };
+    assert.match(runEmbedWidgetCommand(db, { command: 'create', options: demo }, options), /wgt_TensPlaDemoBages2026/);
+    assert.throws(() => runEmbedWidgetCommand(db, { command: 'create', options: demo }, options), /Ja existeix/);
+    assert.throws(() => runEmbedWidgetCommand(db, {
+      command: 'create', options: { ...demo, key: 'wgt_../x' },
+    }, options), WidgetConfigError);
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }

@@ -63,6 +63,7 @@ export function Layout() {
               <Link to={spanish ? '/privacidad' : '/privacitat'}>{t('footer.privacy')}</Link>
               <Link to={spanish ? '/almacenamiento' : '/emmagatzematge'}>{t('footer.storage')}</Link>
               <Link to="/fonts">{t('footer.sources')}</Link>
+              <Link to="/widget">{t('footer.widget')}</Link>
               <Link to={spanish ? '/contacto' : '/contacte'}>{t('footer.contact')}</Link>
             </nav>
             <SocialLinks className="footer-social-links" />

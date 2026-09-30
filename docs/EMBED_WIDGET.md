@@ -102,6 +102,24 @@ servidor; es la única escritura que hace el proceso de la API.
 Los enlaces del widget abren tenspla.cat en una pestaña nueva con
 `utm_source=tenspla-widget&utm_medium=embed&utm_campaign=<clave>`, visibles en los pageviews de Umami.
 
+## Página pública `/widget`
+
+`frontend/src/pages/WidgetPage.jsx` explica el widget en catalán y castellano, incrusta dos ejemplos
+reales y remite a `contacte@tenspla.cat` para pedirlo. No menciona precios ni condiciones. Está en el
+pie de todas las páginas y en el sitemap.
+
+Los ejemplos son widgets normales con claves públicas fijas, creados en cada entorno con `--key` y
+autorizados solo para el propio sitio (`https://tenspla.cat` en producción, `http://localhost:5173`
+en local):
+
+| Clave | Configuración |
+| --- | --- |
+| `wgt_TensPlaDemoBages2026` | `{"territory":{"comarca":"Bages"},"layout":"list","limit":6}` |
+| `wgt_TensPlaDemoEmporda2026` | `{"territory":{"municipality":"Pals"},"sections":["upcoming","permanent"],"layout":"grid","limit":6,"accent":"#1b6b4f","title":{"ca":"Plans a prop del mas","es":"Planes cerca del mas"}}` |
+
+La CSP del sitio debe permitir `frame-src 'self'` para que tenspla.cat pueda incrustar su propio
+widget.
+
 ## Administración
 
 No hay panel. Todo se gestiona con `npm run embed:widgets`:

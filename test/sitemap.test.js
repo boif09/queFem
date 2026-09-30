@@ -47,6 +47,7 @@ test('dynamic sitemap exposes only canonical public URLs without invented metada
     assert.equal((response.text.match(/<loc>https:\/\/tenspla\.cat\/avui<\/loc>/g) ?? []).length, 1);
     assert.equal((response.text.match(/<loc>https:\/\/tenspla\.cat\/cap-de-setmana<\/loc>/g) ?? []).length, 1);
     assert.match(response.text, /<loc>https:\/\/tenspla\.cat\/fonts<\/loc>/);
+    assert.match(response.text, /<loc>https:\/\/tenspla\.cat\/widget<\/loc>/);
     assert.match(response.text, new RegExp(`<loc>https://tenspla\\.cat/plans/${active}</loc>`));
     assert.doesNotMatch(response.text, new RegExp(`/plans/${inactive}<`));
     assert.doesNotMatch(response.text, new RegExp(`/plans/${place}<`));
