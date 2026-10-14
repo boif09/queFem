@@ -20,6 +20,7 @@ Ruta recomendada para una tarea: [`../AGENTS.md`](../AGENTS.md) → documento de
 - [`EMBED_WIDGET.md`](EMBED_WIDGET.md): widget de agenda incrustable B2B: fuentes redistribuibles, configuración, claves por dominio, uso, administración y despliegue pendiente.
 - [`DIBA_M0_DISCOVERY.md`](DIBA_M0_DISCOVERY.md): análisis read-only de viabilidad y solapamiento de DIBA.
 - [`DIBA_INTEGRATION.md`](DIBA_INTEGRATION.md): contrato M1 de importación selectiva, seguridad y activación futura de DIBA.
+- [`RECURRING_PRODUCTION_CONSOLIDATION_DESIGN.md`](RECURRING_PRODUCTION_CONSOLIDATION_DESIGN.md): diseño (implementado) de la consolidación de producciones recurrentes de Gencat, aliases 301 y reconciliación shadow.
 - [`DIBA_M1_4B_POLICY.md`](DIBA_M1_4B_POLICY.md): política preactivación para consolidación, enlaces, sesiones, geografía, revisión y gates de DIBA M1.4C.
 - [`ICGC_GEOGRAPHY.md`](ICGC_GEOGRAPHY.md): snapshot oficial ICGC, contrato del resolver territorial y dry-run geográfico Fever M4A.
 - [`FEVER_PERSISTENCE.md`](FEVER_PERSISTENCE.md): arquitectura M4B, reconciliación y barrera obligatoria de SQLite temporal.

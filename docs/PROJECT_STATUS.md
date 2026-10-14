@@ -1,6 +1,6 @@
 # Tens Pla? — Estado del proyecto
 
-Última revisión documental: 2026-09-15.
+Última revisión documental: 2026-10-14.
 
 Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mismo y qué toca hacer?». La arquitectura está en [`ARCHITECTURE.md`](ARCHITECTURE.md), las fuentes en [`DATA_SOURCES.md`](DATA_SOURCES.md) y la operación en [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
@@ -18,6 +18,14 @@ Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mism
   durable contra solapamientos. Toda imagen Gencat con atribución conocida es elegible en tarjeta y detalle;
   la tarjeta omite el `Peu d'imatge` y el detalle conserva el texto exacto completo cuando existe. Las
   atribuciones desconocidas permanecen cerradas con fallback.
+- Las producciones recurrentes de Gencat están consolidadas: 10 grupos con decisión humana `ACCEPT`
+  (`data-policy/recurring-production-decisions.json`) se fusionaron en un plan canónico cada uno, con 47
+  aliases en `plan_aliases` que redirigen con HTTP 301 y el mapeo `recurring_production_applied_groups`
+  que hace que las importaciones normales de Gencat se adjunten al canónico en vez de recrear planes. El
+  importador mantiene las occurrences de esos grupos (incluidas las de varios recintos y los cambios de
+  fecha). La reconciliación de occurrences obsoletas corre en **modo shadow** tras cada importación
+  (`[recurring-shadow]` en el log): detecta y registra, pero no retira nada. No queda ningún grupo
+  `SAFE_AUTOMATIC` pendiente; los `REVIEW_REQUIRED` y los de DIBA no se han consolidado.
 - El SEO público está desplegado: metadata por ruta, canonical, Open Graph/Twitter, Event JSON-LD conservador, `robots.txt` y sitemap público. Google Search Console ya está verificado.
 - Hay backups automáticos y probados de SQLite, con comprobaciones y copia externa mediante `rclone` al destino de Google Drive `TensPla/backups`.
 - La rotación de logs de Nginx está configurada y verificada.
@@ -26,6 +34,25 @@ Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mism
 La infraestructura de producción es parcialmente externa a Git. «Confirmado» describe el estado conocido a fecha de esta revisión, no sustituye la comprobación previa a una operación.
 
 ## Recently completed
+
+- Filtro de comarcas sin duplicados (2026-09-30): Gencat solo aporta un slug sin acentos
+  («barcelones») y otras fuentes la forma correcta («Barcelonès»), de modo que el desplegable mostraba
+  ambas. `findComarques` agrupa ahora por `normalize_location(comarca)` y `findMunicipalities` compara con
+  la misma normalización, coherente con el filtro principal. La causa (la normalización de Gencat no
+  restaura acentos) no se ha tocado; las filas siguen guardándose tal cual.
+
+- Consolidación de producciones recurrentes de Gencat, fases 4C.3–4C.8 (2026-09-28/29): infraestructura
+  de aliases 301 y script `scripts/consolidate-recurring-group.js` (dry-run por defecto, SQL de rollback y
+  log JSON), consolidación en producción de 10 grupos (47 aliases; integridad y FK correctas), manejo de
+  occurrences de varios recintos (Memòria 9→3, Espais 6→3), mantenimiento de occurrences y adjunción al
+  canónico en la importación normal (4C.6B), y reconciliación shadow de occurrences obsoletas (4C.6D;
+  `npm run recurring:reconcile:gencat` es solo `--dry-run`). Ver
+  [`RECURRING_PRODUCTION_CONSOLIDATION_DESIGN.md`](RECURRING_PRODUCTION_CONSOLIDATION_DESIGN.md).
+
+- Calidad de datos y diseño (2026-09-22/24): normalización segura de gratuito/de pago con backfill
+  puntual de Gencat, cola en lugar de rechazo para ráfagas de descargas de imágenes remotas, rediseño
+  editorial de home, descubrimiento y fichas, filtros en las landings temporales y atribución de sesión
+  social en los eventos de embudo.
 
 - Widget B2B, F2 desplegada en producción el 2026-09-30 (el ejemplo de Pals de `/widget` usa un
   radio de 15 km): territorio por radio en km para
@@ -44,7 +71,7 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
   cobertura suficiente a escala comarcal y de ciudad mediana, no de municipio pequeño; maqueta para
   pilotos Bages / Baix Empordà. Ver [`EMBED_WIDGET.md`](EMBED_WIDGET.md).
 
-- P2.2 prepara localmente las landings editoriales `/avui` y `/cap-de-setmana`: reutilizan visibilidad, occurrences y ranking de `/api/plans`, calculan el calendario con `Europe/Madrid`, reciben HTML SEO inicial determinista y se incorporan al sitemap. El cambio documenta las locations Nginx necesarias, pero no las aplica ni despliega estas rutas en producción.
+- Landings editoriales `/avui` y `/cap-de-setmana` publicadas (responden 200 en producción): reutilizan visibilidad, occurrences y ranking de `/api/plans`, calculan el calendario con `Europe/Madrid`, reciben HTML SEO inicial determinista y se incorporan al sitemap. Las locations Nginx documentadas en [`DEPLOYMENT.md`](DEPLOYMENT.md) deben comprobarse en el servidor si se toca esa configuración.
 
 - DIBA M0 y M1/M1.1/M1.2/M1.3 completados localmente: integración selectiva de `actesturisme_ca`, `escenari` y `actesmuseus`, con procedencias operativas separadas `diba-tourisme`, `diba-escenari` y `diba-museus`. La primera importación local real terminó correctamente con fuentes desactivadas: 710 procedencias elegibles, 613 planes solo-DIBA, 74 planes públicos con procedencia DIBA añadida, 6 matches Turismo→Museos, 21 ambiguos, 28 municipios de Turismo sin resolver y cero retiradas. M1.3 hace fiel el overlay de repeat dry-run y protege la salud semántica del subconjunto accionable. No hay cron ni activación pública. Bibliotecas, agenda general, exposiciones, parques y agregaciones genéricas continúan excluidos.
 - DIBA M1.4A/A.1 completado como auditoría local de solo lectura: el informe separa clústeres internos del mismo feed, ambigüedades históricas y riesgos actuales frente a planes públicos habilitados, incluyendo pares posibles del matcher, cardinalidad por componentes, estado de actividad y evidencia de horarios/URLs alineada al contrato de producción. No altera SQLite ni las reglas de importación. El estado local auditado mantiene riesgo de activación pública y requiere la política explícita de M1.4B; las fuentes DIBA permanecen `enabled=0`.
@@ -77,9 +104,9 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## NEXT DIBA STEP
 
-### RECURRING IMPORT DEPLOYMENT
+### RECURRING IMPORT
 
-M1 está activo. El siguiente paso operativo es desplegar M2 manteniendo `allows_images=0`, verificar el lock y una ejecución controlada de `diba:import:scheduled`, revisar su resumen y solo después instalar por autorización separada el cron diario propuesto a las 05:45. Este cambio de código no crea el cron.
+M1 está activo y el código de M2 ya está desplegado (producción en `82bfab8`) con `allows_images=0`. Falta ejecutar y revisar una pasada controlada de `diba:import:scheduled` (comprobando el lock y su resumen) y solo después instalar, por autorización separada, el cron diario propuesto a las 05:45. El despliegue no crea el cron.
 
 ## AUTONOMOUS WORK
 
@@ -88,9 +115,11 @@ M1 está activo. El siguiente paso operativo es desplegar M2 manteniendo `allows
 ## PRODUCT DECISIONS
 
 - Decidir si se quiere automatizar la purga de planes inactivos y aprobar su política operativa antes de preparar cualquier activación.
+- Decidir, tras 1–2 semanas de observación del modo shadow (`[recurring-shadow]`, lo esperado es `verdict=SAFE` y `stale=0`), si se habilita la retirada real de occurrences obsoletas de grupos recurrentes (futura fase 4C.6E). Hoy ninguna ruta escribe esa retirada.
 
 ## OPERATOR / PRODUCTION
 
+- Revisar el log de la importación de Gencat (`/var/log/quefem-import.log`): confirmar que `[recurring-shadow]` informa los 10 grupos consolidados sin `blocked` ni `stale` inesperados.
 - Widget B2B: crear los widgets de los pilotos con `embed:widgets` cuando haya acuerdo. Antes de cobrar, revisar el aviso legal.
 - Verificar la configuración efectiva de Nginx, PM2 y cron antes de cualquier operación que dependa de ella.
 - Verificar las últimas ejecuciones y la restaurabilidad de los backups, la copia externa mediante `rclone` y las rotaciones de logs cuando una intervención operativa lo requiera.
@@ -109,6 +138,8 @@ M1 está activo. El siguiente paso operativo es desplegar M2 manteniendo `allows
 - No hay `ecosystem.config.*` versionado.
 - El repositorio documenta el estado y los requisitos del backup, pero no contiene la configuración externa ni un runbook reproducible completo de backup/restauración.
 - Parte de `SPECIFICATION.md` y `docs/design/stitch/` es histórica o futura y no representa por sí sola el estado implementado.
+- Los acentos de comarca de Gencat se resuelven solo al consultar; las filas se guardan sin acentos. Si se quiere corregir en origen, el normalizador podría usar `officialPlaceNames.json` (ICGC) para almacenar la forma oficial. Es opcional.
+- Grupos recurrentes `REVIEW_REQUIRED` y los de DIBA permanecen sin consolidar por decisión explícita.
 - Nuevas fuentes o funciones de producto solo pueden evaluarse tras una petición, licencia y alcance explícitos; no constituyen trabajo pendiente autorizado.
 
 ## External production configuration
@@ -122,7 +153,8 @@ M1 está activo. El siguiente paso operativo es desplegar M2 manteniendo `allows
 | Copia `rclone` a `TensPla/backups` | Confirmado externamente | Revisar último envío sin exponer credenciales ni IDs |
 | Logrotate | Confirmado externamente y verificado | Revisar configuración efectiva y rotaciones si se va a modificar |
 | Ticketmaster en producción | Activo según el estado confirmado | Verificar cron y configuración efectiva antes de operar |
-| DIBA en producción | Tres fuentes activas, imágenes deshabilitadas y sin cron | Desplegar/verificar M2 antes de instalar el cron por separado |
+| DIBA en producción | Tres fuentes activas, imágenes deshabilitadas, código M2 desplegado y sin cron | Ejecutar una pasada controlada de `diba:import:scheduled` antes de instalar el cron por separado |
+| Gencat recurrentes | 10 grupos consolidados, shadow activo tras cada import | Revisar `[recurring-shadow]` en `/var/log/quefem-import.log` |
 | CSP | Obligatoria; confirmada por el propietario el 2026-09-30 | Mantener; `/embed/` usa su propia CSP |
 | Widget B2B (`/embed/`) | Desplegado el 2026-09-30; solo los dos widgets de demostración de `/widget` | Revisar `embed:widgets -- list` antes de operar |
 

@@ -1,8 +1,8 @@
-# Disseny — Consolidació de produccions recurrents (Fase 4C.3, no implementat)
+# Disseny — Consolidació de produccions recurrents (Fase 4C.3)
 
-Aquest document descriu el disseny previst per a la fase 4C.3 (encara no implementada, ni autoritzada). La fase 4C.2 va lliurar únicament un detector i un fitxer de decisions de lectura; aquest document cobreix què passaria si, més endavant, s'autoritza consolidar plans ja existents que el detector classifica `SAFE_AUTOMATIC` (o que un revisor humà marca `ACCEPT` a `data-policy/recurring-production-decisions.json`).
+> **Estat (2026-10-14): implementat i en producció.** La infraestructura (`plan_aliases`, `recurring_production_applied_groups`, redireccions 301, `scripts/consolidate-recurring-group.js`) és activa des de la fase 4C.3, i s'han consolidat els 10 grups `ACCEPT` actuals de Gencat (fases 4C.3B–4C.8). El manteniment d'ocurrències durant la importació normal (4C.6B) és actiu; la reconciliació d'ocurrències obsoletes (4C.6D) funciona només en mode *shadow* (no escriu). L'estat operatiu viu a [`PROJECT_STATUS.md`](PROJECT_STATUS.md); la resta d'aquest document conserva el disseny original com a referència.
 
-**Cap part d'això s'executa avui.** No hi ha escriptures previstes fins que aquest disseny sigui revisat i el gate humà l'autoritzi explícitament.
+Aquest document descriu el disseny de la fase 4C.3. La fase 4C.2 va lliurar un detector i un fitxer de decisions (`data-policy/recurring-production-decisions.json`); la consolidació només s'aplica a grups `SAFE_AUTOMATIC` o amb una decisió humana `ACCEPT`.
 
 ## Principi rector
 
@@ -54,7 +54,7 @@ Com que cap fila s'elimina mai (§2), el rollback és senzim en principi: desfer
 - generi un fitxer SQL de rollback exacte abans de confirmar (mateix patró que `scripts/backfill-gencat-free-status.js`);
 - verifiqui invariants dins d'una única transacció abans de confirmar.
 
-## Resum de l'ordre d'implementació recomanat (Fase 4C.3+, no autoritzat encara)
+## Resum de l'ordre d'implementació recomanat (Fase 4C.3+, històric: ja executat)
 
 1. Disseny detallat i implementació de `plan_aliases` + redirecció 301.
 2. Verificació que el sitemap/SEO gestiona correctament la desaparició dels IDs no canònics.
