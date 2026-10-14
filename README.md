@@ -53,7 +53,7 @@ No ejecutes la variante con escritura ni jobs de producción sin autorización. 
 | `npm run db:purge` | Purgar planes caducados según la política vigente |
 | `npm run purge:inactive -- --dry-run` | Inspeccionar la purga de huérfanos inactivos |
 | `npm run import:gencat` | Sincronizar Agenda Cultural de Catalunya |
-| `npm run review:serve` | Página privada de revisión de DIBA (solo loopback; abrir con `scripts/open-review-page.ps1`) |
+| `npm run review:serve` | Página privada de revisión de DIBA (solo loopback; abrir con `scripts/open-review-page.cmd`) |
 | `npm run import:ticketmaster -- --dry-run` | Validar Ticketmaster sin escribir |
 | `npm run diba:import -- --dry-run` | Auditar los tres feeds DIBA sin escribir SQLite |
 | `npm run diba:import:scheduled` | Ejecutar la importación DIBA recurrente protegida, sin bypass de retirada masiva |

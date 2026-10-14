@@ -1,5 +1,5 @@
 // Starts the private DIBA review page. It binds to 127.0.0.1 only (the host cannot be changed) and is meant to be
-// opened through an SSH tunnel; see scripts/open-review-page.ps1 and docs/DEPLOYMENT.md. It is not a PM2 process, not
+// opened through an SSH tunnel; see scripts/open-review-page.cmd and docs/DEPLOYMENT.md. It is not a PM2 process, not
 // behind Nginx and exits by itself after a period without requests.
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';

@@ -179,15 +179,26 @@ test('a merge is refused while an import holds the lock, and when the plans no l
   });
 });
 
-test('same-feed records with different start times are separate sessions and cannot be merged', async () => {
+test('same-day sessions of one production with different start times can be merged into a single plan', async () => {
   const later = { data_inici: '2026-09-10 21:00:00', data_fi: '2026-09-10 23:00:00' };
+  const sessions = [raw('session-a', { data_inici: '2026-09-10 19:00:00', data_fi: '2026-09-10 20:10:00' }), raw('session-b', later)];
   await withReviewServer(async ({ request, post, db }) => {
     const [item] = (await request({ url: '/api/items', headers: { 'x-review-token': TOKEN } })).json().items.filter(({ kind }) => kind === 'POSSIBLE_DUPLICATE_WITHIN_FEED');
-    assert.equal(item.actions.merge.available, false);
-    assert.match(item.actions.merge.problems.join(' '), /hora de inicio distinta/);
-    assert.equal((await post(`/api/items/${item.id}/merge`)).status, 409);
-    assert.equal(db.prepare('SELECT COUNT(*) n FROM plan_aliases').get().n, 0);
-  }, { records: [raw('session-a'), raw('session-b', later)] });
+    assert.equal(item.actions.merge.available, true);
+    assert.deepEqual(item.records.map((record) => record.startsAt?.slice(11, 16)).sort(), ['19:00', '21:00'], 'the start times are shown to the reviewer');
+    const [first, second] = [owner(db, 'session-a'), owner(db, 'session-b')];
+    assert.notEqual(first, second);
+    assert.equal((await post(`/api/items/${item.id}/merge`)).status, 200);
+    assert.equal(owner(db, 'session-a'), owner(db, 'session-b'), 'both records now belong to one plan');
+    assert.equal(db.prepare('SELECT COUNT(*) n FROM plan_aliases').get().n, 1);
+    assert.equal(db.prepare("SELECT COUNT(*) n FROM plans WHERE status = 'active' AND id IN (?, ?)").get(first, second).n, 1, 'one card instead of two');
+    const plansBefore = db.prepare('SELECT COUNT(*) n FROM plans').get().n;
+    const again = (await importer(db, sessions).run({ feeds: [FEED] })).datasets[0];
+    assert.equal(again.safety.status, 'approved');
+    assert.equal(again.reviewQueue.filter(({ kind }) => kind === 'POSSIBLE_DUPLICATE_WITHIN_FEED').length, 0, 'a merged pair is not queued again');
+    assert.equal(db.prepare('SELECT COUNT(*) n FROM plans').get().n, plansBefore, 'the next import creates no plan');
+    assert.equal(owner(db, 'session-a'), owner(db, 'session-b'));
+  }, { records: sessions });
 });
 
 test('same-feed cases offer keep-separate for every member and stale decisions are read-only', async () => {

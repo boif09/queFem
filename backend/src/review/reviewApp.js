@@ -66,10 +66,6 @@ export function createReviewApp({
     if (item.kind === 'POSSIBLE_DUPLICATE_OF_PUBLISHED_PLAN' && records.length === 1 && item.candidatePlans.length === 1) {
       aliasPlanId = records[0].planId; canonicalPlanId = item.candidatePlans[0].planId;
     } else if (item.kind === 'POSSIBLE_DUPLICATE_WITHIN_FEED' && records.length === 2 && records.every((record) => record.planId)) {
-      // Two sessions of one production start at different times; a plan has no sessions, so merging would lose one.
-      if (records[0].startsAt && records[1].startsAt && records[0].startsAt !== records[1].startsAt) {
-        return { available: false, problems: ['Tienen hora de inicio distinta: son sesiones diferentes.'] };
-      }
       [canonicalPlanId, aliasPlanId] = [records[0].planId, records[1].planId].sort((a, b) => a - b);
     } else return { available: false, problems: ['Este caso no admite fusión automática.'] };
     if (!aliasPlanId || !canonicalPlanId) return { available: false, problems: ['El registro todavía no se ha importado.'] };

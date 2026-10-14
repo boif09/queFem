@@ -112,7 +112,7 @@ M1 y M2 están en producción (`allows_images=0`, cron diario 05:45). Desde al m
 
 **Desplegado el 2026-10-14 (commit `863248d`):** la importación real de DIBA usa ahora la política `review-queue` (`ambiguityPolicy` en `DibaImporter`; el valor por defecto del importador sigue siendo `block`). Los posibles duplicados con un plan público y dentro del mismo feed, y las decisiones humanas cuyo destino ya no existe, dejan de bloquear: el registro se importa como plan separado y se anota en `data/diba-review-queue.json` (junto a SQLite, escritura atómica, sin tocar la base). Se siguen bloqueando los fallos graves: retirada masiva, feed vacío o truncado, salud del parser y conflictos con una decisión humana vigente. Primera pasada manual en producción (2026-10-14, con backup previo): 480 planes nuevos (94 tourisme, 386 escenari), integridad y FK correctas, planes activos 2917 → 3397 y cola inicial de 43 casos (22 dentro del feed, 19 posibles duplicados de planes de Gencat, 2 decisiones obsoletas); un ensayo previo sobre una copia mostró que las repeticiones no crean nada y que la cola baja a unos 34 casos. Detalles en [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
-**Página privada de revisión (2026-10-14, `review:serve`):** permite fusionar («importar») o «mantener separado» cada caso de la cola con un clic. Solo es accesible por túnel SSH (`scripts/open-review-page.ps1`), con las decisiones nuevas guardadas en la tabla `diba_review_decisions`. Ver [`DEPLOYMENT.md`](DEPLOYMENT.md).
+**Página privada de revisión (2026-10-14, `review:serve`):** permite fusionar («importar») o «mantener separado» cada caso de la cola con un clic. Solo es accesible por túnel SSH (`scripts/open-review-page.cmd`), con las decisiones nuevas guardadas en la tabla `diba_review_decisions`. Ver [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
 **Primera revisión de la cola (2026-10-14):** se compararon los 19 posibles duplicados DIBA/Gencat (mismo título y fechas en todos) y se fusionaron 17 con `scripts/merge-duplicate-plans.js` (dry-run por defecto; decisiones versionadas en `data-policy/duplicate-plan-merges.json`, revisor `project-owner`). Cada plan DIBA nuevo pasó a ser alias 301 del plan de Gencat, que conserva sus campos y gana la procedencia DIBA; no se tocó ningún otro plan y existe SQL de rollback en `data/consolidation-logs/`. Quedan sin fusionar dos casos dudosos por lugar distinto: «Una carretada de contes» (planes 6767 y 6307) y «Conhort» (6650 y 3568).
 
@@ -133,7 +133,7 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
 - Verificar la configuración efectiva de Nginx, PM2 y cron antes de cualquier operación que dependa de ella.
 - Verificar las últimas ejecuciones y la restaurabilidad de los backups, la copia externa mediante `rclone` y las rotaciones de logs cuando una intervención operativa lo requiera.
 - Revisar periódicamente cobertura, indexación y errores concretos en Google Search Console.
-- Confirmar que `/var/log/quefem-diba.log` muestra `completed` cada día y revisar la cola con `scripts/open-review-page.ps1` (sin necesidad de abrir Nginx ni PM2).
+- Confirmar que `/var/log/quefem-diba.log` muestra `completed` cada día y revisar la cola con `scripts/open-review-page.cmd` (sin necesidad de abrir Nginx ni PM2).
 
 ## BLOCKED
 
