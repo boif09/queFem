@@ -231,7 +231,7 @@ El job programado nunca debe usar `npm run diba:import -- --allow-mass-removal`.
 - La cola es `diba-review-queue.json` junto a la SQLite (`/var/www/queFem/data/`). Se reescribe de forma atómica en cada importación real (nunca en dry-run), conserva `firstSeenAt`, retira los casos ya resueltos y no borra el backlog de un feed que falló. No es una fuente de verdad del catálogo: si no se puede escribir, la importación continúa y el error sale por stderr.
 - Cada elemento indica `kind` (`POSSIBLE_DUPLICATE_OF_PUBLISHED_PLAN`, `POSSIBLE_DUPLICATE_WITHIN_FEED` o `STALE_REVIEW_DECISION`), los registros DIBA con título, fechas, lugar y URL, los planes candidatos y la acción por defecto aplicada.
 
-Al desplegar esta política el primer cron importará de golpe lo acumulado durante el bloqueo (ensayo sobre una copia de producción del 2026-10-14: 94 planes nuevos de Turisme y 386 de Escenari) y publicará como planes separados los posibles duplicados pendientes (19 frente a planes de Gencat). Una repetición no crea nada. Comprobar después `/var/log/quefem-diba.log`, el conteo de planes públicos y `diba-review-queue.json`.
+La política se desplegó el 2026-10-14 y una pasada manual publicó de golpe lo acumulado durante el bloqueo (94 planes nuevos de Turisme y 386 de Escenari), incluidos como planes separados los posibles duplicados pendientes (19 frente a planes de Gencat). Una repetición no crea nada. Comprobar después `/var/log/quefem-diba.log`, el conteo de planes públicos y `diba-review-queue.json`.
 
 Para comprobar o editar la configuración y consultar los últimos logs:
 

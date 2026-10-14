@@ -31,7 +31,7 @@ Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mism
 - La rotación de logs de Nginx está configurada y verificada.
 - Gencat, Ticketmaster, Fever y las tres fuentes DIBA están activos en producción. `diba-tourisme`, `diba-escenari` y `diba-museus` tienen `enabled=1` y `allows_images=0`; su importación inicial, revisión humana, reconciliación y activación M1 están completadas. Fever tiene source habilitada, imágenes same-origin activadas y cron propio (`fever:import:scheduled`, a las 01:05, 07:05, 13:05 y 19:05) cuyas ejecuciones terminan `completed`.
 - Los crons de producción confirmados el 2026-10-14 son: Gencat `:17` cada 2 h, Ticketmaster `:37` cada 2 h y sus imágenes `:52`, Fever cada 6 h, DIBA diario 05:45, `purge:inactive` diario 03:45 y backup 05:10. La purga automática de planes inactivos ya está activa.
-- **La importación programada de DIBA falla desde al menos el 2026-09-30** (guard fail-closed sobre duplicados dudosos) en `diba-tourisme` y `diba-escenari`; `diba-museus` importa con normalidad. La corrección (cola de revisión) está implementada y pendiente de desplegar. Ver «DIBA REVIEW QUEUE».
+- **La importación programada de DIBA falla desde al menos el 2026-09-30** (guard fail-closed sobre duplicados dudosos) en `diba-tourisme` y `diba-escenari`; `diba-museus` importa con normalidad. Corregido el 2026-10-14 con la política de cola de revisión. Ver «DIBA REVIEW QUEUE».
 
 La infraestructura de producción es parcialmente externa a Git. «Confirmado» describe el estado conocido a fecha de esta revisión, no sustituye la comprobación previa a una operación.
 
@@ -110,9 +110,9 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 M1 y M2 están en producción (`allows_images=0`, cron diario 05:45). Desde al menos el 2026-09-30 el guard bloqueaba por completo `diba-tourisme` y `diba-escenari` mientras hubiera duplicados dudosos sin revisar (5 + 38 casos el 2026-10-14). Decisión del propietario: un duplicado visible es preferible a una importación parada.
 
-**Implementado en local, pendiente de desplegar:** la importación real de DIBA usa ahora la política `review-queue` (`ambiguityPolicy` en `DibaImporter`; el valor por defecto del importador sigue siendo `block`). Los posibles duplicados con un plan público y dentro del mismo feed, y las decisiones humanas cuyo destino ya no existe, dejan de bloquear: el registro se importa como plan separado y se anota en `data/diba-review-queue.json` (junto a SQLite, escritura atómica, sin tocar la base). Se siguen bloqueando los fallos graves: retirada masiva, feed vacío o truncado, salud del parser y conflictos con una decisión humana vigente. Ensayo con una copia de producción: 480 planes nuevos (94 tourisme, 386 escenari) al primer import, 0 en la repetición, integridad y FK correctas, cola final de 34 casos abiertos (13 dentro del feed, 19 posibles duplicados de planes de Gencat, 2 decisiones obsoletas). Detalles en [`DEPLOYMENT.md`](DEPLOYMENT.md).
+**Desplegado el 2026-10-14 (commit `863248d`):** la importación real de DIBA usa ahora la política `review-queue` (`ambiguityPolicy` en `DibaImporter`; el valor por defecto del importador sigue siendo `block`). Los posibles duplicados con un plan público y dentro del mismo feed, y las decisiones humanas cuyo destino ya no existe, dejan de bloquear: el registro se importa como plan separado y se anota en `data/diba-review-queue.json` (junto a SQLite, escritura atómica, sin tocar la base). Se siguen bloqueando los fallos graves: retirada masiva, feed vacío o truncado, salud del parser y conflictos con una decisión humana vigente. Primera pasada manual en producción (2026-10-14, con backup previo): 480 planes nuevos (94 tourisme, 386 escenari), integridad y FK correctas, planes activos 2917 → 3397 y cola inicial de 43 casos (22 dentro del feed, 19 posibles duplicados de planes de Gencat, 2 decisiones obsoletas); un ensayo previo sobre una copia mostró que las repeticiones no crean nada y que la cola baja a unos 34 casos. Detalles en [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
-Pendiente: desplegar, verificar el primer cron y revisar la cola. Resolver un caso con «enlazar» sobre un plan DIBA ya importado exigirá una consolidación de planes (hoy lo bloquea `REVIEWED_SOURCE_LINK_CHANGED`); eso debe resolverlo la futura página privada de revisión.
+Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar la cola. Resolver un caso con «enlazar» sobre un plan DIBA ya importado exigirá una consolidación de planes (hoy lo bloquea `REVIEWED_SOURCE_LINK_CHANGED`); eso debe resolverlo la futura página privada de revisión.
 
 ## AUTONOMOUS WORK
 
@@ -130,7 +130,7 @@ Pendiente: desplegar, verificar el primer cron y revisar la cola. Resolver un ca
 - Verificar la configuración efectiva de Nginx, PM2 y cron antes de cualquier operación que dependa de ella.
 - Verificar las últimas ejecuciones y la restaurabilidad de los backups, la copia externa mediante `rclone` y las rotaciones de logs cuando una intervención operativa lo requiera.
 - Revisar periódicamente cobertura, indexación y errores concretos en Google Search Console.
-- Tras desplegar la política `review-queue`: confirmar que `/var/log/quefem-diba.log` muestra `completed` y revisar `data/diba-review-queue.json`.
+- Confirmar que `/var/log/quefem-diba.log` muestra `completed` cada día y revisar `data/diba-review-queue.json`.
 
 ## BLOCKED
 
@@ -159,7 +159,7 @@ Pendiente: desplegar, verificar el primer cron y revisar la cola. Resolver un ca
 | Copia `rclone` a `TensPla/backups` | Confirmado externamente | Revisar último envío sin exponer credenciales ni IDs |
 | Logrotate | Confirmado externamente y verificado | Revisar configuración efectiva y rotaciones si se va a modificar |
 | Ticketmaster en producción | Activo según el estado confirmado | Verificar cron y configuración efectiva antes de operar |
-| DIBA en producción | Tres fuentes activas, imágenes deshabilitadas, M2 desplegado y cron diario 05:45 instalado; `diba-tourisme` y `diba-escenari` fallan fail-closed hasta desplegar la política `review-queue` | Revisar `/var/log/quefem-diba.log` y `data/diba-review-queue.json` |
+| DIBA en producción | Tres fuentes activas, imágenes deshabilitadas, M2 desplegado y cron diario 05:45 instalado; `diba-tourisme` y `diba-escenari` fallaban fail-closed hasta el 2026-10-14; ahora importan con la política `review-queue` | Revisar `/var/log/quefem-diba.log` y `data/diba-review-queue.json` |
 | Cron de Fever | Instalado (01:05, 07:05, 13:05, 19:05); ejecuciones `completed` | Revisar `/var/log/quefem-fever.log` |
 | Purga de inactivos | `purge:inactive` diario 03:45, instalado | Revisar `/var/log/quefem-purge.log` |
 | Gencat recurrentes | 10 grupos consolidados, shadow activo tras cada import | Revisar `[recurring-shadow]` en `/var/log/quefem-import.log` |
