@@ -18,6 +18,7 @@
     "diba:discovery": "node scripts/dibaDiscovery.js",
     "diba:import": "node backend/src/jobs/importDiba.js",
     "diba:import:scheduled": "node backend/src/jobs/importDibaScheduled.js",
+    "review:serve": "node backend/src/jobs/reviewServer.js",
     "diba:quality:audit": "node scripts/dibaQualityAudit.js",
     "diba:policy:dry-run": "node scripts/dibaPolicyDryRun.js",
     "diba:policy:apply": "node scripts/dibaPolicyApply.js",

@@ -214,6 +214,24 @@ PATH=/root/.nvm/versions/node/v24.18.0/bin:/usr/local/sbin:/usr/local/bin:/usr/s
 
 Se ejecuta cada dos horas, en el minuto 17, usa Node/npm instalado mediante NVM y guarda stdout y stderr en `/var/log/quefem-import.log`. El comando adquiere el lock atómico `<DATABASE_PATH>.gencat-import.lock` antes de abrir SQLite o contactar la fuente. Una invocación cron o manual concurrente termina correctamente con estado `skipped`; un lock cuyo proceso ya no existe se recupera mediante la misma identidad PID/inicio usada por los imports Fever.
 
+## Página privada de revisión de DIBA
+
+La cola `diba-review-queue.json` se revisa en una página privada (`npm run review:serve`, código en `backend/src/review/`). No tiene login porque **no es accesible desde internet**: escucha solo en `127.0.0.1:3015` del servidor (el host no es configurable), no es un proceso de PM2, no pasa por Nginx y se cierra sola tras 3 horas sin peticiones autenticadas. Se abre por un túnel SSH desde el equipo del propietario:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/open-review-page.ps1 -Target root@servidor
+```
+
+(o definir una vez `TENSPLA_SSH_TARGET` y ejecutarlo sin argumentos). El lanzador genera un secreto por sesión, lo envía por stdin a un archivo privado (`umask 077`) que el comando de arranque lee y borra —nunca aparece en la línea de comandos de un proceso— y abre `http://localhost:3015/?t=<secreto>`; al cerrar la ventana se detiene la página. Sin el secreto en la URL, `GET /` y `GET /api/items` devuelven 403, de modo que otro proceso del servidor que alcance el puerto local tampoco puede leer ni escribir. Además se comprueban el `Host` (contra DNS rebinding), el `Origin` y `Sec-Fetch-Site` de cada escritura, que sea `application/json`, y el HTML lleva una CSP estricta. Nunca hay que añadir un `location` de Nginx ni un proceso permanente para esta página.
+
+Cada caso muestra los dos registros o planes lado a lado (título, fechas, hora de inicio, lugar, fuentes) con lo que coincide y lo que difiere:
+
+- **Importar (fusionar)** ejecuta la misma fusión de `scripts/merge-duplicate-plans.js` (un plan pasa a ser alias 301 del otro), solo si cumple sus precondiciones: mismo título, fechas y municipio y el plan absorbido solo con procedencia DIBA y sin occurrences. En casos dentro de DIBA se bloquea si la hora de inicio difiere, porque son sesiones distintas. Toma el lock de importación de DIBA (si hay una en curso responde 409), hace una transacción y guarda el SQL de rollback en `diba_review_decisions`. No tiene botón de deshacer.
+- **Mantener separado** guarda una decisión `KEEP_SEPARATE` por registro en la tabla `diba_review_decisions` (migración 018). La importación la lee junto a `data-policy/diba-link-overrides.json` (el archivo de Git manda si ambos existen) y el caso deja de aparecer en la siguiente cola. «Deshacer» la borra y el caso vuelve.
+- Las decisiones antiguas con destino perdido se muestran solo como información: hay que retirarlas de `data-policy/` en Git.
+
+La página lee la cola tal como la dejó la última importación; las decisiones tomadas se ocultan al instante y la cola se reescribe en la siguiente importación.
+
 ## Sincronización recurrente de DIBA
 
 El repositorio prepara `npm run diba:import:scheduled` para los tres feeds DIBA. Usa el mismo importador y lock que el comando manual real, rechaza argumentos, fija `allowMassRemoval=false`, escribe un resumen JSON en stdout, informa fallos por stderr y devuelve código distinto de cero si falla cualquier dataset. La ambigüedad nueva o una autorización que quede obsoleta antes de escribir revierte el dataset afectado.

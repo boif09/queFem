@@ -91,7 +91,7 @@ test('the generated rollback restores the exact previous state', () => {
     db.prepare('INSERT INTO plan_categories (plan_id, category_id) VALUES (?, ?)').run(aliasPlanId, category);
     const before = { alias: planRow(db, aliasPlanId), canonical: planRow(db, canonicalPlanId), owner: owner(db, 'd-1') };
     const done = applyMerge(db, computeMergePlan(db, decision(aliasPlanId, canonicalPlanId)));
-    db.exec(`BEGIN; ${rollbackStatements(done).join('\n')} COMMIT;`);
+    db.exec(`BEGIN; ${rollbackStatements(done).join('\n')}\n COMMIT;`);
     assert.deepEqual(planRow(db, aliasPlanId), before.alias);
     assert.deepEqual(planRow(db, canonicalPlanId), before.canonical);
     assert.equal(owner(db, 'd-1'), before.owner);
@@ -142,7 +142,8 @@ test('merge never absorbs a plan with non-DIBA provenance, occurrences or existi
     enableDiba(db);
     const first = addPlan(db, { fingerprint: 'a', sourceKey: FEED.sourceKey, sourceRecordId: 'd-a' });
     const second = addPlan(db, { fingerprint: 'b', sourceKey: FEED.sourceKey, sourceRecordId: 'd-b' });
-    assert.match(computeMergePlan(db, decision(first, second)).problems.join(' | '), /no enabled gencat-agenda provenance/);
+    db.prepare('UPDATE sources SET enabled = 0 WHERE key = ?').run(FEED.sourceKey);
+    assert.match(computeMergePlan(db, decision(first, second)).problems.join(' | '), /no enabled provenance/);
   });
 });
 

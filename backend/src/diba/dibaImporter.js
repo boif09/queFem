@@ -248,7 +248,7 @@ export class DibaImporter {
       return {
         sourceRecordId: String(sourceRecordId), title: plan?.original_title ?? null, startDate: plan?.start_date ?? null,
         endDate: plan?.end_date ?? null, municipality: plan?.municipality ?? null, venue: plan?.venue_name ?? null,
-        address: plan?.address ?? null, url: candidate?.sourceUrl ?? null,
+        address: plan?.address ?? null, schedule: plan?.schedule_text ?? null, url: candidate?.sourceUrl ?? null,
       };
     };
     const planSummary = (planId) => {

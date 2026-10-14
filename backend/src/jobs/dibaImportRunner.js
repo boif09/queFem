@@ -3,6 +3,8 @@ import { openDatabase } from '../db/database.js';
 import { DibaApiClient } from '../diba/m0Discovery.js';
 import { AMBIGUITY_POLICY, DibaImporter, municipalityIndex } from '../diba/dibaImporter.js';
 import { reviewQueuePath, updateReviewQueue } from '../diba/reviewQueue.js';
+import { DibaReviewDecisionRepository, withReviewPageOverrides } from '../diba/reviewDecisions.js';
+import { loadDibaPolicyOverridesSync } from '../diba/dibaPolicyOverrides.js';
 import { DibaImportLock } from '../diba/importLock.js';
 import { readAndVerifyIcgcSnapshot } from '../geography/icgcSnapshot.js';
 import { DEFAULT_ICGC_MANIFEST_PATH } from './updateIcgcGeography.js';
@@ -29,6 +31,8 @@ export async function runDibaImport(config, {
     const importer = new DibaImporter({
       db, client: new DibaApiClient({ fetchImpl }), municipalities: municipalityIndex(loaded.snapshot),
       ...(now ? { now } : {}), ambiguityPolicy,
+      // Decisions taken on the private review page extend the reviewed overrides kept in Git.
+      reviewedOverrides: withReviewPageOverrides(loadDibaPolicyOverridesSync(), new DibaReviewDecisionRepository(db)),
     });
     // The queue is a best-effort report: failing to write it must never fail or hide an import result.
     const recordReviewQueue = (results) => {

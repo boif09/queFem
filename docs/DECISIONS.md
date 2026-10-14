@@ -22,6 +22,10 @@ Registro ligero de decisiones demostrables en documentación, configuración o c
   afiliación. El widget siempre muestra la marca y el enlace de Tens pla?, y el acceso se limita por
   clave y lista de dominios. Ver [`EMBED_WIDGET.md`](EMBED_WIDGET.md).
 - La deduplicación multi-source es conservadora: una coincidencia dudosa se revisa, no se fusiona silenciosamente.
+- Página de revisión de DIBA (2026-10-14): es privada por construcción, no por contraseña. Escucha solo en el
+  loopback del servidor, sin Nginx ni PM2, y se abre por túnel SSH con un secreto por sesión; no se añade
+  autenticación propia. Las decisiones tomadas en ella viven en SQLite (`diba_review_decisions`), no en Git,
+  para que los despliegues no choquen con ellas.
 - Importación DIBA (2026-10-14): una coincidencia dudosa nunca debe parar la importación diaria. Los
   posibles duplicados se publican como planes separados y se anotan en una cola de revisión
   (`diba-review-queue.json`); solo siguen bloqueando los fallos graves (retirada masiva, feed

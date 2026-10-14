@@ -57,7 +57,7 @@ export function computeMergePlan(db, decision) {
   if (!aliasSources.length) problems.push('alias plan has no provenance to move.');
   const foreign = aliasSources.filter((row) => !row.source_key.startsWith('diba-'));
   if (foreign.length) problems.push(`alias plan carries non-DIBA provenance (${foreign.map((row) => row.source_key).join(', ')}); only DIBA-only plans can be absorbed.`);
-  if (!canonicalSources.some((row) => row.source_key === 'gencat-agenda' && row.enabled === 1)) problems.push('canonical plan has no enabled gencat-agenda provenance.');
+  if (!canonicalSources.some((row) => row.enabled === 1)) problems.push('canonical plan has no enabled provenance.');
   if (aliasRepository.isAlias(aliasPlanId) || aliasRepository.isCanonical(aliasPlanId)) problems.push(`plan ${aliasPlanId} already takes part in plan_aliases.`);
   if (aliasRepository.isAlias(canonicalPlanId)) problems.push(`canonical plan ${canonicalPlanId} is itself an alias.`);
 
@@ -113,12 +113,15 @@ function sqlValue(value) { return value === null || value === undefined ? 'NULL'
 
 // Exact inverse of applyMerge for one plan: restores the alias plan row, the provenance owner, the categories
 // that were added and removes the alias row.
+// The category deletes assume nothing else attached those categories to the canonical plan after the merge: review
+// the file against the current data before running it, and prefer doing it right after the merge.
 export function rollbackStatements(plan) {
   const alias = plan.aliasPlan;
   return [
+    '-- Reverts one duplicate-plan merge. Review against current data before running (see duplicatePlanMerge.js).',
     `UPDATE plans SET status = ${sqlValue(alias.status)}, permanent = ${sqlValue(alias.permanent)}, inactive_at = ${sqlValue(alias.inactive_at)}, updated_at = ${sqlValue(alias.updated_at)} WHERE id = ${alias.id};`,
     ...plan.sourceRows.map((row) => `UPDATE plan_sources SET plan_id = ${row.plan_id} WHERE id = ${row.plan_source_id};`),
     ...plan.newCategoryIds.map((categoryId) => `DELETE FROM plan_categories WHERE plan_id = ${plan.canonicalPlanId} AND category_id = ${categoryId};`),
-    `DELETE FROM plan_aliases WHERE alias_plan_id = ${alias.id};`,
+    `DELETE FROM plan_aliases WHERE alias_plan_id = ${alias.id} AND canonical_plan_id = ${plan.canonicalPlanId};`,
   ];
 }
