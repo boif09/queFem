@@ -1,0 +1,226 @@
+{
+  "version": 1,
+  "decisions": [
+    {
+      "aliasPlanId": 6751,
+      "canonicalPlanId": 6153,
+      "title": "Göteborg",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari77463437433313143661370586"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6772,
+      "canonicalPlanId": 6342,
+      "title": "Struc Màgic Teatre",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari117823145845911782331370835"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6748,
+      "canonicalPlanId": 6608,
+      "title": "Ruta",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari3173395839613698501370817"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6995,
+      "canonicalPlanId": 6398,
+      "title": "Autoficció",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari29915135861413694471371929"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6816,
+      "canonicalPlanId": 6352,
+      "title": "Vola, vola Piu!",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari714499552213702061370322"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6782,
+      "canonicalPlanId": 6600,
+      "title": "Forat",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1219212128261612192151370294"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6811,
+      "canonicalPlanId": 6400,
+      "title": "VIVA!",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari137019837433313702011370590"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6799,
+      "canonicalPlanId": 6273,
+      "title": "Acasa",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari636322219513697041370469"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6970,
+      "canonicalPlanId": 6476,
+      "title": "Banaba Flup",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari136348547929113634881372046"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6807,
+      "canonicalPlanId": 6294,
+      "title": "Refugi",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari1359279128261613592821370320"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6749,
+      "canonicalPlanId": 6607,
+      "title": "Desorientat",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari136956195839613695641370813"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6742,
+      "canonicalPlanId": 6373,
+      "title": "Un món (i un munt!) de dracs",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari33134553537141370858"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6797,
+      "canonicalPlanId": 6521,
+      "title": "Permagel",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari131384337433313641571370584"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6792,
+      "canonicalPlanId": 6144,
+      "title": "Bicicadabra",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari235833849796860451370829"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6765,
+      "canonicalPlanId": 6605,
+      "title": "Hats",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari3850011797083191370882"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6737,
+      "canonicalPlanId": 6180,
+      "title": "Armstrong, un musical molt espacial",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari180637433313103501370588"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6623,
+      "canonicalPlanId": 6097,
+      "title": "Sitges Film Festival",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-tourisme",
+        "sourceRecordId": "agendaturisme406222895"
+      },
+      "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
+      "reviewedAt": "2026-10-14",
+      "reviewer": "project-owner"
+    }
+  ]
+}
