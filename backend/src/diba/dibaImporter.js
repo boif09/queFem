@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { MultiSourceMatcher } from '../deduplication/multiSourceMatcher.js';
 import { PlanRepository, canonicalJson } from '../db/repositories/plan.repository.js';
 import { TicketmasterReconciliationRepository } from '../db/repositories/ticketmasterReconciliation.repository.js';
@@ -150,13 +151,27 @@ function validateRegisteredSource(source) {
   }
 }
 
+// How unresolved duplicate ambiguity is handled before a feed is persisted.
+// BLOCK (default) rejects the whole feed until a human decides. REVIEW_QUEUE keeps importing: possible
+// duplicates are published as separate plans (a visible duplicate is cheaper than a stalled feed) and
+// are listed in the review queue instead. Integrity problems around human decisions always block.
+export const AMBIGUITY_POLICY = Object.freeze({ BLOCK: 'block', REVIEW_QUEUE: 'review-queue' });
+const REVIEW_QUEUE_KIND = Object.freeze({
+  UNRESOLVED_CROSS_SOURCE_POSSIBLE: 'POSSIBLE_DUPLICATE_OF_PUBLISHED_PLAN',
+  UNRESOLVED_SAME_FEED_COMPONENT: 'POSSIBLE_DUPLICATE_WITHIN_FEED',
+  REVIEWED_TARGET_NOT_RESOLVED: 'STALE_REVIEW_DECISION',
+});
+
 export class DibaImporter {
   constructor({
     db, client, now = () => new Date(), lookaheadDays = 365, municipalities = new Map(),
     maximumRemovalRatio = 0.5, minimumHealthRatio = 0.5, postCommitCheck, beforePersist,
     insideTransaction, finalDeferredKeys = deferredFinalReviewKeys(),
     reviewedOverrides = loadDibaPolicyOverridesSync(), finalReviewDecisions = loadFinalReviewDecisions(),
+    ambiguityPolicy = AMBIGUITY_POLICY.BLOCK,
   }) {
+    if (!Object.values(AMBIGUITY_POLICY).includes(ambiguityPolicy)) throw new Error(`Unsupported DIBA ambiguity policy: ${ambiguityPolicy}`);
+    this.ambiguityPolicy = ambiguityPolicy;
     this.db = db; this.client = client; this.now = now; this.lookaheadDays = lookaheadDays;
     this.municipalities = municipalities; this.maximumRemovalRatio = maximumRemovalRatio; this.minimumHealthRatio = minimumHealthRatio;
     this.plans = new PlanRepository(db); this.matcher = new MultiSourceMatcher(db);
@@ -209,6 +224,52 @@ export class DibaImporter {
   resolveReviewedTarget(identity) {
     const rows = this.findStableIdentity.all(identity.sourceKey, identity.sourceRecordId);
     return rows.length === 1 ? rows[0] : null;
+  }
+
+  targetIsAbsent(identity) {
+    return this.findStableIdentity.all(identity.sourceKey, identity.sourceRecordId).length === 0;
+  }
+
+  // Splits datasetSafetyPlan blockers into those that stop the feed and those that only feed the review queue.
+  // A reviewed target that no longer exists at all (e.g. the public event expired and was purged) is a stale
+  // decision, not a conflict: the record simply stops being linked.
+  partitionBlockers(blockers) {
+    if (this.ambiguityPolicy === AMBIGUITY_POLICY.BLOCK) return { blocking: blockers, review: [] };
+    const review = blockers.filter(({ code, targetMissing }) => code === 'UNRESOLVED_CROSS_SOURCE_POSSIBLE'
+      || code === 'UNRESOLVED_SAME_FEED_COMPONENT' || (code === 'REVIEWED_TARGET_NOT_RESOLVED' && targetMissing === true));
+    return { blocking: blockers.filter((blocker) => !review.includes(blocker)), review };
+  }
+
+  reviewQueueItems(feed, candidates, review) {
+    const byId = new Map(candidates.map((candidate) => [String(candidate.sourceRecordId), candidate]));
+    const recordSummary = (sourceRecordId) => {
+      const candidate = byId.get(String(sourceRecordId));
+      const plan = candidate?.plan;
+      return {
+        sourceRecordId: String(sourceRecordId), title: plan?.original_title ?? null, startDate: plan?.start_date ?? null,
+        endDate: plan?.end_date ?? null, municipality: plan?.municipality ?? null, venue: plan?.venue_name ?? null,
+        address: plan?.address ?? null, url: candidate?.sourceUrl ?? null,
+      };
+    };
+    const planSummary = (planId) => {
+      const plan = this.overlayPlan(planId);
+      return plan ? {
+        planId: plan.id, title: plan.original_title, startDate: plan.start_date, endDate: plan.end_date,
+        municipality: plan.municipality, venue: plan.venue_name, status: plan.status,
+        sources: [...new Set(plan.sourceLinks.map(({ sourceKey }) => sourceKey))],
+      } : { planId, missing: true };
+    };
+    return review.map((blocker) => {
+      const sourceRecordIds = [...blocker.sourceRecordIds].map(String).sort();
+      return {
+        id: crypto.createHash('sha1').update([feed.sourceKey, blocker.code, ...sourceRecordIds].join('|')).digest('hex').slice(0, 16),
+        kind: REVIEW_QUEUE_KIND[blocker.code], code: blocker.code, dataset: feed.dataset, sourceKey: feed.sourceKey,
+        defaultAction: blocker.code === 'REVIEWED_TARGET_NOT_RESOLVED' ? 'STALE_DECISION_IGNORED' : 'IMPORTED_AS_SEPARATE_PLAN',
+        records: sourceRecordIds.map(recordSummary),
+        candidatePlans: (blocker.candidatePlanIds || []).map(planSummary),
+        ...(blocker.target ? { staleTarget: blocker.target } : {}),
+      };
+    });
   }
 
   planContainsDeferredIdentity(plan) {
@@ -291,7 +352,7 @@ export class DibaImporter {
       let suppressPublication = disposition?.type === 'FINAL_DEFER' || disposition?.type === 'OVERRIDE_DEFER';
       if (disposition?.type === 'OVERRIDE_LINK_TO_EXISTING') {
         const target = this.resolveReviewedTarget(disposition.decision.target);
-        if (!target) blockers.push({ code: 'REVIEWED_TARGET_NOT_RESOLVED', sourceRecordIds: [sourceRecordId], target: disposition.decision.target });
+        if (!target) blockers.push({ code: 'REVIEWED_TARGET_NOT_RESOLVED', sourceRecordIds: [sourceRecordId], target: disposition.decision.target, targetMissing: this.targetIsAbsent(disposition.decision.target) });
         else {
           reviewedTarget = target;
           targetPlanId = target.planId;
@@ -302,7 +363,7 @@ export class DibaImporter {
         }
       } else if (disposition?.type === 'FINAL_CONSOLIDATE_TO_ONE_PLAN') {
         const target = this.resolveReviewedTarget(disposition.decision.canonicalSourceIdentity);
-        if (!target) blockers.push({ code: 'REVIEWED_TARGET_NOT_RESOLVED', sourceRecordIds: [sourceRecordId], target: disposition.decision.canonicalSourceIdentity });
+        if (!target) blockers.push({ code: 'REVIEWED_TARGET_NOT_RESOLVED', sourceRecordIds: [sourceRecordId], target: disposition.decision.canonicalSourceIdentity, targetMissing: this.targetIsAbsent(disposition.decision.canonicalSourceIdentity) });
         else {
           reviewedTarget = target;
           targetPlanId = target.planId;
@@ -527,6 +588,8 @@ export class DibaImporter {
       }
 
       const safety = this.datasetSafetyPlan(feed, candidates, bounds, dryRun ? virtualPlans : new Map());
+      const { blocking, review } = this.partitionBlockers(safety.blockers);
+      summary.reviewQueue = this.reviewQueueItems(feed, candidates, review);
       summary.sameFeedPotentialDuplicateRecords = new Set(safety.sameFeed.flatMap(({ members }) => members.map(({ sourceRecordId }) => sourceRecordId))).size;
       summary.sameFeedPotentialDuplicateClusters = safety.sameFeed.map(({ members, evidence }) => ({
         dataset: feed.dataset, classification: 'NEEDS REVIEW',
@@ -534,12 +597,14 @@ export class DibaImporter {
         records: members, evidence: evidence[0] || null, componentEvidence: evidence,
       }));
       summary.safety = {
-        status: safety.blockers.length ? (dryRun ? 'would-reject' : 'rejected') : 'approved',
-        code: safety.blockers.length ? 'UNRESOLVED_DIBA_AMBIGUITY' : null,
-        blockers: safety.blockers,
+        status: blocking.length ? (dryRun ? 'would-reject' : 'rejected') : 'approved',
+        code: blocking.length ? 'UNRESOLVED_DIBA_AMBIGUITY' : null,
+        blockers: blocking,
+        policy: this.ambiguityPolicy,
+        reviewQueued: review.length,
       };
-      if (safety.blockers.length && !dryRun) {
-        const error = new Error(`DIBA ${feed.dataset} recurring safety guard rejected ${safety.blockers.length} unresolved ambiguity component(s).`);
+      if (blocking.length && !dryRun) {
+        const error = new Error(`DIBA ${feed.dataset} recurring safety guard rejected ${blocking.length} unresolved ambiguity component(s).`);
         error.code = 'UNRESOLVED_DIBA_AMBIGUITY';
         throw error;
       }
@@ -642,7 +707,7 @@ export class DibaImporter {
         // plans only after every record in this feed has been matched. A plan
         // has one effective representation: the latest feed replaces any
         // previous virtual state while retaining its stable plan identity.
-        if (!safety.blockers.length) for (const [planId, plan] of stagedVirtualPlans) virtualPlans.set(planId, plan);
+        if (!blocking.length) for (const [planId, plan] of stagedVirtualPlans) virtualPlans.set(planId, plan);
         return summary;
       }
 
@@ -650,8 +715,9 @@ export class DibaImporter {
       this.beforePersist?.({ feed, summary, candidates });
       this.db.transaction(() => {
         const lockedSafety = this.datasetSafetyPlan(feed, candidates, bounds);
-        if (lockedSafety.blockers.length || lockedSafety.authorization !== safety.authorization) {
-          summary.safety = { status: 'rejected', code: 'DIBA_STALE_DATASET_AUTHORIZATION', blockers: lockedSafety.blockers };
+        const lockedBlocking = this.partitionBlockers(lockedSafety.blockers).blocking;
+        if (lockedBlocking.length || lockedSafety.authorization !== safety.authorization) {
+          summary.safety = { status: 'rejected', code: 'DIBA_STALE_DATASET_AUTHORIZATION', blockers: lockedBlocking };
           const error = new Error(`DIBA ${feed.dataset} database-dependent safety authorization changed before persistence.`);
           error.code = 'DIBA_STALE_DATASET_AUTHORIZATION';
           throw error;

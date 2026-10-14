@@ -218,13 +218,20 @@ Se ejecuta cada dos horas, en el minuto 17, usa Node/npm instalado mediante NVM 
 
 El repositorio prepara `npm run diba:import:scheduled` para los tres feeds DIBA. Usa el mismo importador y lock que el comando manual real, rechaza argumentos, fija `allowMassRemoval=false`, escribe un resumen JSON en stdout, informa fallos por stderr y devuelve código distinto de cero si falla cualquier dataset. La ambigüedad nueva o una autorización que quede obsoleta antes de escribir revierte el dataset afectado.
 
-No hay cron DIBA instalado por este cambio. Cuando se autorice por separado, el horario recomendado es diario a las 05:45, después del backup aproximado de las 05:10 y fuera del minuto 17 usado por Gencat:
+El cron DIBA está instalado en producción (confirmado el 2026-10-14), diario a las 05:45, después del backup de las 05:10 y fuera del minuto 17 usado por Gencat:
 
 ```cron
-45 5 * * * cd /var/www/queFem && npm run diba:import:scheduled >> /var/log/quefem-diba.log 2>&1
+45 5 * * * cd /var/www/queFem && /root/.nvm/versions/node/v24.18.0/bin/npm run diba:import:scheduled >> /var/log/quefem-diba.log 2>&1
 ```
 
-El job programado nunca debe usar `npm run diba:import -- --allow-mass-removal`. Una retirada superior al 50 % requiere revisión y una ejecución manual explícita. Antes de instalar el cron hay que desplegar y verificar esta versión, confirmar el backup reciente y revisar una ejecución controlada del entrypoint programado.
+El job programado nunca debe usar `npm run diba:import -- --allow-mass-removal`. Una retirada superior al 50 % requiere revisión y una ejecución manual explícita. Hasta ahora, cualquier duplicado dudoso sin revisar bloqueaba el feed completo (`UNRESOLVED_DIBA_AMBIGUITY`): desde al menos el 2026-09-30 `diba-tourisme` y `diba-escenari` no se actualizaban. El importador real (manual y programado) usa ahora la política `review-queue`; con `ambiguityPolicy: 'block'`, el valor por defecto de `DibaImporter`, se conserva el comportamiento antiguo. Con `review-queue`:
+
+- Un posible duplicado de un plan público existente, un posible duplicado dentro del mismo feed y una decisión humana cuyo destino ya no existe **no bloquean**: el registro se importa como plan separado (o sin enlazar) y se anota en la cola de revisión. No se fusiona nada de forma silenciosa.
+- Siguen bloqueando, por feed, la retirada de más del 50 %, un feed vacío o truncado, la salud del parser, los conflictos con una decisión humana vigente y la revalidación transaccional.
+- La cola es `diba-review-queue.json` junto a la SQLite (`/var/www/queFem/data/`). Se reescribe de forma atómica en cada importación real (nunca en dry-run), conserva `firstSeenAt`, retira los casos ya resueltos y no borra el backlog de un feed que falló. No es una fuente de verdad del catálogo: si no se puede escribir, la importación continúa y el error sale por stderr.
+- Cada elemento indica `kind` (`POSSIBLE_DUPLICATE_OF_PUBLISHED_PLAN`, `POSSIBLE_DUPLICATE_WITHIN_FEED` o `STALE_REVIEW_DECISION`), los registros DIBA con título, fechas, lugar y URL, los planes candidatos y la acción por defecto aplicada.
+
+Al desplegar esta política el primer cron importará de golpe lo acumulado durante el bloqueo (ensayo sobre una copia de producción del 2026-10-14: 94 planes nuevos de Turisme y 386 de Escenari) y publicará como planes separados los posibles duplicados pendientes (19 frente a planes de Gencat). Una repetición no crea nada. Comprobar después `/var/log/quefem-diba.log`, el conteo de planes públicos y `diba-review-queue.json`.
 
 Para comprobar o editar la configuración y consultar los últimos logs:
 
@@ -303,11 +310,10 @@ npm run purge:inactive
 
 La operación valida el schema, exige `status='inactive'`, `inactive_at` con al menos 7 días y ausencia total de `plan_sources`. Elimina `plan_categories` dentro de la misma transacción y después el plan; no elimina categorías compartidas, fuentes ni `import_runs`.
 
-En el futuro puede ejecutarse una vez al día mediante cron:
+En producción se ejecuta una vez al día mediante cron (confirmado el 2026-10-14), tras el backup de las 05:10 del día anterior y antes del siguiente:
 
 ```cron
-# Horario pendiente de aprobación
-cd /var/www/queFem && npm run purge:inactive >> /var/log/quefem-import.log 2>&1
+45 3 * * * cd /var/www/queFem && npm run purge:inactive >> /var/log/quefem-purge.log 2>&1
 ```
 
-Este ejemplo no está activo. No añadirlo al crontab hasta aprobar el horario, verificar el dry-run de producción y confirmar que el backup y la monitorización externos vigentes cubren esta operación.
+Revisar `/var/log/quefem-purge.log` para ver cuántos planes elimina cada ejecución.

@@ -29,7 +29,9 @@ Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mism
 - El SEO público está desplegado: metadata por ruta, canonical, Open Graph/Twitter, Event JSON-LD conservador, `robots.txt` y sitemap público. Google Search Console ya está verificado.
 - Hay backups automáticos y probados de SQLite, con comprobaciones y copia externa mediante `rclone` al destino de Google Drive `TensPla/backups`.
 - La rotación de logs de Nginx está configurada y verificada.
-- Gencat, Ticketmaster, Fever y las tres fuentes DIBA están activos en producción. `diba-tourisme`, `diba-escenari` y `diba-museus` tienen `enabled=1` y `allows_images=0`; su importación inicial, revisión humana, reconciliación y activación M1 están completadas. Fever tiene source habilitada, imágenes same-origin activadas y una primera importación real completada; la configuración efectiva de cron debe verificarse en el servidor antes de operar.
+- Gencat, Ticketmaster, Fever y las tres fuentes DIBA están activos en producción. `diba-tourisme`, `diba-escenari` y `diba-museus` tienen `enabled=1` y `allows_images=0`; su importación inicial, revisión humana, reconciliación y activación M1 están completadas. Fever tiene source habilitada, imágenes same-origin activadas y cron propio (`fever:import:scheduled`, a las 01:05, 07:05, 13:05 y 19:05) cuyas ejecuciones terminan `completed`.
+- Los crons de producción confirmados el 2026-10-14 son: Gencat `:17` cada 2 h, Ticketmaster `:37` cada 2 h y sus imágenes `:52`, Fever cada 6 h, DIBA diario 05:45, `purge:inactive` diario 03:45 y backup 05:10. La purga automática de planes inactivos ya está activa.
+- **La importación programada de DIBA falla desde al menos el 2026-09-30** (guard fail-closed sobre duplicados dudosos) en `diba-tourisme` y `diba-escenari`; `diba-museus` importa con normalidad. La corrección (cola de revisión) está implementada y pendiente de desplegar. Ver «DIBA REVIEW QUEUE».
 
 La infraestructura de producción es parcialmente externa a Git. «Confirmado» describe el estado conocido a fecha de esta revisión, no sustituye la comprobación previa a una operación.
 
@@ -79,7 +81,7 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - DIBA M1.4C1.1 completado localmente como endurecimiento final del plan de mutaciones read-only: los overrides de enlace requieren revisión completa por componente y destino público candidato, la evidencia de sesión exige horario real (nunca solo duración) y el dry-run produce destinos finales por fases, no una lista ejecutable. La snapshot mantiene bloqueadores de activación y DIBA continúa desactivada; M1.4C2 requerirá aprobación separada para cualquier mutación.
 - DIBA M1.4C2 completado como ensayo temporal: el ejecutor rechaza la SQLite real, exige una ruta explícita de copia y aplica el plan por fases en una única transacción, protegiendo los campos públicos y recalculando huérfanos. El ensayo completo pasó con relinks e idempotencia estructural; cualquier autorización separada para modificar la base local real sigue pendiente. DIBA permanece desactivada y sin imágenes.
 - DIBA M1.4C3/D1-D4/E1-E4 y FINAL F1/F2 cerraron la reconciliación y revisión humana. Las decisiones CONFIRMED/POSSIBLE y las cinco decisiones finales permanecen versionadas; los planes `DEFER` siguen intencionalmente inactivos. La activación M1 posterior ya está completada en producción con las tres fuentes habilitadas y sus imágenes deshabilitadas.
-- DIBA M2 prepara localmente la importación diaria fail-closed: analiza toda la topología cross-source y same-feed antes de mutar, respeta las decisiones humanas estables, impide que identidades desconocidas reactiven `DEFER`, revalida bajo `BEGIN IMMEDIATE` y comparte un lock entre imports reales manuales y programados. `diba:import:scheduled` no admite flags ni bypass de retirada masiva. No se ha instalado cron ni se ha ejecutado este código en producción.
+- DIBA M2 prepara localmente la importación diaria fail-closed: analiza toda la topología cross-source y same-feed antes de mutar, respeta las decisiones humanas estables, impide que identidades desconocidas reactiven `DEFER`, revalida bajo `BEGIN IMMEDIATE` y comparte un lock entre imports reales manuales y programados. `diba:import:scheduled` no admite flags ni bypass de retirada masiva. Está desplegado y su cron diario (05:45) está instalado; hoy las importaciones de `diba-tourisme` y `diba-escenari` son rechazadas por el guard hasta revisar el backlog (ver «DIBA REVIEW QUEUE»).
 
 - Generic Image Library V1 preparada: manifiesto curado y auditable de 100 fotografías Pexels,
   resolver determinista local por categoría/fingerprint, prioridad de imágenes oficiales controladas,
@@ -100,13 +102,17 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 - Fever M4A preparado sin persistencia: resolución administrativa local por point-in-polygon sobre cartografía oficial ICGC 1:5.000, con códigos/nombres de municipio, comarca y provincia, updater explícito y dry-run read-only. No crea fuentes ni planes Fever y no modifica SQLite.
 - Fever M4B/M5A/M5B prepararon persistencia por `CatalogItemId`, geography source-specific, occurrences, idempotencia, guards, categorías, precio, CTA e imágenes; su validación local antecedió la primera importación real.
 - M5C aportó el entrypoint manual protegido para la primera importación. Fever está ahora live, con source e imágenes habilitadas, y la primera importación terminó con integridad correcta.
-- La automatización recurrente Fever prepara `fever:import:scheduled`: preflight de migrations/source/integridad, lock compartido con el modo manual, guards sin bypass e imágenes Fever soportadas. El cron queda pendiente de validación manual del segundo import y de instalación explícita por el operador.
+- Automatización recurrente de Fever en producción: `fever:import:scheduled` (preflight de migrations/source/integridad, lock compartido con el modo manual, guards sin bypass, imágenes Fever soportadas) corre por cron cada 6 horas.
 
 ## NEXT DIBA STEP
 
-### RECURRING IMPORT
+### DIBA REVIEW QUEUE
 
-M1 está activo y el código de M2 ya está desplegado (producción en `82bfab8`) con `allows_images=0`. Falta ejecutar y revisar una pasada controlada de `diba:import:scheduled` (comprobando el lock y su resumen) y solo después instalar, por autorización separada, el cron diario propuesto a las 05:45. El despliegue no crea el cron.
+M1 y M2 están en producción (`allows_images=0`, cron diario 05:45). Desde al menos el 2026-09-30 el guard bloqueaba por completo `diba-tourisme` y `diba-escenari` mientras hubiera duplicados dudosos sin revisar (5 + 38 casos el 2026-10-14). Decisión del propietario: un duplicado visible es preferible a una importación parada.
+
+**Implementado en local, pendiente de desplegar:** la importación real de DIBA usa ahora la política `review-queue` (`ambiguityPolicy` en `DibaImporter`; el valor por defecto del importador sigue siendo `block`). Los posibles duplicados con un plan público y dentro del mismo feed, y las decisiones humanas cuyo destino ya no existe, dejan de bloquear: el registro se importa como plan separado y se anota en `data/diba-review-queue.json` (junto a SQLite, escritura atómica, sin tocar la base). Se siguen bloqueando los fallos graves: retirada masiva, feed vacío o truncado, salud del parser y conflictos con una decisión humana vigente. Ensayo con una copia de producción: 480 planes nuevos (94 tourisme, 386 escenari) al primer import, 0 en la repetición, integridad y FK correctas, cola final de 34 casos abiertos (13 dentro del feed, 19 posibles duplicados de planes de Gencat, 2 decisiones obsoletas). Detalles en [`DEPLOYMENT.md`](DEPLOYMENT.md).
+
+Pendiente: desplegar, verificar el primer cron y revisar la cola. Resolver un caso con «enlazar» sobre un plan DIBA ya importado exigirá una consolidación de planes (hoy lo bloquea `REVIEWED_SOURCE_LINK_CHANGED`); eso debe resolverlo la futura página privada de revisión.
 
 ## AUTONOMOUS WORK
 
@@ -114,7 +120,7 @@ M1 está activo y el código de M2 ya está desplegado (producción en `82bfab8`
 
 ## PRODUCT DECISIONS
 
-- Decidir si se quiere automatizar la purga de planes inactivos y aprobar su política operativa antes de preparar cualquier activación.
+- Futura página privada de revisión de DIBA: leer `data/diba-review-queue.json` y ofrecer, por caso, «enlazar» o «mantener separado» (con la consolidación de planes que implica enlazar un plan DIBA ya publicado).
 - Decidir, tras 1–2 semanas de observación del modo shadow (`[recurring-shadow]`, lo esperado es `verdict=SAFE` y `stale=0`), si se habilita la retirada real de occurrences obsoletas de grupos recurrentes (futura fase 4C.6E). Hoy ninguna ruta escribe esa retirada.
 
 ## OPERATOR / PRODUCTION
@@ -124,7 +130,7 @@ M1 está activo y el código de M2 ya está desplegado (producción en `82bfab8`
 - Verificar la configuración efectiva de Nginx, PM2 y cron antes de cualquier operación que dependa de ella.
 - Verificar las últimas ejecuciones y la restaurabilidad de los backups, la copia externa mediante `rclone` y las rotaciones de logs cuando una intervención operativa lo requiera.
 - Revisar periódicamente cobertura, indexación y errores concretos en Google Search Console.
-- Si el propietario aprueba automatizar la purga de inactivos, validar primero el dry-run, backup y monitorización en producción y después configurar el cron autorizado.
+- Tras desplegar la política `review-queue`: confirmar que `/var/log/quefem-diba.log` muestra `completed` y revisar `data/diba-review-queue.json`.
 
 ## BLOCKED
 
@@ -153,7 +159,9 @@ M1 está activo y el código de M2 ya está desplegado (producción en `82bfab8`
 | Copia `rclone` a `TensPla/backups` | Confirmado externamente | Revisar último envío sin exponer credenciales ni IDs |
 | Logrotate | Confirmado externamente y verificado | Revisar configuración efectiva y rotaciones si se va a modificar |
 | Ticketmaster en producción | Activo según el estado confirmado | Verificar cron y configuración efectiva antes de operar |
-| DIBA en producción | Tres fuentes activas, imágenes deshabilitadas, código M2 desplegado y sin cron | Ejecutar una pasada controlada de `diba:import:scheduled` antes de instalar el cron por separado |
+| DIBA en producción | Tres fuentes activas, imágenes deshabilitadas, M2 desplegado y cron diario 05:45 instalado; `diba-tourisme` y `diba-escenari` fallan fail-closed hasta desplegar la política `review-queue` | Revisar `/var/log/quefem-diba.log` y `data/diba-review-queue.json` |
+| Cron de Fever | Instalado (01:05, 07:05, 13:05, 19:05); ejecuciones `completed` | Revisar `/var/log/quefem-fever.log` |
+| Purga de inactivos | `purge:inactive` diario 03:45, instalado | Revisar `/var/log/quefem-purge.log` |
 | Gencat recurrentes | 10 grupos consolidados, shadow activo tras cada import | Revisar `[recurring-shadow]` en `/var/log/quefem-import.log` |
 | CSP | Obligatoria; confirmada por el propietario el 2026-09-30 | Mantener; `/embed/` usa su propia CSP |
 | Widget B2B (`/embed/`) | Desplegado el 2026-09-30; solo los dos widgets de demostración de `/widget` | Revisar `embed:widgets -- list` antes de operar |

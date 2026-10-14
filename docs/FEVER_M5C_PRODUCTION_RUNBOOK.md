@@ -66,12 +66,12 @@ Exigir último run `completed`, integridad `ok`, source `fever | 1`, ausencia de
 
 Antes de instalar cron, comprobar también que el usuario de cron puede crear/escribir `/var/log/quefem-fever.log` y que la configuración efectiva de logrotate cubre esa ruta. No crear ni editar logrotate desde este repositorio.
 
-## Cron propuesto
+## Cron
 
-Una vez validada esa segunda importación, usar la ruta absoluta que devuelva `command -v npm`. El ejemplo siguiente separa Fever del clúster escritor de horas pares (Gencat :17, Ticketmaster :37 e imágenes :52):
+El cron está instalado en producción (confirmado el 2026-10-14) con la línea siguiente, que usa la ruta absoluta de `npm`, y sus ejecuciones terminan `completed`. Separa Fever del clúster escritor de horas pares (Gencat :17, Ticketmaster :37 e imágenes :52):
 
 ```cron
-5 1,7,13,19 * * * cd /var/www/queFem && /ruta/absoluta/a/npm run fever:import:scheduled >> /var/log/quefem-fever.log 2>&1
+5 1,7,13,19 * * * cd /var/www/queFem && /root/.nvm/versions/node/v24.18.0/bin/npm run fever:import:scheduled >> /var/log/quefem-fever.log 2>&1
 ```
 
 Inspección:

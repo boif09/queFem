@@ -22,6 +22,11 @@ Registro ligero de decisiones demostrables en documentación, configuración o c
   afiliación. El widget siempre muestra la marca y el enlace de Tens pla?, y el acceso se limita por
   clave y lista de dominios. Ver [`EMBED_WIDGET.md`](EMBED_WIDGET.md).
 - La deduplicación multi-source es conservadora: una coincidencia dudosa se revisa, no se fusiona silenciosamente.
+- Importación DIBA (2026-10-14): una coincidencia dudosa nunca debe parar la importación diaria. Los
+  posibles duplicados se publican como planes separados y se anotan en una cola de revisión
+  (`diba-review-queue.json`); solo siguen bloqueando los fallos graves (retirada masiva, feed
+  truncado, salud del parser, conflictos con una decisión humana). Un duplicado visible es preferible a un
+  feed parado.
 - Los planes permanentes se conservan. Retirada y purga ofrecen dry-run y límites transaccionales.
 
 ## Arquitectura, privacidad y operación

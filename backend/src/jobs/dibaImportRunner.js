@@ -1,7 +1,8 @@
 import path from 'node:path';
 import { openDatabase } from '../db/database.js';
 import { DibaApiClient } from '../diba/m0Discovery.js';
-import { DibaImporter, municipalityIndex } from '../diba/dibaImporter.js';
+import { AMBIGUITY_POLICY, DibaImporter, municipalityIndex } from '../diba/dibaImporter.js';
+import { reviewQueuePath, updateReviewQueue } from '../diba/reviewQueue.js';
 import { DibaImportLock } from '../diba/importLock.js';
 import { readAndVerifyIcgcSnapshot } from '../geography/icgcSnapshot.js';
 import { DEFAULT_ICGC_MANIFEST_PATH } from './updateIcgcGeography.js';
@@ -11,7 +12,7 @@ import { DEFAULT_ICGC_MANIFEST_PATH } from './updateIcgcGeography.js';
 export async function runDibaImport(config, {
   dryRun = false, databasePath = config.databasePath, fetchImpl, now,
   manifestPath = DEFAULT_ICGC_MANIFEST_PATH, logger = console, allowMassRemoval = false,
-  lockFactory = (pathValue) => new DibaImportLock(pathValue),
+  lockFactory = (pathValue) => new DibaImportLock(pathValue), ambiguityPolicy = AMBIGUITY_POLICY.REVIEW_QUEUE,
 } = {}) {
   const resolvedPath = path.resolve(databasePath);
   const lock = dryRun ? null : lockFactory(resolvedPath);
@@ -27,9 +28,18 @@ export async function runDibaImport(config, {
     db = openDatabase(resolvedPath, { readonly: dryRun });
     const importer = new DibaImporter({
       db, client: new DibaApiClient({ fetchImpl }), municipalities: municipalityIndex(loaded.snapshot),
-      ...(now ? { now } : {}),
+      ...(now ? { now } : {}), ambiguityPolicy,
     });
-    const summary = await importer.run({ dryRun, allowMassRemoval });
+    // The queue is a best-effort report: failing to write it must never fail or hide an import result.
+    const recordReviewQueue = (results) => {
+      if (dryRun || !results) return;
+      try { updateReviewQueue(reviewQueuePath(resolvedPath), results, now ? now() : new Date()); }
+      catch (error) { console.error(`DIBA review queue could not be written: ${error.message}`); }
+    };
+    let summary;
+    try { summary = await importer.run({ dryRun, allowMassRemoval }); }
+    catch (error) { recordReviewQueue(error.results); throw error; }
+    recordReviewQueue(summary.datasets);
     logger.log(`DIBA ${dryRun ? 'dry-run' : 'import'}: ${JSON.stringify(summary)}`);
     return summary;
   } catch (error) {
