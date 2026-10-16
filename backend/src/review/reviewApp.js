@@ -99,15 +99,16 @@ export function createReviewApp({
   const openItems = () => {
     const queue = readQueue(queuePath);
     const decided = decisions.decidedItemIds();
-    const open = []; const stale = [];
+    const open = [];
     for (const item of queue.items) {
-      if (item.kind === 'STALE_REVIEW_DECISION') { stale.push({ id: item.id, sourceKey: item.sourceKey, records: item.records, staleTarget: item.staleTarget }); continue; }
+      // Older queue files may still list expired decisions; they are not tasks and are never shown.
+      if (item.kind === 'STALE_REVIEW_DECISION') continue;
       if (decided.has(item.id)) continue;
       const enriched = enrich(item);
       if (enriched.merge.resolved) continue;
       open.push(enriched);
     }
-    return { queue, open, stale };
+    return { queue, open };
   };
 
   const recentDecisions = () => decisions.recent(30).map((row) => ({
@@ -157,10 +158,10 @@ export function createReviewApp({
 
   // --- API ---------------------------------------------------------------------------------------------------------
   app.get('/api/items', requireToken, (request, response) => {
-    const { queue, open, stale } = openItems();
+    const { queue, open } = openItems();
     response.json({
       generatedAt: now().toISOString(), queueUpdatedAt: queue.updatedAt ?? null,
-      items: open.map(view), stale, recent: recentDecisions(),
+      items: open.map(view), recent: recentDecisions(),
     });
   });
 

@@ -113,7 +113,7 @@ test('the default block policy is unchanged and still rejects the same possible 
   });
 });
 
-test('a human decision whose target no longer exists is queued as stale instead of blocking', async () => {
+test('a human decision whose target no longer exists neither blocks nor is queued: it is only recorded in the summary', async () => {
   await withTestDatabase(async (db) => {
     enableDiba(db);
     const decision = {
@@ -125,9 +125,10 @@ test('a human decision whose target no longer exists is queued as stale instead 
     const summary = (await importer(db, [raw('stale-link')], options).run({ feeds: [FEED] })).datasets[0];
     assert.equal(summary.safety.status, 'approved');
     assert.ok(sourcePlan(db, FEED.sourceKey, 'stale-link'));
-    assert.equal(summary.reviewQueue[0].kind, 'STALE_REVIEW_DECISION');
-    assert.equal(summary.reviewQueue[0].defaultAction, 'STALE_DECISION_IGNORED');
-    assert.equal(summary.reviewQueue[0].staleTarget.sourceRecordId, 'purged-event');
+    assert.equal(summary.reviewQueue.length, 0, 'an expired decision is not a task');
+    assert.equal(summary.safety.reviewQueued, 0);
+    assert.equal(summary.safety.staleDecisions, 1);
+    assert.deepEqual(summary.staleDecisions, [{ sourceKey: FEED.sourceKey, sourceRecordIds: ['stale-link'], staleTarget: { sourceKey: 'gencat-agenda', sourceRecordId: 'purged-event' } }]);
   });
 });
 

@@ -201,7 +201,7 @@ test('same-day sessions of one production with different start times can be merg
   }, { records: sessions });
 });
 
-test('same-feed cases offer keep-separate for every member and stale decisions are read-only', async () => {
+test('same-feed cases offer keep-separate for every member and expired decisions in an older queue file are ignored', async () => {
   await withReviewServer(async ({ request, post, db, queuePath }) => {
     const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
     const within = queue.items.find(({ kind }) => kind === 'POSSIBLE_DUPLICATE_WITHIN_FEED');
@@ -210,7 +210,8 @@ test('same-feed cases offer keep-separate for every member and stale decisions a
     const stale = { id: 'stale0000000001', kind: 'STALE_REVIEW_DECISION', sourceKey: FEED.sourceKey, records: [{ sourceRecordId: 'x' }], staleTarget: { sourceKey: 'gencat-agenda', sourceRecordId: 'gone' } };
     fs.writeFileSync(queuePath, JSON.stringify({ ...queue, items: [...queue.items, stale] }));
     const body = (await request({ url: '/api/items', headers: { 'x-review-token': TOKEN } })).json();
-    assert.equal(body.stale.length, 1);
+    assert.equal(body.stale, undefined, 'the page has no stale section');
+    assert.ok(!body.items.some(({ id }) => id === 'stale0000000001'), 'an expired decision is not listed');
     assert.equal((await post('/api/items/stale0000000001/keep-separate')).status, 404, 'stale items are not actionable');
     const item = body.items.find(({ id }) => id === within.id);
     assert.equal((await post(`/api/items/${within.id}/keep-separate`)).status, 200);

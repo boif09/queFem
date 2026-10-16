@@ -589,7 +589,12 @@ export class DibaImporter {
 
       const safety = this.datasetSafetyPlan(feed, candidates, bounds, dryRun ? virtualPlans : new Map());
       const { blocking, review } = this.partitionBlockers(safety.blockers);
-      summary.reviewQueue = this.reviewQueueItems(feed, candidates, review);
+      const queueItems = this.reviewQueueItems(feed, candidates, review);
+      // A reviewed decision whose target no longer exists (the public event expired and was purged) is part of the
+      // normal life cycle, not a task for a person: it is only recorded in the run summary, never queued.
+      summary.reviewQueue = queueItems.filter(({ kind }) => kind !== 'STALE_REVIEW_DECISION');
+      summary.staleDecisions = queueItems.filter(({ kind }) => kind === 'STALE_REVIEW_DECISION')
+        .map(({ sourceKey, records, staleTarget }) => ({ sourceKey, sourceRecordIds: records.map(({ sourceRecordId }) => sourceRecordId), staleTarget }));
       summary.sameFeedPotentialDuplicateRecords = new Set(safety.sameFeed.flatMap(({ members }) => members.map(({ sourceRecordId }) => sourceRecordId))).size;
       summary.sameFeedPotentialDuplicateClusters = safety.sameFeed.map(({ members, evidence }) => ({
         dataset: feed.dataset, classification: 'NEEDS REVIEW',
@@ -601,7 +606,8 @@ export class DibaImporter {
         code: blocking.length ? 'UNRESOLVED_DIBA_AMBIGUITY' : null,
         blockers: blocking,
         policy: this.ambiguityPolicy,
-        reviewQueued: review.length,
+        reviewQueued: summary.reviewQueue.length,
+        staleDecisions: summary.staleDecisions.length,
       };
       if (blocking.length && !dryRun) {
         const error = new Error(`DIBA ${feed.dataset} recurring safety guard rejected ${blocking.length} unresolved ambiguity component(s).`);

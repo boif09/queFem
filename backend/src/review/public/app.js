@@ -187,11 +187,6 @@ function renderLists() {
       return el('li', {}, `${row.decidedAt.slice(0, 16).replace('T', ' ')} · ${label} · ${row.sourceRecordId} `, undo);
     })));
   }
-  if (data.stale.length) {
-    blocks.push(section('Decisiones antiguas con destino perdido (solo informativo)', data.stale.map((row) => el('li', {},
-      `${row.records.map((record) => record.sourceRecordId).join(', ')} → ${row.staleTarget ? `${row.staleTarget.sourceKey}:${row.staleTarget.sourceRecordId}` : '?'}. `
-      + 'Se ignoran en la importación; hay que retirarlas de data-policy/ en Git.'))));
-  }
   return blocks;
 }
 

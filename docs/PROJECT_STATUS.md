@@ -116,7 +116,7 @@ M1 y M2 están en producción (`allows_images=0`, cron diario 05:45). Desde al m
 
 **Primera revisión de la cola (2026-10-14):** se compararon los 19 posibles duplicados DIBA/Gencat (mismo título y fechas en todos) y se fusionaron 17 con `scripts/merge-duplicate-plans.js` (dry-run por defecto; decisiones versionadas en `data-policy/duplicate-plan-merges.json`, revisor `project-owner`). Cada plan DIBA nuevo pasó a ser alias 301 del plan de Gencat, que conserva sus campos y gana la procedencia DIBA; no se tocó ningún otro plan y existe SQL de rollback en `data/consolidation-logs/`. Quedan sin fusionar dos casos dudosos por lugar distinto: «Una carretada de contes» (planes 6767 y 6307) y «Conhort» (6650 y 3568).
 
-Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar la cola (se espera de unos 17 casos: 13 dentro del feed, 2 dudosos DIBA/Gencat y 2 decisiones obsoletas). Resolver un caso con «enlazar» sobre un plan DIBA ya importado exigirá una consolidación de planes (hoy lo bloquea `REVIEWED_SOURCE_LINK_CHANGED`); eso debe resolverlo la futura página privada de revisión.
+Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar la cola (solo casos dudosos reales; las decisiones antiguas con destino caducado ya no se encolan). Resolver un caso con «enlazar» sobre un plan DIBA ya importado exigirá una consolidación de planes (hoy lo bloquea `REVIEWED_SOURCE_LINK_CHANGED`); eso debe resolverlo la futura página privada de revisión.
 
 ## AUTONOMOUS WORK
 
@@ -124,7 +124,7 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
 
 ## PRODUCT DECISIONS
 
-- Decidir, tras 1–2 semanas de observación del modo shadow (`[recurring-shadow]`, lo esperado es `verdict=SAFE` y `stale=0`), si se habilita la retirada real de occurrences obsoletas de grupos recurrentes (futura fase 4C.6E). Hoy ninguna ruta escribe esa retirada.
+- Decidir, tras 1–2 semanas de observación del modo shadow (`[recurring-shadow]`, hoy da `verdict=SAFE groups=10 stale=9 blocked=0`, estable: son 9 sesiones que han desaparecido del feed de Gencat en grupos consolidados, sin analizar aún si son legítimas), si se habilita la retirada real de occurrences obsoletas de grupos recurrentes (futura fase 4C.6E). Hoy ninguna ruta escribe esa retirada.
 
 ## OPERATOR / PRODUCTION
 
