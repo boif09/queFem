@@ -143,6 +143,7 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
 
 - La búsqueda `q` usa normalización/`instr` en SQLite y puede hacer escaneos; no hay FTS ni paginación por cursor.
 - La SPA puede mostrar Not Found con respuesta HTTP 200 por el fallback de Nginx.
+- El log de errores de PM2 muestra avisos `Media queue wait timeout after 6000ms (N still queued, 4 active)` (visto el 2026-10-16: 5 en las últimas 2000 líneas, API estable, sin impacto visible). Es la cola acotada de descargas remotas de imágenes (4 simultáneas, espera máxima de 6 s): una ráfaga de imágenes aún sin caché con el origen lento deja a las sobrantes con la imagen de reserva. Sin prioridad. No se ha medido su frecuencia ni qué origen lo provoca, y el mensaje no lleva marca de tiempo ni origen. Revisar si aparecen tarjetas con imagen genérica en eventos que deberían tener foto, si el número de avisos crece de forma sostenida o al sumar fuentes con muchas imágenes; el primer paso sería añadir marca de tiempo y origen al mensaje y contarlos por hora.
 - Nginx, PM2, cron, backups, `rclone` y logrotate no están versionados; existe riesgo de divergencia entre documentación y servidor.
 - No hay `ecosystem.config.*` versionado.
 - El repositorio documenta el estado y los requisitos del backup, pero no contiene la configuración externa ni un runbook reproducible completo de backup/restauración.
