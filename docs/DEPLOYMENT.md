@@ -236,7 +236,7 @@ La página lee la cola tal como la dejó la última importación; las decisiones
 
 Gencat publica comarca y municipio como slugs sin acentos. El normalizador de Gencat (`location.normalizer.js`) restaura la ortografía oficial del ICGC con `placeNameRestorer.js` (nombres de `backend/src/embed/officialPlaceNames.json`); lo que no tiene coincidencia única se deja como estaba. La provincia y la localidad no se tocan.
 
-El importador de Gencat no refresca filas ya guardadas, así que las existentes se corrigen una vez con un script del operador (hacer antes un backup):
+El importador de Gencat no refresca filas ya guardadas, así que las existentes se corrigen una vez con un script del operador (hacer antes un backup). Esa corrección se aplicó en producción el 2026-10-16 (1.406 planes); los planes nuevos de Gencat ya entran corregidos, así que no debería hacer falta repetirla, aunque es idempotente:
 
 ```bash
 node scripts/restore-place-accents.js                                  # simulación: cuenta y lista las correcciones
