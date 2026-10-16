@@ -5,6 +5,7 @@ import { runGencatShadowReconciliation } from '../backend/src/deduplication/recu
 import { RecurringProductionAppliedGroupRepository } from '../backend/src/db/repositories/recurringProductionAppliedGroup.repository.js';
 
 const NOW = '2026-09-29T10:00:00.000Z';
+const TODAY = '2026-09-29';
 
 function insertPlan(db, { title = 'Test Production', venue = 'Test Venue', startDate = '2026-10-01', endDate = startDate } = {}) {
   return Number(db.prepare(`
@@ -67,7 +68,7 @@ test('shadow: safe complete batch with zero stale sessions logs one concise SAFE
 
     const logger = fakeLogger();
     runGencatShadowReconciliation(db, {
-      sourceId, runId, seenRecurringSessions: new Map([[canonicalPlanId, new Set(['20261001001'])]]), logger,
+      sourceId, runId, today: TODAY, seenRecurringSessions: new Map([[canonicalPlanId, new Set(['20261001001'])]]), logger,
     });
     assert.equal(logger.lines.length, 1, 'zero stale: one concise summary line is enough');
     assert.match(logger.lines[0], /\[recurring-shadow\].*verdict=SAFE.*stale=0.*blocked=0/);
@@ -139,7 +140,7 @@ test('shadow: a stale session is logged as WOULD_RETIRE, occurrence remains acti
     const logger = fakeLogger();
     // Only session 20261001011 was seen this run — 20261001010 has vanished.
     runGencatShadowReconciliation(db, {
-      sourceId, runId, seenRecurringSessions: new Map([[canonicalPlanId, new Set(['20261001011'])]]), logger,
+      sourceId, runId, today: TODAY, seenRecurringSessions: new Map([[canonicalPlanId, new Set(['20261001011'])]]), logger,
     });
 
     assert.ok(logger.lines.some((l) => l.includes('stale=1')));
@@ -179,7 +180,7 @@ test('shadow: a group losing more than 50% of its occurrences is blocked, not re
     const logger = fakeLogger();
     // Only 1 of 4 sessions still seen -> 3/4 = 75% loss, exceeds the 50% ceiling.
     runGencatShadowReconciliation(db, {
-      sourceId, runId, seenRecurringSessions: new Map([[canonicalPlanId, new Set(['20261001020'])]]), logger,
+      sourceId, runId, today: TODAY, seenRecurringSessions: new Map([[canonicalPlanId, new Set(['20261001020'])]]), logger,
     });
     assert.ok(logger.lines.some((l) => l.includes('BLOCKED')));
     assert.ok(logger.lines.some((l) => l.includes('blocked=3')));
@@ -225,7 +226,7 @@ test('shadow: a multi-venue session present via any variant is never a false sta
 
     const logger = fakeLogger();
     runGencatShadowReconciliation(db, {
-      sourceId, runId, seenRecurringSessions: new Map([[canonicalPlanId, new Set([codi])]]), logger,
+      sourceId, runId, today: TODAY, seenRecurringSessions: new Map([[canonicalPlanId, new Set([codi])]]), logger,
     });
     assert.ok(logger.lines[0].includes('stale=0'));
   });
@@ -245,7 +246,7 @@ test('shadow: an old-format (pre-4C.6) occurrence_key is correctly reconciled (t
     const logger = fakeLogger();
     // Seen-set uses the bare codi (as the live importer always reports it).
     runGencatShadowReconciliation(db, {
-      sourceId, runId, seenRecurringSessions: new Map([[canonicalPlanId, new Set(['20261001050'])]]), logger,
+      sourceId, runId, today: TODAY, seenRecurringSessions: new Map([[canonicalPlanId, new Set(['20261001050'])]]), logger,
     });
     assert.ok(logger.lines[0].includes('stale=0'), 'correctly recognized despite the old occurrence_key format');
   });
@@ -268,5 +269,62 @@ test('shadow: an ordinary non-applied Gencat plan is never evaluated or touched 
     runGencatShadowReconciliation(db, { sourceId, runId, seenRecurringSessions: new Map(), logger });
     assert.match(logger.lines[0], /groups=0/, 'no applied groups exist, the ordinary plan is never in scope at all');
     assert.equal(db.prepare('SELECT status FROM plan_occurrences WHERE plan_source_id = ?').get(ps1).status, 'active');
+  });
+});
+
+// ============================================================================
+// Expired vs stale: a session that has already been held always leaves the feed
+// (Gencat only publishes current events). That is expected, not a signal.
+// ============================================================================
+
+function expiredScenario(db, { dates, seen }) {
+  const sourceId = gencatSourceId(db);
+  const canonicalPlanId = insertPlan(db);
+  const planSourceIds = dates.map((localDate, index) => {
+    const ps = insertGencatSource(db, canonicalPlanId, `2026100${index}00@aaaaaaaaaaaaaaaa`, '2026-08-01T00:00:00.000Z');
+    insertOccurrence(db, ps, `2026100${index}00`, localDate);
+    return ps;
+  });
+  applyGroup(db, { title: 'expired', venue: 'venue', canonicalPlanId });
+  for (let i = 0; i < 5; i += 1) insertImportRun(db, sourceId, { fetched: 2000, errors: 0 });
+  const runId = insertImportRun(db, sourceId, { fetched: 2000, errors: 0 });
+  const logger = fakeLogger();
+  runGencatShadowReconciliation(db, {
+    sourceId, runId, today: '2026-10-16', logger,
+    seenRecurringSessions: new Map([[canonicalPlanId, new Set(seen.map((index) => `2026100${index}00`))]]),
+  });
+  return { logger, planSourceIds };
+}
+
+test('shadow: sessions already held that left the feed are counted as expired, not stale, and never listed', () => {
+  withTestDatabase((db) => {
+    const { logger, planSourceIds } = expiredScenario(db, { dates: ['2026-10-04', '2026-10-11', '2026-10-25'], seen: [2] });
+    assert.ok(logger.lines.some((l) => l.includes('verdict=SAFE') && l.includes('stale=0 blocked=0 expired=2')), logger.lines.join('\n'));
+    assert.ok(!logger.lines.some((l) => l.includes('WOULD_RETIRE') || l.includes('BLOCKED')));
+    for (const ps of planSourceIds) assert.equal(db.prepare('SELECT status FROM plan_occurrences WHERE plan_source_id = ?').get(ps).status, 'active', 'still shadow only');
+  });
+});
+
+test('shadow: the mass-loss ceiling ignores sessions that merely passed their date', () => {
+  withTestDatabase((db) => {
+    // 3 of 4 sessions are past and gone: 75% of all occurrences, but nothing upcoming vanished.
+    const { logger } = expiredScenario(db, { dates: ['2026-10-01', '2026-10-04', '2026-10-11', '2026-11-08'], seen: [3] });
+    assert.ok(logger.lines.some((l) => l.includes('stale=0 blocked=0 expired=3')), logger.lines.join('\n'));
+    assert.ok(!logger.lines.some((l) => l.includes('BLOCKED')));
+  });
+});
+
+test('shadow: an upcoming session that vanishes is still reported as stale next to expired ones', () => {
+  withTestDatabase((db) => {
+    const { logger } = expiredScenario(db, { dates: ['2026-10-04', '2026-11-01', '2026-11-08', '2026-11-15'], seen: [2, 3] });
+    assert.ok(logger.lines.some((l) => l.includes('stale=1 blocked=0 expired=1')), logger.lines.join('\n'));
+    assert.ok(logger.lines.some((l) => l.includes('WOULD_RETIRE=1') && l.includes('20261001')));
+  });
+});
+
+test('shadow: a session dated today is still upcoming, not expired', () => {
+  withTestDatabase((db) => {
+    const { logger } = expiredScenario(db, { dates: ['2026-10-16', '2026-11-08', '2026-11-15'], seen: [1, 2] });
+    assert.ok(logger.lines.some((l) => l.includes('stale=1 blocked=0 expired=0')), logger.lines.join('\n'));
   });
 });

@@ -6,6 +6,10 @@
 // (4C.6E) that will call scripts/reconcile-recurring-occurrences.js's logic
 // (or a promoted version of this module) explicitly, not a toggle here.
 //
+// stale = sessions dated today or later that vanished from the feed (a possible cancellation: the real signal);
+// expired = sessions already held that left the feed as expected (counted, never a candidate); blocked = anything
+// the safety checks refuse to judge.
+//
 // Reuses every piece of Phase 4C.6C's core module verbatim — no reconciliation
 // logic is duplicated between the standalone CLI, this shadow path, and any
 // future write path.
@@ -17,6 +21,13 @@ import {
 } from './recurringOccurrenceReconciliation.js';
 
 const RECENT_RUNS_FOR_MEDIAN = 10;
+
+// Gencat only publishes current events (the importer asks for data_fi >= today), so a session that has already been
+// held always drops out of the feed. That is expected, not a signal: only a session dated today or later that
+// vanishes can mean a cancellation. Dates are plain Europe/Madrid calendar days.
+export function madridToday(now = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+}
 
 function appliedGencatGroups(db) {
   return db.prepare(`
@@ -30,7 +41,7 @@ function appliedGencatGroups(db) {
 // record by record, before this ever runs), but it must also never be
 // silently swallowed (see importGencat.js's own try/catch around this call).
 export function runGencatShadowReconciliation(db, {
-  sourceId, runId, seenRecurringSessions, logger = console,
+  sourceId, runId, seenRecurringSessions, logger = console, today = madridToday(),
 }) {
   const run = db.prepare('SELECT fetched, errors, started_at FROM import_runs WHERE id = ?').get(runId);
   if (!run) throw new Error(`[recurring-shadow] could not load import_runs row ${runId} for shadow evaluation.`);
@@ -48,21 +59,26 @@ export function runGencatShadowReconciliation(db, {
 
   const groups = appliedGencatGroups(db);
   let totalStale = 0;
+  let totalExpired = 0;
   let totalBlocked = 0;
   const detailLines = [];
 
   for (const group of groups) {
     const seenSessionIds = seenRecurringSessions.get(group.canonical_plan_id) || new Set();
+    // The mass-loss ceiling compares sessions that vanished while still upcoming against the upcoming ones, so the
+    // natural passing of dates can never trip it.
     const existingCount = db.prepare(`
       SELECT COUNT(*) n FROM plan_occurrences po JOIN plan_sources ps ON ps.id = po.plan_source_id
-      WHERE ps.plan_id = ? AND po.status = 'active'
-    `).get(group.canonical_plan_id).n;
-    const { candidates, blocked } = computeStaleOccurrenceCandidates(db, {
+      WHERE ps.plan_id = ? AND po.status = 'active' AND po.local_date >= ?
+    `).get(group.canonical_plan_id, today).n;
+    const { candidates: allCandidates, blocked } = computeStaleOccurrenceCandidates(db, {
       canonicalPlanId: group.canonical_plan_id,
       sourceKey: 'gencat-agenda',
       seenSessionIds,
       batchStartedAt: run.started_at,
     });
+    const candidates = allCandidates.filter((candidate) => candidate.local_date >= today);
+    totalExpired += allCandidates.length - candidates.length;
     totalBlocked += blocked.length;
 
     if (candidates.length === 0 && blocked.length === 0) continue;
@@ -85,9 +101,9 @@ export function runGencatShadowReconciliation(db, {
   }
 
   if (totalStale === 0 && totalBlocked === 0) {
-    logger.log(`[recurring-shadow] ts=${ts} runId=${runId} fetched=${run.fetched} verdict=SAFE groups=${groups.length} stale=0 blocked=0`);
+    logger.log(`[recurring-shadow] ts=${ts} runId=${runId} fetched=${run.fetched} verdict=SAFE groups=${groups.length} stale=0 blocked=0 expired=${totalExpired}`);
     return;
   }
-  logger.log(`[recurring-shadow] ts=${ts} runId=${runId} fetched=${run.fetched} verdict=SAFE groups=${groups.length} stale=${totalStale} blocked=${totalBlocked}`);
+  logger.log(`[recurring-shadow] ts=${ts} runId=${runId} fetched=${run.fetched} verdict=SAFE groups=${groups.length} stale=${totalStale} blocked=${totalBlocked} expired=${totalExpired}`);
   for (const line of detailLines) logger.log(line);
 }
