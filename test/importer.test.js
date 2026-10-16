@@ -176,7 +176,7 @@ test('excludes explicit outside locations and keeps a Catalonia plan without coo
     assert.deepEqual(imported, [{
       original_title: 'Activitat catalana sense coordenades',
       province: 'Barcelona',
-      comarca: 'Barcelones',
+      comarca: 'Barcelonès',
       latitude: null,
       longitude: null,
     }]);

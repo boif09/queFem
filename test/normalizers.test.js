@@ -29,7 +29,7 @@ test('normalizes verified Gencat fields and never reuses an image', () => {
   assert.equal(normalized.plan.title_es, null);
   assert.equal(normalized.plan.start_date, '2026-08-17');
   assert.equal(normalized.plan.province, 'Girona');
-  assert.equal(normalized.plan.comarca, 'Baix Emporda');
+  assert.equal(normalized.plan.comarca, 'Baix Empordà');
   assert.equal(normalized.plan.municipality, 'Palafrugell');
   assert.equal(normalized.plan.is_free, 1);
   assert.equal(normalized.plan.image_url, null);

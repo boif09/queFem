@@ -1,3 +1,5 @@
+import { defaultPlaceNameRestorer } from '../location/placeNameRestorer.js';
+
 function humanizeSlug(slug) {
   if (!slug) return null;
 
@@ -29,7 +31,10 @@ function parseLocationTag(value) {
   return value.slice(start + marker.length).split('/').filter(Boolean);
 }
 
+// Gencat only publishes comarca and municipality as de-accented slugs; the official ICGC spelling is restored when it
+// can be matched unambiguously, and the humanized slug is kept otherwise.
 export function normalizeLocation(record) {
+  const placeNames = defaultPlaceNameRestorer();
   const locationParts = parseLocationTag(record.municipi || record.comarca_i_municipi);
   const comarcaParts = parseLocationTag(record.comarca);
   const provinceSlug = locationParts[0] || comarcaParts[0];
@@ -38,8 +43,8 @@ export function normalizeLocation(record) {
 
   return {
     province: humanizeSlug(provinceSlug),
-    comarca: humanizeSlug(comarcaSlug),
-    municipality: humanizeSlug(municipalitySlug),
+    comarca: placeNames.restoreComarca(humanizeSlug(comarcaSlug)),
+    municipality: placeNames.restoreMunicipality(humanizeSlug(municipalitySlug)),
     locality: humanizeSlug(record.localitat) || null,
   };
 }

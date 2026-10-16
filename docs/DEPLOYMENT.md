@@ -232,6 +232,19 @@ Cada caso muestra los dos registros o planes lado a lado (título, fechas, hora 
 
 La página lee la cola tal como la dejó la última importación; las decisiones tomadas se ocultan al instante y la cola se reescribe en la siguiente importación.
 
+## Nombres oficiales de comarca y municipio
+
+Gencat publica comarca y municipio como slugs sin acentos. El normalizador de Gencat (`location.normalizer.js`) restaura la ortografía oficial del ICGC con `placeNameRestorer.js` (nombres de `backend/src/embed/officialPlaceNames.json`); lo que no tiene coincidencia única se deja como estaba. La provincia y la localidad no se tocan.
+
+El importador de Gencat no refresca filas ya guardadas, así que las existentes se corrigen una vez con un script del operador (hacer antes un backup):
+
+```bash
+node scripts/restore-place-accents.js                                  # simulación: cuenta y lista las correcciones
+node scripts/restore-place-accents.js --apply --expected-changes=<n> --expected-hash=<h>   # aplica; ambos valores los imprime la simulación
+```
+
+Solo actualiza `plans.comarca` y `plans.municipality` (no `updated_at`, fingerprints ni procedencias), en una transacción, y escribe un SQL de rollback y un log en `data/consolidation-logs/`. Si la cifra o la huella del conjunto de cambios no coincide con la real (aunque el número sea el mismo), aborta sin escribir. El SQL de rollback es condicional: solo revierte un nombre si sigue siendo el que puso la corrección. Es idempotente: una segunda ejecución no encuentra nada. Las URLs y filtros antiguos (`?comarca=Barcelones`) siguen funcionando, porque las comparaciones ignoran acentos y mayúsculas.
+
 ## Sincronización recurrente de DIBA
 
 El repositorio prepara `npm run diba:import:scheduled` para los tres feeds DIBA. Usa el mismo importador y lock que el comando manual real, rechaza argumentos, fija `allowMassRemoval=false`, escribe un resumen JSON en stdout, informa fallos por stderr y devuelve código distinto de cero si falla cualquier dataset. La ambigüedad nueva o una autorización que quede obsoleta antes de escribir revierte el dataset afectado.

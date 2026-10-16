@@ -37,6 +37,8 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
+- Nombres oficiales de comarca y municipio (2026-10-16): el normalizador de Gencat restaura ahora la ortografía oficial del ICGC («Barcelones» → «Barcelonès», «Alcarras» → «Alcarràs», «Palau Solita» → «Palau-solità», «Pla D'Urgell» → «Pla d'Urgell») con `backend/src/location/placeNameRestorer.js`, sobre los nombres que ya usa el widget. Se muestra con inicial mayúscula («El Masnou») y solo hay un alias explícito (comarca Aran → Val d'Aran). No hay alias de municipio a propósito: cambiar las palabras de un municipio alteraría la huella de deduplicación de los planes, así que los pocos municipios que el ICGC renombró («Bigues i Riells», «Castell Platja d'Aro») conservan el nombre de Gencat. Un nombre sin coincidencia única se deja tal cual. Como el importador de Gencat no actualiza filas existentes, `scripts/restore-place-accents.js` corrige las ya guardadas (ensayo sobre una copia de producción: unos 1.400 planes, 120 correcciones distintas, 41 comarcas únicas, filtros y URLs antiguas intactos). Ver [`DEPLOYMENT.md`](DEPLOYMENT.md).
+
 - Filtro de comarcas sin duplicados (2026-09-30): Gencat solo aporta un slug sin acentos
   («barcelones») y otras fuentes la forma correcta («Barcelonès»), de modo que el desplegable mostraba
   ambas. `findComarques` agrupa ahora por `normalize_location(comarca)` y `findMunicipalities` compara con
@@ -148,7 +150,7 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
 - No hay `ecosystem.config.*` versionado.
 - El repositorio documenta el estado y los requisitos del backup, pero no contiene la configuración externa ni un runbook reproducible completo de backup/restauración.
 - Parte de `SPECIFICATION.md` y `docs/design/stitch/` es histórica o futura y no representa por sí sola el estado implementado.
-- Los acentos de comarca de Gencat se resuelven solo al consultar; las filas se guardan sin acentos. Si se quiere corregir en origen, el normalizador podría usar `officialPlaceNames.json` (ICGC) para almacenar la forma oficial. Es opcional.
+- `plans.locality` (localidad) de Gencat también se guarda como slug humanizado sin acentos («Poble sec»). No se ha medido ni corregido; el alcance de la restauración de nombres oficiales es comarca y municipio.
 - Grupos recurrentes `REVIEW_REQUIRED` y los de DIBA permanecen sin consolidar por decisión explícita.
 - Nuevas fuentes o funciones de producto solo pueden evaluarse tras una petición, licencia y alcance explícitos; no constituyen trabajo pendiente autorizado.
 
