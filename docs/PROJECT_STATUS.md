@@ -124,11 +124,11 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
 
 ## PRODUCT DECISIONS
 
-- Decidir, tras 1–2 semanas de observación del modo shadow (`[recurring-shadow]`, hoy da `verdict=SAFE groups=10 stale=9 blocked=0`, estable: son 9 sesiones que han desaparecido del feed de Gencat en grupos consolidados, sin analizar aún si son legítimas), si se habilita la retirada real de occurrences obsoletas de grupos recurrentes (futura fase 4C.6E). Hoy ninguna ruta escribe esa retirada.
+- Decidir qué hacer con el modo shadow de recurrentes (`[recurring-shadow]`, hoy `verdict=SAFE groups=10 stale=9 blocked=0`). Análisis del 2026-10-16: las 9 sesiones «stale» (5 grupos: Gran Gala Flamenc 2, Barcelona Guitar Trio & Dance 3, Salvador Pagès, Memòria/Torre Bellesguard, Matí musical, Carilló) son todas **sesiones ya celebradas** (1–12 de octubre). Siguen en el dataset de Gencat con los mismos datos; salen de nuestra descarga porque el importador solo pide eventos con `data_fi` >= hoy (retención 0). No son cancelaciones. El producto ya las ignora: visibilidad, orden y `nextOccurrences` solo cuentan occurrences con `local_date >= hoy` (p. ej. Gran Gala muestra como siguiente el 2026-10-18). Su único efecto visible sería el inicio del rango del plan canónico (`start_date` sigue en la primera sesión pasada). Como el contador crecerá a medida que pasen sesiones, el shadow solo será útil como señal si distingue las pasadas (esperadas) de las futuras que desaparecen (posibles cancelaciones, hoy 0). Opciones: (a) que el shadow cuente aparte las pasadas y solo alerte de las futuras; (b) activar una retirada real acotada a occurrences ya pasadas y ausentes del feed (fase 4C.6E restringida); nunca retirar automáticamente una sesión futura. Hoy ninguna ruta escribe esa retirada.
 
 ## OPERATOR / PRODUCTION
 
-- Revisar el log de la importación de Gencat (`/var/log/quefem-import.log`): confirmar que `[recurring-shadow]` informa los 10 grupos consolidados sin `blocked` ni `stale` inesperados.
+- Revisar el log de la importación de Gencat (`/var/log/quefem-import.log`): confirmar que `[recurring-shadow]` informa los 10 grupos consolidados con `blocked=0` y que no aparece ninguna sesión futura entre las `stale` (hoy todas son pasadas).
 - Widget B2B: crear los widgets de los pilotos con `embed:widgets` cuando haya acuerdo. Antes de cobrar, revisar el aviso legal.
 - Verificar la configuración efectiva de Nginx, PM2 y cron antes de cualquier operación que dependa de ella.
 - Verificar las últimas ejecuciones y la restaurabilidad de los backups, la copia externa mediante `rclone` y las rotaciones de logs cuando una intervención operativa lo requiera.
