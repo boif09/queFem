@@ -680,6 +680,9 @@
 .fonts-page .legal-source-card dt { color: var(--ink-warm-soft); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
 .fonts-page .legal-source-card dd { font-size: 0.92rem; }
 .fonts-page .legal-links { gap: 20px; margin-top: 18px; }
+.fonts-page .source-datasets { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.fonts-page .source-datasets li { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.fonts-page .source-datasets a { margin-top: 0; font-size: 0.82rem; }
 .fonts-page .legal-links a,
 .fonts-page .source-card a { font-weight: 700; }
 .fonts-page .source-policy-note { border-top: 1px solid rgba(26, 26, 26, 0.08); }

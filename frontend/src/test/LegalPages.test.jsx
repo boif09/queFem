@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import i18n from '../i18n.js';
@@ -161,6 +161,35 @@ describe('legal and privacy pages', () => {
     const legal = renderRoute('/legal');
     expect(legal.container.querySelector('.mobile-nav')).not.toBeInTheDocument();
     expect(legal.container.querySelector('.site-shell')).not.toHaveClass('has-mobile-nav');
+  });
+
+  it('lists the three Diputació de Barcelona datasets under one entry with a link each', async () => {
+    const diba = (key, dataset) => ({
+      key, name: 'Diputació de Barcelona', publisher: 'Diputació de Barcelona', dataset_name: dataset,
+      dataset_url: `https://do.diba.cat/datasets/${key}`, license_name: 'Creative Commons Attribution 4.0 International',
+      license_url: 'https://creativecommons.org/licenses/by/4.0/deed.ca', attribution_text: 'Diputació de Barcelona — Dades obertes',
+      reviewed_at: key === 'diba-escenari' ? '2026-09-02' : '2026-08-31',
+    });
+    api.getSources.mockResolvedValue({ data: [
+      { key: 'gencat-agenda', name: 'Agenda Cultural de Catalunya', publisher: 'Generalitat de Catalunya', dataset_name: 'Agenda cultural', license_name: 'Llicència oberta' },
+      diba('diba-tourisme', "Turisme: agenda d'activitats"),
+      diba('diba-escenari', "Teatres i auditoris: agenda d'activitats"),
+      diba('diba-museus', "Museus: agenda d'activitats"),
+    ] });
+    renderRoute('/fonts');
+    expect(await screen.findAllByRole('heading', { name: 'Diputació de Barcelona' })).toHaveLength(1);
+    for (const dataset of ["Turisme: agenda d'activitats", "Teatres i auditoris: agenda d'activitats", "Museus: agenda d'activitats"]) {
+      expect(screen.getByText(dataset)).toBeInTheDocument();
+    }
+    const card = screen.getByRole('heading', { name: 'Diputació de Barcelona' }).closest('article');
+    const links = within(card).getAllByRole('link').map((link) => link.getAttribute('href'));
+    expect(links).toEqual([
+      'https://do.diba.cat/datasets/diba-tourisme', 'https://do.diba.cat/datasets/diba-escenari', 'https://do.diba.cat/datasets/diba-museus',
+      'https://creativecommons.org/licenses/by/4.0/deed.ca',
+    ]);
+    expect(within(card).getAllByText('Creative Commons Attribution 4.0 International')).toHaveLength(1);
+    expect(within(card).getByText('2 de setembre del 2026')).toBeInTheDocument(); // the latest review date of the three datasets
+    expect(screen.getByRole('heading', { name: 'Agenda Cultural de Catalunya' })).toBeInTheDocument();
   });
 
   it('keeps /fonts operational and explains Ticketmaster from confirmed data', async () => {
