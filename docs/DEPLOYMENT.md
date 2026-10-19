@@ -244,7 +244,7 @@ node scripts/sweep-gencat-images.js --apply         # las anota y limpia las que
 node scripts/sweep-gencat-images.js --concurrency=2 --delay-ms=300   # más suave
 ```
 
-Pide cada dirección distinta una sola vez, de 4 en 4 y con una pausa entre peticiones (unos 100 segundos para ~1.500 direcciones), y los resultados dudosos (timeout, 5xx, otra respuesta) se informan pero no se tocan. Con `--apply` escribe un log en `data/consolidation-logs/`. Es idempotente y conviene repetirlo de vez en cuando.
+Pide cada dirección distinta una sola vez, de 4 en 4 y con una pausa entre peticiones (unos 100 segundos para ~1.500 direcciones), y los resultados dudosos (timeout, 5xx, otra respuesta) se informan pero no se tocan. Con `--apply` escribe un log en `data/consolidation-logs/`. Es idempotente y conviene repetirlo de vez en cuando (el primer barrido en producción fue el 2026-10-19 y marcó 12 direcciones).
 
 ## Nombres oficiales de comarca y municipio
 
