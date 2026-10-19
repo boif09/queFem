@@ -1,4 +1,5 @@
 import { outsideCataloniaWhere } from '../../location/cataloniaScope.js';
+import { deadImageRetryCutoff, imageIsAvailableSql } from './imageAvailability.js';
 import {
   currentYearInCatalonia,
   temporallyInvalidWhere,
@@ -398,6 +399,7 @@ export class PlanQueryRepository {
         WHERE ps.plan_id IN (${placeholders})
           AND psi.role = ?
           AND psi.attribution_known = 1
+          AND ${imageIsAvailableSql('psi')}
           AND (s.key <> 'gencat-agenda' OR s.allows_images = 1)
           AND ((s.key = 'ticketmaster-discovery-feed' AND ? = 1)
             OR (s.key = 'fever' AND ? = 1)
@@ -407,7 +409,7 @@ export class PlanQueryRepository {
       ) ranked
       WHERE image_rank = 1
     `).all(
-      ...plans.map(({ id }) => id), role,
+      ...plans.map(({ id }) => id), role, deadImageRetryCutoff(this.now()),
       Number(this.ticketmasterImagesEnabled), Number(this.feverImagesEnabled), Number(this.gencatImagesEnabled),
       Number(syndicatedOnly),
     );

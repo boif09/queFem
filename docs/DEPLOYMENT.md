@@ -232,6 +232,20 @@ Cada caso muestra los dos registros o planes lado a lado (título, fechas, hora 
 
 La página lee la cola tal como la dejó la última importación; las decisiones tomadas se ocultan al instante y la cola se reescribe en la siguiente importación.
 
+## Imágenes de Gencat que el origen ya no sirve
+
+Gencat puede dejar registrada en su ficha una imagen cuyo archivo desaparece de `agenda.cultura.gencat.cat` (404). Cuando la ruta `/api/media/gencat/:id` recibe un 404 o un 410 del origen anota la dirección en `plan_source_images` (`unavailable_at`, `unavailable_status`) para todas las filas que la usan. Mientras la marca tenga menos de 7 días (`DEAD_IMAGE_RETRY_DAYS` en `imageAvailability.js`) la API no ofrece esa imagen —el plan muestra la foto genérica de la librería— y la ruta responde 404 sin consultar al origen; pasado ese plazo se ofrece de nuevo y, si el origen la sirve, la marca se borra. Solo cuenta un 404/410: los timeouts, errores 5xx, redirecciones y errores de capacidad no se anotan nunca. Si Gencat cambia la dirección de imagen de un plan, la marca se borra. Solo se aplica a Gencat.
+
+Para marcarlas todas de una vez (por ejemplo tras desplegar) hay un script del operador:
+
+```bash
+node scripts/sweep-gencat-images.js                 # simulación: cuenta y lista las muertas
+node scripts/sweep-gencat-images.js --apply         # las anota y limpia las que han vuelto
+node scripts/sweep-gencat-images.js --concurrency=2 --delay-ms=300   # más suave
+```
+
+Pide cada dirección distinta una sola vez, de 4 en 4 y con una pausa entre peticiones (unos 100 segundos para ~1.500 direcciones), y los resultados dudosos (timeout, 5xx, otra respuesta) se informan pero no se tocan. Con `--apply` escribe un log en `data/consolidation-logs/`. Es idempotente y conviene repetirlo de vez en cuando.
+
 ## Nombres oficiales de comarca y municipio
 
 Gencat publica comarca y municipio como slugs sin acentos. El normalizador de Gencat (`location.normalizer.js`) restaura la ortografía oficial del ICGC con `placeNameRestorer.js` (nombres de `backend/src/embed/officialPlaceNames.json`); lo que no tiene coincidencia única se deja como estaba. La provincia y la localidad no se tocan.

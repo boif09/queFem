@@ -56,7 +56,15 @@ export function createMediaRouter({
       }
       const image = repository.findServableImage(Number(request.params.imageId), 'gencat-agenda');
       if (!image) return response.status(404).json({ error: { code: 'MEDIA_NOT_FOUND', message: 'Imatge no trobada.' } });
-      const media = await gencatProxy.get(image);
+      let media;
+      try {
+        media = await gencatProxy.get(image);
+      } catch (error) {
+        // Only a definitive "gone" is remembered; timeouts, 5xx and capacity errors are transient and never are.
+        if (error instanceof TicketmasterMediaError && [404, 410].includes(error.originStatus)) repository.markUnavailable(image.id, error.originStatus);
+        throw error;
+      }
+      if (image.unavailable_at) repository.clearUnavailableUrls([image.url]);
       response.set({
         'Cache-Control': 'public, max-age=3600', 'Content-Type': media.contentType,
         'Content-Length': String(media.data.length), 'X-Content-Type-Options': 'nosniff',

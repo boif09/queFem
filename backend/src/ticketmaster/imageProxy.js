@@ -47,11 +47,13 @@ export const MAXIMUM_MEDIA_REMOTE_FETCH_QUEUE_WAIT_MS = 20000;
 const MEDIA_CAPACITY_RETRY_AFTER_SECONDS = 3;
 
 export class TicketmasterMediaError extends Error {
-  constructor(status, code, message, { retryAfterSeconds = null } = {}) {
+  constructor(status, code, message, { retryAfterSeconds = null, originStatus = null } = {}) {
     super(message);
     this.status = status;
     this.code = code;
     this.retryAfterSeconds = retryAfterSeconds;
+    // HTTP status the remote origin answered with, when the failure is an origin response.
+    this.originStatus = originStatus;
   }
 }
 
@@ -236,7 +238,9 @@ export class TicketmasterImageProxy {
         redirect: 'manual',
         signal: controller.signal,
       });
-      if (response.status !== 200) throw new TicketmasterMediaError(502, 'MEDIA_ORIGIN_ERROR', 'No s’ha pogut obtenir la imatge remota.');
+      if (response.status !== 200) {
+        throw new TicketmasterMediaError(502, 'MEDIA_ORIGIN_ERROR', 'No s’ha pogut obtenir la imatge remota.', { originStatus: response.status });
+      }
       const contentType = response.headers.get('content-type')?.split(';', 1)[0].trim().toLowerCase();
       if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
         throw new TicketmasterMediaError(502, 'MEDIA_INVALID_TYPE', 'La resposta remota no és una imatge admesa.');

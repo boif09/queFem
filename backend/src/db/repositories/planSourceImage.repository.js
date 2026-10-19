@@ -1,3 +1,5 @@
+import { deadImageRetryCutoff, imageIsAvailableSql } from './imageAvailability.js';
+
 const ROLES = ['card', 'detail'];
 
 function sameImage(row, image) {
@@ -11,8 +13,9 @@ function sameImage(row, image) {
 }
 
 export class PlanSourceImageRepository {
-  constructor(db) {
+  constructor(db, { now = () => new Date() } = {}) {
     this.db = db;
+    this.now = now;
   }
 
   findActiveTicketmasterSources() {
@@ -53,7 +56,7 @@ export class PlanSourceImageRepository {
 
   findServableImage(imageId, sourceKey) {
     return this.db.prepare(`
-      SELECT psi.id, psi.url
+      SELECT psi.id, psi.url, psi.unavailable_at
       FROM plan_source_images psi
       JOIN plan_sources ps ON ps.id = psi.plan_source_id
       JOIN sources s ON s.id = ps.source_id
@@ -63,8 +66,28 @@ export class PlanSourceImageRepository {
         AND s.enabled = 1
         AND (s.key <> 'gencat-agenda' OR s.allows_images = 1)
         AND psi.attribution_known = 1
+        AND ${imageIsAvailableSql('psi')}
         AND p.status = 'active'
-    `).get(imageId, sourceKey);
+    `).get(imageId, sourceKey, deadImageRetryCutoff(this.now()));
+  }
+
+  // The origin answered 404/410 for this address: hide it from every plan and role that uses it for a while.
+  markUnavailable(imageId, status, at = this.now().toISOString()) {
+    if (![404, 410].includes(status)) return 0;
+    const image = this.db.prepare('SELECT url FROM plan_source_images WHERE id = ?').get(imageId);
+    if (!image) return 0;
+    return this.markUrlsUnavailable([image.url], status, at);
+  }
+
+  markUrlsUnavailable(urls, status, at = this.now().toISOString()) {
+    const mark = this.db.prepare('UPDATE plan_source_images SET unavailable_at = ?, unavailable_status = ? WHERE url = ?');
+    return this.db.transaction(() => urls.reduce((changed, url) => changed + mark.run(at, status, url).changes, 0))();
+  }
+
+  // The origin served the image again: show it right away.
+  clearUnavailableUrls(urls) {
+    const clear = this.db.prepare('UPDATE plan_source_images SET unavailable_at = NULL, unavailable_status = NULL WHERE url = ?');
+    return this.db.transaction(() => urls.reduce((changed, url) => changed + clear.run(url).changes, 0))();
   }
 
   findAllImageIds() {
@@ -176,10 +199,12 @@ export class PlanSourceImageRepository {
           this.db.prepare(`
             UPDATE plan_source_images SET
               url = ?, ratio = ?, width = ?, height = ?, is_fallback = ?,
-              attribution = ?, attribution_known = ?, last_seen_at = ?, updated_at = ?
+              attribution = ?, attribution_known = ?, last_seen_at = ?, updated_at = ?,
+              unavailable_at = CASE WHEN url = ? THEN unavailable_at END,
+              unavailable_status = CASE WHEN url = ? THEN unavailable_status END
             WHERE id = ?
           `).run(image.url, image.ratio, image.width, image.height, Number(image.isFallback),
-            image.attribution, Number(image.attributionKnown ?? true), now, now, existing.id);
+            image.attribution, Number(image.attributionKnown ?? true), now, now, image.url, image.url, existing.id);
           summary.updated += 1;
         }
       }

@@ -68,7 +68,7 @@ export function createApp({
     eventRetentionDays, now, ticketmasterImagesEnabled, feverImagesEnabled, gencatImagesEnabled,
     fallbackImageLibrary: resolvedFallbackImageLibrary,
   });
-  const imageRepository = new PlanSourceImageRepository(db);
+  const imageRepository = new PlanSourceImageRepository(db, { now });
   const aliasRepository = new PlanAliasRepository(db);
   const mediaRemoteFetchLimiter = new MediaRemoteFetchLimiter(mediaRemoteFetchConcurrency, {
     maxQueueDepth: mediaRemoteFetchQueueDepth,
