@@ -325,6 +325,15 @@ El sistema externo de backup de Tens Pla? está configurado, automatizado y prob
 
 La automatización, la configuración de `rclone` y sus credenciales viven fuera del repositorio. No deben copiarse aquí ni mostrarse en salidas. Antes de una operación destructiva o de recuperación hay que verificar en el servidor la última ejecución correcta, la presencia de la copia externa y la restaurabilidad del backup aplicable. El estado confirmado no permite inferir desde Git comandos, horarios, rutas locales, retención o identificadores privados que no estén documentados.
 
+Estado observado en el servidor el 2026-10-19 (sin credenciales ni rutas de configuración secretas):
+
+- Una copia diaria a las 05:10 UTC (07:10 en España), de unos 10 segundos: `sqlite3 .backup` (consistente con WAL), `PRAGMA integrity_check` antes de comprimir, `gzip` (~15 MB) y subida con `rclone copyto --checksum`.
+- Retención: **14 días en el servidor y 7 días en Google Drive**. La de Drive se redujo de 30 a 7 días el 2026-10-19 a petición del propietario (para no llenar la cuenta); `rclone delete` mueve lo borrado a la papelera de Drive. Solo se borran los `quefem_*.sqlite.gz`: los snapshots manuales previos a operaciones (`/var/backups/tenspla` y `/var/backups/quefem`) no tienen limpieza automática.
+- Verificado ese día: 15 ejecuciones consecutivas correctas en los logs conservados, 0 diferencias de checksum entre las copias locales y las de Drive, y una restauración de prueba completa (descarga desde Drive, `integrity_check` correcto, datos coherentes con producción).
+- Solo se copia la base de datos. No se copian el `.env`, la configuración externa (Nginx, PM2, crontab, logrotate, el script de backup, la configuración de `rclone`) ni `data/consolidation-logs/` (SQL de rollback); las cachés y la cola de revisión de DIBA se regeneran.
+- No hay aviso si el backup falla o deja de ejecutarse (el crontab no tiene `MAILTO` y no hay comando de correo): se comprueba mirando `/var/log/tenspla-backup.log`.
+- Las decisiones tomadas en la página de revisión de DIBA y los aliases de las fusiones se guardan en SQLite y quedan sin copia hasta la siguiente ejecución diaria.
+
 ## Cabeceras de seguridad de Nginx
 
 La configuración externa aplicada incluye HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy` y `server_tokens off`. Observado en el servidor el 2026-09-30: también se envía una cabecera `Content-Security-Policy` **obligatoria** (no `Report-Only`) con `frame-ancestors 'none'`. El propietario confirmó el mismo día que es el estado deseado y debe mantenerse; el comentario de la configuración de Nginx ya lo refleja.
