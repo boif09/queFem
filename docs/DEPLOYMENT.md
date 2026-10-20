@@ -354,6 +354,15 @@ tar -xzf tenspla-config.tgz
   Pide la contraseña de la clave privada. Para generar de nuevo la pareja de claves en PowerShell: `& "C:\Program Files\Git\mingw64\bin\openssl.exe" req -x509 -newkey rsa:4096 -keyout tenspla-backup-private.pem -out tenspla-backup-cert.pem -days 36500 -subj "/CN=tenspla-backup"` (en Git Bash hace falta anteponer `MSYS_NO_PATHCONV=1`) y sustituir el certificado en el servidor; los paquetes antiguos solo se descifran con la clave antigua.
 - Las decisiones tomadas en la página de revisión de DIBA y los aliases de las fusiones se guardan en SQLite y quedan sin copia hasta la siguiente ejecución diaria.
 
+## Avisos de los crons y salud (healthchecks.io)
+
+Desde el 2026-10-20, además del backup, healthchecks.io (aviso por correo) vigila las importaciones y la salud general. Todo vive fuera del repositorio y va incluido en el paquete cifrado de configuración.
+
+- `/usr/local/sbin/tenspla-job <nombre> <comando>`: envoltorio de los crons de **Gencat** (`17 */2 * * *`, grace 30 min), **Fever** (`5 1,7,13,19 * * *`, 30 min) y **DIBA** (`45 5 * * *`, 1 h), todos en UTC. Ejecuta el comando igual que antes (misma salida y código de salida), avisa al empezar y al terminar y, si falla, envía las últimas líneas de la salida con las claves tapadas. Si falta la URL o healthchecks no responde, el trabajo se ejecuta igual. Un «skipped» por bloqueo sale con código 0 y cuenta como correcto.
+- `/usr/local/sbin/tenspla-health.sh` (`27 * * * *`, grace 20 min, log en `/var/log/tenspla-health.log`): solo lee. Comprueba web y API (pública y local), `quefem-api` en PM2 sin reinicios en bucle, certificado (más de 14 días), disco (menos del 85%), importaciones al día (Gencat y Ticketmaster 5 h, Fever 9 h, DIBA 27 h) y sin última importación fallida, caída de planes activos (más del 20% en 20 h o más) y copia de seguridad de las últimas 26 h. Los umbrales se cambian con variables `TENSPLA_HEALTH_*`.
+- Las URLs de ping están en `/root/.tenspla-healthchecks` (líneas `gencat=`, `diba=`, `fever=`, `health=`; permisos 600). El estado de la comprobación horaria está en `/var/lib/tenspla-health/`.
+- Ticketmaster no tiene check propio: lo cubre el de salud. Copia del crontab anterior: `/root/crontab.bak-20261020`.
+
 ## Cabeceras de seguridad de Nginx
 
 La configuración externa aplicada incluye HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy` y `server_tokens off`. Observado en el servidor el 2026-09-30: también se envía una cabecera `Content-Security-Policy` **obligatoria** (no `Report-Only`) con `frame-ancestors 'none'`. El propietario confirmó el mismo día que es el estado deseado y debe mantenerse; el comentario de la configuración de Nginx ya lo refleja.
