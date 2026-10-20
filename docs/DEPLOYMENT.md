@@ -330,10 +330,28 @@ Estado observado en el servidor el 2026-10-19 (sin credenciales ni rutas de conf
 - Una copia diaria a las 05:10 UTC (07:10 en España), de unos 10 segundos: `sqlite3 .backup` (consistente con WAL), `PRAGMA integrity_check` antes de comprimir, `gzip` (~15 MB) y subida con `rclone copyto --checksum`.
 - Retención: **14 días en el servidor y 7 días en Google Drive**. La de Drive se redujo de 30 a 7 días el 2026-10-19 a petición del propietario (para no llenar la cuenta); `rclone delete` mueve lo borrado a la papelera de Drive. Solo se borran los `quefem_*.sqlite.gz`: los snapshots manuales previos a operaciones (`/var/backups/tenspla` y `/var/backups/quefem`) no tienen limpieza automática.
 - Verificado ese día: 15 ejecuciones consecutivas correctas en los logs conservados, 0 diferencias de checksum entre las copias locales y las de Drive, y una restauración de prueba completa (descarga desde Drive, `integrity_check` correcto, datos coherentes con producción).
-- Solo se copia la base de datos. No se copian el `.env`, la configuración externa (Nginx, PM2, crontab, logrotate, el script de backup, la configuración de `rclone`) ni `data/consolidation-logs/` (SQL de rollback); las cachés y la cola de revisión de DIBA se regeneran.
+- La copia diaria cubre la base de datos. **Desde el 2026-10-20 el mismo script guarda además un paquete de configuración cifrado** (ver más abajo). Siguen sin copia la configuración de `rclone` (se vuelve a autorizar con `rclone config`) y `data/consolidation-logs/` (SQL de rollback); las cachés y la cola de revisión de DIBA se regeneran.
 - **Avisos (desde el 2026-10-20):** el script avisa a healthchecks.io (comprobación «Tens pla - backup diario», cron `10 5 * * *` en UTC, 2 h de margen) al empezar, al terminar bien y al fallar, con el paso en el que falló (sin credenciales ni salida de `rclone`). healthchecks.io avisa por correo si llega un fallo o si pasan unas 2 h de las 05:10 UTC sin noticias (cron parado, servidor caído, proceso muerto). Telegram se puede añadir desde su web (Integrations), sin cambiar el script. La URL de aviso está en `/root/.tenspla-healthcheck-url` (modo 600, solo root, fuera de Git); si el fichero no existe o healthchecks no responde, el backup funciona igual.
 - Comprobaciones añadidas al script: aborta con aviso si la base de datos no existe o está vacía (SQLite crearía una vacía y el backup saldría «correcto») y trata como sospechosa una copia que pese menos del 50 % de la anterior (se sube igualmente, se avisa y **no se borra ninguna copia antigua**). Las variables `TENSPLA_BACKUP_DB`, `TENSPLA_BACKUP_DIR`, `TENSPLA_BACKUP_REMOTE` y `TENSPLA_HEALTHCHECK_URL_FILE` existen solo para probar el script en una carpeta temporal.
-- El script sigue siendo externo al repositorio (`/usr/local/sbin/tenspla-backup.sh`); la versión anterior está en `/root/tenspla-backup.sh.bak-20261020`.
+- El script sigue siendo externo al repositorio (`/usr/local/sbin/tenspla-backup.sh`); las versiones anteriores están en `/root/tenspla-backup.sh.bak-20261020` y `/root/tenspla-backup.sh.bak-20261020-v2`.
+
+### Paquete de configuración cifrado
+
+Un fichero `tenspla-config_FECHA.tgz.cms` en `TensPla/config` de Google Drive (fuera de la regla de 7 días), con el `.env`, el crontab, la configuración de Nginx (`tenspla`, `quefem`, `umami`) y de logrotate de Tens pla, el propio script de backup, la URL de healthchecks, la definición de PM2 de `quefem-api` (sin variables de entorno), un `MANIFEST.txt` con huellas y un `LEEME-RESTAURAR.txt`. Se cifra con el **certificado público** del propietario (`/root/.tenspla-backup-cert.pem`, RSA 4096, CN `tenspla-backup`): el servidor puede cifrar pero no descifrar. La clave privada `tenspla-backup-private.pem` y su contraseña **solo las tiene el propietario** (gestor de contraseñas más una copia aparte) y no están en el servidor, en el repositorio ni en Drive. Si se pierden, los paquetes son irrecuperables.
+
+- Solo se sube una versión nueva si el contenido cambió (huella de un tar determinista en `/var/backups/tenspla-config/last.sha256`); se conservan las últimas 10 en Drive y 3 en `/var/backups/tenspla-config`. La huella solo se guarda tras una subida correcta, así que un fallo se reintenta en la siguiente ejecución.
+- La carpeta de trabajo con el `.env` en claro se borra siempre, también si el script falla. Un fallo en este paso avisa a healthchecks.io con el paso exacto, después de haber guardado ya la copia de la base de datos.
+- Para restaurarlo: descargar el fichero desde Drive y, en PowerShell (en el PC del propietario `openssl` no está en el PATH, pero viene con Git):
+
+```powershell
+& "C:\Program Files\Git\mingw64\bin\openssl.exe" cms -decrypt -binary -inform DER -in tenspla-config_FECHA.tgz.cms -inkey tenspla-backup-private.pem -out tenspla-config.tgz
+```
+
+```powershell
+tar -xzf tenspla-config.tgz
+```
+
+  Pide la contraseña de la clave privada. Para generar de nuevo la pareja de claves en PowerShell: `& "C:\Program Files\Git\mingw64\bin\openssl.exe" req -x509 -newkey rsa:4096 -keyout tenspla-backup-private.pem -out tenspla-backup-cert.pem -days 36500 -subj "/CN=tenspla-backup"` (en Git Bash hace falta anteponer `MSYS_NO_PATHCONV=1`) y sustituir el certificado en el servidor; los paquetes antiguos solo se descifran con la clave antigua.
 - Las decisiones tomadas en la página de revisión de DIBA y los aliases de las fusiones se guardan en SQLite y quedan sin copia hasta la siguiente ejecución diaria.
 
 ## Cabeceras de seguridad de Nginx
