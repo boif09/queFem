@@ -14,7 +14,7 @@ function addPlan(db, { comarca, municipality, title = 'Test', fingerprint }) {
 const row = (db, id) => db.prepare('SELECT * FROM plans WHERE id = ?').get(id);
 
 function seed(db) {
-  return {
+  const ids = {
     bad: addPlan(db, { comarca: 'Barcelones', municipality: 'Cornella de Llobregat' }),
     onlyComarca: addPlan(db, { comarca: 'Valles Oriental', municipality: 'Granollers' }),
     official: addPlan(db, { comarca: 'Barcelonès', municipality: 'Barcelona' }),
@@ -22,6 +22,8 @@ function seed(db) {
     unknown: addPlan(db, { comarca: 'Comarca Inventada', municipality: 'Poble Inventat' }),
     nulls: addPlan(db, { comarca: null, municipality: null }),
   };
+  db.prepare('UPDATE plans SET locality = NULL WHERE id = ?').run(ids.nulls);
+  return ids;
 }
 
 test('the dry-run computation lists only plans whose names differ from the official spelling and writes nothing', () => {
@@ -38,7 +40,33 @@ test('the dry-run computation lists only plans whose names differ from the offic
   });
 });
 
-test('apply updates only comarca and municipality, keeps updated_at and every other column, and is idempotent', () => {
+test('a locality is corrected only when it is an official municipality name, in the same change set', () => {
+  withTestDatabase((db) => {
+    const town = addPlan(db, { comarca: 'Baix Llobregat', municipality: 'Cornellà de Llobregat' });
+    db.prepare('UPDATE plans SET locality = ? WHERE id = ?').run('Cornellà de llobregat', town);
+    const fresh = computePlaceNameChanges(db);
+    assert.deepEqual(fresh.changes.map(({ id, next }) => [id, next]), [[town, { locality: 'Cornellà de Llobregat' }]], 'the neighbourhood "Poble Sec" of the other plans is not a municipality');
+    const applied = applyPlaceNameChanges(db, { expectedChanges: 1, expectedHash: changeSetHash(fresh.changes) });
+    assert.equal(row(db, town).locality, 'Cornellà de Llobregat');
+    db.exec(`BEGIN; ${rollbackSql(applied.changes).join('\n')}\n COMMIT;`);
+    assert.equal(row(db, town).locality, 'Cornellà de llobregat', 'the rollback restores the previous locality');
+  });
+});
+
+test('restricting the fields leaves the other columns out of the change set and out of the apply', () => {
+  withTestDatabase((db) => {
+    const ids = seed(db);
+    db.prepare('UPDATE plans SET locality = ? WHERE id = ?').run('el masnou', ids.bad);
+    const onlyLocality = computePlaceNameChanges(db, undefined, ['locality']);
+    assert.deepEqual(onlyLocality.changes.map(({ id, next }) => [id, next]), [[ids.bad, { locality: 'El Masnou' }]]);
+    applyPlaceNameChanges(db, { expectedChanges: 1, expectedHash: changeSetHash(onlyLocality.changes), fields: ['locality'] });
+    assert.equal(row(db, ids.bad).locality, 'El Masnou');
+    assert.equal(row(db, ids.bad).municipality, 'Cornella de Llobregat', 'municipality is untouched');
+    assert.equal(row(db, ids.bad).comarca, 'Barcelones', 'comarca is untouched');
+  });
+});
+
+test('apply updates only comarca, municipality and locality, keeps updated_at and every other column, and is idempotent', () => {
   withTestDatabase((db) => {
     const ids = seed(db);
     const before = db.prepare('SELECT * FROM plans ORDER BY id').all();

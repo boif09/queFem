@@ -1,5 +1,6 @@
 import { normalizeForFingerprint, nullableString } from './text.normalizer.js';
 import { normalizeTicketmasterCategories } from './ticketmasterCategory.normalizer.js';
+import { defaultPlaceNameRestorer } from '../location/placeNameRestorer.js';
 
 function safeUrl(value) {
   try { const url = new URL(value); return ['http:', 'https:'].includes(url.protocol) ? url.toString() : null; } catch { return null; }
@@ -23,7 +24,7 @@ export function normalizeTicketmasterGroup(group) {
     schedule_text: group.hours.length ? group.hours.join(', ') : null,
     permanent: 0, price_text: nullableString(record.priceRange || record.priceRanges),
     is_free: null, province: location.province, comarca: null,
-    municipality: nullableString(location.municipality), locality: nullableString(location.locality),
+    municipality: nullableString(location.municipality), locality: defaultPlaceNameRestorer().restoreMunicipality(nullableString(location.locality)),
     address: typeof location.address === 'object' ? nullableString(location.address.line1) : nullableString(location.address),
     postal_code: location.postalCode, venue_name: nullableString(location.venueName),
     latitude: location.latitude, longitude: location.longitude,

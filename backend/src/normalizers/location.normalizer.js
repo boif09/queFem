@@ -32,7 +32,9 @@ function parseLocationTag(value) {
 }
 
 // Gencat only publishes comarca and municipality as de-accented slugs; the official ICGC spelling is restored when it
-// can be matched unambiguously, and the humanized slug is kept otherwise.
+// can be matched unambiguously, and the humanized slug is kept otherwise. The locality is free text (often the town
+// itself, sometimes a neighbourhood) and gets the same treatment as a municipality: "Cornellà de llobregat" becomes
+// "Cornellà de Llobregat" and "Poble sec" stays as it is.
 export function normalizeLocation(record) {
   const placeNames = defaultPlaceNameRestorer();
   const locationParts = parseLocationTag(record.municipi || record.comarca_i_municipi);
@@ -45,6 +47,6 @@ export function normalizeLocation(record) {
     province: humanizeSlug(provinceSlug),
     comarca: placeNames.restoreComarca(humanizeSlug(comarcaSlug)),
     municipality: placeNames.restoreMunicipality(humanizeSlug(municipalitySlug)),
-    locality: humanizeSlug(record.localitat) || null,
+    locality: placeNames.restoreMunicipality(humanizeSlug(record.localitat)) || null,
   };
 }

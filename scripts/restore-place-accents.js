@@ -1,14 +1,15 @@
-// One-off, operator-run correction of plans.comarca and plans.municipality to the official ICGC spelling (see
+// One-off, operator-run correction of plans.comarca, plans.municipality and plans.locality to the official ICGC spelling (see
 // backend/src/location/placeNameRestorer.js). Gencat stores de-accented slugs and its importer never refreshes existing
 // rows, so plans imported before the normalizer was fixed keep "Barcelones" / "Alcarras" forever.
 //
 // Default is a read-only dry-run. Nothing is written unless --apply is passed together with --expected-changes=<n> and
 // --expected-hash=<h>, the count and the fingerprint of the exact change set the dry-run printed: if the data moved in
-// between (even keeping the same count) the run aborts. Only the comarca and municipality columns are
+// between (even keeping the same count) the run aborts. Only the comarca, municipality and locality columns are
 // updated; updated_at, fingerprints, provenance and every other column are left untouched. A rollback SQL and a JSON log
 // are written before the change. Take a backup first.
 //
 //   node scripts/restore-place-accents.js                         # dry-run
+//   node scripts/restore-place-accents.js --fields=locality       # only that column (default: all three)
 //   node scripts/restore-place-accents.js --apply --expected-changes=1234 --expected-hash=0123456789ab
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -19,19 +20,21 @@ import { loadConfig } from '../backend/src/config.js';
 import { openDatabase } from '../backend/src/db/database.js';
 import { defaultPlaceNameRestorer } from '../backend/src/location/placeNameRestorer.js';
 
-const FIELDS = [['comarca', 'restoreComarca'], ['municipality', 'restoreMunicipality']];
+// A locality is free text: it is only touched when it is exactly an official municipality name.
+const FIELDS = [['comarca', 'restoreComarca'], ['municipality', 'restoreMunicipality'], ['locality', 'restoreMunicipality']];
+const FIELD_NAMES = FIELDS.map(([field]) => field);
 
 // Pure read: every plan whose comarca or municipality differs from its official spelling.
-export function computePlaceNameChanges(db, restorer = defaultPlaceNameRestorer()) {
-  const rows = db.prepare('SELECT id, comarca, municipality FROM plans WHERE comarca IS NOT NULL OR municipality IS NOT NULL ORDER BY id').all();
+export function computePlaceNameChanges(db, restorer = defaultPlaceNameRestorer(), fields = FIELD_NAMES) {
+  const rows = db.prepare('SELECT id, comarca, municipality, locality FROM plans WHERE comarca IS NOT NULL OR municipality IS NOT NULL OR locality IS NOT NULL ORDER BY id').all();
   const changes = [];
   for (const row of rows) {
     const next = {};
-    for (const [field, method] of FIELDS) {
+    for (const [field, method] of FIELDS.filter(([name]) => fields.includes(name))) {
       const restored = restorer[method](row[field]);
       if (restored !== row[field]) next[field] = restored;
     }
-    if (Object.keys(next).length) changes.push({ id: row.id, before: { comarca: row.comarca, municipality: row.municipality }, next });
+    if (Object.keys(next).length) changes.push({ id: row.id, before: { comarca: row.comarca, municipality: row.municipality, locality: row.locality }, next });
   }
   return { scanned: rows.length, changes };
 }
@@ -52,9 +55,9 @@ export function rollbackSql(changes) {
 }
 
 // One transaction. Re-computes inside it, so data that changed since the dry-run aborts with zero writes.
-export function applyPlaceNameChanges(db, { expectedChanges, expectedHash, restorer = defaultPlaceNameRestorer(), beforeWrite } = {}) {
+export function applyPlaceNameChanges(db, { expectedChanges, expectedHash, restorer = defaultPlaceNameRestorer(), fields = FIELD_NAMES, beforeWrite } = {}) {
   return db.transaction(() => {
-    const fresh = computePlaceNameChanges(db, restorer);
+    const fresh = computePlaceNameChanges(db, restorer, fields);
     if (fresh.changes.length !== expectedChanges) {
       throw new Error(`Expected ${expectedChanges} changes but found ${fresh.changes.length}; run the dry-run again. No writes performed.`);
     }
@@ -65,9 +68,10 @@ export function applyPlaceNameChanges(db, { expectedChanges, expectedHash, resto
     const update = {
       comarca: db.prepare('UPDATE plans SET comarca = ? WHERE id = ?'),
       municipality: db.prepare('UPDATE plans SET municipality = ? WHERE id = ?'),
+      locality: db.prepare('UPDATE plans SET locality = ? WHERE id = ?'),
     };
     for (const { id, next } of fresh.changes) for (const [field, value] of Object.entries(next)) update[field].run(value, id);
-    const remaining = computePlaceNameChanges(db, restorer).changes.length;
+    const remaining = computePlaceNameChanges(db, restorer, fields).changes.length;
     if (remaining !== 0) throw new Error(`Invariant failed: ${remaining} plans still differ after the update.`);
     return fresh;
   })();
@@ -99,17 +103,19 @@ function main() {
     expectedHash = get('expected-hash') ?? '';
     if (!Number.isInteger(expected) || !/^[0-9a-f]{12}$/.test(expectedHash)) throw new Error('--apply requires --expected-changes=<n> and --expected-hash=<h>, both printed by the dry-run.');
   }
+  const fields = (get('fields') ?? FIELD_NAMES.join(',')).split(',');
+  if (!fields.length || fields.some((field) => !FIELD_NAMES.includes(field))) throw new Error(`--fields must be a comma-separated subset of ${FIELD_NAMES.join(', ')}.`);
   const config = loadConfig();
   const db = openDatabase(config.databasePath, apply ? { readonly: false, configureJournal: true } : { readonly: true });
   try {
-    const result = computePlaceNameChanges(db);
+    const result = computePlaceNameChanges(db, undefined, fields);
     const byField = Object.fromEntries(FIELDS.map(([field]) => [field, result.changes.filter(({ next }) => next[field] !== undefined).length]));
-    console.log(`${result.scanned} plans scanned; ${result.changes.length} would change (comarca ${byField.comarca}, municipality ${byField.municipality}).`);
+    console.log(`${result.scanned} plans scanned; ${result.changes.length} would change (comarca ${byField.comarca}, municipality ${byField.municipality}, locality ${byField.locality}).`);
     const table = summarise(result.changes);
     console.log(`${table.length} distinct corrections:`);
     for (const [line, count] of table) console.log(`  ${String(count).padStart(5)}  ${line}`);
     const hash = changeSetHash(result.changes);
-    if (!apply) { console.log(`\nDry-run only. To apply: --apply --expected-changes=${result.changes.length} --expected-hash=${hash}`); return; }
+    if (!apply) { console.log(`\nDry-run only. To apply: --apply --expected-changes=${result.changes.length} --expected-hash=${hash}${fields.length === FIELD_NAMES.length ? '' : ` --fields=${fields.join(',')}`}`); return; }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const outDir = get('out-dir') || path.resolve(config.projectRoot, 'data/consolidation-logs');
@@ -117,8 +123,9 @@ function main() {
     const applied = applyPlaceNameChanges(db, {
       expectedChanges: expected,
       expectedHash,
+      fields,
       beforeWrite: (fresh) => {
-        writeFileSync(path.join(outDir, `place-accents-${timestamp}.rollback.sql`), `-- Restores comarca/municipality as they were before restore-place-accents.js (${timestamp}).\nBEGIN TRANSACTION;\n${rollbackSql(fresh.changes).join('\n')}\nCOMMIT;\n`);
+        writeFileSync(path.join(outDir, `place-accents-${timestamp}.rollback.sql`), `-- Restores comarca/municipality/locality as they were before restore-place-accents.js (${timestamp}).\nBEGIN TRANSACTION;\n${rollbackSql(fresh.changes).join('\n')}\nCOMMIT;\n`);
         writeFileSync(path.join(outDir, `place-accents-${timestamp}.log.json`), JSON.stringify({ timestamp, dbPath: config.databasePath, changes: fresh.changes }, null, 2));
       },
     });

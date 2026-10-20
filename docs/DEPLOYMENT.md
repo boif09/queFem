@@ -248,16 +248,19 @@ Pide cada dirección distinta una sola vez, de 4 en 4 y con una pausa entre peti
 
 ## Nombres oficiales de comarca y municipio
 
-Gencat publica comarca y municipio como slugs sin acentos. El normalizador de Gencat (`location.normalizer.js`) restaura la ortografía oficial del ICGC con `placeNameRestorer.js` (nombres de `backend/src/embed/officialPlaceNames.json`); lo que no tiene coincidencia única se deja como estaba. La provincia y la localidad no se tocan.
+Gencat publica comarca y municipio como slugs sin acentos. El normalizador de Gencat (`location.normalizer.js`) restaura la ortografía oficial del ICGC con `placeNameRestorer.js` (nombres de `backend/src/embed/officialPlaceNames.json`); lo que no tiene coincidencia única se deja como estaba. La provincia no se toca. La localidad (texto libre de Gencat y ciudad de Ticketmaster; ya llega con acentos pero con minúsculas, «Cornellà de llobregat») recibe el mismo tratamiento que el municipio: solo se corrige si coincide exactamente con un municipio oficial; un barrio («Poble sec») o un lugar fuera de Catalunya se quedan como están.
 
 El importador de Gencat no refresca filas ya guardadas, así que las existentes se corrigen una vez con un script del operador (hacer antes un backup). Esa corrección se aplicó en producción el 2026-10-16 (1.406 planes); los planes nuevos de Gencat ya entran corregidos, así que no debería hacer falta repetirla, aunque es idempotente:
 
 ```bash
 node scripts/restore-place-accents.js                                  # simulación: cuenta y lista las correcciones
 node scripts/restore-place-accents.js --apply --expected-changes=<n> --expected-hash=<h>   # aplica; ambos valores los imprime la simulación
+node scripts/restore-place-accents.js --fields=locality                # limita la corrección a una columna (hay que repetirlo con --apply)
 ```
 
-Solo actualiza `plans.comarca` y `plans.municipality` (no `updated_at`, fingerprints ni procedencias), en una transacción, y escribe un SQL de rollback y un log en `data/consolidation-logs/`. Si la cifra o la huella del conjunto de cambios no coincide con la real (aunque el número sea el mismo), aborta sin escribir. El SQL de rollback es condicional: solo revierte un nombre si sigue siendo el que puso la corrección. Es idempotente: una segunda ejecución no encuentra nada. Las URLs y filtros antiguos (`?comarca=Barcelones`) siguen funcionando, porque las comparaciones ignoran acentos y mayúsculas.
+Solo actualiza `plans.comarca`, `plans.municipality` y `plans.locality` (con `--fields`, solo las indicadas; no `updated_at`, fingerprints ni procedencias), en una transacción, y escribe un SQL de rollback y un log en `data/consolidation-logs/`. Si la cifra o la huella del conjunto de cambios no coincide con la real (aunque el número sea el mismo), aborta sin escribir. El SQL de rollback es condicional: solo revierte un nombre si sigue siendo el que puso la corrección. Es idempotente: una segunda ejecución no encuentra nada. Las URLs y filtros antiguos (`?comarca=Barcelones`) siguen funcionando, porque las comparaciones ignoran acentos y mayúsculas.
+
+Los municipios que DIBA y Fever guardan con el artículo en minúscula («l'Hospitalet de Llobregat», «els Hostalets de Pierola», 16 planes el 2026-10-20) no se corrigen a propósito: Fever los reescribiría en la siguiente importación. Por eso la corrección de la localidad se aplica con `--fields=locality`.
 
 ## Sincronización recurrente de DIBA
 

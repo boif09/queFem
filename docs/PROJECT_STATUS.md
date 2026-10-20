@@ -159,7 +159,7 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
 - No hay `ecosystem.config.*` versionado.
 - El repositorio documenta el estado y los requisitos del backup, pero no contiene la configuración externa ni un runbook reproducible completo de backup/restauración.
 - Parte de `SPECIFICATION.md` y `docs/design/stitch/` es histórica o futura y no representa por sí sola el estado implementado.
-- `plans.locality` (localidad) de Gencat también se guarda como slug humanizado sin acentos («Poble sec»). No se ha medido ni corregido; el alcance de la restauración de nombres oficiales es comarca y municipio.
+- Localidad (`plans.locality`): ya llega con acentos, el defecto era la capitalización («Cornellà de llobregat»). Los normalizadores de Gencat y Ticketmaster la restauran ahora como un municipio (solo si coincide exactamente con uno oficial; los barrios no se tocan) y `scripts/restore-place-accents.js --fields=locality` corrige las ya guardadas. Medido en una copia de producción el 2026-10-20: 18 planes. Pendiente de aplicar en producción. Los 16 municipios de DIBA/Fever con artículo en minúscula quedan sin corregir a propósito (Fever los reescribiría).
 - Grupos recurrentes `REVIEW_REQUIRED` y los de DIBA permanecen sin consolidar por decisión explícita.
 - Nuevas fuentes o funciones de producto solo pueden evaluarse tras una petición, licencia y alcance explícitos; no constituyen trabajo pendiente autorizado.
 

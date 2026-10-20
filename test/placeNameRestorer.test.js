@@ -80,12 +80,17 @@ test('an alias that points to a name missing from the official index is rejected
   assert.doesNotThrow(() => new PlaceNameRestorer({ municipalities: [{ name: 'Vic', comarca: 'Osona' }] }, { comarcaAliases: { Osonaa: 'Osona' }, municipalityAliases: {} }));
 });
 
-test('the Gencat location normalizer restores comarca and municipality but leaves province and locality alone', () => {
+test('the Gencat location normalizer restores comarca, municipality and a locality that is an official municipality, and leaves province alone', () => {
   const location = normalizeLocation({ municipi: 'agenda:ubicacions/barcelona/barcelones/sant-adria-de-besos', localitat: 'Poble sec' });
   assert.equal(location.province, 'Barcelona');
   assert.equal(location.comarca, 'Barcelonès');
   assert.equal(location.municipality, 'Sant Adrià de Besòs');
-  assert.equal(location.locality, 'Poble sec', 'locality is outside this change and keeps its previous value');
+  assert.equal(location.locality, 'Poble sec', 'a neighbourhood is not an official municipality and keeps its value');
+  assert.equal(normalizeLocation({ localitat: 'Cornellà de llobregat' }).locality, 'Cornellà de Llobregat');
+  assert.equal(normalizeLocation({ localitat: "L'hospitalet de llobregat" }).locality, "L'Hospitalet de Llobregat");
+  assert.equal(normalizeLocation({ localitat: 'Cornella de Llobregat' }).locality, 'Cornellà de Llobregat', 'accents are restored too');
+  assert.equal(normalizeLocation({ localitat: 'Paris' }).locality, 'Paris', 'a place outside Catalonia is untouched');
+  assert.equal(normalizeLocation({}).locality, null);
   assert.equal(normalizeLocation({ municipi: 'agenda:ubicacions/lleida/aran/bossost' }).comarca, "Val d'Aran");
   const unknown = normalizeLocation({ municipi: 'agenda:ubicacions/barcelona/comarca-inventada/poble-inventat' });
   assert.equal(unknown.comarca, 'Comarca Inventada');
