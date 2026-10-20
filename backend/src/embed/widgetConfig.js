@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 
 export const WIDGET_LAYOUTS = new Set(['list', 'grid', 'compact']);
 export const WIDGET_THEMES = new Set(['light', 'dark', 'auto']);
-export const WIDGET_LANGUAGES = new Set(['ca', 'es']);
+export const WIDGET_LANGUAGES = new Set(['ca', 'es', 'en']);
 export const WIDGET_SECTIONS = new Set(['upcoming', 'permanent']);
 export const WIDGET_STATUSES = new Set(['active', 'suspended', 'revoked']);
 export const MAX_ALLOWED_ORIGINS = 10;
@@ -167,7 +167,7 @@ function normalizeTerritory(raw, placeNames) {
 
 function normalizeTitle(raw) {
   if (raw === undefined) return undefined;
-  if (!isPlainObject(raw)) throw new WidgetConfigError('title ha de ser un objecte {ca, es}.');
+  if (!isPlainObject(raw)) throw new WidgetConfigError('title ha de ser un objecte {ca, es, en}.');
   rejectUnknownKeys(raw, WIDGET_LANGUAGES, 'title');
   const title = {};
   for (const [language, text] of Object.entries(raw)) {

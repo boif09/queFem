@@ -67,6 +67,11 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
   alojamientos (`territory.near`), informe mensual por cliente (`embed:widgets -- report`) y
   `?lang=ca|es` en tenspla.cat para que las fichas abiertas desde un widget respeten su idioma.
 
+- Interfaz en inglés (F1, 2026-10-20, pendiente de despliegue): UI, textos legales (con nota de
+  traducción informativa), página `/widget`, widget incrustable e informe mensual en inglés; selector
+  CA/ES/EN y `?lang=en`. Los planes no se traducen (decisión en [`DECISIONS.md`](DECISIONS.md)); se
+  avisa en el pie y en los resultados. SEO, rutas y metadatos del servidor siguen en catalán.
+
 - Página pública `/widget` (CA/ES) publicada el 2026-09-30: explica el widget, muestra dos
   ejemplos reales (Bages y Pals) y remite a `contacte@tenspla.cat`; enlazada desde el pie y el
   sitemap. La CSP del sitio admite `frame-src 'self'`. Ver [`EMBED_WIDGET.md`](EMBED_WIDGET.md).

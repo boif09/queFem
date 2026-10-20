@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGE_STORAGE_KEY } from '../i18n.js';
+import { UI_LANGUAGES, uiLanguage } from '../utils/language.js';
 
 export function LanguageSwitcher() {
   const { t, i18n } = useTranslation();
-  const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
+  const language = uiLanguage(i18n);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -17,7 +18,7 @@ export function LanguageSwitcher() {
 
   return (
     <div className="language-switcher" role="group" aria-label={t('language.label')}>
-      {['ca', 'es'].map((code) => (
+      {UI_LANGUAGES.map((code) => (
         <button
           className={language === code ? 'is-active' : ''}
           key={code}

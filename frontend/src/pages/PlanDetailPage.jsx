@@ -11,6 +11,7 @@ import { ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
 import { trackAffiliateClick, trackPlanView } from '../services/analytics.js';
 import { formatDate } from '../utils/dates.js';
+import { contentLanguage, uiLanguage } from '../utils/language.js';
 
 export { buildEventJsonLd };
 
@@ -23,7 +24,7 @@ export function PlanDetailPage() {
   const { id } = useParams();
   const location = useLocation();
   const { t, i18n } = useTranslation();
-  const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
+  const language = uiLanguage(i18n);
   const [state, setState] = useState({ status: 'loading', plan: null });
   const [reloadKey, setReloadKey] = useState(0);
   const [failedDetailImageUrl, setFailedDetailImageUrl] = useState(null);
@@ -32,7 +33,7 @@ export function PlanDetailPage() {
   useEffect(() => {
     let active = true;
     setState({ status: 'loading', plan: null });
-    api.getPlan(id, language)
+    api.getPlan(id, contentLanguage(language))
       .then((payload) => active && setState({ status: 'success', plan: payload.data }))
       .catch((error) => active && setState({ status: error.status === 404 ? 'not-found' : 'error', plan: null }));
     return () => { active = false; };
@@ -68,7 +69,7 @@ export function PlanDetailPage() {
         : plan.free ? t('plan.free') : (plan.price_text || t('plan.priceUnknown'));
   const back = location.state?.from || '/plans';
   const hasCoordinates = hasValidCoordinates(plan.latitude, plan.longitude);
-  const locationLabel = plan.municipality ? `${language === 'es' ? ' en ' : ' a '}${plan.municipality}` : '';
+  const locationLabel = plan.municipality ? `${{ es: ' en ', en: ' in ' }[language] || ' a '}${plan.municipality}` : '';
   const seoTitle = `${plan.title}${locationLabel} | Tens pla?`;
   const seoDescription = compactDescription(plan.description)
     || t('seo.detailFallback', { title: plan.title, location: locationLabel });

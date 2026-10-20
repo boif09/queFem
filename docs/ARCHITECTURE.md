@@ -10,7 +10,7 @@ fuentes oficiales → importadores → normalización y filtros
                   → API Express de solo lectura → frontend React/Vite
 ```
 
-Todo vive en un único paquete npm. El backend usa Node.js, Express 5 y `better-sqlite3`; el frontend usa React 19, React Router, i18next y Vite. La UI utiliza catalán por defecto y ofrece castellano.
+Todo vive en un único paquete npm. El backend usa Node.js, Express 5 y `better-sqlite3`; el frontend usa React 19, React Router, i18next y Vite. La UI utiliza catalán por defecto y ofrece castellano e inglés. El inglés es solo de interfaz (`frontend/src/locales/en`, nombres de categoría en `categories.*` sin tocar la base de datos): los planes siguen en su idioma original y la API solo conoce `ca`/`es` (`contentLanguage()` en `frontend/src/utils/language.js` traduce `en` a `es`).
 
 ## Backend y API
 

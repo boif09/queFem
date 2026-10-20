@@ -1,7 +1,7 @@
 {
   "common": {
     "eyebrow": "Informació legal i transparència",
-    "updated": "Darrera actualització: 21/08/2026",
+    "updated": "Darrera actualització: 20/10/2026",
     "emailLabel": "Escriure a contacte@tenspla.cat",
     "externalPolicies": "Quan accedeixes a un servei extern, s'hi apliquen les seves pròpies condicions i política de privacitat."
   },
@@ -32,7 +32,7 @@
     "emailTitle": "Correus enviats voluntàriament",
     "emailBody": "Si escrius a contacte@tenspla.cat, es poden tractar la teva adreça de correu, el nom si el facilites, el contingut del missatge i altres dades que hi incloguis voluntàriament.",
     "languageTitle": "Preferència local d'idioma",
-    "languageBody": "El navegador conserva quefem.language amb el valor ca o es per recordar l'idioma escollit. No és un sistema d'identificació, seguiment ni perfilat.",
+    "languageBody": "El navegador conserva quefem.language amb el valor ca, es o en per recordar l'idioma escollit. No és un sistema d'identificació, seguiment ni perfilat.",
     "locationTitle": "Preferència local d'ubicació",
     "locationBody": "Quan selecciones explícitament filtres territorials, el navegador pot conservar la província, la comarca i/o el municipi escollits per contextualitzar la portada. No s'infereix cap nivell, no s'utilitza GPS ni compte, i aquesta preferència no comporta seguiment ni comunicació a tercers.",
     "dataNatureTitle": "Caràcter de les dades",
@@ -67,7 +67,7 @@
     "cookiesTitle": "Sense cookies pròpies",
     "cookiesBody": "Tens pla? no utilitza actualment cookies pròpies, cookies publicitàries, analítica, seguiment, fingerprinting, sessions ni login.",
     "languageTitle": "Preferència d'idioma",
-    "languageBody": "S'utilitza exclusivament localStorage amb la clau quefem.language i els valors ca o es per recordar l'idioma seleccionat.",
+    "languageBody": "S'utilitza exclusivament localStorage amb la clau quefem.language i els valors ca, es o en per recordar l'idioma seleccionat.",
     "locationTitle": "Preferència d'ubicació",
     "locationBody": "localStorage pot desar amb la clau quefem.location només la província, la comarca i/o el municipi que hagis seleccionat explícitament. Serveix per mostrar plans contextualitzats a la portada; no utilitza GPS, identificadors ni compte.",
     "sharingBody": "Aquestes preferències no identifiquen persones, no s'utilitzen per a publicitat, analítica, seguiment o perfilat i no es comparteixen amb tercers.",

@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { TensPlaHorizontalLogo } from '../assets/brand/TensPlaLogos.jsx';
 import { Header } from './Header.jsx';
+import { uiLanguage } from '../utils/language.js';
 
 function InstagramIcon() {
   return (
@@ -39,7 +40,8 @@ function SocialLinks({ className = '' }) {
 export function Layout() {
   const { t, i18n } = useTranslation();
   const { pathname } = useLocation();
-  const spanish = i18n.resolvedLanguage?.startsWith('es');
+  const language = uiLanguage(i18n);
+  const spanish = language === 'es';
   const showMobileNav = pathname === '/'
     || pathname === '/avui'
     || pathname === '/cap-de-setmana'
@@ -70,6 +72,7 @@ export function Layout() {
             <SocialLinks className="footer-social-links" />
             <span>{t('app.tagline')}</span>
             <p>{t('app.notOfficial')}</p>
+            {language === 'en' && <p className="content-notice">{t('app.contentNotice')}</p>}
           </div>
         </div>
       </footer>

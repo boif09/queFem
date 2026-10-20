@@ -14,7 +14,7 @@
     var params = new URLSearchParams();
     var lang = element.getAttribute('data-lang');
     var theme = element.getAttribute('data-theme');
-    if (lang === 'ca' || lang === 'es') params.set('lang', lang);
+    if (lang === 'ca' || lang === 'es' || lang === 'en') params.set('lang', lang);
     if (theme === 'light' || theme === 'dark' || theme === 'auto') params.set('theme', theme);
     var query = params.toString();
     var iframe = document.createElement('iframe');

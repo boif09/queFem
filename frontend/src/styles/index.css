@@ -524,3 +524,5 @@ input[type="date"], select { border-color: var(--line); background-color: #fbf9f
   .footer-meta { justify-items: start; }
   .legal-container { width: min(calc(100% - 32px), 860px); }
 }
+
+.content-notice { color: var(--ink-soft); font-size: 0.85rem; margin: 0.25rem 0 0.75rem; }

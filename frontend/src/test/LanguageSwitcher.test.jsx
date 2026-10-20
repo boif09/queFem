@@ -26,4 +26,15 @@ describe('LanguageSwitcher', () => {
     expect(window.localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('es');
     expect(document.documentElement.lang).toBe('es');
   });
+
+  it('switches to English, saves the preference and shows the original-language notice', async () => {
+    const user = userEvent.setup();
+    render(<><LanguageSwitcher /><TranslatedHeading /></>);
+
+    await user.click(screen.getByRole('button', { name: 'English' }));
+
+    expect(screen.getByRole('heading', { name: 'What do you feel like doing?' })).toBeInTheDocument();
+    expect(window.localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('en');
+    expect(document.documentElement.lang).toBe('en');
+  });
 });

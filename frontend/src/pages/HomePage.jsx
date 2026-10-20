@@ -10,6 +10,7 @@ import { api } from '../services/api.js';
 import { getCataloniaQuickDateRange } from '../utils/dates.js';
 import { clearLocationPreference, formatLocationPreference, readLocationPreference } from '../utils/locationPreference.js';
 import { createPlansSearch } from '../utils/search.js';
+import { categoryName, contentLanguage, uiLanguage } from '../utils/language.js';
 
 const HOME_PLAN_LIMIT = 6;
 const WEEKEND_HOME_LIMIT = 3;
@@ -54,7 +55,7 @@ function PlanSection({ eyebrow, title, intro, state, viewAllUrl, locationUrl, on
 export function HomePage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
+  const language = uiLanguage(i18n);
   const [query, setQuery] = useState('');
   const [location, setLocation] = useState(() => readLocationPreference());
   const [weekendPlans, setWeekendPlans] = useState({ status: 'loading', plans: [] });
@@ -75,7 +76,7 @@ export function HomePage() {
     setUpcomingPlans({ status: 'loading', plans: [] });
     setPermanentPlans({ status: 'loading', plans: [] });
     setCategories({ status: 'loading', items: [] });
-    const common = { ...location, page: 1, sort: 'date', lang: language };
+    const common = { ...location, page: 1, sort: 'date', lang: contentLanguage(language) };
     Promise.allSettled([
       api.getPlans({ ...common, ...weekend, permanent: false, editorial: 'home-weekend', limit: HOME_PLAN_LIMIT }),
       api.getPlans({ ...common, dateFrom: today.date, permanent: false, editorial: 'home-upcoming', limit: HOME_PLAN_LIMIT * 3 }),
@@ -161,7 +162,7 @@ export function HomePage() {
           {categories.status === 'success' && categories.items.length === 0 && <EmptyState />}
           {categories.status === 'success' && categories.items.length > 0 && <div className="explore-categories">
             {categories.items.slice(0, 8).map((category, index) => {
-              const name = language === 'es' ? (category.name_es || category.name_ca) : (category.name_ca || category.name_es);
+              const name = categoryName(category, language, t);
               return <Link key={category.slug} data-category={category.slug} to={planUrl({ category: category.slug })}><ExploreCategoryArtwork category={category} eager={index < 4} /><strong>{name}</strong></Link>;
             })}
           </div>}

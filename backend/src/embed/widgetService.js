@@ -48,7 +48,9 @@ export class EmbedWidgetService {
     const today = retentionCutoff(0, this.now());
     const filters = {
       syndicatedOnly: true,
-      lang: language,
+      // English is UI-only: plans exist in Catalan and Spanish, so the text is fetched in Spanish,
+      // which falls back to the original (mostly Catalan).
+      lang: language === 'en' ? 'es' : language,
       sort: 'date',
       page: 1,
       limit: config.limit,

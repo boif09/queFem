@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../utils/dates.js';
+import { uiLanguage } from '../utils/language.js';
 
 export function SourceAttribution({ sources }) {
   const { t, i18n } = useTranslation();
-  const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
+  const language = uiLanguage(i18n);
   if (!sources?.length) return null;
   return (
     <section className="source-section" aria-labelledby="source-heading">

@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Seo } from '../components/Seo.jsx';
+import { uiLanguage } from '../utils/language.js';
 
 const CONTACT_EMAIL = 'contacte@tenspla.cat';
 
 function LegalPage({ pageKey, children }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const title = t(`legal.${pageKey}.title`);
   return (
     <><Seo title={`${title} | ${t('app.name')}`} description={t(`legal.${pageKey}.intro`)} robots="noindex,follow" />
@@ -16,6 +17,7 @@ function LegalPage({ pageKey, children }) {
           <h1>{title}</h1>
           <p>{t(`legal.${pageKey}.intro`)}</p>
           <p className="legal-updated">{t('legal.common.updated')}</p>
+          {uiLanguage(i18n) === 'en' && <p className="legal-updated">{t('legal.common.translationNote')}</p>}
         </header>
         <div className="legal-document">{children}</div>
       </article>
@@ -34,7 +36,7 @@ function EmailLink() {
 
 export function LegalNoticePage() {
   const { t, i18n } = useTranslation();
-  const contactPath = i18n.resolvedLanguage?.startsWith('es') ? '/contacto' : '/contacte';
+  const contactPath = uiLanguage(i18n) === 'es' ? '/contacto' : '/contacte';
   return (
     <LegalPage pageKey="notice">
       <Section title={t('legal.notice.identityTitle')}><p>{t('legal.notice.identityBody')}</p><p><EmailLink /></p></Section>

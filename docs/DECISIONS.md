@@ -6,6 +6,7 @@ Registro ligero de decisiones demostrables en documentación, configuración o c
 
 - El nombre público es **Tens Pla?**; identificadores legacy `queFem`, `quefem` y «Què Fem?» se conservan cuando cambiarlos afectaría compatibilidad técnica.
 - Catalunya es el ámbito territorial. El catalán es idioma principal y predeterminado; el castellano debe tener soporte completo.
+- El inglés es un idioma solo de interfaz (UI, textos legales con nota de traducción informativa y widget), pensado como ayuda a visitantes extranjeros. Los planes no se traducen: se muestran en su idioma original (casi siempre catalán). La API sigue aceptando solo `ca`/`es`; con la UI en inglés el frontend pide `lang=es`, que cae al texto original. Traducir planes queda como investigación futura si hay demanda.
 
 ## Datos y contenido
 

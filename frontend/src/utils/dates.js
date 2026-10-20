@@ -52,7 +52,7 @@ export function formatDate(value, language = 'ca') {
   if (!value) return '';
   const [year, month, day] = value.split('-').map(Number);
   const date = new Date(year, month - 1, day);
-  return new Intl.DateTimeFormat(language === 'es' ? 'es-ES' : 'ca-ES', {
+  return new Intl.DateTimeFormat({ es: 'es-ES', en: 'en-GB' }[language] || 'ca-ES', {
     day: 'numeric', month: 'long', year: 'numeric',
   }).format(date);
 }

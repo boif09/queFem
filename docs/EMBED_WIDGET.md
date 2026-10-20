@@ -18,7 +18,7 @@ su web con dos líneas:
 servidor. El iframe aísla estilos y garantiza que la marca «Agenda de Tens pla?» y la atribución no se
 pueden ocultar desde la web anfitriona. La altura se ajusta por `postMessage`
 (`{type: 'tenspla:resize', height}`); el cargador solo acepta mensajes del origen de su propio script
-y del `contentWindow` de su iframe. Atributos opcionales del contenedor: `data-lang` (`ca`/`es`),
+y del `contentWindow` de su iframe. Atributos opcionales del contenedor: `data-lang` (`ca`/`es`/`en`),
 `data-theme` (`light`/`dark`/`auto`) y `data-title` (título accesible del iframe).
 
 ## Fuentes y datos que se redistribuyen
@@ -64,8 +64,8 @@ anfitriona no puede cambiarla; solo puede elegir idioma y tema.
 | `layout` | `list`, `grid`, `compact` | `list` |
 | `theme` | `light`, `dark`, `auto` | `light` |
 | `accent` | color `#rrggbb` | `#0055ff` |
-| `language` | `ca`, `es` | `ca` |
-| `title` | `{ "ca": "...", "es": "..." }`, máximo 80 caracteres | «Plans · {territori}» |
+| `language` | `ca`, `es`, `en` | `ca` |
+| `title` | `{ "ca": "...", "es": "...", "en": "..." }`, máximo 80 caracteres | «Plans · {territori}» |
 
 Los nombres de territorio se normalizan contra el ICGC (`"baix emporda"` → `Baix Empordà`); con un
 municipio, la comarca se deduce automáticamente. La visibilidad, las occurrences y el orden son los
@@ -100,10 +100,14 @@ nuevos se agrupan en `other`. No guarda IPs ni datos
 del visitante. Los contadores se acumulan en memoria y se vuelcan a SQLite cada 60 s y al detener el
 servidor; es la única escritura que hace el proceso de la API.
 
-Los enlaces del widget abren tenspla.cat en una pestaña nueva con el idioma del widget (`lang=ca|es`)
+Los enlaces del widget abren tenspla.cat en una pestaña nueva con el idioma del widget (`lang=ca|es|en`)
 y `utm_source=tenspla-widget&utm_medium=embed&utm_campaign=<clave>`, visibles en los pageviews de
 Umami. tenspla.cat usa ese `lang` para la visita sin guardarlo; solo el selector de idioma guarda la
 preferencia.
+
+El inglés (`en`) traduce solo la interfaz del widget (textos, fechas, informe). Los títulos y
+descripciones de los planes se muestran como están almacenados, casi siempre en catalán, y el pie
+lo indica («Listings are shown in their original language, mostly Catalan.»).
 
 Con un territorio por radio, el widget muestra los planes con coordenadas a esa distancia del punto
 (los que no tienen coordenadas quedan fuera), indica «a X km» en cada plan y titula «Plans · {municipi}
@@ -112,7 +116,7 @@ radio.
 
 ## Página pública `/widget`
 
-`frontend/src/pages/WidgetPage.jsx` explica el widget en catalán y castellano, incrusta dos ejemplos
+`frontend/src/pages/WidgetPage.jsx` explica el widget en catalán, castellano e inglés, incrusta dos ejemplos
 reales y remite a `contacte@tenspla.cat` para pedirlo. No menciona precios ni condiciones. Se enlaza
 como «Tens una web?» / «¿Tienes una web?» en el menú superior (en lugar de «Fonts», que sigue en el
 pie) y en la barra inferior del móvil, además de en el pie y el sitemap.
@@ -152,7 +156,7 @@ npm run embed:widgets -- snippet <clau>
 
 `report` genera en texto plano, listo para pegar en un correo al cliente, el resumen de un mes
 (por defecto el anterior): cargas totales, media diaria, cargas por web, días con más cargas e
-intentos bloqueados desde otras webs. `--lang` elige catalán o castellano; por defecto, el idioma del
+intentos bloqueados desde otras webs. `--lang` elige catalán, castellano o inglés; por defecto, el idioma del
 widget.
 
 `create` y `rotate` imprimen el código que hay que enviar al cliente. `rotate` invalida la clave

@@ -11,6 +11,7 @@ import { api } from '../services/api.js';
 import { trackCollectionView } from '../services/analytics.js';
 import { readLocationPreference, saveLocationPreference } from '../utils/locationPreference.js';
 import { createPlansSearch, filtersFromSearchParams } from '../utils/search.js';
+import { contentLanguage, uiLanguage } from '../utils/language.js';
 
 export function PlansPage() {
   const { t, i18n } = useTranslation();
@@ -22,7 +23,7 @@ export function PlansPage() {
   const viewedCollections = useRef(new Set());
   const searchKey = searchParams.toString();
   const filters = useMemo(() => filtersFromSearchParams(searchParams), [searchKey]);
-  const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
+  const language = uiLanguage(i18n);
   const page = searchParams.get('page') || '1';
   const sort = filters.date || filters.dateFrom || filters.dateTo ? 'date' : 'quality';
   const filtered = searchParams.size > 0;
@@ -36,7 +37,7 @@ export function PlansPage() {
   useEffect(() => {
     let active = true;
     setState((current) => ({ ...current, status: 'loading' }));
-    api.getPlans({ ...filters, page, limit: 12, sort, lang: language })
+    api.getPlans({ ...filters, page, limit: 12, sort, lang: contentLanguage(language) })
       .then((payload) => active && setState({ status: 'success', plans: payload.data, pagination: payload.pagination }))
       .catch(() => active && setState({ status: 'error', plans: [], pagination: null }));
     return () => { active = false; };
@@ -81,6 +82,7 @@ export function PlansPage() {
         {state.status === 'success' && (
           <>
             <p className="result-count">{t('results.count', { count: state.pagination.total })}</p>
+            {language === 'en' && <p className="content-notice">{t('app.contentNotice')}</p>}
             {state.plans.length > 0 ? <PlanList plans={state.plans} /> : <div className="filtered-empty"><EmptyState /><button type="button" className="button button-primary" onClick={() => applyFilters({})}>{t('filters.clear')}</button></div>}
             <Pagination pagination={state.pagination} />
           </>

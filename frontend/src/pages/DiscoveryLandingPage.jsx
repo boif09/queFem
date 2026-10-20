@@ -12,6 +12,7 @@ import { trackCollectionView } from '../services/analytics.js';
 import { getCataloniaQuickDateRange } from '../utils/dates.js';
 import { readLocationPreference, saveLocationPreference } from '../utils/locationPreference.js';
 import { createPlansSearch, filtersFromSearchParams } from '../utils/search.js';
+import { contentLanguage, uiLanguage } from '../utils/language.js';
 
 const LANDINGS = {
   today: { path: '/avui', key: 'today' },
@@ -32,7 +33,7 @@ export function DiscoveryLandingPage({ type, now }) {
   const [reloadKey, setReloadKey] = useState(0);
   const lastCollection = useRef(null);
   const landing = LANDINGS[type];
-  const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
+  const language = uiLanguage(i18n);
   const range = useMemo(
     () => getCataloniaQuickDateRange(type, now || new Date()),
     [type, now],
@@ -56,8 +57,8 @@ export function DiscoveryLandingPage({ type, now }) {
     let active = true;
     setState((current) => ({ ...current, status: 'loading' }));
     const parameters = type === 'weekend'
-      ? { ...filters, ...range, permanent: false, editorial: 'home-weekend', sort: 'date', page, limit: 24, lang: language }
-      : { ...filters, ...range, sort: 'date', page, limit: 24, lang: language };
+      ? { ...filters, ...range, permanent: false, editorial: 'home-weekend', sort: 'date', page, limit: 24, lang: contentLanguage(language) }
+      : { ...filters, ...range, sort: 'date', page, limit: 24, lang: contentLanguage(language) };
     api.getPlans(parameters)
       .then((payload) => active && setState({ status: 'success', plans: payload.data, pagination: payload.pagination }))
       .catch(() => active && setState({ status: 'error', plans: [], pagination: null }));

@@ -29,6 +29,21 @@ const STRINGS = {
     unavailable: 'Esta agenda no está disponible en este momento.',
     label: 'Agenda de planes de Tens pla?',
   },
+  en: {
+    weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    heading: (place) => `Plans · ${place}`,
+    headingNear: (place) => `Plans · ${place} and surroundings`,
+    distance: (km) => `${km} km away`,
+    until: 'Until', free: 'Free', now: 'Now', ongoing: 'ongoing', always: 'Always', open: 'open',
+    sections: { upcoming: 'Coming up', permanent: 'To visit' },
+    empty: 'There are no plans published for this area right now.',
+    more: 'See all plans', by: 'Agenda by', data: 'Data:',
+    updated: (date) => `Data updated on ${date}`,
+    unavailable: 'This agenda is not available right now.',
+    label: 'Tens pla? plans agenda',
+    notice: 'Listings are shown in their original language, mostly Catalan.',
+  },
 };
 
 const ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -47,11 +62,13 @@ function textOnAccent(hex) {
   return luminance > 170 ? '#1a1a1a' : '#ffffff';
 }
 
-function formatUpdatedAt(isoTimestamp) {
+const LOCALES = { ca: 'ca-ES', es: 'es-ES', en: 'en-GB' };
+
+function formatUpdatedAt(isoTimestamp, language) {
   if (!isoTimestamp) return null;
   const date = new Date(isoTimestamp);
   if (Number.isNaN(date.getTime())) return null;
-  return new Intl.DateTimeFormat('ca-ES', {
+  return new Intl.DateTimeFormat(LOCALES[language] || 'ca-ES', {
     timeZone: 'Europe/Madrid', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
   }).format(date);
 }
@@ -76,7 +93,7 @@ function dateBlock(plan, t) {
 function accessibleDate(plan, t, language) {
   if (plan.permanent || !plan.date) return `${t.always} ${t.open}`;
   if (plan.ongoing) return t.now;
-  return new Intl.DateTimeFormat(language === 'es' ? 'es-ES' : 'ca-ES', {
+  return new Intl.DateTimeFormat(LOCALES[language] || 'ca-ES', {
     timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long',
   }).format(parseDate(plan.date));
 }
@@ -213,7 +230,7 @@ export function renderWidget({ widget, view, language, theme }) {
   if (config.categories.length) moreFilters.category = config.categories.join(',');
   if (config.freeOnly) moreFilters.free = 'true';
   moreFilters.lang = language;
-  const updated = formatUpdatedAt(view.updatedAt);
+  const updated = formatUpdatedAt(view.updatedAt, language);
 
   const body = `<section class="w ${config.layout} ${theme}" data-key="${escapeHtml(key)}" aria-label="${escapeHtml(t.label)}">
 <div class="head"><h1>${escapeHtml(heading)}</h1></div>
@@ -223,6 +240,7 @@ ${tabs}${panels}
 <a class="brand" href="${escapeHtml(trackedUrl('/', key, { lang: language }))}" target="_blank" rel="noopener">${t.by} <span class="logo">Tens pla<i>?</i></span></a>
 <span>${t.data} ${view.attributions.map(escapeHtml).join(' · ')}</span>
 ${updated ? `<span>${escapeHtml(t.updated(updated))}</span>` : ''}
+${t.notice ? `<span>${escapeHtml(t.notice)}</span>` : ''}
 </footer>
 </section>`;
   return page({ language, accent: config.accent, body });

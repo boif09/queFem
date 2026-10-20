@@ -231,6 +231,24 @@ test('widget supports Spanish and permanent sections', () => withTestDatabase(as
   assert.match(html, /Museu de la Tècnica/);
 }));
 
+test('widget supports English, keeps plan text as stored and notes the original language', () => withTestDatabase(async (db) => {
+  enableAllSources(db);
+  insertPlan(db, { title: 'Concert' });
+  insertPlan(db, { title: 'Museu de la Tècnica', permanent: 1, start_date: null, end_date: null });
+  seedWidget(db, { config: { sections: ['upcoming', 'permanent'] } });
+
+  const html = (await framed(request(appFor(db)), `/embed/v1/w/${KEY}?lang=en`)).text;
+  assert.match(html, /<html lang="en">/);
+  assert.match(html, /Plans · Bages/);
+  assert.match(html, /Coming up/);
+  assert.match(html, /To visit/);
+  assert.match(html, /See all plans/);
+  assert.match(html, /Listings are shown in their original language, mostly Catalan\./);
+  assert.match(html, /\?lang=en&amp;utm_source=/);
+  assert.match(html, /Museu de la Tècnica/);
+  assert.doesNotMatch((await framed(request(appFor(db)), `/embed/v1/w/${KEY}?lang=es`)).text, /original language/);
+}));
+
 test('a municipality widget widens to its comarca when it has too few plans', () => withTestDatabase(async (db) => {
   enableAllSources(db);
   insertPlan(db, { title: 'Pla de Súria', municipality: 'Súria' });
@@ -418,6 +436,9 @@ test('monthly usage report summarises loads per domain for the client', () => wi
   const spanish = run({ month: '2026-08', lang: 'es' });
   assert.match(spanish, /Periodo: agosto de 2026/);
   assert.match(spanish, /Cargas de la agenda: 999/);
+  const english = run({ month: '2026-08', lang: 'en' });
+  assert.match(english, /Tens pla\? agenda usage report/);
+  assert.match(english, /Agenda loads: 999/);
   assert.match(run({ month: '2026-07' }), /No s’ha registrat cap càrrega/);
   assert.throws(() => run({ month: '2026-13' }), /AAAA-MM/);
 }));

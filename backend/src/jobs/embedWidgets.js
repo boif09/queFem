@@ -20,7 +20,7 @@ const USAGE = `Ús: npm run embed:widgets -- <ordre> [opcions]
   suspend <clau> | activate <clau> | revoke <clau>
   rotate <clau>
   usage <clau> [--days 30]
-  report <clau> [--month AAAA-MM] [--lang ca|es]   (per defecte, el mes anterior)
+  report <clau> [--month AAAA-MM] [--lang ca|es|en]   (per defecte, el mes anterior)
   snippet <clau> [--base https://tenspla.cat]`;
 
 const VALUE_OPTIONS = new Set(['name', 'client', 'origins', 'config', 'notes', 'days', 'base', 'key', 'month', 'lang']);
@@ -151,7 +151,7 @@ export function runEmbedWidgetCommand(db, { command, key, options }, {
     }
     case 'report': {
       const widget = requireWidget();
-      if (options.lang !== undefined && !['ca', 'es'].includes(options.lang)) throw new Error('--lang ha de ser ca o es.');
+      if (options.lang !== undefined && !['ca', 'es', 'en'].includes(options.lang)) throw new Error('--lang ha de ser ca, es o en.');
       const month = options.month ?? previousMonth(retentionCutoff(0, now()));
       const { from, to } = monthRange(month);
       return buildUsageReport({

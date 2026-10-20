@@ -4,9 +4,11 @@ import ca from './locales/ca/translation.json';
 import es from './locales/es/translation.json';
 import caLegal from './locales/ca/legal.json';
 import esLegal from './locales/es/legal.json';
+import en from './locales/en/translation.json';
+import enLegal from './locales/en/legal.json';
 
 export const LANGUAGE_STORAGE_KEY = 'quefem.language';
-const LANGUAGES = ['ca', 'es'];
+const LANGUAGES = ['ca', 'es', 'en'];
 
 // An explicit ?lang= (links from the embed widget) wins for this visit but is never stored: only the
 // visitor's own choice in the language switcher is persisted.
@@ -29,10 +31,11 @@ i18n
     resources: {
       ca: { translation: { ...ca, legal: caLegal } },
       es: { translation: { ...es, legal: esLegal } },
+      en: { translation: { ...en, legal: enLegal } },
     },
     lng: initialLanguage,
     fallbackLng: 'ca',
-    supportedLngs: ['ca', 'es'],
+    supportedLngs: ['ca', 'es', 'en'],
     interpolation: { escapeValue: false },
     react: { useSuspense: false },
   });

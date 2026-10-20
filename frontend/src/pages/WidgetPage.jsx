@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Seo } from '../components/Seo.jsx';
+import { uiLanguage } from '../utils/language.js';
 
 const CONTACT_EMAIL = 'contacte@tenspla.cat';
 
@@ -41,7 +42,7 @@ function DemoFrame({ demo, language, title }) {
 
 export function WidgetPage() {
   const { t, i18n } = useTranslation();
-  const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
+  const language = uiLanguage(i18n);
   const [demoId, setDemoId] = useState(WIDGET_DEMOS[0].id);
   const demo = WIDGET_DEMOS.find(({ id }) => id === demoId);
   const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(t('widget.mailSubject'))}`;

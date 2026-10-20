@@ -2,11 +2,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../utils/dates.js';
 import { PlanVisual } from './PlanVisual.jsx';
+import { uiLanguage } from '../utils/language.js';
 
 export function PlanCard({ plan }) {
   const { t, i18n } = useTranslation();
   const location = useLocation();
-  const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
+  const language = uiLanguage(i18n);
   const primaryCategory = plan.categories?.[0];
   const occurrenceDate = plan.nextOccurrence && `${formatDate(plan.nextOccurrence.localDate, language)}${plan.nextOccurrence.localTime ? ` · ${plan.nextOccurrence.localTime}` : ''}`;
   const dateLabel = occurrenceDate || (plan.permanent

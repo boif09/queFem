@@ -4,6 +4,7 @@ import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { api } from '../services/api.js';
 import { formatDate } from '../utils/dates.js';
+import { uiLanguage } from '../utils/language.js';
 
 // Several registered sources can belong to the same organisation under the same licence and attribution (the three
 // Diputació de Barcelona datasets). They are one entry on this page, listing each dataset with its own link.
@@ -19,7 +20,7 @@ export function groupSources(sources) {
 
 export function FontsPage() {
   const { t, i18n } = useTranslation();
-  const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
+  const language = uiLanguage(i18n);
   const [state, setState] = useState({ status: 'loading', sources: [] });
   const [reloadKey, setReloadKey] = useState(0);
   useEffect(() => {

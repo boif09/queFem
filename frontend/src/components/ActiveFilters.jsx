@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../utils/dates.js';
+import { uiLanguage } from '../utils/language.js';
 
 export function ActiveFilters({ filters, onRemove, onClear }) {
   const { t, i18n } = useTranslation();
-  const language = i18n.resolvedLanguage?.startsWith('es') ? 'es' : 'ca';
+  const language = uiLanguage(i18n);
   const items = [
     filters.q && { key: 'q', label: t('filter.query', { query: filters.q }) },
     filters.date && { key: 'date', label: t('filter.date', { value: formatDate(filters.date, language) }) },
