@@ -71,6 +71,8 @@
     "languageBody": "Only localStorage is used, with the key quefem.language and the values ca, es or en, to remember the selected language.",
     "locationTitle": "Location preference",
     "locationBody": "localStorage may save, with the key quefem.location, only the province, comarca and/or municipality you have explicitly selected. It is used to show contextual plans on the homepage; it uses no GPS, identifiers or account.",
+    "favoritesTitle": "Saved plans",
+    "favoritesBody": "If you save plans with the heart, localStorage keeps, under the key quefem.favorites, each plan's identifier, its title and the date you saved it (up to 200 plans). The list exists only on this device: it is not stored on Tens pla? servers or linked to any account. To show current dates and prices, the Saved plans page requests each plan from the Tens pla? API, just like opening a plan page. When you save, remove or share a plan, Tens pla?'s own statistics (Umami, without cookies) count the action with the plan's identifier and no data about you. You can remove them one by one with the heart or delete them from your browser's data settings.",
     "sharingBody": "These preferences do not identify people, are not used for advertising, analytics, tracking or profiling and are not shared with third parties.",
     "deleteTitle": "How to delete it",
     "deleteBody": "You can change the language from the Tens pla? selector, remove the location from the homepage or the filters, or delete the preferences from the browser's data settings.",

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CategoryIcon } from '../components/CategoryIcon.jsx';
+import { FavoriteButton } from '../components/FavoriteButton.jsx';
+import { ShareButton } from '../components/ShareButton.jsx';
 import { PlanVisual } from '../components/PlanVisual.jsx';
 import { MiniMap } from '../components/MiniMap.jsx';
 import { buildEventJsonLd, compactDescription, hasValidCoordinates } from '../../../shared/seo/eventJsonLd.js';
@@ -124,6 +126,10 @@ export function PlanDetailPage() {
               </div>
               <h1>{plan.title}</h1>
               {plan.subtitle && <p className="detail-subtitle">{plan.subtitle}</p>}
+              <div className="detail-actions">
+                <FavoriteButton plan={plan} placement="detail" showLabel />
+                <ShareButton planId={plan.id} title={plan.title} url={canonicalUrl} />
+              </div>
             </div>
           </div>
         </div>

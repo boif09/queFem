@@ -80,6 +80,7 @@ export function StoragePage() {
       <Section title={t('legal.storage.cookiesTitle')}><p>{t('legal.storage.cookiesBody')}</p></Section>
       <Section title={t('legal.storage.languageTitle')}><p>{t('legal.storage.languageBody')}</p><p>{t('legal.storage.sharingBody')}</p></Section>
       <Section title={t('legal.storage.locationTitle')}><p>{t('legal.storage.locationBody')}</p></Section>
+      <Section title={t('legal.storage.favoritesTitle')}><p>{t('legal.storage.favoritesBody')}</p></Section>
       <Section title={t('legal.storage.deleteTitle')}><p>{t('legal.storage.deleteBody')}</p></Section>
       <Section title={t('legal.storage.mapTitle')}><p>{t('legal.storage.mapBody')}</p></Section>
       <Section title={t('legal.storage.offlineTitle')}><p>{t('legal.storage.offlineBody')}</p></Section>

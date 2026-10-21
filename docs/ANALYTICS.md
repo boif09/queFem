@@ -21,6 +21,8 @@ Ejemplo de enlace de bio (con una campaña actualizada semanalmente):
 | `collection_view` | Una vez por cada navegación a `avui`, `cap-de-setmana` o `plans`; los cambios de filtro, paginación o query dentro de la misma colección no lo repiten, pero volver tras visitar otra página sí | `collection`, `language` (`ca` o `es`) y los campos social disponibles |
 | `plan_view` | Una vez por cada navegación correcta a un plan; un refetch por cambio de idioma del mismo plan no lo repite | `plan_id`, `has_affiliate`, `language` y los campos social disponibles |
 | `affiliate_click` | Clic en el CTA de Fever | `source=fever`, `plan_id`, `source_record_id` (el `CatalogItemId` de Fever), `placement=detail_cta`, `language` y los campos social disponibles |
+| `favorite_add` / `favorite_remove` | Clic en el corazón de un plan (desde 2026-10-21) | `plan_id`, `placement` (`card` o `detail`), `language` y los campos social disponibles |
+| `plan_share` | Se abre la hoja de compartir del sistema o se copia el enlace de un plan (desde 2026-10-21); cancelar la hoja no cuenta | `plan_id`, `method` (`native` o `copy`), `language` y los campos social disponibles |
 
 El CTA `affiliate_click` no bloquea, retrasa ni modifica la navegación al enlace de Impact. Esta fase mide hasta el clic saliente afiliado, no una venta ni una comisión: la atribución de ingresos de Impact/Fever no está implementada.
 

@@ -30,6 +30,14 @@ export function trackCollectionView({ collection, language }) {
   trackEvent('collection_view', withSocialAttribution({ collection, language }));
 }
 
+export function trackFavoriteChange({ planId, saved, placement, language }) {
+  trackEvent(saved ? 'favorite_add' : 'favorite_remove', withSocialAttribution({ plan_id: planId, placement, language }));
+}
+
+export function trackPlanShare({ planId, method, language }) {
+  trackEvent('plan_share', withSocialAttribution({ plan_id: planId, method, language }));
+}
+
 export function trackPlanView({ planId, hasAffiliate, language }) {
   trackEvent('plan_view', withSocialAttribution({
     plan_id: planId,

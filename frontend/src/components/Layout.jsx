@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { TensPlaHorizontalLogo } from '../assets/brand/TensPlaLogos.jsx';
 import { Header } from './Header.jsx';
+import { FAVORITES_PATHS, favoritesPath } from '../utils/favoritesPath.js';
 import { uiLanguage } from '../utils/language.js';
 
 function InstagramIcon() {
@@ -48,6 +49,7 @@ export function Layout() {
     || pathname === '/fonts'
     || pathname === '/plans'
     || pathname === '/widget'
+    || FAVORITES_PATHS.includes(pathname)
     || pathname.startsWith('/plans/');
   return (
     <div className={`site-shell${showMobileNav ? ' has-mobile-nav' : ''}`}>
@@ -81,6 +83,7 @@ export function Layout() {
           <SocialLinks className="mobile-social-links" />
           <Link to="/"><span aria-hidden="true">⌂</span>{t('nav.home')}</Link>
           <Link to="/plans"><span aria-hidden="true">◇</span>{t('nav.exploreShort')}</Link>
+          <Link to={favoritesPath(language)}><span aria-hidden="true">♡</span>{t('nav.favoritesShort')}</Link>
           <Link to="/widget"><span aria-hidden="true">▦</span>{t('nav.widget')}</Link>
         </nav>
       )}

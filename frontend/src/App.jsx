@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout.jsx';
+import { FavoritesPage } from './pages/FavoritesPage.jsx';
 import { FontsPage } from './pages/FontsPage.jsx';
 import { DiscoveryLandingPage } from './pages/DiscoveryLandingPage.jsx';
 import { HomePage } from './pages/HomePage.jsx';
@@ -18,6 +19,8 @@ export function AppRoutes() {
           <Route path="cap-de-setmana" element={<DiscoveryLandingPage type="weekend" />} />
           <Route path="plans" element={<PlansPage />} />
           <Route path="plans/:id" element={<PlanDetailPage />} />
+          <Route path="preferits" element={<FavoritesPage />} />
+          <Route path="favoritos" element={<FavoritesPage />} />
           <Route path="fonts" element={<FontsPage />} />
           <Route path="widget" element={<WidgetPage />} />
           <Route path="legal" element={<LegalNoticePage />} />

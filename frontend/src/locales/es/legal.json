@@ -70,6 +70,8 @@
     "languageBody": "Se utiliza exclusivamente localStorage con la clave quefem.language y los valores ca, es o en para recordar el idioma seleccionado.",
     "locationTitle": "Preferencia de ubicación",
     "locationBody": "localStorage puede guardar con la clave quefem.location solo la provincia, la comarca y/o el municipio que hayas seleccionado explícitamente. Sirve para mostrar planes contextualizados en la portada; no utiliza GPS, identificadores ni cuenta.",
+    "favoritesTitle": "Planes favoritos",
+    "favoritesBody": "Si guardas planes con el corazón, localStorage guarda con la clave quefem.favorites el identificador de cada plan, el título y la fecha en que lo guardaste (hasta 200 planes). La lista solo está en este dispositivo: no se guarda en los servidores de Tens pla? ni se vincula a ninguna cuenta. Para mostrar las fechas y los precios actuales, la página Favoritos pide cada plan a la API de Tens pla?, igual que cuando abres una ficha. Cuando guardas, quitas o compartes un plan, la estadística propia de Tens pla? (Umami, sin cookies) cuenta la acción con el identificador del plan, sin datos tuyos. Puedes quitarlos uno a uno con el corazón o eliminarlos desde la configuración de datos del navegador.",
     "sharingBody": "Estas preferencias no identifican personas, no se utilizan para publicidad, analítica, seguimiento o perfilado y no se comparten con terceros.",
     "deleteTitle": "Cómo eliminarla",
     "deleteBody": "Puedes cambiar el idioma desde el selector de Tens pla?, quitar la ubicación desde la portada o los filtros, o eliminar las preferencias desde la configuración de datos del navegador.",

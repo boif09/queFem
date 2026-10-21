@@ -37,6 +37,15 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
+- Favoritos y compartir (2026-10-21, pendiente de despliegue): paso 2 del plan de app móvil. Corazón en
+  cada tarjeta y en la ficha, página `/preferits` (alias `/favoritos`) con enlace en la cabecera (oculto en
+  móvil) y en la barra inferior móvil, que pasa de 3 a 4 botones. Los favoritos se guardan solo en el
+  dispositivo (`localStorage`, `quefem.favorites`, máximo 200), sin cuentas ni cambios en el backend; la
+  página refresca cada plan desde la API y separa los que ya no están publicados. Botón «Comparteix» en
+  la ficha (hoja nativa, copia del enlace o enlace para copiar a mano). Eventos Umami `favorite_add`,
+  `favorite_remove` y `plan_share` ([`ANALYTICS.md`](ANALYTICS.md)); la página de almacenamiento explica
+  la nueva clave en los tres idiomas.
+
 - Web instalable como PWA (2026-10-21, **desplegada ese día**, commit `ed40509`, con la CSP de Nginx
   ampliada a `worker-src 'self'; manifest-src 'self'`): primer paso hacia la app Android (ver
   [`DECISIONS.md`](DECISIONS.md)). Manifiesto (`frontend/public/manifest.webmanifest`), iconos PNG en

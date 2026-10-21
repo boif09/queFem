@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../utils/dates.js';
+import { FavoriteButton } from './FavoriteButton.jsx';
 import { PlanVisual } from './PlanVisual.jsx';
 import { uiLanguage } from '../utils/language.js';
 
@@ -44,6 +45,7 @@ export function PlanCard({ plan }) {
           </div>
         </div>
       </Link>
+      <FavoriteButton plan={plan} placement="card" className="plan-card-favorite" />
     </article>
   );
 }

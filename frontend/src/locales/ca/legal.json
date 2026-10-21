@@ -70,6 +70,8 @@
     "languageBody": "S'utilitza exclusivament localStorage amb la clau quefem.language i els valors ca, es o en per recordar l'idioma seleccionat.",
     "locationTitle": "Preferència d'ubicació",
     "locationBody": "localStorage pot desar amb la clau quefem.location només la província, la comarca i/o el municipi que hagis seleccionat explícitament. Serveix per mostrar plans contextualitzats a la portada; no utilitza GPS, identificadors ni compte.",
+    "favoritesTitle": "Plans preferits",
+    "favoritesBody": "Si deses plans amb el cor, localStorage guarda amb la clau quefem.favorites l'identificador de cada pla, el títol i la data en què el vas desar (fins a 200 plans). La llista només és en aquest dispositiu: no es guarda als servidors de Tens pla? ni es vincula a cap compte. Per mostrar les dates i els preus actuals, la pàgina Preferits demana cada pla a l'API de Tens pla?, igual que quan obres una fitxa. Quan deses, treus o comparteixes un pla, l'estadística pròpia de Tens pla? (Umami, sense cookies) en compta l'acció amb l'identificador del pla, sense dades teves. Els pots treure un per un amb el cor o eliminar-los des de la configuració de dades del navegador.",
     "sharingBody": "Aquestes preferències no identifiquen persones, no s'utilitzen per a publicitat, analítica, seguiment o perfilat i no es comparteixen amb tercers.",
     "deleteTitle": "Com esborrar-la",
     "deleteBody": "Pots canviar l'idioma des del selector de Tens pla?, treure la ubicació des de la portada o els filtres, o eliminar les preferències des de la configuració de dades del navegador.",
