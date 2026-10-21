@@ -37,7 +37,8 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
-- Favoritos y compartir (2026-10-21, pendiente de despliegue): paso 2 del plan de app móvil. Corazón en
+- Favoritos y compartir (2026-10-21, **desplegado ese día**, commit `3f91fad`, sin cambios en Nginx;
+  comprobado en producción: corazones, página `/preferits` y `/favoritos` en 200 y botón «Comparteix»): paso 2 del plan de app móvil. Corazón en
   cada tarjeta y en la ficha, página `/preferits` (alias `/favoritos`) con enlace en la cabecera (oculto en
   móvil) y en la barra inferior móvil, que pasa de 3 a 4 botones. Los favoritos se guardan solo en el
   dispositivo (`localStorage`, `quefem.favorites`, máximo 200), sin cuentas ni cambios en el backend; la
