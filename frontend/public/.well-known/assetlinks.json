@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "cat.tenspla.app",
+      "sha256_cert_fingerprints": ["BF:65:EC:1B:F9:FF:71:4C:70:24:C9:48:58:BE:F3:BC:97:2C:8A:CF:D4:9C:8D:D2:4A:EC:81:9A:24:E0:BA:B6"]
+    }
+  }
+]

@@ -173,12 +173,13 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
 ## OPERATOR / PRODUCTION
 
 - App Android (paso 3 del plan móvil): el proyecto TWA (`mobile/android/`), los textos e imágenes de la ficha
-  y la guía de formularios (`mobile/store-listing/`) están preparados. Faltan acciones del propietario, en este
-  orden: terminar la verificación de la cuenta de Play Console (documento enviado el 2026-10-21; falta el
-  teléfono); consultar con un gestor el NIF y el domicilio del aviso legal (LSSI art. 10); crear la clave de
-  subida; compilar y subir el `.aab` a una prueba cerrada;
-  publicar `/.well-known/assetlinks.json` con la huella de Firma de aplicaciones de Play; reunir 12 testers
-  (mejor 14–15) durante 14 días seguidos y pedir el acceso a producción. Pasos detallados en
+  y la guía de formularios (`mobile/store-listing/`) están preparados. Hecho el 2026-10-21: cuenta de Play
+  Console verificada, app `cat.tenspla.app` creada, clave de subida creada por el propietario (fuera del
+  repositorio), versión 1 (1.0.0) subida a la **prueba interna** y `/.well-known/assetlinks.json` publicado con
+  la huella de Firma de aplicaciones de Play. Faltan, del propietario: completar «Termina de configurar tu
+  aplicación» (ficha y formularios), crear la prueba cerrada, reunir 12 testers (mejor 14–15) durante 14 días
+  seguidos y pedir el acceso a producción; y consultar con un gestor el NIF y el domicilio del aviso legal
+  (LSSI art. 10). Pasos detallados en
   [`../mobile/store-listing/play-console-guide.md`](../mobile/store-listing/play-console-guide.md).
 
 - Revisar el log de la importación de Gencat (`/var/log/quefem-import.log`): confirmar que `[recurring-shadow]` informa los 10 grupos consolidados con `blocked=0` y `stale=0`: cualquier `stale` > 0 es una sesión futura que ha desaparecido del feed y merece mirarse; `expired` es normal.

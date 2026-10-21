@@ -48,6 +48,16 @@ describe('PWA assets', () => {
     for (const icon of manifest.icons) expect(fs.existsSync(`${publicDir}${icon.src.slice(1)}`)).toBe(true);
   });
 
+  it('links the Android app to the site with the Play App Signing fingerprint', () => {
+    const links = JSON.parse(fs.readFileSync(`${publicDir}.well-known/assetlinks.json`, 'utf8'));
+    expect(links).toHaveLength(1);
+    expect(links[0].relation).toEqual(['delegate_permission/common.handle_all_urls']);
+    expect(links[0].target).toMatchObject({ namespace: 'android_app', package_name: 'cat.tenspla.app' });
+    for (const fingerprint of links[0].target.sha256_cert_fingerprints) {
+      expect(fingerprint).toMatch(/^([0-9A-F]{2}:){31}[0-9A-F]{2}$/);
+    }
+  });
+
   it('keeps the API, the embed widget and the sitemap out of the service worker', () => {
     const worker = fs.readFileSync(`${publicDir}sw.js`, 'utf8');
     expect(worker).toMatch(/BYPASS_PREFIXES = \['\/api\/', '\/embed\/', '\/sitemap\.xml'\]/);

@@ -75,6 +75,10 @@ Se guarda en `frontend/public/.well-known/assetlinks.json` y se despliega con la
 
 Mientras no esté publicado el archivo, la app funciona igual pero muestra una barra con la dirección de la web.
 
+Estado (2026-10-21): `frontend/public/.well-known/assetlinks.json` declara la huella de la **clave de firma de
+aplicación** de Play (`BF:65:EC:…:BA:B6`, también en `fingerprints` de `twa-manifest.json`). Si se instala un
+.aab firmado localmente sin pasar por Google Play, habrá que añadir también la huella de la clave de subida.
+
 ## 4. Probar en un emulador o móvil
 
 ```powershell
