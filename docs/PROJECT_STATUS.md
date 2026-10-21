@@ -176,10 +176,13 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
   y la guía de formularios (`mobile/store-listing/`) están preparados. Hecho el 2026-10-21: cuenta de Play
   Console verificada, app `cat.tenspla.app` creada, clave de subida creada por el propietario (fuera del
   repositorio), versión 1 (1.0.0) subida a la **prueba interna** y `/.well-known/assetlinks.json` publicado con
-  la huella de Firma de aplicaciones de Play. Faltan, del propietario: completar «Termina de configurar tu
-  aplicación» (ficha y formularios), crear la prueba cerrada, reunir 12 testers (mejor 14–15) durante 14 días
-  seguidos y pedir el acceso a producción; y consultar con un gestor el NIF y el domicilio del aviso legal
-  (LSSI art. 10). Pasos detallados en
+  las huellas de Firma de aplicaciones de Play y de la clave de subida. También el 2026-10-21: ficha en catalán y
+  todos los formularios completados (PEGI 3; seguridad de los datos con ubicación aproximada, interacciones e
+  historial de búsqueda de Umami) y prueba cerrada «Alpha» (España, lista «tenspla testers») creada y **enviada
+  a la primera revisión de Google**. Faltan, del propietario: esperar la aprobación, enviar el enlace de
+  participación y reunir 12 testers (mejor 14–15) durante 14 días seguidos, pedir el acceso a producción,
+  opcionalmente añadir la ficha en castellano e inglés, y consultar con un gestor el NIF y el domicilio del aviso
+  legal (LSSI art. 10). Respuestas dadas y pasos en
   [`../mobile/store-listing/play-console-guide.md`](../mobile/store-listing/play-console-guide.md).
 
 - Revisar el log de la importación de Gencat (`/var/log/quefem-import.log`): confirmar que `[recurring-shadow]` informa los 10 grupos consolidados con `blocked=0` y `stale=0`: cualquier `stale` > 0 es una sesión futura que ha desaparecido del feed y merece mirarse; `expired` es normal.
