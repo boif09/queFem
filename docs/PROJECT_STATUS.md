@@ -37,7 +37,8 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
-- Web instalable como PWA (2026-10-21, pendiente de despliegue): primer paso hacia la app Android (ver
+- Web instalable como PWA (2026-10-21, **desplegada ese día**, commit `ed40509`, con la CSP de Nginx
+  ampliada a `worker-src 'self'; manifest-src 'self'`): primer paso hacia la app Android (ver
   [`DECISIONS.md`](DECISIONS.md)). Manifiesto (`frontend/public/manifest.webmanifest`), iconos PNG en
   `frontend/public/icons/` (192, 512, 512 maskable y `apple-touch-icon` de 180, generados desde
   `favicon.svg`), `viewport-fit=cover` con márgenes de área segura en cabecera, laterales y barra inferior,
@@ -77,7 +78,8 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
   alojamientos (`territory.near`), informe mensual por cliente (`embed:widgets -- report`) y
   `?lang=ca|es` en tenspla.cat para que las fichas abiertas desde un widget respeten su idioma.
 
-- Interfaz en inglés (F1, 2026-10-20, pendiente de despliegue): UI, textos legales (con nota de
+- Interfaz en inglés (F1, 2026-10-20, publicada: confirmado en producción el 2026-10-21; llegó con el
+  despliegue del commit `c12e10b`): UI, textos legales (con nota de
   traducción informativa), página `/widget`, widget incrustable e informe mensual en inglés; selector
   CA/ES/EN y `?lang=en`. Los planes no se traducen (decisión en [`DECISIONS.md`](DECISIONS.md)); se
   avisa en el pie y en los resultados. SEO, rutas y metadatos del servidor siguen en catalán.

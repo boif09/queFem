@@ -43,17 +43,19 @@ La aplicación se publica mediante HTTPS en `https://tenspla.cat`.
 ### PWA y service worker
 
 El build copia a `dist/` `manifest.webmanifest`, `icons/`, `sw.js`, `offline.html` y `offline.css`;
-el fallback SPA no los afecta porque existen como archivos. Antes del primer despliegue con PWA,
-comprobar en el servidor (sin cambiar Nginx sin autorización):
+el fallback SPA no los afecta porque existen como archivos.
 
-- `/sw.js` y `/manifest.webmanifest` deben responder 200 con su tipo (`text/javascript` y, idealmente,
-  `application/manifest+json`; si el `mime.types` de Nginx no conoce `.webmanifest`, Chrome lo acepta
-  igualmente). Es recomendable `Cache-Control: no-cache` en `/sw.js` para que los navegadores vean
-  pronto una versión nueva; el navegador ya ignora la caché HTTP al comprobar el service worker, pero
-  no es recomendable una caché larga.
-- La CSP del sitio debe permitir el service worker y el manifiesto desde el propio dominio
-  (`worker-src` y `manifest-src`, o sus valores por defecto, con `'self'`). `offline.html` no usa
-  scripts ni estilos en línea.
+Desplegado el 2026-10-21 (commit `ed40509`). Ese día, y con autorización, la CSP del sitio en
+`/etc/nginx/sites-available/tenspla` (línea 53) pasó de `worker-src 'none'; manifest-src 'none'` a
+`worker-src 'self'; manifest-src 'self'`, con `nginx -t` correcto y recarga; copia previa en
+`/root/nginx-backups/tenspla.20261021T063625Z.before-pwa-csp`. Sin ese cambio la web funciona igual,
+pero el navegador bloquea el service worker y el manifiesto. Comprobado después en producción: `/sw.js`
+responde `application/javascript`, el service worker queda activo y controla la página, el widget
+`/embed/` sigue respondiendo 200 y no hay errores de consola. `/manifest.webmanifest` se sirve como
+`application/octet-stream` (el `mime.types` de Nginx no conoce `.webmanifest`); Chrome lo acepta, pero
+podría añadirse `application/manifest+json`. `/sw.js` no lleva `Cache-Control` propio; el navegador
+ignora la caché HTTP al buscar versiones nuevas del service worker, así que no es imprescindible.
+`offline.html` no usa scripts ni estilos en línea.
 
 Para publicar cambios en el service worker hay que modificar `sw.js` (por ejemplo, subir `VERSION`):
 se instala solo en la siguiente visita y borra las cachés `tenspla-*` antiguas. Si alguna vez
@@ -399,7 +401,7 @@ Desde el 2026-10-20, además del backup, healthchecks.io (aviso por correo) vigi
 
 ## Cabeceras de seguridad de Nginx
 
-La configuración externa aplicada incluye HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy` y `server_tokens off`. Observado en el servidor el 2026-09-30: también se envía una cabecera `Content-Security-Policy` **obligatoria** (no `Report-Only`) con `frame-ancestors 'none'`. El propietario confirmó el mismo día que es el estado deseado y debe mantenerse; el comentario de la configuración de Nginx ya lo refleja.
+La configuración externa aplicada incluye HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy` y `server_tokens off`. Observado en el servidor el 2026-09-30: también se envía una cabecera `Content-Security-Policy` **obligatoria** (no `Report-Only`) con `frame-ancestors 'none'`. El propietario confirmó el mismo día que es el estado deseado y debe mantenerse; el comentario de la configuración de Nginx ya lo refleja. Desde el 2026-10-21 permite `worker-src 'self'` y `manifest-src 'self'` para la PWA (ver «PWA y service worker»).
 
 El widget incrustable tiene una excepción aplicada el 2026-09-30: `location ^~ /embed/` hacia el
 backend, sin `X-Frame-Options` ni la CSP del sitio, porque Express envía `frame-ancestors` por
