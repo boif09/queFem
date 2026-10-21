@@ -14,6 +14,11 @@ Registro ligero de decisiones demostrables en documentación, configuración o c
   personal, a nombre del propietario. El propietario quiere favoritos, notificaciones y «planes cerca» con
   localización, uno por uno; esto levanta el aplazamiento de `SPECIFICATION.md` §50 solo para estas tres
   funciones, y cada una sigue necesitando su propia petición.
+- App Android (2026-10-21): paquete `cat.tenspla.app` (no se puede cambiar una vez publicada), mínimo Android
+  7.0 (API 24, lo exige la librería TWA de Google) y compilada para Android 16 (API 36). Cuenta de Play Console
+  personal: nombre de desarrollador «Tens pla?» y correo público `contacte@tenspla.cat`. Firma de aplicaciones
+  de Play activada; la clave de subida la guarda el propietario fuera del repositorio. Ver
+  [`../mobile/android/README.md`](../mobile/android/README.md).
 
 ## Datos y contenido
 

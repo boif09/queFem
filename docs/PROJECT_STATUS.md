@@ -161,6 +161,15 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
 
 ## OPERATOR / PRODUCTION
 
+- App Android (paso 3 del plan móvil): el proyecto TWA (`mobile/android/`), los textos e imágenes de la ficha
+  y la guía de formularios (`mobile/store-listing/`) están preparados. Faltan acciones del propietario, en este
+  orden: terminar la verificación de la cuenta de Play Console (documento enviado el 2026-10-21; falta el
+  teléfono); **corregir la política de privacidad y la página de almacenamiento para mencionar Umami y la app**
+  (hoy dicen que no hay analítica); crear la clave de subida; compilar y subir el `.aab` a una prueba cerrada;
+  publicar `/.well-known/assetlinks.json` con la huella de Firma de aplicaciones de Play; reunir 12 testers
+  (mejor 14–15) durante 14 días seguidos y pedir el acceso a producción. Pasos detallados en
+  [`../mobile/store-listing/play-console-guide.md`](../mobile/store-listing/play-console-guide.md).
+
 - Revisar el log de la importación de Gencat (`/var/log/quefem-import.log`): confirmar que `[recurring-shadow]` informa los 10 grupos consolidados con `blocked=0` y `stale=0`: cualquier `stale` > 0 es una sesión futura que ha desaparecido del feed y merece mirarse; `expired` es normal.
 - Widget B2B: crear los widgets de los pilotos con `embed:widgets` cuando haya acuerdo. Antes de cobrar, revisar el aviso legal.
 - Verificar la configuración efectiva de Nginx, PM2 y cron antes de cualquier operación que dependa de ella.

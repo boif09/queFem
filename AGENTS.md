@@ -16,6 +16,7 @@ El nombre público es **Tens Pla?**; la interfaz y el wordmark también pueden m
 - `backend/src/services/`: deduplicación, reconciliación e imágenes Ticketmaster.
 - `data/`: SQLite y cachés locales; no tratar como código ni versionar datos generados. La única excepción versionada es `data/geography/`, que contiene el snapshot oficial ICGC, su metadata y el manifiesto atómico necesarios para M4A.
 - `test/` y `frontend/src/**/*.test.*`: tests backend y frontend.
+- `mobile/android/`: app Android (TWA `cat.tenspla.app`) generada con Bubblewrap; `mobile/store-listing/`: textos, imágenes y guía de Google Play.
 - `deploy.sh`: despliegue manual; no ejecutarlo sin autorización explícita.
 - `docs/`: documentación detallada. Empezar por [`docs/README.md`](docs/README.md).
 
