@@ -8,6 +8,13 @@ Registro ligero de decisiones demostrables en documentación, configuración o c
 - Catalunya es el ámbito territorial. El catalán es idioma principal y predeterminado; el castellano debe tener soporte completo.
 - El inglés es un idioma solo de interfaz (UI, textos legales con nota de traducción informativa y widget), pensado como ayuda a visitantes extranjeros. Los planes no se traducen: se muestran en su idioma original (casi siempre catalán). La API sigue aceptando solo `ca`/`es`; con la UI en inglés el frontend pide `lang=es`, que cae al texto original. Traducir planes queda como investigación futura si hay demanda.
 
+- App móvil (2026-10-21): primero Android y más adelante, si Android funciona, iPhone. Orden de pasos: la web
+  como PWA instalable → app Android como TWA (la web real dentro de Chrome, de modo que analítica, afiliación
+  y SEO siguen igual) → iPhone con Capacitor. No se reescribe en React Native. La cuenta de Google Play será
+  personal, a nombre del propietario. El propietario quiere favoritos, notificaciones y «planes cerca» con
+  localización, uno por uno; esto levanta el aplazamiento de `SPECIFICATION.md` §50 solo para estas tres
+  funciones, y cada una sigue necesitando su propia petición.
+
 ## Datos y contenido
 
 - Se priorizan fuentes oficiales y datos abiertos. Una fuente nueva requiere revisar licencia/términos; no se hace scraping sin aprobación explícita.

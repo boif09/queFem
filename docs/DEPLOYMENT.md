@@ -40,6 +40,36 @@ El frontend React/Vite se compila en `/var/www/queFem/frontend/dist` y Nginx lo 
 
 La aplicación se publica mediante HTTPS en `https://tenspla.cat`.
 
+### PWA y service worker
+
+El build copia a `dist/` `manifest.webmanifest`, `icons/`, `sw.js`, `offline.html` y `offline.css`;
+el fallback SPA no los afecta porque existen como archivos. Antes del primer despliegue con PWA,
+comprobar en el servidor (sin cambiar Nginx sin autorización):
+
+- `/sw.js` y `/manifest.webmanifest` deben responder 200 con su tipo (`text/javascript` y, idealmente,
+  `application/manifest+json`; si el `mime.types` de Nginx no conoce `.webmanifest`, Chrome lo acepta
+  igualmente). Es recomendable `Cache-Control: no-cache` en `/sw.js` para que los navegadores vean
+  pronto una versión nueva; el navegador ya ignora la caché HTTP al comprobar el service worker, pero
+  no es recomendable una caché larga.
+- La CSP del sitio debe permitir el service worker y el manifiesto desde el propio dominio
+  (`worker-src` y `manifest-src`, o sus valores por defecto, con `'self'`). `offline.html` no usa
+  scripts ni estilos en línea.
+
+Para publicar cambios en el service worker hay que modificar `sw.js` (por ejemplo, subir `VERSION`):
+se instala solo en la siguiente visita y borra las cachés `tenspla-*` antiguas. Si alguna vez
+diera problemas, sustituir `frontend/public/sw.js` por esta versión, que vacía las cachés y se
+desregistra en la siguiente visita de cada navegador, y desplegar:
+
+```js
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    for (const name of await caches.keys()) if (name.startsWith('tenspla-')) await caches.delete(name);
+    await self.registration.unregister();
+  })());
+});
+```
+
 ## Imágenes Ticketmaster pendientes de activación
 
 La implementación está preparada pero no activada en producción. Requiere configurar:

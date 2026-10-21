@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
+import { registerServiceWorker } from './services/serviceWorker.js';
 import { captureSocialAttributionFromLocation } from './services/socialAttribution.js';
 import '@fontsource-variable/montserrat/wght.css';
 import './i18n.js';
@@ -19,3 +20,5 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 );
+
+registerServiceWorker();

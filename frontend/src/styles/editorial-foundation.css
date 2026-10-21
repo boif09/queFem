@@ -814,3 +814,9 @@
   .widget-contact { padding: 28px 20px; }
 }
 @media (prefers-reduced-motion: reduce) { .widget-cta-button:hover { transform: none; } }
+
+/* Safe areas: with viewport-fit=cover the page reaches under the notch and the rounded corners.
+   env() is 0 on regular screens, so this only adds space where the device needs it. */
+.site-header { padding-top: env(safe-area-inset-top); }
+.site-shell { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+.mobile-nav { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }

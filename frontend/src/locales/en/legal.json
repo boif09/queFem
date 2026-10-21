@@ -1,7 +1,7 @@
 {
   "common": {
     "eyebrow": "Legal information and transparency",
-    "updated": "Last updated: 20/10/2026",
+    "updated": "Last updated: 21/10/2026",
     "translationNote": "This English version is an informational translation. If there is any discrepancy, the Catalan or Spanish version prevails.",
     "emailLabel": "Write to contacte@tenspla.cat",
     "externalPolicies": "When you access an external service, its own terms and privacy policy apply."
@@ -75,7 +75,9 @@
     "deleteTitle": "How to delete it",
     "deleteBody": "You can change the language from the Tens pla? selector, remove the location from the homepage or the filters, or delete the preferences from the browser's data settings.",
     "mapTitle": "Map on request",
-    "mapBody": "OpenStreetMap is not loaded when you open a plan page. The connection is only created after you click «Show map», and this decision is not saved for future pages."
+    "mapBody": "OpenStreetMap is not loaded when you open a plan page. The connection is only created after you click «Show map», and this decision is not saved for future pages.",
+    "offlineTitle": "Working offline",
+    "offlineBody": "Your browser keeps a copy of the app's files (code, styles, icons and an offline notice page) so that Tens pla? loads faster and can tell you when you have no internet. No plans, searches or personal data are stored, and you can delete it from your browser's data settings."
   },
   "contact": {
     "title": "Contact",

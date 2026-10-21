@@ -31,7 +31,7 @@ describe('legal and privacy pages', () => {
   ])('renders the Catalan route %s', (route, heading) => {
     renderRoute(route);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
-    expect(screen.getByText('Darrera actualització: 20/10/2026')).toBeInTheDocument();
+    expect(screen.getByText('Darrera actualització: 21/10/2026')).toBeInTheDocument();
     expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
     expect(document.head.querySelector('link[rel="canonical"]')).not.toBeInTheDocument();
   });
@@ -44,7 +44,7 @@ describe('legal and privacy pages', () => {
     await i18n.changeLanguage('es');
     renderRoute(route);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
-    expect(screen.getByText('Última actualización: 20/10/2026')).toBeInTheDocument();
+    expect(screen.getByText('Última actualización: 21/10/2026')).toBeInTheDocument();
   });
 
   it.each([

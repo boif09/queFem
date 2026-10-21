@@ -1,7 +1,7 @@
 {
   "common": {
     "eyebrow": "Informació legal i transparència",
-    "updated": "Darrera actualització: 20/10/2026",
+    "updated": "Darrera actualització: 21/10/2026",
     "emailLabel": "Escriure a contacte@tenspla.cat",
     "externalPolicies": "Quan accedeixes a un servei extern, s'hi apliquen les seves pròpies condicions i política de privacitat."
   },
@@ -74,7 +74,9 @@
     "deleteTitle": "Com esborrar-la",
     "deleteBody": "Pots canviar l'idioma des del selector de Tens pla?, treure la ubicació des de la portada o els filtres, o eliminar les preferències des de la configuració de dades del navegador.",
     "mapTitle": "Mapa sota petició",
-    "mapBody": "OpenStreetMap no es carrega en obrir una fitxa. Només es crea la connexió després de prémer «Veure mapa», i aquesta decisió no es desa per a futures pàgines."
+    "mapBody": "OpenStreetMap no es carrega en obrir una fitxa. Només es crea la connexió després de prémer «Veure mapa», i aquesta decisió no es desa per a futures pàgines.",
+    "offlineTitle": "Funcionament sense connexió",
+    "offlineBody": "El navegador desa una còpia dels fitxers de l'aplicació (codi, estils, icones i una pàgina d'avís sense connexió) perquè Tens pla? carregui més de pressa i et pugui avisar quan no tens internet. No s'hi desen plans, cerques ni dades teves, i s'esborra des de la configuració de dades del navegador."
   },
   "contact": {
     "title": "Contacte",

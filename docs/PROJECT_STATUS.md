@@ -37,6 +37,16 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
+- Web instalable como PWA (2026-10-21, pendiente de despliegue): primer paso hacia la app Android (ver
+  [`DECISIONS.md`](DECISIONS.md)). Manifiesto (`frontend/public/manifest.webmanifest`), iconos PNG en
+  `frontend/public/icons/` (192, 512, 512 maskable y `apple-touch-icon` de 180, generados desde
+  `favicon.svg`), `viewport-fit=cover` con márgenes de área segura en cabecera, laterales y barra inferior,
+  y un service worker (`frontend/public/sw.js`) que solo se registra en el build de producción. El service
+  worker muestra `offline.html` cuando falla una navegación y guarda los assets con hash de Vite y los
+  iconos; **no guarda respuestas de `/api/`, imágenes de planes ni HTML**, y no toca `/embed/` ni
+  `/sitemap.xml`. La página de almacenamiento explica la nueva caché en los tres idiomas. Requisitos de
+  Nginx y cómo desactivarlo en [`DEPLOYMENT.md`](DEPLOYMENT.md#pwa-y-service-worker).
+
 - Imágenes de Gencat muertas (2026-10-19): el plan 1074 salía sin foto porque Gencat registra una imagen que su servidor ya no sirve (404), y la web mostraba el dibujo de la categoría. La ruta `/api/media/gencat/:id` anota ahora un 404/410 definitivo del origen (migración 019: `plan_source_images.unavailable_at` y `unavailable_status`, para todas las filas con esa dirección); mientras la marca es reciente la API no ofrece esa imagen —el plan usa una foto genérica de la librería— y no se vuelve a pedir al origen, y a los 7 días se ofrece otra vez por si Gencat la repone. Timeouts, 5xx y redirecciones nunca se anotan; una dirección de imagen nueva borra la marca. `scripts/sweep-gencat-images.js` comprueba de golpe las direcciones de planes activos (simulación por defecto; `--apply` anota las muertas y limpia las recuperadas). **Desplegado el 2026-10-19 (commit `3b0dfd8`, migración 019) y barrido ejecutado en producción ese mismo día:** 1.460 direcciones comprobadas, 12 muertas (0,8 %) anotadas (24 filas, porque la tarjeta y el detalle comparten dirección), 0 dudosas, unos 100 s; afecta a 12 planes activos (11 con fecha futura). Nueve de ellos muestran ahora una foto genérica de la librería (entre ellos el plan 1074) y tres siguen con una foto oficial porque tienen otro registro de Gencat con una imagen que sí funciona. Una segunda simulación no encuentra nada nuevo. Ver [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
 - Página `/fonts` sin entradas repetidas (2026-10-16): las tres fuentes de Diputació de Barcelona (`diba-tourisme`, `diba-escenari`, `diba-museus`) son fuentes registradas distintas con el mismo nombre, y la página pintaba una tarjeta por fuente. Ahora agrupa las fuentes con el mismo nombre, organismo, licencia y atribución en una sola tarjeta que lista cada dataset con su enlace al original (y la fecha de revisión más reciente); las fuentes únicas se ven como antes. Solo cambia el frontend (`FontsPage.jsx`); la API sigue devolviendo una fila por fuente.
@@ -186,5 +196,7 @@ El roadmap operativo separa AUTONOMOUS WORK, PRODUCT DECISIONS, OPERATOR / PRODU
 ## No iniciar sin una petición explícita
 
 - Nuevas fuentes como Fever, Viator, Civitatis o Tiqets, ni scraping.
-- Mapas avanzados/proximidad, favoritos, cuentas, analítica, publicidad, IA o monetización.
+- Mapas avanzados/proximidad, favoritos, cuentas, analítica, publicidad, IA o monetización. Favoritos,
+  notificaciones y «planes cerca» están aprobados como dirección para la app móvil (2026-10-21), pero cada
+  uno sigue necesitando su propia petición.
 - Cambios en producción, deploy, SSH, PM2, Nginx, cron, importaciones reales, commits o push.
