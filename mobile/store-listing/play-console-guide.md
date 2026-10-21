@@ -8,8 +8,8 @@ Respuestas propuestas para los formularios de Play Console, basadas en lo que ha
 ## Antes de empezar: bloqueante legal
 
 Google exige una política de privacidad accesible y **exacta**. Los textos legales se corrigieron el 2026-10-21
-(Umami, enlaces de afiliado de Fever/Impact, app de Android, conservación de 24 meses); hay que **desplegarlos
-antes de enviar la app a revisión** y aplicar la conservación en el servidor (`docs/DEPLOYMENT.md`).
+(Umami, enlaces de afiliado de Fever/Impact, app de Android, conservación de 24 meses) y se desplegaron ese
+mismo día, con la conservación ya programada en el servidor (`docs/DEPLOYMENT.md`).
 
 Sigue abierto, para consultar con un gestor: con ingresos de afiliación, el art. 10 de la LSSI probablemente
 exige que el aviso legal incluya el NIF y un domicilio del titular, que hoy no figuran.

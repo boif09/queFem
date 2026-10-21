@@ -30,14 +30,15 @@ Esta es la fuente principal para responder «¿Dónde está Tens Pla? ahora mism
 - Hay backups automáticos y probados de SQLite, con comprobaciones y copia externa mediante `rclone` al destino de Google Drive `TensPla/backups`.
 - La rotación de logs de Nginx está configurada y verificada.
 - Gencat, Ticketmaster, Fever y las tres fuentes DIBA están activos en producción. `diba-tourisme`, `diba-escenari` y `diba-museus` tienen `enabled=1` y `allows_images=0`; su importación inicial, revisión humana, reconciliación y activación M1 están completadas. Fever tiene source habilitada, imágenes same-origin activadas y cron propio (`fever:import:scheduled`, a las 01:05, 07:05, 13:05 y 19:05) cuyas ejecuciones terminan `completed`.
-- Los crons de producción confirmados el 2026-10-14 son: Gencat `:17` cada 2 h, Ticketmaster `:37` cada 2 h y sus imágenes `:52`, Fever cada 6 h, DIBA diario 05:45, `purge:inactive` diario 03:45 y backup 05:10. La purga automática de planes inactivos ya está activa.
+- Los crons de producción confirmados el 2026-10-14 son: Gencat `:17` cada 2 h, Ticketmaster `:37` cada 2 h y sus imágenes `:52`, Fever cada 6 h, DIBA diario 05:45, `purge:inactive` diario 03:45 y backup 05:10. La purga automática de planes inactivos ya está activa. Desde el 2026-10-21 hay además la conservación de Umami (`umami-retention.sh --apply`, día 1 de cada mes a las 04:20).
 - **La importación programada de DIBA falla desde al menos el 2026-09-30** (guard fail-closed sobre duplicados dudosos) en `diba-tourisme` y `diba-escenari`; `diba-museus` importa con normalidad. Corregido el 2026-10-14 con la política de cola de revisión. Ver «DIBA REVIEW QUEUE».
 
 La infraestructura de producción es parcialmente externa a Git. «Confirmado» describe el estado conocido a fecha de esta revisión, no sustituye la comprobación previa a una operación.
 
 ## Recently completed
 
-- Textos legales y privacidad de Umami (2026-10-21, pendiente de despliegue): el aviso legal ya no dice que el
+- Textos legales y privacidad de Umami (2026-10-21, **desplegado ese día**, commit `602c557`, con la
+  conservación de 24 meses programada y los `fbclid` guardados borrados; ver [`DEPLOYMENT.md`](DEPLOYMENT.md)): el aviso legal ya no dice que el
   proyecto no esté monetizado y explica los enlaces de afiliado de Fever/Impact; la política de privacidad
   describe Umami (comprobado en el servidor: 3.3.1, sin IP, país/región/ciudad, sin plazo de conservación),
   los enlaces de afiliado, la app de Android, la conservación de 24 meses y la oposición mediante «No
@@ -174,9 +175,8 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
 - App Android (paso 3 del plan móvil): el proyecto TWA (`mobile/android/`), los textos e imágenes de la ficha
   y la guía de formularios (`mobile/store-listing/`) están preparados. Faltan acciones del propietario, en este
   orden: terminar la verificación de la cuenta de Play Console (documento enviado el 2026-10-21; falta el
-  teléfono); **desplegar los textos legales corregidos** (ver «Recently completed») y aplicar la conservación de
-  Umami en el servidor en la misma intervención (los textos prometen 24 meses); consultar con un gestor el NIF y el domicilio del aviso legal (LSSI art. 10); crear la
-  clave de subida; compilar y subir el `.aab` a una prueba cerrada;
+  teléfono); consultar con un gestor el NIF y el domicilio del aviso legal (LSSI art. 10); crear la clave de
+  subida; compilar y subir el `.aab` a una prueba cerrada;
   publicar `/.well-known/assetlinks.json` con la huella de Firma de aplicaciones de Play; reunir 12 testers
   (mejor 14–15) durante 14 días seguidos y pedir el acceso a producción. Pasos detallados en
   [`../mobile/store-listing/play-console-guide.md`](../mobile/store-listing/play-console-guide.md).
