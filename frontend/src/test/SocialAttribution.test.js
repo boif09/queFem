@@ -50,34 +50,25 @@ describe('social attribution', () => {
     expect(getSocialAttribution()).toEqual({ social_source: 'tiktok', social_medium: 'social' });
   });
 
-  it('stores no extra query parameters', () => {
+  it('keeps only the social fields and writes nothing to the device', () => {
+    const setItem = vi.spyOn(Storage.prototype, 'setItem');
     captureSocialAttributionFromLocation('?utm_source=instagram&utm_medium=social&fbclid=secret&email=person%40example.test');
-    expect(JSON.parse(window.sessionStorage.getItem(key))).toEqual({ social_source: 'instagram', social_medium: 'social' });
     expect(withSocialAttribution({ event: 'test' })).toEqual({ event: 'test', social_source: 'instagram', social_medium: 'social' });
+    expect(setItem).not.toHaveBeenCalled();
+    expect(window.localStorage.length).toBe(0);
+    expect(window.sessionStorage.length).toBe(0);
   });
 
-  it('treats tampered storage as invalid', () => {
-    window.sessionStorage.setItem(key, '{bad json');
+  it('removes the copy that earlier versions left in sessionStorage and ignores it', () => {
+    window.sessionStorage.setItem(key, JSON.stringify({ social_source: 'tiktok', social_medium: 'social' }));
+    captureSocialAttributionFromLocation('?anything=else');
+    expect(window.sessionStorage.getItem(key)).toBeNull();
     expect(getSocialAttribution()).toBeNull();
-    window.sessionStorage.setItem(key, JSON.stringify({ social_source: 'facebook', social_medium: 'social' }));
-    expect(getSocialAttribution()).toBeNull();
   });
 
-  it('uses in-memory attribution when sessionStorage read or write throws', () => {
-    const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked'); });
-    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked'); });
-    expect(() => captureSocialAttributionFromLocation('?utm_source=instagram&utm_medium=social')).not.toThrow();
-    expect(getSocialAttribution()).toEqual({ social_source: 'instagram', social_medium: 'social' });
-    getItem.mockRestore();
-    setItem.mockRestore();
-  });
-
-  it('uses in-memory attribution when only sessionStorage writes throw', () => {
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('quota exceeded'); });
-    captureSocialAttributionFromLocation('?utm_source=tiktok&utm_medium=social');
+  it('keeps working when storage is blocked', () => {
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => { throw new Error('blocked'); });
+    expect(() => captureSocialAttributionFromLocation('?utm_source=tiktok&utm_medium=social')).not.toThrow();
     expect(getSocialAttribution()).toEqual({ social_source: 'tiktok', social_medium: 'social' });
-    expect(withSocialAttribution({ event: 'test' })).toEqual({
-      event: 'test', social_source: 'tiktok', social_medium: 'social',
-    });
   });
 });

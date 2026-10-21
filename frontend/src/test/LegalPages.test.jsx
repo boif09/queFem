@@ -82,8 +82,28 @@ describe('legal and privacy pages', () => {
     expect(screen.getByText(/clave quefem.location solo la provincia, la comarca y\/o el municipio/)).toBeInTheDocument();
     expect(screen.getByText(/no se utilizan para publicidad, analítica, seguimiento o perfilado/)).toBeInTheDocument();
     expect(screen.getByText(/no utiliza GPS, identificadores ni cuenta/)).toBeInTheDocument();
-    expect(screen.getByText(/no utiliza actualmente cookies propias/)).toBeInTheDocument();
+    expect(screen.getByText(/no utiliza cookies propias ni de publicidad/)).toBeInTheDocument();
+    expect(screen.getByText(/La estadística de uso \(Umami\) funciona sin cookies/)).toBeInTheDocument();
     expect(screen.getByText(/OpenStreetMap no se carga al abrir una ficha/)).toBeInTheDocument();
+  });
+
+  it('discloses usage statistics, affiliate links and the Android app', async () => {
+    await i18n.changeLanguage('es');
+    const privacy = renderRoute('/privacidad');
+    expect(screen.getByRole('heading', { name: 'Estadística de uso (Umami)' })).toBeInTheDocument();
+    expect(screen.getByText(/la dirección IP no se guarda/)).toBeInTheDocument();
+    expect(screen.getByText(/elimina los identificadores de clic/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Enlaces de afiliado' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Aplicación para Android' })).toBeInTheDocument();
+    expect(screen.getByText(/se conservan un máximo de 24 meses/)).toBeInTheDocument();
+    expect(screen.getByText(/activando la opción «No rastrear»/)).toBeInTheDocument();
+    privacy.unmount();
+
+    await i18n.changeLanguage('ca');
+    renderRoute('/legal');
+    expect(screen.getByText(/Es finança en part amb enllaços d'afiliat/)).toBeInTheDocument();
+    expect(screen.queryByText(/no monetitzada/)).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Aplicació per a Android' })).toBeInTheDocument();
   });
 
   it('documents voluntary external services and Ticketmaster removal contact', async () => {

@@ -37,6 +37,16 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
+- Textos legales y privacidad de Umami (2026-10-21, pendiente de despliegue): el aviso legal ya no dice que el
+  proyecto no esté monetizado y explica los enlaces de afiliado de Fever/Impact; la política de privacidad
+  describe Umami (comprobado en el servidor: 3.3.1, sin IP, país/región/ciudad, sin plazo de conservación),
+  los enlaces de afiliado, la app de Android, la conservación de 24 meses y la oposición mediante «No
+  rastrear»; la página de almacenamiento ya no dice que no haya analítica. Cambios de código: la atribución
+  social vive solo en memoria (sin `sessionStorage`), Umami respeta «No rastrear» y ya no recibe `fbclid`,
+  `gclid` y similares (`frontend/public/umami-before-send.js`). `scripts/umami-retention.sh` aplica los 24
+  meses y vacía los identificadores de clic ya guardados; falta ejecutarlo y programarlo en producción
+  ([`DEPLOYMENT.md`](DEPLOYMENT.md)). Sigue abierto el NIF y domicilio del aviso legal (LSSI art. 10).
+
 - Favoritos y compartir (2026-10-21, **desplegado ese día**, commit `3f91fad`, sin cambios en Nginx;
   comprobado en producción: corazones, página `/preferits` y `/favoritos` en 200 y botón «Comparteix»): paso 2 del plan de app móvil. Corazón en
   cada tarjeta y en la ficha, página `/preferits` (alias `/favoritos`) con enlace en la cabecera (oculto en
@@ -164,8 +174,9 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
 - App Android (paso 3 del plan móvil): el proyecto TWA (`mobile/android/`), los textos e imágenes de la ficha
   y la guía de formularios (`mobile/store-listing/`) están preparados. Faltan acciones del propietario, en este
   orden: terminar la verificación de la cuenta de Play Console (documento enviado el 2026-10-21; falta el
-  teléfono); **corregir la política de privacidad y la página de almacenamiento para mencionar Umami y la app**
-  (hoy dicen que no hay analítica); crear la clave de subida; compilar y subir el `.aab` a una prueba cerrada;
+  teléfono); **desplegar los textos legales corregidos** (ver «Recently completed») y aplicar la conservación de
+  Umami en el servidor en la misma intervención (los textos prometen 24 meses); consultar con un gestor el NIF y el domicilio del aviso legal (LSSI art. 10); crear la
+  clave de subida; compilar y subir el `.aab` a una prueba cerrada;
   publicar `/.well-known/assetlinks.json` con la huella de Firma de aplicaciones de Play; reunir 12 testers
   (mejor 14–15) durante 14 días seguidos y pedir el acceso a producción. Pasos detallados en
   [`../mobile/store-listing/play-console-guide.md`](../mobile/store-listing/play-console-guide.md).

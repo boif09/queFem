@@ -1,8 +1,15 @@
 # Analítica de afiliación y social
 
-Tens Pla? carga Umami autoalojado desde `stats.tenspla.cat`. Sus pageviews automáticos conservan la URL inicial con UTM. No existe un evento `social_landing`: duplicaría esa información.
+Tens Pla? carga Umami autoalojado desde `stats.tenspla.cat` (Umami 3.3.1 en Docker con PostgreSQL, en el mismo servidor; comprobado el 2026-10-21). Sus pageviews automáticos conservan la URL inicial con UTM. No existe un evento `social_landing`: duplicaría esa información.
 
-La atribución social es de primer contacto por sesión de pestaña. Solo se acepta `utm_source=instagram` o `utm_source=tiktok` junto con `utm_medium=social`. Se guarda en `sessionStorage`, no usa cookies ni `localStorage`, desaparece cuando acaba la sesión de la pestaña y un enlace social posterior no puede sobrescribir el primer contacto. No se guardan URL, referrer, otros parámetros ni identificadores de usuario.
+Privacidad de Umami (desde 2026-10-21):
+
+- El script lleva `data-do-not-track="true"`: si el navegador tiene activado «No rastrear», Umami no envía nada.
+- `frontend/public/umami-before-send.js` (cargado antes de Umami y conectado con `data-before-send`) quita de la URL y del referrer los identificadores de clic que añaden redes y plataformas de anuncios (`fbclid`, `gclid`, `ttclid`, `msclkid`, `twclid`, `li_fat_id`, `igshid`…). Los `utm_*` se conservan.
+- Umami no guarda la IP; la usa en el momento, con el navegador y una sal mensual, para el identificador de sesión. Guarda país, región y ciudad aproximados.
+- Conservación: 24 meses, aplicada con `scripts/umami-retention.sh` (ver [`DEPLOYMENT.md`](DEPLOYMENT.md)).
+
+La atribución social es de primer contacto y vive **solo en memoria**: dura mientras se navega por la SPA y se pierde al recargar la página. No escribe nada en el dispositivo (ni cookies, ni `localStorage`, ni `sessionStorage`), así que no necesita consentimiento de almacenamiento; al arrancar se borra la copia en `sessionStorage` que dejaban versiones anteriores. Solo se acepta `utm_source=instagram` o `utm_source=tiktok` junto con `utm_medium=social`, y un enlace social posterior no puede sobrescribir el primer contacto. No se guardan URL, referrer, otros parámetros ni identificadores de usuario.
 
 Los campos social opcionales son `social_campaign` y `social_content`; se normalizan a minúsculas y solo admiten identificadores compactos de hasta 80 caracteres (`a-z`, `0-9`, `.`, `_`, `-`). La convención es `utm_campaign={yyyy}w{ww}-{pillar}` y `utm_content={content_id}.{surface}`. Nunca se etiquetan enlaces internos.
 

@@ -7,15 +7,12 @@ Respuestas propuestas para los formularios de Play Console, basadas en lo que ha
 
 ## Antes de empezar: bloqueante legal
 
-Google exige una política de privacidad accesible y **exacta**. Hoy los textos legales contradicen lo que hace
-la app, y hay que corregirlos en CA/ES/EN (y mencionar la app de Android) antes de enviarla a revisión:
+Google exige una política de privacidad accesible y **exacta**. Los textos legales se corrigieron el 2026-10-21
+(Umami, enlaces de afiliado de Fever/Impact, app de Android, conservación de 24 meses); hay que **desplegarlos
+antes de enviar la app a revisión** y aplicar la conservación en el servidor (`docs/DEPLOYMENT.md`).
 
-- `https://tenspla.cat/privacitat` no menciona Umami, y la página de almacenamiento dice que Tens pla? no usa
-  analítica, aunque Umami (sin cookies) registra visitas y algunos eventos (`docs/ANALYTICS.md`).
-- El aviso legal dice que Tens pla? «actualment no monetitzada» y que no incorpora «afiliació», pero las fichas
-  de Fever llevan enlaces de afiliado y la ficha de la tienda lo declara.
-
-Es una decisión legal del propietario; conviene revisarla con un gestor.
+Sigue abierto, para consultar con un gestor: con ingresos de afiliación, el art. 10 de la LSSI probablemente
+exige que el aviso legal incluya el NIF y un domicilio del titular, que hoy no figuran.
 
 ## 1. Crear la app
 

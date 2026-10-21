@@ -46,6 +46,7 @@ export function LegalNoticePage() {
         <p>{t('legal.notice.useBody')}</p>
         <p className="legal-inline-links"><Link to="/fonts">{t('legal.notice.sourcesLink')}</Link><Link to={contactPath}>{t('legal.notice.contactLink')}</Link></p>
       </Section>
+      <Section title={t('legal.notice.appTitle')}><p>{t('legal.notice.appBody')}</p></Section>
     </LegalPage>
   );
 }
@@ -57,6 +58,7 @@ export function PrivacyPage() {
       <Section title={t('legal.privacy.controllerTitle')}><p>{t('legal.privacy.controllerBody')}</p><p><EmailLink /></p></Section>
       <Section title={t('legal.privacy.dataTitle')}>
         <h3>{t('legal.privacy.logsTitle')}</h3><p>{t('legal.privacy.logsBody')}</p>
+        <h3>{t('legal.privacy.analyticsTitle')}</h3><p>{t('legal.privacy.analyticsBody')}</p>
         <h3>{t('legal.privacy.emailTitle')}</h3><p>{t('legal.privacy.emailBody')}</p>
         <h3>{t('legal.privacy.languageTitle')}</h3><p>{t('legal.privacy.languageBody')}</p>
         <h3>{t('legal.privacy.locationTitle')}</h3><p>{t('legal.privacy.locationBody')}</p>
@@ -64,9 +66,11 @@ export function PrivacyPage() {
       <Section title={t('legal.privacy.dataNatureTitle')}><p>{t('legal.privacy.dataNatureBody')}</p></Section>
       <Section title={t('legal.privacy.purposesTitle')}><p>{t('legal.privacy.purposesBody')}</p></Section>
       <Section title={t('legal.privacy.basisTitle')}><p>{t('legal.privacy.basisBody')}</p></Section>
-      <Section title={t('legal.privacy.retentionTitle')}><ul><li>{t('legal.privacy.retentionLogs')}</li><li>{t('legal.privacy.retentionLanguage')}</li><li>{t('legal.privacy.retentionLocation')}</li><li>{t('legal.privacy.retentionEmail')}</li></ul></Section>
+      <Section title={t('legal.privacy.retentionTitle')}><ul><li>{t('legal.privacy.retentionLogs')}</li><li>{t('legal.privacy.retentionLanguage')}</li><li>{t('legal.privacy.retentionLocation')}</li><li>{t('legal.privacy.retentionFavorites')}</li><li>{t('legal.privacy.retentionAnalytics')}</li><li>{t('legal.privacy.retentionEmail')}</li></ul></Section>
       <Section title={t('legal.privacy.providersTitle')}><h3>Hetzner Online GmbH</h3><p>{t('legal.privacy.hetznerBody')}</p><h3>OVHcloud</h3><p>{t('legal.privacy.ovhBody')}</p><p>{t('legal.privacy.sharingBody')}</p></Section>
-      <Section title={t('legal.privacy.externalTitle')}><ul><li>{t('legal.privacy.osmBody')}</li><li>{t('legal.privacy.mapsBody')}</li><li>{t('legal.privacy.ticketmasterBody')}</li><li>{t('legal.privacy.sourcesBody')}</li></ul><p>{t('legal.common.externalPolicies')}</p></Section>
+      <Section title={t('legal.privacy.affiliateTitle')}><p>{t('legal.privacy.affiliateBody')}</p></Section>
+      <Section title={t('legal.privacy.appTitle')}><p>{t('legal.privacy.appBody')}</p></Section>
+      <Section title={t('legal.privacy.externalTitle')}><ul><li>{t('legal.privacy.osmBody')}</li><li>{t('legal.privacy.mapsBody')}</li><li>{t('legal.privacy.ticketmasterBody')}</li><li>{t('legal.privacy.feverBody')}</li><li>{t('legal.privacy.sourcesBody')}</li></ul><p>{t('legal.common.externalPolicies')}</p></Section>
       <Section title={t('legal.privacy.rightsTitle')}><p>{t('legal.privacy.rightsBody')}</p><p><EmailLink /></p><p><a href="https://www.aepd.es" target="_blank" rel="noreferrer">{t('legal.privacy.aepdLink')} <span aria-hidden="true">↗</span></a></p></Section>
       <Section title={t('legal.privacy.automationTitle')}><p>{t('legal.privacy.automationBody')}</p></Section>
     </LegalPage>

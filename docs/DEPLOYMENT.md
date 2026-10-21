@@ -40,6 +40,33 @@ El frontend React/Vite se compila en `/var/www/queFem/frontend/dist` y Nginx lo 
 
 La aplicación se publica mediante HTTPS en `https://tenspla.cat`.
 
+### Conservación de Umami (pendiente de aplicar)
+
+La política de privacidad promete conservar la estadística de uso un máximo de 24 meses, pero Umami
+autoalojado no borra nada (2026-10-21: datos desde el 2026-08-26, 3.048 eventos y 369 sesiones, sin tarea de
+limpieza). `scripts/umami-retention.sh` borra, en una transacción, eventos, `event_data`, `session_data` y las
+sesiones sin eventos recientes anteriores a 24 meses del contenedor `umami-db`. Sin `--apply` solo cuenta. Con
+`--clear-click-ids` vacía los `fbclid`, `gclid`… ya guardados (32 eventos con `fbclid` el 2026-10-21), que
+desde ese día ya no se envían. Probado contra PostgreSQL (PGlite) con el esquema de Umami 3.3.1; **no se ha
+ejecutado en producción**. Cuando se autorice:
+
+```bash
+cd /var/www/queFem
+bash scripts/umami-retention.sh                          # simulación
+bash scripts/umami-retention.sh --clear-click-ids --apply # una vez, tras desplegar el cambio del frontend
+```
+
+y añadir al crontab de root (mensual, día 1 a las 04:20 UTC):
+
+```cron
+20 4 1 * * cd /var/www/queFem && bash scripts/umami-retention.sh --apply >> /var/log/tenspla-umami-retention.log 2>&1
+```
+
+Hasta el 2028-08-26 no hay nada que borrar, así que la tarea solo tendrá efecto a partir de entonces. Aun
+así, **la tarea debe programarse en la misma intervención en que se desplieguen los textos legales** que
+prometen los 24 meses, y comprobar después su log; la transacción abandona si espera más de 30 s un bloqueo y
+lo reintenta el mes siguiente.
+
 ### PWA y service worker
 
 El build copia a `dist/` `manifest.webmanifest`, `icons/`, `sw.js`, `offline.html` y `offline.css`;
