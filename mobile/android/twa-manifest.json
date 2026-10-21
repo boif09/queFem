@@ -35,7 +35,8 @@
   "minSdkVersion": 24,
   "orientation": "portrait",
   "fingerprints": [
-    { "name": "play-app-signing", "value": "BF:65:EC:1B:F9:FF:71:4C:70:24:C9:48:58:BE:F3:BC:97:2C:8A:CF:D4:9C:8D:D2:4A:EC:81:9A:24:E0:BA:B6" }
+    { "name": "play-app-signing", "value": "BF:65:EC:1B:F9:FF:71:4C:70:24:C9:48:58:BE:F3:BC:97:2C:8A:CF:D4:9C:8D:D2:4A:EC:81:9A:24:E0:BA:B6" },
+    { "name": "upload-key", "value": "13:B3:6E:D4:CB:EB:0B:EC:9F:03:E5:0D:E5:97:38:74:ED:B7:1B:A5:F9:F8:E9:BC:38:49:8F:FF:4D:5B:2C:A3" }
   ],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
