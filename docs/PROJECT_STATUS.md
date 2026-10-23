@@ -178,8 +178,13 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
   repositorio), versión 1 (1.0.0) subida a la **prueba interna** y `/.well-known/assetlinks.json` publicado con
   las huellas de Firma de aplicaciones de Play y de la clave de subida. También el 2026-10-21: ficha en catalán y
   todos los formularios completados (PEGI 3; seguridad de los datos con ubicación aproximada, interacciones e
-  historial de búsqueda de Umami) y prueba cerrada «Alpha» (España, lista «tenspla testers») creada y **enviada
-  a la primera revisión de Google**. Faltan, del propietario: esperar la aprobación, enviar el enlace de
+  historial de búsqueda de Umami) y prueba cerrada «Alpha» (España, lista «tenspla testers») creada y enviada a
+  revisión. El 2026-10-23 Google la **rechazó por la política de afirmaciones engañosas**: la descripción citaba
+  datos de la Generalitat y la Diputació sin enlaces a las fuentes ni renuncia. Se añadió un aviso de que no es un
+  servicio oficial y los enlaces oficiales (portal de transparencia de la Generalitat, Agenda Cultural y la ficha
+  de la Diputació en datos.gob.es; los enlaces `do.diba.cat/datasets/…` no abren en un navegador) y se **reenvió a
+  revisión ese mismo día**. Pendiente: los enlaces de la Diputació en `/fonts` (campo `dataset_url` de `sources`)
+  siguen apuntando a `do.diba.cat/datasets/…`. Faltan, del propietario: esperar la aprobación, enviar el enlace de
   participación y reunir 12 testers (mejor 14–15) durante 14 días seguidos, pedir el acceso a producción,
   opcionalmente añadir la ficha en castellano e inglés, y consultar con un gestor el NIF y el domicilio del aviso
   legal (LSSI art. 10). Respuestas dadas y pasos en
