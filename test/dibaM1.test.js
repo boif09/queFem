@@ -525,3 +525,14 @@ test('rich ambiguity fields and museum/patrimony category evidence are explicit'
     assert.deepEqual(normalizeDibaImportRecord(FEED, raw('heritage', { titol: 'Visita guiada al monument', categoria: ['Visita'] }), { ...WINDOW, municipalities: MUNICIPALITIES }).candidate.categorySlugs, ['patrimoni']);
   });
 });
+
+test('DIBA sources link to official dataset pages that open in a browser, not to the do.diba.cat API host', async () => {
+  await withTestDatabase(async (db) => {
+    const rows = db.prepare("SELECT key, dataset_url FROM sources WHERE key LIKE 'diba-%' ORDER BY key").all();
+    assert.deepEqual(rows.map((row) => row.key), ['diba-escenari', 'diba-museus', 'diba-tourisme']);
+    for (const row of rows) {
+      assert.match(row.dataset_url, /^https:\/\/datos\.gob\.es\/ca\/catalogo\/l02000008-[a-z-]+-agenda-de-actividades$/);
+      assert.doesNotMatch(row.dataset_url, /do\.diba\.cat/);
+    }
+  });
+});
