@@ -45,7 +45,7 @@ FONTS DE LES DADES
 Bona part dels plans provenen de dades obertes publicades per organismes públics, que pots consultar directament:
 • Agenda Cultural de Catalunya (Generalitat de Catalunya): https://analisi.transparenciacatalunya.cat/Cultura-oci/Agenda-cultural-de-Catalunya-per-localitzacions-/rhpv-yr4f
 • Web de l'Agenda Cultural: https://agenda.cultura.gencat.cat
-• Dades obertes de la Diputació de Barcelona: https://do.diba.cat/datasets/actesturisme_ca , https://do.diba.cat/datasets/escenari , https://do.diba.cat/datasets/actesmuseus
+• Dades obertes de la Diputació de Barcelona (catàleg oficial datos.gob.es): https://datos.gob.es/es/iniciativas/dades-obertes-diputacio-de-barcelona
 La resta provenen de plataformes de venda d'entrades. Cada fitxa enllaça a la seva font original i indica quan es va actualitzar. Llista completa de fonts i llicències: https://tenspla.cat/fonts
 
 EN CATALÀ, CASTELLÀ I ANGLÈS
@@ -93,7 +93,7 @@ FUENTES DE LOS DATOS
 Buena parte de los planes proceden de datos abiertos publicados por organismos públicos, que puedes consultar directamente:
 • Agenda Cultural de Catalunya (Generalitat de Catalunya): https://analisi.transparenciacatalunya.cat/Cultura-oci/Agenda-cultural-de-Catalunya-per-localitzacions-/rhpv-yr4f
 • Web de la Agenda Cultural: https://agenda.cultura.gencat.cat
-• Datos abiertos de la Diputació de Barcelona: https://do.diba.cat/datasets/actesturisme_ca , https://do.diba.cat/datasets/escenari , https://do.diba.cat/datasets/actesmuseus
+• Datos abiertos de la Diputació de Barcelona (catálogo oficial datos.gob.es): https://datos.gob.es/es/iniciativas/dades-obertes-diputacio-de-barcelona
 El resto proceden de plataformas de venta de entradas. Cada ficha enlaza a su fuente original e indica cuándo se actualizó. Lista completa de fuentes y licencias: https://tenspla.cat/fonts
 
 EN CATALÁN, CASTELLANO E INGLÉS
@@ -141,7 +141,7 @@ DATA SOURCES
 Many plans come from open data published by public bodies, which you can check directly:
 • Catalonia's Cultural Agenda (Generalitat de Catalunya): https://analisi.transparenciacatalunya.cat/Cultura-oci/Agenda-cultural-de-Catalunya-per-localitzacions-/rhpv-yr4f
 • Cultural Agenda website: https://agenda.cultura.gencat.cat
-• Diputació de Barcelona open data: https://do.diba.cat/datasets/actesturisme_ca , https://do.diba.cat/datasets/escenari , https://do.diba.cat/datasets/actesmuseus
+• Diputació de Barcelona open data (official datos.gob.es catalogue): https://datos.gob.es/es/iniciativas/dades-obertes-diputacio-de-barcelona
 The rest come from ticketing platforms. Every plan links to its original source and shows when it was last updated. Full list of sources and licences: https://tenspla.cat/fonts
 
 IN CATALAN, SPANISH AND ENGLISH
