@@ -27,6 +27,8 @@ Concerts, festes, cultura i activitats a Catalunya, avui i aquest cap de setmana
 ```text
 Tens pla? t'ajuda a trobar què fer a Catalunya: concerts, festes majors, exposicions, teatre, mercats, activitats en família, visites i molt més, en un sol lloc.
 
+AVÍS: Tens pla? és una iniciativa privada i independent. No és un servei oficial ni representa la Generalitat de Catalunya, la Diputació de Barcelona ni cap altre organisme públic.
+
 QUÈ HI TROBARÀS
 • Plans d'avui i d'aquest cap de setmana, a un toc.
 • Cerca per text, dates, província, comarca o municipi.
@@ -39,8 +41,12 @@ DESA I COMPARTEIX
 • Comparteix qualsevol pla amb un toc per WhatsApp, correu o la xarxa que vulguis.
 • Els preferits es guarden al teu mòbil: sense compte ni registre.
 
-DADES DE FONTS OFICIALS
-Els plans provenen de fonts oficials i de dades obertes, com l'Agenda Cultural de la Generalitat de Catalunya i la Diputació de Barcelona, i de plataformes de venda d'entrades. Cada fitxa indica d'on surt la informació i quan es va actualitzar. Tens pla? no és un servei oficial de la Generalitat ni de cap altre organisme.
+FONTS DE LES DADES
+Bona part dels plans provenen de dades obertes publicades per organismes públics, que pots consultar directament:
+• Agenda Cultural de Catalunya (Generalitat de Catalunya): https://analisi.transparenciacatalunya.cat/Cultura-oci/Agenda-cultural-de-Catalunya-per-localitzacions-/rhpv-yr4f
+• Web de l'Agenda Cultural: https://agenda.cultura.gencat.cat
+• Dades obertes de la Diputació de Barcelona: https://do.diba.cat/datasets/actesturisme_ca , https://do.diba.cat/datasets/escenari , https://do.diba.cat/datasets/actesmuseus
+La resta provenen de plataformes de venda d'entrades. Cada fitxa enllaça a la seva font original i indica quan es va actualitzar. Llista completa de fonts i llicències: https://tenspla.cat/fonts
 
 EN CATALÀ, CASTELLÀ I ANGLÈS
 La interfície està en català, castellà i anglès. Els plans es mostren en l'idioma original de la font.
@@ -69,6 +75,8 @@ Conciertos, fiestas, cultura y actividades en Cataluña, hoy y este fin de seman
 ```text
 Tens pla? te ayuda a encontrar qué hacer en Cataluña: conciertos, fiestas mayores, exposiciones, teatro, mercados, actividades en familia, visitas y mucho más, en un solo lugar.
 
+AVISO: Tens pla? es una iniciativa privada e independiente. No es un servicio oficial ni representa a la Generalitat de Catalunya, la Diputació de Barcelona ni ningún otro organismo público.
+
 QUÉ ENCONTRARÁS
 • Planes de hoy y de este fin de semana, a un toque.
 • Búsqueda por texto, fechas, provincia, comarca o municipio.
@@ -81,8 +89,12 @@ GUARDA Y COMPARTE
 • Comparte cualquier plan con un toque por WhatsApp, correo o la red que quieras.
 • Los favoritos se guardan en tu móvil: sin cuenta ni registro.
 
-DATOS DE FUENTES OFICIALES
-Los planes proceden de fuentes oficiales y de datos abiertos, como la Agenda Cultural de la Generalitat de Catalunya y la Diputació de Barcelona, y de plataformas de venta de entradas. Cada ficha indica de dónde sale la información y cuándo se actualizó. Tens pla? no es un servicio oficial de la Generalitat ni de ningún otro organismo.
+FUENTES DE LOS DATOS
+Buena parte de los planes proceden de datos abiertos publicados por organismos públicos, que puedes consultar directamente:
+• Agenda Cultural de Catalunya (Generalitat de Catalunya): https://analisi.transparenciacatalunya.cat/Cultura-oci/Agenda-cultural-de-Catalunya-per-localitzacions-/rhpv-yr4f
+• Web de la Agenda Cultural: https://agenda.cultura.gencat.cat
+• Datos abiertos de la Diputació de Barcelona: https://do.diba.cat/datasets/actesturisme_ca , https://do.diba.cat/datasets/escenari , https://do.diba.cat/datasets/actesmuseus
+El resto proceden de plataformas de venta de entradas. Cada ficha enlaza a su fuente original e indica cuándo se actualizó. Lista completa de fuentes y licencias: https://tenspla.cat/fonts
 
 EN CATALÁN, CASTELLANO E INGLÉS
 La interfaz está en catalán, castellano e inglés. Los planes se muestran en el idioma original de la fuente.
@@ -111,6 +123,8 @@ Concerts, festivals and things to do in Catalonia, today and this weekend
 ```text
 Tens pla? helps you find things to do in Catalonia: concerts, local festivals, exhibitions, theatre, markets, family activities, visits and much more, all in one place.
 
+DISCLAIMER: Tens pla? is a private, independent project. It is not an official service and does not represent the Generalitat de Catalunya, the Diputació de Barcelona or any other public body.
+
 WHAT YOU'LL FIND
 • Today's and this weekend's plans, one tap away.
 • Search by text, dates, province, county (comarca) or town.
@@ -123,8 +137,12 @@ SAVE AND SHARE
 • Share any plan in one tap via WhatsApp, email or any app you like.
 • Saved plans stay on your phone: no account, no sign-up.
 
-DATA FROM OFFICIAL SOURCES
-Plans come from official and open data sources, such as the Generalitat de Catalunya's cultural agenda and the Diputació de Barcelona, and from ticketing platforms. Every plan shows where the information comes from and when it was last updated. Tens pla? is not an official service of the Generalitat or any other public body.
+DATA SOURCES
+Many plans come from open data published by public bodies, which you can check directly:
+• Catalonia's Cultural Agenda (Generalitat de Catalunya): https://analisi.transparenciacatalunya.cat/Cultura-oci/Agenda-cultural-de-Catalunya-per-localitzacions-/rhpv-yr4f
+• Cultural Agenda website: https://agenda.cultura.gencat.cat
+• Diputació de Barcelona open data: https://do.diba.cat/datasets/actesturisme_ca , https://do.diba.cat/datasets/escenari , https://do.diba.cat/datasets/actesmuseus
+The rest come from ticketing platforms. Every plan links to its original source and shows when it was last updated. Full list of sources and licences: https://tenspla.cat/fonts
 
 IN CATALAN, SPANISH AND ENGLISH
 The interface is available in Catalan, Spanish and English. Plans are shown in the original language of their source, usually Catalan.
