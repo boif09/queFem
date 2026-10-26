@@ -26,9 +26,8 @@ test('generic image manifest is complete, auditable and never event-specific', (
   assert.equal(new Set(library.items.map(({ id }) => id)).size, 105);
   assert.equal(new Set(library.items.map(({ local_filename: filename }) => filename)).size, 105);
   assert.deepEqual(Object.keys(CATEGORY_POOL_BY_PLAN_CATEGORY).sort(), [
-    'bicicleta', 'cultura', 'espectacles', 'familia', 'festes', 'fires-mercats',
-    'gastronomia', 'miradors', 'monuments', 'muntanya', 'museus', 'natura',
-    'parcs-jardins', 'patrimoni', 'platges', 'pobles', 'senderisme', 'musica',
+    'cinema', 'cultura', 'espectacles', 'experiencies', 'exposicions', 'familia', 'festes', 'fires-mercats',
+    'gastronomia', 'museus', 'natura', 'patrimoni', 'senderisme', 'musica',
   ].sort());
   for (const item of library.items) {
     assert.equal(item.generic_only, true);
@@ -53,7 +52,7 @@ test('generic resolver is deterministic, distributed and uses the explicit categ
   const selected = new Set(Array.from({ length: 30 }, (_, index) => library.resolve(plan({ fingerprint: `different-${index}` })).id));
   assert.ok(selected.size > 1);
   assert.equal(library.resolve(plan({ categories: [{ slug: 'senderisme' }] })).category, 'natura');
-  assert.equal(library.resolve(plan({ categories: [{ slug: 'monuments' }] })).category, 'patrimoni');
+  assert.equal(library.resolve(plan({ categories: [{ slug: 'exposicions' }] })).category, 'cultura');
   assert.equal(library.resolve(plan({ categories: [], title: 'Tast de vins locals' })).category, 'gastronomia');
   assert.equal(library.resolve(plan({ categories: [], title: 'Sense senyal conegut' })).category, 'cultura');
   assert.equal(stableHash('same-event'), stableHash('same-event'));

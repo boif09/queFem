@@ -123,12 +123,12 @@ h1, h2, h3, h4, h5, h6, strong, .legal-section h2, .prose { font-family: var(--f
 .explore-category-photo img { width: 100%; height: 100%; min-height: 0; display: block; object-fit: cover; transition: transform 160ms ease; }
 .explore-categories a:hover .explore-category-photo img { transform: scale(1.02); }
 .explore-categories a[data-category="musica"] { --category-color: #0b49d1; }
-.explore-categories a[data-category="festes"], .explore-categories a[data-category="espectacles"] { --category-color: var(--color-red); }
+.explore-categories a[data-category="festes"], .explore-categories a[data-category="espectacles"], .explore-categories a[data-category="cinema"] { --category-color: var(--color-red); }
 .explore-categories a[data-category="gastronomia"], .explore-categories a[data-category="fires-mercats"] { --category-color: var(--color-yellow); }
-.explore-categories a[data-category="cultura"], .explore-categories a[data-category="museus"], .explore-categories a[data-category="patrimoni"] { --category-color: var(--color-purple); }
+.explore-categories a[data-category="cultura"], .explore-categories a[data-category="museus"], .explore-categories a[data-category="patrimoni"], .explore-categories a[data-category="exposicions"] { --category-color: var(--color-purple); }
 .explore-categories a[data-category="familia"] { --category-color: #ffd34e; }
-.explore-categories a[data-category="natura"], .explore-categories a[data-category="senderisme"], .explore-categories a[data-category="muntanya"] { --category-color: var(--color-green); }
-.explore-categories a[data-category="bicicleta"], .explore-categories a[data-category="esport"], .explore-categories a[data-category="platges"] { --category-color: var(--color-teal); }
+.explore-categories a[data-category="natura"], .explore-categories a[data-category="senderisme"] { --category-color: var(--color-green); }
+.explore-categories a[data-category="experiencies"], .explore-categories a[data-category="esport"] { --category-color: var(--color-teal); }
 .explore-all { margin-top: 32px; text-align: center; }
 
 /* Search/filter panel */
@@ -199,12 +199,12 @@ h1, h2, h3, h4, h5, h6, strong, .legal-section h2, .prose { font-family: var(--f
 .category-artwork i:nth-child(4) { width: 13%; aspect-ratio: 1; right: 7%; top: 9%; border: 9px solid rgba(255,255,255,.2); border-radius: 50%; }
 .category-icon-large { position: relative; z-index: 2; border: var(--border-strong); border-radius: 0; background: var(--color-text); color: white; box-shadow: 4px 4px 0 rgba(255,255,255,.8); }
 .plan-visual[data-category="musica"] { --category-color: #0b49d1; }
-.plan-visual[data-category="festes"], .plan-visual[data-category="espectacles"] { --category-color: var(--color-red); }
+.plan-visual[data-category="festes"], .plan-visual[data-category="espectacles"], .plan-visual[data-category="cinema"] { --category-color: var(--color-red); }
 .plan-visual[data-category="gastronomia"], .plan-visual[data-category="fires-mercats"] { --category-color: var(--color-yellow); }
-.plan-visual[data-category="cultura"], .plan-visual[data-category="museus"], .plan-visual[data-category="patrimoni"] { --category-color: var(--color-purple); }
+.plan-visual[data-category="cultura"], .plan-visual[data-category="museus"], .plan-visual[data-category="patrimoni"], .plan-visual[data-category="exposicions"] { --category-color: var(--color-purple); }
 .plan-visual[data-category="familia"] { --category-color: #ffd34e; }
-.plan-visual[data-category="natura"], .plan-visual[data-category="senderisme"], .plan-visual[data-category="muntanya"] { --category-color: var(--color-green); }
-.plan-visual[data-category="bicicleta"], .plan-visual[data-category="esport"], .plan-visual[data-category="platges"] { --category-color: var(--color-teal); }
+.plan-visual[data-category="natura"], .plan-visual[data-category="senderisme"] { --category-color: var(--color-green); }
+.plan-visual[data-category="experiencies"], .plan-visual[data-category="esport"] { --category-color: var(--color-teal); }
 
 /* Detail */
 .detail-header { padding-top: 30px; }

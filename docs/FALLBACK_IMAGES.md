@@ -38,8 +38,9 @@ escrituras SQLite ni lecturas de ficheros por plan.
 | espectacles | espectacles |
 | cultura | cultura |
 | museus | museus |
-| patrimoni, monuments, pobles | patrimoni |
-| natura, senderisme, muntanya, platges, bicicleta, miradors, parcs-jardins | natura |
+| patrimoni | patrimoni |
+| natura, senderisme | natura |
+| exposicions, cinema, experiencies | cultura |
 
 Si no hay categoría editorial, las palabras clave curadas del paquete son una señal secundaria; a
 continuación se considera `family_friendly` y `outdoor`. El último recurso es `cultura`. Esta

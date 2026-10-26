@@ -48,11 +48,12 @@ export function municipalityIndex(snapshot) {
   return index;
 }
 
-function categorySlugs(dataset, item) {
+export function categorySlugs(dataset, item) {
   const words = normalizeForFingerprint([item.title, ...item.categories].filter(Boolean).join(' '));
   const has = (pattern) => pattern.test(words);
   if (dataset === 'actesmuseus') return ['museus'];
   if (dataset === 'escenari') {
+    if (has(/(^|-)(cinema|cine|pellicula|film)(-|$)/)) return ['cinema'];
     if (has(/(^|-)(musica|musical|concert|concerts|jazz|opera)(-|$)/)) return ['musica'];
     return ['espectacles'];
   }
@@ -62,6 +63,8 @@ function categorySlugs(dataset, item) {
   if (has(/(^|-)(fira|fires|mercat|mercats)(-|$)/)) return ['fires-mercats'];
   if (has(/(^|-)(festa|festes)(-|$)/)) return ['festes'];
   if (has(/(^|-)(museu|museus|museo)(-|$)/)) return ['museus'];
+  if (has(/(^|-)(exposicio|exposicions|exposicion)(-|$)/)) return ['exposicions'];
+  if (has(/(^|-)(cinema|cine|pellicula|film)(-|$)/)) return ['cinema'];
   if (has(/(^|-)(monument|patrimoni|patrimonio)(-|$)/)) return ['patrimoni'];
   return ['cultura'];
 }

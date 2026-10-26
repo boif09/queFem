@@ -29,7 +29,7 @@ describe('interface languages', () => {
 
   it('has an English name for every category in the reference data', () => {
     const slugs = ['festes', 'musica', 'espectacles', 'fires-mercats', 'gastronomia', 'cultura', 'familia', 'natura',
-      'senderisme', 'muntanya', 'platges', 'bicicleta', 'miradors', 'patrimoni', 'museus', 'monuments', 'pobles', 'parcs-jardins'];
+      'senderisme', 'patrimoni', 'museus', 'exposicions', 'cinema', 'experiencies'];
     slugs.forEach((slug) => expect(en[`categories.${slug}`], slug).toBeTruthy());
   });
 

@@ -430,6 +430,17 @@ Desde el 2026-10-20, además del backup, healthchecks.io (aviso por correo) vigi
 - Las URLs de ping están en `/root/.tenspla-healthchecks` (líneas `gencat=`, `diba=`, `fever=`, `health=`, `alive=`; permisos 600). El estado de la comprobación horaria está en `/var/lib/tenspla-health/`.
 - Ticketmaster no tiene check propio: lo cubre el de salud. Copia del crontab anterior: `/root/crontab.bak-20261020`.
 
+## Revisión de categorías
+
+La migración 021 (se ejecuta sola al arrancar) borra siete categorías de lugares que nunca tuvieron planes (solo si siguen sin planes asociados) y crea `exposicions`, `cinema` y `experiencies`. Los clasificadores de cada fuente ya las usan para los planes nuevos, pero Gencat, DIBA y Ticketmaster solo añaden categorías al importar y nunca las quitan, así que los planes ya guardados se corrigen una vez con un script del operador (hacer antes un backup y desplegar antes la migración; el script aborta si falta alguna categoría nueva):
+
+```bash
+node scripts/recategorize-plans.js                                   # simulación: cuenta y lista los cambios
+node scripts/recategorize-plans.js --apply --expected-changes=<n> --expected-hash=<h>   # aplica; ambos valores los imprime la simulación
+```
+
+Recalcula las categorías de cada plan a partir del payload crudo de todas sus fuentes (unión) y solo toca `cultura`, `exposicions`, `cinema` y `experiencies`; las demás categorías no se tocan, y un plan con un payload ilegible se salta. Solo modifica filas de `plan_categories` (no `plans`, `plan_sources` ni `updated_at`), en una transacción, y escribe un SQL de rollback y un log en `data/consolidation-logs/`. Si la cifra o la huella del conjunto de cambios no coincide con la real, aborta sin escribir. Es idempotente. Fever recalcula sus categorías en cada importación, así que converge solo.
+
 ## Cabeceras de seguridad de Nginx
 
 La configuración externa aplicada incluye HSTS, `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy` y `server_tokens off`. Observado en el servidor el 2026-09-30: también se envía una cabecera `Content-Security-Policy` **obligatoria** (no `Report-Only`) con `frame-ancestors 'none'`. El propietario confirmó el mismo día que es el estado deseado y debe mantenerse; el comentario de la configuración de Nginx ya lo refleja. Desde el 2026-10-21 permite `worker-src 'self'` y `manifest-src 'self'` para la PWA (ver «PWA y service worker»).

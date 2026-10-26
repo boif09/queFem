@@ -6,6 +6,7 @@ import { ExploreCategoryArtwork } from '../components/ExploreCategoryArtwork.jsx
 import { PlanList } from '../components/PlanList.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
+import { homeExploreCategories } from '../config/exploreCategoryImages.js';
 import { api } from '../services/api.js';
 import { getCataloniaQuickDateRange } from '../utils/dates.js';
 import { clearLocationPreference, formatLocationPreference, readLocationPreference } from '../utils/locationPreference.js';
@@ -161,7 +162,7 @@ export function HomePage() {
           {categories.status === 'error' && <ErrorState onRetry={retry} />}
           {categories.status === 'success' && categories.items.length === 0 && <EmptyState />}
           {categories.status === 'success' && categories.items.length > 0 && <div className="explore-categories">
-            {categories.items.slice(0, 8).map((category, index) => {
+            {homeExploreCategories(categories.items).map((category, index) => {
               const name = categoryName(category, language, t);
               return <Link key={category.slug} data-category={category.slug} to={planUrl({ category: category.slug })}><ExploreCategoryArtwork category={category} eager={index < 4} /><strong>{name}</strong></Link>;
             })}

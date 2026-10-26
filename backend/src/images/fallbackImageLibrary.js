@@ -20,13 +20,9 @@ export const CATEGORY_POOL_BY_PLAN_CATEGORY = Object.freeze({
   patrimoni: 'patrimoni',
   natura: 'natura',
   senderisme: 'natura',
-  muntanya: 'natura',
-  platges: 'natura',
-  bicicleta: 'natura',
-  miradors: 'natura',
-  'parcs-jardins': 'natura',
-  monuments: 'patrimoni',
-  pobles: 'patrimoni',
+  exposicions: 'cultura',
+  cinema: 'cultura',
+  experiencies: 'cultura',
 });
 
 const REQUIRED_ITEM_FIELDS = [

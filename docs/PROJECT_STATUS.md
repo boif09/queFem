@@ -37,6 +37,7 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
 
 ## Recently completed
 
+- Revisión de categorías (2026-10-26, **preparada en local, pendiente de desplegar**): el catálogo pasa de 18 a 14. Se quitan siete categorías de lugares que ninguna fuente puede etiquetar y que siempre estuvieron vacías (`muntanya`, `platges`, `bicicleta`, `miradors`, `monuments`, `pobles`, `parcs-jardins`; dos de ellas, Bicicleta y Miradors, salían en la home porque esta mostraba las ocho primeras por orden alfabético) y se añaden `exposicions`, `cinema` y `experiencies` (migración 021). Cultura baja de 1.158 a unos 760 planes. Las reglas de Gencat, DIBA, Ticketmaster y Fever clasifican ya las nuevas; `senderisme` se mantiene. La home usa un orden editorial fijo (`HOME_EXPLORE_ORDER`: Cultura, Espectacles, Música, Família, Festes, Gastronomia, Patrimoni, Natura) y se borran las fotos de bicicleta y miradors. Como los importadores solo añaden categorías, los planes ya guardados se corrigen una vez con `scripts/recategorize-plans.js` (en una copia de producción: 783 planes). Ver [`DEPLOYMENT.md`](DEPLOYMENT.md).
 - Textos legales y privacidad de Umami (2026-10-21, **desplegado ese día**, commit `602c557`, con la
   conservación de 24 meses programada y los `fbclid` guardados borrados; ver [`DEPLOYMENT.md`](DEPLOYMENT.md)): el aviso legal ya no dice que el
   proyecto no esté monetizado y explica los enlaces de afiliado de Fever/Impact; la política de privacidad

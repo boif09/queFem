@@ -7,7 +7,9 @@ const CATEGORY_RULES = [
   ['gastronomia', ['gastronomia', 'gastronomic', 'enologia']],
   ['museus', ['museus', 'museu']],
   ['patrimoni', ['patrimoni', 'monuments', 'rutes-i-visites']],
-  ['cultura', ['arts-visuals', 'cinema', 'divulgacio', 'llibres-i-lletres', 'literatura', 'exposicions', 'conferencies']],
+  ['exposicions', ['exposicions']],
+  ['cinema', ['cinema']],
+  ['cultura', ['divulgacio', 'llibres-i-lletres', 'literatura', 'conferencies']],
 ];
 
 export function normalizeCategories(record) {
@@ -18,9 +20,12 @@ export function normalizeCategories(record) {
     .replace(/[\u0300-\u036f]/g, '')
     .toLocaleLowerCase('ca');
 
-  return CATEGORY_RULES
+  const slugs = CATEGORY_RULES
     .filter(([, matches]) => matches.some((match) => tags.includes(match)))
     .map(([slug]) => slug);
+  // The broad "arts-visuals" tag is Cultura only when the plan is not already an exhibition or a film.
+  if (tags.includes('arts-visuals') && !slugs.some((slug) => ['exposicions', 'cinema', 'cultura'].includes(slug))) slugs.push('cultura');
+  return slugs;
 }
 
 export function isFamilyFriendly(record) {

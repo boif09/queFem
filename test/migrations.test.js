@@ -34,7 +34,7 @@ test('creates the current schema including occurrences and seeds approved source
     assert.equal(ticketmaster.allows_commercial_use, 0);
     assert.equal(ticketmaster.allows_images, 0);
     assert.match(ticketmaster.review_notes, /NO es Open Data/);
-    assert.equal(db.prepare('SELECT count(*) AS count FROM categories').get().count, 18);
+    assert.equal(db.prepare('SELECT count(*) AS count FROM categories').get().count, 14);
     const importRunColumns = new Set(db.pragma('table_info(import_runs)').map(({ name }) => name));
     assert.ok(importRunColumns.has('invalid'));
     assert.ok(importRunColumns.has('invalid_details'));

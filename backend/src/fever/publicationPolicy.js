@@ -1,13 +1,17 @@
 const CATEGORY_RULES = new Map([
   ['musica', ['concerts', 'music events', 'candlelight concerts', 'classical concerts', 'concerts & music festivals']],
   ['espectacles', ['live shows', 'theater, comedy & shows', 'theatre', 'stand-up comedy', 'dance performances', 'musicals', 'magic & mentalism', 'burlesque & cabaret']],
-  ['cultura', ['culture', 'exhibitions', 'cinema', 'immersive experiences & exhibits']],
+  ['cultura', ['culture']],
+  ['exposicions', ['exhibitions', 'immersive experiences & exhibits']],
+  ['cinema', ['cinema']],
   ['museus', ['museums & art galleries', 'museums and exhibitions']],
   ['patrimoni', ['landmarks', 'top attractions', 'city tours', 'historical sites']],
   ['gastronomia', ['food & drink', 'restaurants', 'tasting experiences', 'drinks & happy hour', 'restaurant & show']],
   ['familia', ['family']],
   ['fires-mercats', ['markets', 'fairs']],
   ['natura', ['outdoor activities', 'day trips & excursions', 'cruises & boat tours']],
+  // "Other Experiences" alone is deliberately not a signal: it is on a third of the catalogue and would dilute the category.
+  ['experiencies', ['activities', 'diy workshops', 'games', 'birthday parties', 'stag night & hen do', 'beauty & wellness', 'sports & adventure', 'experiences from home']],
 ]);
 
 export function feverCategorySlugs(subCategory) {

@@ -1,22 +1,18 @@
 const ICON_SYMBOLS = {
-  bike: '◒',
   'book-open': '⌁',
   theater: '◐',
   family: '✦',
   'party-popper': '✺',
   store: '◇',
   utensils: '◉',
-  binoculars: '⌾',
-  monument: '▥',
-  mountain: '△',
   museum: '▦',
   music: '♪',
   tree: '♢',
-  trees: '♧',
   landmark: '▤',
-  'umbrella-beach': '◡',
-  houses: '⌂',
   walking: '↟',
+  frame: '▣',
+  film: '◧',
+  sparkles: '❖',
 };
 
 export function CategoryIcon({ icon, className = '' }) {
