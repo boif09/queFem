@@ -183,7 +183,8 @@ Pendiente: verificar que el cron diario (05:45) sigue en `completed` y revisar l
   datos de la Generalitat y la Diputació sin enlaces a las fuentes ni renuncia. Se añadió un aviso de que no es un
   servicio oficial y los enlaces oficiales (portal de transparencia de la Generalitat, Agenda Cultural y la ficha
   de la Diputació en datos.gob.es; los enlaces `do.diba.cat/datasets/…` no abren en un navegador) y se **reenvió a
-  revisión ese mismo día**. Los enlaces de la Diputació en `/fonts` (campo `dataset_url` de `sources`) pasan a
+  revisión ese mismo día**; ese segundo envío figura como **«Publicada»** (comprobado el 2026-10-26): la prueba
+  cerrada ya está activa. Los enlaces de la Diputació en `/fonts` (campo `dataset_url` de `sources`) pasan a
   las fichas de datos.gob.es con la migración `020` (2026-10-23). Faltan, del propietario: esperar la aprobación, enviar el enlace de
   participación y reunir 12 testers (mejor 14–15) durante 14 días seguidos, pedir el acceso a producción,
   opcionalmente añadir la ficha en castellano e inglés, y consultar con un gestor el NIF y el domicilio del aviso
