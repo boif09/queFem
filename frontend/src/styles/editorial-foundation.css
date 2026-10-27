@@ -102,9 +102,17 @@
 
 @media (max-width: 680px) {
   .home-page .home-hero { padding-block: 36px 28px; }
-  .home-page .home-hero-media { display: none; }
   .home-page .home-hero h1 { font-size: clamp(2.4rem, 11vw, 3.2rem); }
-  .home-page .home-hero-intro { font-size: 0.95rem; margin-bottom: 24px; }
+  /* On phones the cropped strip of the hero image takes the place of the intro text, between the title and the
+     search: the copy wrapper is flattened so the strip can sit inside it in the single-column grid. */
+  .home-page .home-hero-inner { gap: 0; justify-items: stretch; }
+  .home-page .home-hero-copy { display: contents; }
+  .home-page .home-hero-eyebrow { order: 1; }
+  .home-page .home-hero h1 { order: 2; }
+  .home-page .home-hero-intro { display: none; }
+  .home-page .home-hero-media { order: 3; margin: 18px 0 22px; }
+  .home-page .home-hero-image { height: auto; aspect-ratio: 1200 / 522; object-fit: cover; border-radius: 22px; }
+  .home-page .hero-search { order: 4; }
 }
 
 /* ---------------------------------------------------------------------- */

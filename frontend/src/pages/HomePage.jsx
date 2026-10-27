@@ -131,7 +131,11 @@ export function HomePage() {
             </form>
           </div>
           <div className="home-hero-media" aria-hidden="true">
-            <img className="home-hero-image" src="/images/home/tibidabo-cultura-i-vida-a-barcelona.webp" alt="" width="1672" height="941" loading="eager" decoding="async" />
+            {/* Phones get a light, cropped strip instead of the full image (about 50 KB instead of 400 KB). */}
+            <picture>
+              <source media="(max-width: 680px)" srcSet="/images/home/tibidabo-cultura-i-vida-mobile.webp" width="1200" height="522" />
+              <img className="home-hero-image" src="/images/home/tibidabo-cultura-i-vida-a-barcelona.webp" alt="" width="1672" height="941" loading="eager" decoding="async" />
+            </picture>
           </div>
         </div>
       </section>
