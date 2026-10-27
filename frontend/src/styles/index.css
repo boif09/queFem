@@ -410,11 +410,17 @@ h1, h2, h3, .result-count { text-wrap: balance; }
 .quick-date-list button { border-color: var(--line); padding: 10px 16px; }
 .quick-date-list button:hover { border-color: var(--coral); background: #ffdbd0; }
 input[type="date"], select { border-color: var(--line); background-color: #fbf9f0; }
-.category-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.category-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .category-choice { min-height: 104px; border-color: transparent; background: #f6f4eb; }
 .category-choice:hover { border-color: var(--line); box-shadow: var(--shadow-soft); }
 .category-choice.is-selected { background: #ffdea0; color: #261a00; border-color: #efc058; }
 .category-choice.is-selected .category-icon { background: white; color: var(--coral); }
+/* 14 categories on 7 columns fill exactly two rows. Only the outer box shrinks (height and side padding); the label and
+   icon keep their size, and the longest label still fits on one line down to the 981px breakpoint where the grid
+   switches to 4 columns. */
+@media (min-width: 981px) {
+  .category-choice { min-height: 88px; padding: 10px 6px; }
+}
 .filter-actions { grid-column: 1 / -1; padding: 26px 40px; background: #f0eee5; }
 .search-panel > .inline-error { grid-column: 1 / -1; }
 .button { border-radius: 999px; }
