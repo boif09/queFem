@@ -104,7 +104,7 @@ describe('Pop Editorial home', () => {
   it('uses local decorative category photos and preserves the pattern fallback and links in CA/ES', async () => {
     api.getCategories.mockResolvedValue({ data: [
       { slug: 'cultura', name_ca: 'Cultura', name_es: 'Cultura', icon: 'culture' },
-      { slug: 'natura', name_ca: 'Natura', name_es: 'Naturaleza', icon: 'nature' },
+      { slug: 'senderisme', name_ca: 'Senderisme', name_es: 'Senderismo', icon: 'hiking' },
     ] });
     const { container } = renderHome();
     const culturaLink = await screen.findByRole('link', { name: 'Cultura' });
@@ -116,14 +116,14 @@ describe('Pop Editorial home', () => {
     expect(culturaLink.querySelector('.explore-category-artwork i')).not.toBeInTheDocument();
     expect(culturaLink).toHaveAttribute('href', '/plans?category=cultura');
 
-    const naturaLink = screen.getByRole('link', { name: 'Natura' });
-    expect(naturaLink.querySelector('img')).not.toBeInTheDocument();
-    expect(naturaLink.querySelector('.category-icon')).toBeInTheDocument();
-    expect(naturaLink.querySelectorAll('.explore-category-artwork i')).toHaveLength(2);
+    const hikingLink = screen.getByRole('link', { name: 'Senderisme' });
+    expect(hikingLink.querySelector('img')).not.toBeInTheDocument();
+    expect(hikingLink.querySelector('.category-icon')).toBeInTheDocument();
+    expect(hikingLink.querySelectorAll('.explore-category-artwork i')).toHaveLength(2);
     expect(container.querySelectorAll('.explore-category-photo')).toHaveLength(1);
 
     await i18n.changeLanguage('es');
-    await waitFor(() => expect(screen.getByRole('link', { name: 'Naturaleza' })).toHaveAttribute('href', '/plans?category=natura'));
+    await waitFor(() => expect(screen.getByRole('link', { name: 'Senderismo' })).toHaveAttribute('href', '/plans?category=senderisme'));
     expect(screen.getByRole('link', { name: 'Cultura' }).querySelector('img')).toHaveAttribute('src', '/images/explore/cultura.webp');
   });
 });

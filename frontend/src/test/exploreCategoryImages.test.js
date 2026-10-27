@@ -28,7 +28,8 @@ describe('home explore categories', () => {
 
   it('only lists categories that exist in the catalogue and keeps photos for the ones that have them', () => {
     HOME_EXPLORE_ORDER.forEach((slug) => expect(CATALOGUE.map((entry) => entry.slug), slug).toContain(slug));
-    ['cultura', 'espectacles', 'familia', 'festes', 'gastronomia'].forEach((slug) => expect(getExploreCategoryImage(slug)?.src, slug).toMatch(/^\/images\/explore\//));
-    ['bicicleta', 'miradors', 'musica', 'natura', 'patrimoni'].forEach((slug) => expect(getExploreCategoryImage(slug), slug).toBeNull());
+    ['cultura', 'espectacles', 'musica', 'familia', 'festes', 'gastronomia', 'patrimoni', 'natura']
+      .forEach((slug) => expect(getExploreCategoryImage(slug)?.src, slug).toMatch(/^\/images\/explore\//));
+    ['bicicleta', 'miradors'].forEach((slug) => expect(getExploreCategoryImage(slug), slug).toBeNull());
   });
 });

@@ -5,6 +5,10 @@ const EXPLORE_CATEGORY_IMAGES = Object.freeze({
   festes: { src: '/images/explore/festes.webp', objectPosition: '50% 50%' },
   'fires-mercats': { src: '/images/explore/fires-mercats.webp', objectPosition: '34% 50%' },
   gastronomia: { src: '/images/explore/gastronomia.webp', objectPosition: '50% 54%' },
+  // Owner's own photos, already cropped to the 4:5 tile around the subject (see docs/IMAGE_CREDITS.md).
+  musica: { src: '/images/explore/musica.webp', objectPosition: '50% 50%' },
+  patrimoni: { src: '/images/explore/patrimoni.webp', objectPosition: '50% 50%' },
+  natura: { src: '/images/explore/natura.webp', objectPosition: '50% 50%' },
 });
 
 // The home page shows eight categories. They used to be the first eight in alphabetical order, which put empty categories
