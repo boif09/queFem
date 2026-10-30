@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { TensPlaHorizontalLogo } from '../assets/brand/TensPlaLogos.jsx';
 import { Header } from './Header.jsx';
+import { ScrollManager } from './ScrollManager.jsx';
 import { FAVORITES_PATHS, favoritesPath } from '../utils/favoritesPath.js';
 import { uiLanguage } from '../utils/language.js';
 
@@ -53,6 +54,7 @@ export function Layout() {
     || pathname.startsWith('/plans/');
   return (
     <div className={`site-shell${showMobileNav ? ' has-mobile-nav' : ''}`}>
+      <ScrollManager />
       <Header />
       <main id="main-content">
         <Outlet />
