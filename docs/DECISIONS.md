@@ -6,7 +6,7 @@ Registro ligero de decisiones demostrables en documentación, configuración o c
 
 - El nombre público es **Tens Pla?**; identificadores legacy `queFem`, `quefem` y «Què Fem?» se conservan cuando cambiarlos afectaría compatibilidad técnica.
 - Catalunya es el ámbito territorial. El catalán es idioma principal y predeterminado; el castellano debe tener soporte completo.
-- El inglés es un idioma solo de interfaz (UI, textos legales con nota de traducción informativa y widget), pensado como ayuda a visitantes extranjeros. Los planes no se traducen: se muestran en su idioma original (casi siempre catalán). La API sigue aceptando solo `ca`/`es`; con la UI en inglés el frontend pide `lang=es`, que cae al texto original. Traducir planes queda como investigación futura si hay demanda.
+- El inglés es un idioma solo de interfaz (UI, textos legales con nota de traducción informativa y widget), pensado como ayuda a visitantes extranjeros. Los planes no se traducen: se muestran en su idioma original (casi siempre catalán). La API sigue aceptando solo `ca`/`es`; con la UI en inglés el frontend pide `lang=es`, que cae al texto original. Traducir planes queda como investigación futura si hay demanda. Excepción de presentación (2026-10-30): en el texto libre del precio se quita el «Preu:»/«Preus:» inicial en todos los idiomas, y los precios sin más texto («de 6 a 20 €», «des de 29 €») se muestran como «6–20 €» o con la traducción de «desde» de la interfaz (`frontend/src/utils/priceText.js`); el resto del texto del precio sigue en su idioma original.
 
 - App móvil (2026-10-21): primero Android y más adelante, si Android funciona, iPhone. Orden de pasos: la web
   como PWA instalable → app Android como TWA (la web real dentro de Chrome, de modo que analítica, afiliación

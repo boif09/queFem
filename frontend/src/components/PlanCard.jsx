@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../utils/dates.js';
+import { formatPriceText } from '../utils/priceText.js';
 import { FavoriteButton } from './FavoriteButton.jsx';
 import { PlanVisual } from './PlanVisual.jsx';
 import { uiLanguage } from '../utils/language.js';
@@ -20,7 +21,7 @@ export function PlanCard({ plan }) {
   const price = commercePrice?.type === 'free' ? t('plan.free')
     : commercePrice?.type === 'from' ? t('plan.priceFrom', { amount: commercePrice.amount })
       : commercePrice?.type === 'fixed' ? t('plan.priceFixed', { amount: commercePrice.amount })
-        : plan.free ? t('plan.free') : (plan.price_text || t('plan.priceUnknown'));
+        : plan.free ? t('plan.free') : (formatPriceText(plan.price_text, t) || t('plan.priceUnknown'));
   const place = plan.venue_name
     ? [plan.venue_name, plan.municipality].filter(Boolean).join(' · ')
     : [plan.municipality, plan.comarca].filter(Boolean).join(' · ') || t('plan.locationUnknown');

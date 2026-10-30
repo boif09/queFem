@@ -13,6 +13,7 @@ import { ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
 import { trackAffiliateClick, trackPlanView } from '../services/analytics.js';
 import { formatDate } from '../utils/dates.js';
+import { formatPriceText } from '../utils/priceText.js';
 import { contentLanguage, uiLanguage } from '../utils/language.js';
 
 export { buildEventJsonLd };
@@ -68,7 +69,7 @@ export function PlanDetailPage() {
   const price = commercePrice?.type === 'free' ? t('plan.free') : commercePrice?.type === 'from'
     ? t('plan.priceFrom', { amount: commercePrice.amount }) : commercePrice?.type === 'fixed'
       ? t('plan.priceFixed', { amount: commercePrice.amount }) : plan.commerce ? t('plan.priceProvider')
-        : plan.free ? t('plan.free') : (plan.price_text || t('plan.priceUnknown'));
+        : plan.free ? t('plan.free') : (formatPriceText(plan.price_text, t) || t('plan.priceUnknown'));
   const back = location.state?.from || '/plans';
   const hasCoordinates = hasValidCoordinates(plan.latitude, plan.longitude);
   const locationLabel = plan.municipality ? `${{ es: ' en ', en: ' in ' }[language] || ' a '}${plan.municipality}` : '';
