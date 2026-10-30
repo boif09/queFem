@@ -53,6 +53,14 @@ echo "7/7 ♻️ Reiniciando backend..."
 pm2 restart "$PM2_APP" --update-env
 pm2 save
 
+# Count this planned restart so the hourly health check (tenspla-health.sh) does not report it as a failure.
+HEALTH_STATE_DIR="/var/lib/tenspla-health"
+if [ -d "$HEALTH_STATE_DIR" ]; then
+    deploy_restarts=$(cat "$HEALTH_STATE_DIR/deploy-restarts" 2>/dev/null || echo 0)
+    [[ "$deploy_restarts" =~ ^[0-9]+$ ]] || deploy_restarts=0
+    echo $((deploy_restarts + 1)) > "$HEALTH_STATE_DIR/deploy-restarts"
+fi
+
 echo
 echo "⏳ Esperando a que la API arranque..."
 sleep 3
