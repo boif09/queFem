@@ -54,8 +54,6 @@ describe('PlanDetailPage', () => {
     expect(await screen.findByRole('heading', { name: 'Festival de prova' })).toBeInTheDocument();
     expect(screen.getByText('Descripció original del festival.')).toBeInTheDocument();
     expect(screen.getByText('Plaça Major')).toBeInTheDocument();
-    expect(screen.queryByTitle('Mapa de la ubicació')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /Veure mapa/i }));
     expect(screen.getByTitle('Mapa de la ubicació')).toHaveAttribute(
       'src',
       expect.stringContaining('openstreetmap.org/export/embed.html'),

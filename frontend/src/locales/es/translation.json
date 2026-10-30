@@ -149,8 +149,6 @@
   "detail.locality": "Localidad",
   "detail.coordinates": "Coordenadas",
   "detail.mapTitle": "Mapa de la ubicación",
-  "detail.loadMap": "Ver mapa",
-  "detail.mapLocation": "Ubicación: {{latitude}}, {{longitude}}",
   "detail.openGoogleMaps": "Abrir en Google Maps",
   "detail.officialWeb": "Web oficial",
   "detail.tickets": "Entradas oficiales",

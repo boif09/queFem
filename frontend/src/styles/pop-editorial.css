@@ -234,8 +234,6 @@ h1, h2, h3, h4, h5, h6, strong, .legal-section h2, .prose { font-family: var(--f
 .source-heading > span, .legal-source-top > span { border-radius: 0; background: var(--color-blue); }
 .source-card, .legal-source-card { border: var(--border-strong); border-radius: 0; box-shadow: 3px 3px 0 var(--color-text); }
 .mini-map-frame { border: var(--border-strong); border-radius: 0; background: #dce1ff; }
-.mini-map-placeholder { background: repeating-linear-gradient(135deg, #dce1ff 0 12px, #b6c4ff 12px 24px); }
-.mini-map-placeholder strong { padding: 8px 12px; border: var(--border-strong); background: var(--color-background); color: var(--color-blue-dark); box-shadow: 3px 3px 0 var(--color-text); text-transform: uppercase; }
 .mini-map-link > span { border: var(--border-strong); border-radius: 0; box-shadow: 3px 3px 0 var(--color-text); color: var(--color-blue-dark); }
 
 /* Legal, sources and states */

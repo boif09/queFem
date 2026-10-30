@@ -55,7 +55,7 @@ Registro ligero de decisiones demostrables en documentación, configuración o c
   Solo `/embed/` tiene una CSP propia por widget. `frame-src` admite `'self'` (demos de `/widget`) y
   OpenStreetMap.
 - El frontend usa recursos locales/same-origin cuando es posible. Montserrat se empaqueta localmente.
-- OpenStreetMap no se carga hasta que el usuario activa el minimapa. La implementación no incorpora analítica ni seguimiento; la preferencia de idioma se guarda localmente.
+- El minimapa de OpenStreetMap de la ficha se muestra directamente, con carga diferida (`loading="lazy"`) y sin referrer (2026-10-30; antes se cargaba solo tras pulsar «Veure mapa», y el propietario lo cambió por petición de testers). La política de privacidad lo declara como servicio externo. La implementación no incorpora analítica ni seguimiento; la preferencia de idioma se guarda localmente.
 - Sincronización de datos y despliegue son procesos separados. Gencat usa cron externo. El estado actual de Ticketmaster y sus imágenes es temporal y operativo: cualquier activación en producción requiere aprobación específica, pero no se define aquí como una prohibición arquitectónica permanente.
 - La configuración de producción que vive fuera de Git se documenta separando lo versionado, lo confirmado externamente y lo que debe verificarse en servidor antes de operar.
 - Deploy, SSH, PM2, Nginx, cron, importaciones reales, commits y push requieren autorización explícita.

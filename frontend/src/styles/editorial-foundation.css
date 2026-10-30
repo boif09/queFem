@@ -613,7 +613,6 @@
 .detail-page .coordinate-value { color: var(--ink-warm-soft); font-size: 0.85rem; }
 
 .detail-page .mini-map-frame { border: var(--surface-soft-border); border-radius: var(--radius-editorial); }
-.detail-page .mini-map-placeholder strong { border: 0; background: transparent; box-shadow: none; text-transform: none; font-weight: 700; }
 .detail-page .mini-map-link > span { border: 1px solid rgba(26, 26, 26, 0.14); border-radius: 999px; box-shadow: none; }
 
 /* CTA buttons */

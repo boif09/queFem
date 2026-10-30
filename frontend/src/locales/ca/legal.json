@@ -1,7 +1,7 @@
 {
   "common": {
     "eyebrow": "Informació legal i transparència",
-    "updated": "Darrera actualització: 21/10/2026",
+    "updated": "Darrera actualització: 30/10/2026",
     "emailLabel": "Escriure a contacte@tenspla.cat",
     "externalPolicies": "Quan accedeixes a un servei extern, s'hi apliquen les seves pròpies condicions i política de privacitat."
   },
@@ -60,8 +60,8 @@
     "affiliateBody": "Quan prems el botó d'entrades de Fever d'una fitxa, s'obre un enllaç de la xarxa d'afiliació Impact que et porta a Fever. A partir d'aquí, Impact i Fever poden fer servir cookies o tecnologies similars als seus propis dominis per atribuir la compra a Tens pla?, d'acord amb les seves polítiques. Tens pla? no els envia cap dada teva; la seva pròpia estadística només compta que s'ha premut el botó.",
     "appTitle": "Aplicació per a Android",
     "appBody": "L'aplicació de Tens pla? per a Android obre aquest mateix web dins del navegador del mòbil (normalment Chrome). No declara cap permís del dispositiu (ubicació, contactes, càmera, fotos…), no té codi propi de publicitat ni d'estadística i tracta les mateixes dades que el web, descrites en aquesta política. Google tracta les dades relacionades amb la descàrrega des de Google Play i amb l'ús del navegador d'acord amb les seves pròpies polítiques.",
-    "externalTitle": "Serveis externs sota acció de l'usuari",
-    "osmBody": "OpenStreetMap només es contacta després de prémer «Veure mapa». L'elecció no es conserva globalment.",
+    "externalTitle": "Serveis externs",
+    "osmBody": "Les fitxes amb ubicació mostren un mapa d'OpenStreetMap, que el navegador carrega quan el mapa apareix a la pantalla. Com amb qualsevol web, OpenStreetMap rep la teva adreça IP i les coordenades del lloc, i les tracta d'acord amb la seva pròpia política. Tens pla? no li envia cap altra dada teva.",
     "mapsBody": "Google Maps no està incrustat: només s'obre mitjançant un enllaç extern voluntari.",
     "ticketmasterBody": "Ticketmaster es consulta des del backend. El navegador només el contacta si obres voluntàriament un enllaç d'entrades o informació.",
     "feverBody": "Fever i la xarxa d'afiliació Impact només es contacten si prems voluntàriament un botó d'entrades de Fever.",
@@ -86,8 +86,8 @@
     "sharingBody": "Aquestes preferències no identifiquen persones, no s'utilitzen per a publicitat, analítica, seguiment o perfilat i no es comparteixen amb tercers.",
     "deleteTitle": "Com esborrar-la",
     "deleteBody": "Pots canviar l'idioma des del selector de Tens pla?, treure la ubicació des de la portada o els filtres, o eliminar les preferències des de la configuració de dades del navegador.",
-    "mapTitle": "Mapa sota petició",
-    "mapBody": "OpenStreetMap no es carrega en obrir una fitxa. Només es crea la connexió després de prémer «Veure mapa», i aquesta decisió no es desa per a futures pàgines.",
+    "mapTitle": "Mapa de les fitxes",
+    "mapBody": "El mapa de les fitxes es carrega directament des d'OpenStreetMap. Tens pla? no desa res al teu dispositiu per mostrar-lo; OpenStreetMap el gestiona d'acord amb la seva pròpia política.",
     "offlineTitle": "Funcionament sense connexió",
     "offlineBody": "El navegador desa una còpia dels fitxers de l'aplicació (codi, estils, icones i una pàgina d'avís sense connexió) perquè Tens pla? carregui més de pressa i et pugui avisar quan no tens internet. No s'hi desen plans, cerques ni dades teves, i s'esborra des de la configuració de dades del navegador."
   },

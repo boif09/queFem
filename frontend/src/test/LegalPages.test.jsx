@@ -31,7 +31,7 @@ describe('legal and privacy pages', () => {
   ])('renders the Catalan route %s', (route, heading) => {
     renderRoute(route);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
-    expect(screen.getByText('Darrera actualització: 21/10/2026')).toBeInTheDocument();
+    expect(screen.getByText('Darrera actualització: 30/10/2026')).toBeInTheDocument();
     expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex,follow');
     expect(document.head.querySelector('link[rel="canonical"]')).not.toBeInTheDocument();
   });
@@ -44,7 +44,7 @@ describe('legal and privacy pages', () => {
     await i18n.changeLanguage('es');
     renderRoute(route);
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
-    expect(screen.getByText('Última actualización: 21/10/2026')).toBeInTheDocument();
+    expect(screen.getByText('Última actualización: 30/10/2026')).toBeInTheDocument();
   });
 
   it.each([
@@ -84,7 +84,7 @@ describe('legal and privacy pages', () => {
     expect(screen.getByText(/no utiliza GPS, identificadores ni cuenta/)).toBeInTheDocument();
     expect(screen.getByText(/no utiliza cookies propias ni de publicidad/)).toBeInTheDocument();
     expect(screen.getByText(/La estadística de uso \(Umami\) funciona sin cookies/)).toBeInTheDocument();
-    expect(screen.getByText(/OpenStreetMap no se carga al abrir una ficha/)).toBeInTheDocument();
+    expect(screen.getByText(/El mapa de las fichas se carga directamente desde OpenStreetMap/)).toBeInTheDocument();
   });
 
   it('discloses usage statistics, affiliate links and the Android app', async () => {
@@ -109,7 +109,7 @@ describe('legal and privacy pages', () => {
   it('documents voluntary external services and Ticketmaster removal contact', async () => {
     await i18n.changeLanguage('es');
     renderRoute('/privacidad');
-    expect(screen.getByText(/OpenStreetMap solo se contacta después de pulsar/)).toBeInTheDocument();
+    expect(screen.getByText(/OpenStreetMap recibe tu dirección IP y las coordenadas del lugar/)).toBeInTheDocument();
     expect(screen.getByText(/Ticketmaster se consulta desde el backend/)).toBeInTheDocument();
     expect(screen.getByText(/Google Maps no está incrustado/)).toBeInTheDocument();
   });

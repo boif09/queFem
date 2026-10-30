@@ -150,8 +150,6 @@
   "detail.locality": "Locality",
   "detail.coordinates": "Coordinates",
   "detail.mapTitle": "Location map",
-  "detail.loadMap": "Show map",
-  "detail.mapLocation": "Location: {{latitude}}, {{longitude}}",
   "detail.openGoogleMaps": "Open in Google Maps",
   "detail.officialWeb": "Official website",
   "detail.tickets": "Official tickets",

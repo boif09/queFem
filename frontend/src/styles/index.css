@@ -482,11 +482,6 @@ input[type="date"], select { border-color: var(--line); background-color: #fbf9f
 .mini-map { display: grid; gap: 6px; }
 .mini-map-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-md); background: #e4e3da; }
 .mini-map-frame iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }
-.mini-map-placeholder { width: 100%; height: 100%; display: grid; place-content: center; justify-items: center; gap: 8px; padding: 18px; border: 0; background: radial-gradient(circle at 70% 30%, rgba(255,255,255,.7), transparent 32%), #e4e3da; color: var(--ink); cursor: pointer; text-align: center; }
-.mini-map-placeholder strong { color: var(--coral); font-size: .82rem; }
-.mini-map-placeholder span { color: var(--ink-soft); font-size: .72rem; }
-.mini-map-placeholder:hover strong { text-decoration: underline; text-underline-offset: 3px; }
-.mini-map-placeholder:focus-visible { outline: 3px solid var(--coral); outline-offset: -4px; }
 .mini-map-link { position: absolute; inset: 0; display: flex; align-items: end; justify-content: end; padding: 10px; color: var(--ink); text-decoration: none; }
 .mini-map-link > span { display: inline-flex; align-items: center; gap: 5px; padding: 7px 10px; border: 1px solid rgba(217,193,187,.8); border-radius: 999px; background: rgba(255,255,255,.94); box-shadow: var(--shadow-soft); color: var(--coral); font-size: .72rem; font-weight: 700; }
 .mini-map-link:hover > span { background: var(--coral); color: white; }

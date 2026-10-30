@@ -1,7 +1,7 @@
 {
   "common": {
     "eyebrow": "Legal information and transparency",
-    "updated": "Last updated: 21/10/2026",
+    "updated": "Last updated: 30/10/2026",
     "translationNote": "This English version is an informational translation. If there is any discrepancy, the Catalan or Spanish version prevails.",
     "emailLabel": "Write to contacte@tenspla.cat",
     "externalPolicies": "When you access an external service, its own terms and privacy policy apply."
@@ -61,8 +61,8 @@
     "affiliateBody": "When you tap the Fever ticket button on a plan page, a link from the Impact affiliate network opens and takes you to Fever. From there, Impact and Fever may use cookies or similar technologies on their own domains to attribute the purchase to Tens pla?, under their own policies. Tens pla? does not send them any of your data; its own statistics only count that the button was tapped.",
     "appTitle": "Android app",
     "appBody": "The Tens pla? Android app opens this same website in the phone's browser (usually Chrome). It declares no device permissions (location, contacts, camera, photos…), has no advertising or analytics code of its own and processes the same data as the website, described in this policy. Google processes data related to downloading from Google Play and using the browser under its own policies.",
-    "externalTitle": "External services triggered by the user",
-    "osmBody": "OpenStreetMap is only contacted after you click «Show map». The choice is not kept globally.",
+    "externalTitle": "External services",
+    "osmBody": "Plan pages with a location show an OpenStreetMap map, which the browser loads when the map comes into view. As with any website, OpenStreetMap receives your IP address and the coordinates of the place, and processes them under its own policy. Tens pla? does not send it any other data about you.",
     "mapsBody": "Google Maps is not embedded: it only opens through a voluntary external link.",
     "ticketmasterBody": "Ticketmaster is queried from the backend. The browser only contacts it if you voluntarily open a ticket or information link.",
     "feverBody": "Fever and the Impact affiliate network are only contacted if you choose to tap a Fever ticket button.",
@@ -87,8 +87,8 @@
     "sharingBody": "These preferences do not identify people, are not used for advertising, analytics, tracking or profiling and are not shared with third parties.",
     "deleteTitle": "How to delete it",
     "deleteBody": "You can change the language from the Tens pla? selector, remove the location from the homepage or the filters, or delete the preferences from the browser's data settings.",
-    "mapTitle": "Map on request",
-    "mapBody": "OpenStreetMap is not loaded when you open a plan page. The connection is only created after you click «Show map», and this decision is not saved for future pages.",
+    "mapTitle": "Plan page map",
+    "mapBody": "The plan page map loads directly from OpenStreetMap. Tens pla? does not store anything on your device to show it; OpenStreetMap handles it under its own policy.",
     "offlineTitle": "Working offline",
     "offlineBody": "Your browser keeps a copy of the app's files (code, styles, icons and an offline notice page) so that Tens pla? loads faster and can tell you when you have no internet. No plans, searches or personal data are stored, and you can delete it from your browser's data settings."
   },
