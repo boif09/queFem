@@ -4,7 +4,7 @@ import { formatDate } from '../utils/dates.js';
 import { formatPriceText } from '../utils/priceText.js';
 import { FavoriteButton } from './FavoriteButton.jsx';
 import { PlanVisual } from './PlanVisual.jsx';
-import { uiLanguage } from '../utils/language.js';
+import { categoryName, uiLanguage } from '../utils/language.js';
 
 export function PlanCard({ plan }) {
   const { t, i18n } = useTranslation();
@@ -34,7 +34,7 @@ export function PlanCard({ plan }) {
       >
         <PlanVisual plan={plan} showKind showAttribution loading="lazy" />
         <div className="plan-card-body">
-          {primaryCategory && <span className="category-label">{primaryCategory.name}</span>}
+          {primaryCategory && <span className="category-label">{categoryName(primaryCategory, language, t)}</span>}
           <h2>{plan.title}</h2>
           <dl className="card-meta">
             <div><dt aria-hidden="true">◷</dt><dd>{dateLabel}</dd></div>

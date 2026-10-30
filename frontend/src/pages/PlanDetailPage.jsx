@@ -14,7 +14,7 @@ import { api } from '../services/api.js';
 import { trackAffiliateClick, trackPlanView } from '../services/analytics.js';
 import { formatDate } from '../utils/dates.js';
 import { formatPriceText } from '../utils/priceText.js';
-import { contentLanguage, uiLanguage } from '../utils/language.js';
+import { categoryName, contentLanguage, uiLanguage } from '../utils/language.js';
 
 export { buildEventJsonLd };
 
@@ -122,7 +122,7 @@ export function PlanDetailPage() {
             <CategoryIcon icon={primaryCategory?.icon} className="detail-icon" />
             <div>
               <div className="detail-labels">
-                {primaryCategory && <span>{primaryCategory.name}</span>}
+                {primaryCategory && <span>{categoryName(primaryCategory, language, t)}</span>}
                 <span>{t(`plan.kind.${plan.kind}`)}</span>
               </div>
               <h1>{plan.title}</h1>

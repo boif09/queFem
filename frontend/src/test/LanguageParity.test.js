@@ -53,5 +53,7 @@ describe('interface languages', () => {
     expect(categoryName({ slug: 'museus', name_ca: 'Museus', name_es: 'Museos' }, 'en', t)).toBe('Museums');
     expect(categoryName({ slug: 'nou', name_ca: 'Nou', name_es: 'Nuevo' }, 'en', t)).toBe('Nuevo');
     expect(categoryName({ slug: 'museus', name_ca: 'Museus', name_es: 'Museos' }, 'ca', t)).toBe('Museus');
+    expect(categoryName({ slug: 'espectacles', name: 'Espectáculos', name_ca: 'Espectacles', name_es: 'Espectáculos' }, 'en', t)).toBe('Shows');
+    expect(categoryName({ slug: 'nou', name: 'Nou' }, 'es', t)).toBe('Nou');
   });
 });

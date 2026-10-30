@@ -15,9 +15,9 @@ export function contentLanguage(language) {
 
 export function categoryName(category, language, t) {
   if (language === 'en') {
-    return t(`categories.${category.slug}`, { defaultValue: category.name_es || category.name_ca });
+    return t(`categories.${category.slug}`, { defaultValue: category.name_es || category.name_ca || category.name });
   }
   return language === 'es'
-    ? (category.name_es || category.name_ca)
-    : (category.name_ca || category.name_es);
+    ? (category.name_es || category.name_ca || category.name)
+    : (category.name_ca || category.name_es || category.name);
 }
