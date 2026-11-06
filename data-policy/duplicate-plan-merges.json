@@ -221,6 +221,19 @@
       "reason": "Same title, same dates and same municipality as the Gencat plan; the DIBA record only names the venue differently. Confirmed by the project owner after comparing both plans.",
       "reviewedAt": "2026-10-14",
       "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 7071,
+      "canonicalPlanId": 7668,
+      "title": "Gota",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari118768045500211876831372288"
+      },
+      "reason": "Same show, same day (2026-11-08) and same venue (Teatre Auditori Llinars) as the Gencat plan. A second DIBA session of the same day (12:30) matched both plans and blocked the whole escenari import with UNRESOLVED_MULTIPLE_CONFIRMED_TARGETS. Confirmed by the project owner, with the Gencat plan as canonical.",
+      "reviewedAt": "2026-11-06",
+      "reviewer": "project-owner"
     }
   ]
 }
