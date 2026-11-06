@@ -46,10 +46,11 @@ function addGencatPlan(db) {
 const owner = (db, recordId) => db.prepare('SELECT plan_id FROM plan_sources WHERE source_record_id=?').get(recordId).plan_id;
 
 // Imports one possible duplicate, writes the real review queue and serves the review app on an ephemeral port.
-async function withReviewServer(callback, { records = [raw('new-possible')], lock } = {}) {
+async function withReviewServer(callback, { records = [raw('new-possible')], lock, prepare } = {}) {
   await withTestDatabase(async (db) => {
     db.prepare("UPDATE sources SET enabled=1 WHERE key LIKE 'diba-%'").run();
     const gencatPlanId = addGencatPlan(db);
+    prepare?.(db, gencatPlanId);
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'tenspla-review-'));
     const queuePath = path.join(directory, 'diba-review-queue.json');
     const result = await importer(db, records).run({ feeds: [FEED] });
@@ -118,6 +119,32 @@ test('GET /api/items describes each open case from live data and writes nothing'
     assert.equal(item.actions.merge.available, true);
     assert.equal(db.prepare('SELECT COUNT(*) n FROM diba_review_decisions').get().n, 0);
   });
+});
+
+test('a record that matches several published plans is listed with all of them, cannot be merged from the page and can be kept separate', async () => {
+  // Two Gencat plans for the same show, both confirmed matches of the DIBA record (same venue): the importer cannot choose.
+  const prepare = (db, firstId) => {
+    db.prepare("UPDATE plans SET venue_name = 'Teatre', address = 'Carrer Major 1' WHERE id = ?").run(firstId);
+    const secondId = Number(db.prepare(`INSERT INTO plans (kind,fingerprint,original_title,start_date,end_date,municipality,venue_name,address,status,created_at,updated_at)
+      VALUES ('event','gencat-second','Concert de prova','2026-09-10','2026-09-10','Mataró','Teatre','Carrer Major 1','active',?,?)`).run(NOW, NOW).lastInsertRowid);
+    const sourceId = db.prepare("SELECT id FROM sources WHERE key='gencat-agenda'").get().id;
+    db.prepare("INSERT INTO plan_sources(plan_id,source_id,source_record_id,source_url,source_payload_json,imported_at,last_seen_at) VALUES (?,?,?,?, '{}',?,?)")
+      .run(secondId, sourceId, 'g-second', null, NOW, NOW);
+  };
+  await withReviewServer(async ({ request, post, db, gencatPlanId }) => {
+    const { items } = (await request({ url: '/api/items', headers: { 'x-review-token': TOKEN } })).json();
+    assert.equal(items.length, 1);
+    const [item] = items;
+    assert.equal(item.kind, 'MATCHES_MULTIPLE_PUBLISHED_PLANS');
+    assert.equal(item.candidatePlans.length, 2);
+    assert.ok(item.candidatePlans.some(({ id }) => id === gencatPlanId));
+    assert.equal(item.actions.merge.available, false);
+    assert.match(item.actions.merge.problems[0], /fusionar esos planes entre sí/);
+    assert.equal((await post(`/api/items/${item.id}/merge`)).status >= 400, true, 'the merge endpoint refuses it');
+    assert.equal(db.prepare('SELECT COUNT(*) n FROM plan_aliases').get().n, 0, 'nothing was merged');
+    assert.equal((await post(`/api/items/${item.id}/keep-separate`)).status, 200);
+    assert.equal((await request({ url: '/api/items', headers: { 'x-review-token': TOKEN } })).json().items.length, 0);
+  }, { prepare });
 });
 
 test('"mantener separado" is stored, hides the case and the importer stops queueing it; undo brings it back', async () => {

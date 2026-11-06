@@ -161,6 +161,7 @@ function validateRegisteredSource(source) {
 export const AMBIGUITY_POLICY = Object.freeze({ BLOCK: 'block', REVIEW_QUEUE: 'review-queue' });
 const REVIEW_QUEUE_KIND = Object.freeze({
   UNRESOLVED_CROSS_SOURCE_POSSIBLE: 'POSSIBLE_DUPLICATE_OF_PUBLISHED_PLAN',
+  UNRESOLVED_MULTIPLE_CONFIRMED_TARGETS: 'MATCHES_MULTIPLE_PUBLISHED_PLANS',
   UNRESOLVED_SAME_FEED_COMPONENT: 'POSSIBLE_DUPLICATE_WITHIN_FEED',
   REVIEWED_TARGET_NOT_RESOLVED: 'STALE_REVIEW_DECISION',
 });
@@ -239,7 +240,7 @@ export class DibaImporter {
   partitionBlockers(blockers) {
     if (this.ambiguityPolicy === AMBIGUITY_POLICY.BLOCK) return { blocking: blockers, review: [] };
     const review = blockers.filter(({ code, targetMissing }) => code === 'UNRESOLVED_CROSS_SOURCE_POSSIBLE'
-      || code === 'UNRESOLVED_SAME_FEED_COMPONENT' || (code === 'REVIEWED_TARGET_NOT_RESOLVED' && targetMissing === true));
+      || code === 'UNRESOLVED_MULTIPLE_CONFIRMED_TARGETS' || code === 'UNRESOLVED_SAME_FEED_COMPONENT' || (code === 'REVIEWED_TARGET_NOT_RESOLVED' && targetMissing === true));
     return { blocking: blockers.filter((blocker) => !review.includes(blocker)), review };
   }
 
@@ -638,6 +639,10 @@ export class DibaImporter {
             || this.overlayPlan(safetyEntry.targetPlanId);
         if (safetyEntry?.suppressPublication) match.confirmed = null;
         else if (reviewedTarget) match.confirmed = reviewedTarget;
+        // A record that matches several published plans (which are probably duplicates of each other) has no single
+        // target: matchDibaCandidates() would just return the first one, an arbitrary choice. It is imported as its own
+        // plan and queued for review instead, like any other unresolved ambiguity.
+        else if (safetyEntry?.confirmedPlanIds?.length > 1) match.confirmed = null;
         if (match.possible.length) {
           summary.ambiguous += 1;
           summary.ambiguousDetails.push(...match.possibleDetails.map((detail) => this.ambiguousDetail(feed, candidate, detail)));

@@ -67,6 +67,8 @@ export function createReviewApp({
       aliasPlanId = records[0].planId; canonicalPlanId = item.candidatePlans[0].planId;
     } else if (item.kind === 'POSSIBLE_DUPLICATE_WITHIN_FEED' && records.length === 2 && records.every((record) => record.planId)) {
       [canonicalPlanId, aliasPlanId] = [records[0].planId, records[1].planId].sort((a, b) => a - b);
+    } else if (item.kind === 'MATCHES_MULTIPLE_PUBLISHED_PLANS') {
+      return { available: false, problems: ['El registro encaja con varios planes publicados: primero hay que fusionar esos planes entre sí (scripts/merge-duplicate-plans.js).'] };
     } else return { available: false, problems: ['Este caso no admite fusión automática.'] };
     if (!aliasPlanId || !canonicalPlanId) return { available: false, problems: ['El registro todavía no se ha importado.'] };
     if (aliasPlanId === canonicalPlanId) return { available: false, resolved: true, problems: [] };

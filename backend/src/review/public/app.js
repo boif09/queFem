@@ -8,6 +8,7 @@ const toast = document.getElementById('toast');
 const KIND_LABEL = {
   POSSIBLE_DUPLICATE_OF_PUBLISHED_PLAN: 'Posible duplicado de un plan ya publicado',
   POSSIBLE_DUPLICATE_WITHIN_FEED: 'Posible duplicado dentro de DIBA',
+  MATCHES_MULTIPLE_PUBLISHED_PLANS: 'Encaja con varios planes publicados',
 };
 const SOURCE_LABEL = { 'gencat-agenda': 'Gencat', 'diba-escenari': 'DIBA Escenari', 'diba-tourisme': 'DIBA Turisme', 'diba-museus': 'DIBA Museus', fever: 'Fever', 'ticketmaster-discovery-feed': 'Ticketmaster' };
 let data = null;
@@ -73,6 +74,13 @@ function itemSides(item) {
       side('Plan publicado', published || {}),
     ];
   }
+  if (item.kind === 'MATCHES_MULTIPLE_PUBLISHED_PLANS') {
+    const record = item.records[0];
+    return [
+      side('Registro DIBA', { ...record, ...(record.plan || {}), title: record.plan?.title ?? record.title, url: record.plan?.url ?? record.sourceUrl, planId: record.planId }),
+      ...item.candidatePlans.map((candidate, index) => side(`Plan publicado ${index + 1}`, candidate)),
+    ];
+  }
   return item.records.map((record, index) => side(`Registro DIBA ${index === 0 ? 'A' : 'B'}`, {
     ...record, ...(record.plan || {}), title: record.plan?.title ?? record.title, url: record.plan?.url ?? record.sourceUrl, planId: record.planId,
   }));
@@ -117,7 +125,8 @@ function setBusy(card, busy) {
 }
 
 function renderCard(item) {
-  const [left, right] = itemSides(item);
+  const sides = itemSides(item);
+  const [left, right] = sides;
   const card = el('article', { class: 'card', 'data-id': item.id });
   const actions = el('div', { class: 'actions' });
   const confirmBox = el('div', { class: 'confirm', hidden: true });
@@ -162,7 +171,7 @@ function renderCard(item) {
       el('h2', { text: left.title || right?.title || 'Caso' }),
       el('span', { class: 'badge', text: KIND_LABEL[item.kind] || item.kind })),
     right ? matchLine(left, right) : null,
-    el('div', { class: 'cols' }, renderSide(left, right), right ? renderSide(right, left) : null),
+    el('div', { class: `cols${sides.length > 2 ? ' many' : ''}` }, sides.map((entry, index) => renderSide(entry, index === 0 ? right : left))),
     actions, confirmBox);
   return card;
 }
@@ -196,7 +205,7 @@ function render() {
   summary.textContent = data.items.length
     ? `${data.items.length} casos pendientes · cola actualizada ${data.queueUpdatedAt ? data.queueUpdatedAt.slice(0, 16).replace('T', ' ') : 'nunca'}`
     : 'No hay casos pendientes.';
-  const tabs = [['all', 'Todos'], ['POSSIBLE_DUPLICATE_OF_PUBLISHED_PLAN', 'Con un plan publicado'], ['POSSIBLE_DUPLICATE_WITHIN_FEED', 'Dentro de DIBA']];
+  const tabs = [['all', 'Todos'], ['POSSIBLE_DUPLICATE_OF_PUBLISHED_PLAN', 'Con un plan publicado'], ['POSSIBLE_DUPLICATE_WITHIN_FEED', 'Dentro de DIBA'], ['MATCHES_MULTIPLE_PUBLISHED_PLANS', 'Con varios planes']];
   tabsBox.replaceChildren(...tabs.map(([key, label]) => el('button', {
     type: 'button', class: 'tab', 'aria-pressed': String(filter === key), text: `${label} (${counts[key] || 0})`,
     onclick: () => { filter = key; render(); },

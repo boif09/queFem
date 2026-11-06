@@ -28,6 +28,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 16p
 .card-head h2 { margin: 0; font-size: 1.1rem; }
 .badge { font-size: .75rem; padding: 2px 8px; border-radius: 999px; background: var(--warn-bg); color: var(--warn); white-space: nowrap; }
 .cols { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+.cols.many { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
 .col { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 4px; align-content: start; min-width: 0; }
 .col .label { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }

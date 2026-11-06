@@ -152,6 +152,92 @@ test('conflicts around an existing human decision still block under the review-q
   });
 });
 
+// A record that matches two published plans (which are duplicates of each other) used to reject the whole feed.
+function addTwoMatchingPlans(db) {
+  const first = addPlan(db, { fingerprint: 'gencat-a', venue: 'Teatre', address: 'Carrer Major 1', sourceRecordId: 'g-a' });
+  const second = addPlan(db, { fingerprint: 'gencat-b', venue: 'Teatre', address: 'Carrer Major 1', sourceRecordId: 'g-b' });
+  return { first, second };
+}
+
+test('a record matching several published plans is imported as its own plan and queued instead of blocking the feed', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const { first, second } = addTwoMatchingPlans(db);
+    const before = planCount(db);
+    const result = await importer(db, [raw('multi'), raw('unrelated', { titol: 'Una altra cosa', acte_url: 'https://diba.example/other' })]).run({ feeds: [FEED] });
+    const summary = result.datasets[0];
+    assert.equal(summary.safety.status, 'approved');
+    assert.equal(summary.safety.code, null);
+    assert.equal(summary.catalogCommitted, true);
+    const imported = sourcePlan(db, FEED.sourceKey, 'multi');
+    assert.ok(imported, 'the record is imported');
+    assert.ok(![first, second].includes(imported.planId), 'it is not arbitrarily attached to one of the two published plans');
+    assert.ok(sourcePlan(db, FEED.sourceKey, 'unrelated'), 'the rest of the feed keeps flowing');
+    assert.equal(planCount(db), before + 2);
+    const [item] = summary.reviewQueue;
+    assert.equal(summary.reviewQueue.length, 1);
+    assert.equal(item.kind, 'MATCHES_MULTIPLE_PUBLISHED_PLANS');
+    assert.equal(item.code, 'UNRESOLVED_MULTIPLE_CONFIRMED_TARGETS');
+    assert.equal(item.defaultAction, 'IMPORTED_AS_SEPARATE_PLAN');
+    assert.deepEqual(item.records.map(({ sourceRecordId }) => sourceRecordId), ['multi']);
+    assert.deepEqual(item.candidatePlans.map(({ planId }) => planId).sort((a, b) => a - b), [first, second]);
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM plan_sources WHERE plan_id IN (?, ?) AND source_id = (SELECT id FROM sources WHERE key = ?)').get(first, second, FEED.sourceKey).count, 0);
+  });
+});
+
+test('the multi-match case is stable across runs and the default block policy still rejects it', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    addTwoMatchingPlans(db);
+    const first = (await importer(db, [raw('multi')]).run({ feeds: [FEED] })).datasets[0];
+    const afterFirst = planCount(db);
+    const importedPlan = sourcePlan(db, FEED.sourceKey, 'multi').planId;
+    const second = (await importer(db, [raw('multi')]).run({ feeds: [FEED] })).datasets[0];
+    assert.equal(planCount(db), afterFirst, 'a repeated import creates nothing new');
+    assert.equal(second.safety.status, 'approved');
+    assert.equal(second.reviewQueue.length, 1);
+    assert.equal(second.reviewQueue[0].id, first.reviewQueue[0].id);
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'multi').planId, importedPlan, 'the record stays on its own plan');
+  });
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    addTwoMatchingPlans(db);
+    const before = planCount(db);
+    let failure;
+    await assert.rejects(importer(db, [raw('multi')], { ambiguityPolicy: AMBIGUITY_POLICY.BLOCK }).run({ feeds: [FEED] }), (error) => { failure = error; return /recurring safety guard/.test(error.message); });
+    assert.equal(planCount(db), before);
+    assert.ok(failure.results[0].safety.blockers.some(({ code }) => code === 'UNRESOLVED_MULTIPLE_CONFIRMED_TARGETS'));
+  });
+});
+
+test('once only one published plan matches, the record links to it as before', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const { first, second } = addTwoMatchingPlans(db);
+    // The reviewer merged the duplicate into the first plan: its sources moved over, so the second plan (now an inactive
+    // alias with no sources) is no longer a candidate.
+    db.prepare('UPDATE plan_sources SET plan_id = ? WHERE plan_id = ?').run(first, second);
+    db.prepare("UPDATE plans SET status = 'inactive' WHERE id = ?").run(second);
+    const before = planCount(db);
+    const summary = (await importer(db, [raw('single')]).run({ feeds: [FEED] })).datasets[0];
+    assert.equal(summary.reviewQueue.length, 0);
+    assert.equal(sourcePlan(db, FEED.sourceKey, 'single').planId, first);
+    assert.equal(planCount(db), before, 'no new plan: the record joined the one that matches');
+  });
+});
+
+test('a keep-separate decision on a multi-match record imports it separately and stops queueing it', async () => {
+  await withTestDatabase(async (db) => {
+    enableDiba(db);
+    const { first, second } = addTwoMatchingPlans(db);
+    const decision = { source: { sourceKey: FEED.sourceKey, sourceRecordId: 'multi' }, decision: 'KEEP_SEPARATE', reason: 'reviewed', reviewedAt: '2026-11-06', reviewer: 'human-review' };
+    const summary = (await importer(db, [raw('multi')], { reviewedOverrides: { version: 1, decisions: [decision] } }).run({ feeds: [FEED] })).datasets[0];
+    assert.equal(summary.safety.status, 'approved');
+    assert.equal(summary.reviewQueue.length, 0, 'a decided case is no longer a task');
+    assert.ok(![first, second].includes(sourcePlan(db, FEED.sourceKey, 'multi').planId), 'kept separate, not attached to the first candidate');
+  });
+});
+
 test('updateReviewQueue keeps firstSeenAt, drops resolved items and preserves feeds that were not refreshed', () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'tenspla-diba-queue-'));
   try {
