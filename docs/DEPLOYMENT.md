@@ -40,6 +40,23 @@ El frontend React/Vite se compila en `/var/www/queFem/frontend/dist` y Nginx lo 
 
 La aplicación se publica mediante HTTPS en `https://tenspla.cat`.
 
+### Visitas automatizadas en Umami
+
+Medición del 2026-11-09 en la base de Umami (553 sesiones desde el 2026-08-26): 178 sesiones (32%) eran de Estados
+Unidos con 1,2 páginas por sesión (108 rebotes puros), casi todas Chrome en Linux desde un centro de datos, y solo
+un evento de afiliado en todo el tráfico fuera de España. Umami ya descarta los bots que se identifican, así que no
+son Googlebot declarado; lo que se cuela son navegadores automatizados y herramientas de prueba (p. ej. las de la app
+de Android en Google Play). Umami no guarda IP, así que no se puede confirmar el origen exacto.
+
+`frontend/public/umami-before-send.js` (el gancho `data-before-send`) descarta ahora, antes de enviarla, la visita
+de un navegador con `navigator.webdriver` verdadero, con «Headless» en el user agent, con pantalla 800x600 o con un
+idioma que contiene «@» (`en-US@posix`). Umami cancela el envío cuando el gancho devuelve un valor falso. Son señales
+que un navegador de una persona no produce; a propósito **no** se usan el país, el sistema operativo ni «en-US» solos,
+porque hay turistas y usuarios de Linux reales (la web tiene interfaz en inglés). Los bots que se hacen pasar por un
+navegador normal no se detectan. Solo afecta a lo que se envía a partir del despliegue: lo ya guardado no cambia (para
+leerlo sin ese tráfico, usar un segmento en el panel de Umami). Para excluir un navegador propio:
+`localStorage.setItem('umami.disabled', 1)` en su consola.
+
 ### Conservación de Umami
 
 **Aplicada el 2026-10-21**, junto con el despliegue de los textos legales (commit `602c557`): simulación sin
