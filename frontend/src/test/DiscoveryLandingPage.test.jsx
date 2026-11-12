@@ -55,6 +55,27 @@ describe('discovery landing pages', () => {
   });
 
   it.each([
+    ['today', '/avui'],
+    ['weekend', '/cap-de-setmana'],
+  ])('recommends the local agenda on the %s landing only when filtering by Terrassa', async (type, path) => {
+    const { unmount } = renderLanding(type, `${path}?municipality=Terrassa`);
+    expect(await screen.findByRole('complementary', { name: 'Més plans a Terrassa' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Visita Terrassa amb plans/ })).toHaveAttribute('href', 'https://terrassambplans.cat/');
+    unmount();
+
+    renderLanding(type, `${path}?municipality=Barcelona`);
+    await screen.findByText('Concert de prova');
+    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+  });
+
+  it('keeps the local agenda recommendation when a Terrassa landing has no plans', async () => {
+    api.getPlans.mockResolvedValue({ data: [], pagination: { page: 1, limit: 24, total: 0, pages: 0 } });
+    renderLanding('today', '/avui?municipality=Terrassa');
+    expect(await screen.findByRole('heading', { name: 'No hem trobat cap pla' })).toBeInTheDocument();
+    expect(screen.getByRole('complementary', { name: 'Més plans a Terrassa' })).toBeInTheDocument();
+  });
+
+  it.each([
     ['/avui', 'Què fer avui a Catalunya'],
     ['/cap-de-setmana', 'Què fer aquest cap de setmana a Catalunya'],
   ])('registers the %s application route', async (path, heading) => {

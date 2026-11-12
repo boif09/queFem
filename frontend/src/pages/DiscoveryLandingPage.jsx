@@ -5,6 +5,7 @@ import { Pagination } from '../components/Pagination.jsx';
 import { PlanList } from '../components/PlanList.jsx';
 import { ActiveFilters } from '../components/ActiveFilters.jsx';
 import { FiltersPanel } from '../components/FiltersPanel.jsx';
+import { LocalAgendaRecommendation } from '../components/LocalAgendaRecommendation.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
@@ -102,7 +103,9 @@ export function DiscoveryLandingPage({ type, now }) {
       {state.status === 'loading' && <LoadingState />}
       {state.status === 'error' && <ErrorState onRetry={() => setReloadKey((value) => value + 1)} />}
       {state.status === 'success' && state.plans.length === 0 && <EmptyState />}
-      {state.status === 'success' && state.plans.length > 0 && <><PlanList plans={state.plans} /><Pagination pagination={state.pagination} /></>}
+      {state.status === 'success' && state.plans.length > 0 && <PlanList plans={state.plans} />}
+      {state.status === 'success' && <LocalAgendaRecommendation municipality={filters.municipality} />}
+      {state.status === 'success' && state.plans.length > 0 && <Pagination pagination={state.pagination} />}
     </div>
   </section></>;
 }
