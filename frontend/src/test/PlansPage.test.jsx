@@ -120,14 +120,15 @@ describe('PlansPage', () => {
     api.getPlans.mockResolvedValue({ data: [], pagination: { page: 1, limit: 12, total: 0, pages: 0 } });
     const { unmount } = render(<MemoryRouter initialEntries={['/plans?municipality=Barcelona']}><PlansPage /></MemoryRouter>);
     await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
-    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Mira les agendes locals que recomanem' })).toHaveAttribute('href', '/agendes-locals');
+    expect(screen.queryByRole('complementary', { name: /Més plans a/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Busques plans més locals?' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Veure les agendes locals/ })).toHaveAttribute('href', '/agendes-locals');
     unmount();
 
     render(<MemoryRouter initialEntries={['/plans']}><PlansPage /></MemoryRouter>);
     await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Mira les agendes locals que recomanem' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Veure les agendes locals/ })).not.toBeInTheDocument();
   });
 
   function LocationProbe() {

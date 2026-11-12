@@ -300,8 +300,8 @@
   "localAgendas.contactTitle": "Do you know a local agenda?",
   "localAgendas.contactBody": "If you run one or know one that fits, write to us and we will take a look.",
   "localAgendas.mailSubject": "Local agenda for Tens pla?",
-  "localAgendas.emptyHint": "A lot of local life never reaches the official sources.",
-  "localAgendas.emptyHintLink": "See the local agendas we recommend",
+  "localAgendas.emptyHintTitle": "Looking for more local plans?",
+  "localAgendas.emptyHint": "A lot of local life never reaches the official sources. The local agendas we recommend cover it.",
   "home.localAgendasText": "Independent, ad-free projects made by people from each town, for finding plans that never reach the official sources.",
   "home.localAgendasCta": "See the local agendas",
   "localAgenda.description.terrassa-amb-plans": "Terrassa amb plans gathers activities from the city's neighbourhoods, associations and venues. It is an independent project, made in Terrassa and free of ads. Its content is in Catalan."

@@ -9,9 +9,14 @@ export function LocalAgendasEmptyHint({ municipality }) {
   const { t, i18n } = useTranslation();
   if (!municipality || localAgendaForMunicipality(municipality)) return null;
   return (
-    <p className="local-agendas-hint">
-      {t('localAgendas.emptyHint')} <Link to={localAgendasPath(uiLanguage(i18n))}>{t('localAgendas.emptyHintLink')}</Link>
-    </p>
+    <aside className="local-agendas-hint" aria-label={t('footer.localAgendas')}>
+      <div>
+        <p className="eyebrow dark">{t('footer.localAgendas')}</p>
+        <h2>{t('localAgendas.emptyHintTitle')}</h2>
+        <p>{t('localAgendas.emptyHint')}</p>
+      </div>
+      <Link to={localAgendasPath(uiLanguage(i18n))}>{t('home.localAgendasCta')} <span aria-hidden="true">→</span></Link>
+    </aside>
   );
 }
 

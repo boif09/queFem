@@ -285,8 +285,8 @@
   "localAgendas.contactTitle": "Coneixes una agenda local?",
   "localAgendas.contactBody": "Si en portes una o en coneixes alguna que hi encaixi, escriu-nos i ens la mirarem.",
   "localAgendas.mailSubject": "Agenda local per a Tens pla?",
-  "localAgendas.emptyHint": "Hi ha molta vida local que no arriba a les fonts oficials.",
-  "localAgendas.emptyHintLink": "Mira les agendes locals que recomanem",
+  "localAgendas.emptyHintTitle": "Busques plans més locals?",
+  "localAgendas.emptyHint": "Hi ha molta vida local que no arriba a les fonts oficials. Les agendes locals que recomanem la recullen.",
   "home.localAgendasText": "Projectes independents i sense anuncis, fets per gent de cada municipi, per trobar plans que no arriben a les fonts oficials.",
   "home.localAgendasCta": "Veure les agendes locals",
   "localAgenda.description.terrassa-amb-plans": "Terrassa amb plans recull activitats de barris, entitats i centres de la ciutat. És un projecte independent, fet des de Terrassa i sense anuncis."

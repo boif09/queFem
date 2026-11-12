@@ -525,6 +525,7 @@
 .discovery-page .state-card h2 { font-size: 1.4rem; }
 .discovery-page .filtered-empty .button-primary,
 .discovery-page .location-empty .button-primary { background: var(--color-blue); box-shadow: none; }
+.discovery-page .filtered-empty > .button-primary { margin-top: 20px; }
 
 /* Pagination */
 
@@ -575,8 +576,42 @@
   .home-local-agendas .local-agenda-cta { width: 100%; text-align: center; }
 }
 .home-local-agendas .local-agenda { margin-top: 0; }
-.local-agendas-hint { margin: 22px 0 0; color: var(--ink-warm-soft); font-size: var(--text-body-sm); line-height: 1.5; text-align: center; }
-.local-agendas-hint a { color: var(--color-blue-dark); font-weight: 700; }
+.local-agendas-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 28px;
+  max-width: 760px;
+  margin: 36px auto 0;
+  padding: 20px 24px;
+  border: var(--surface-soft-border);
+  border-left: 4px solid var(--color-red);
+  border-radius: var(--radius-editorial);
+  background: var(--color-surface);
+  text-align: left;
+}
+.local-agendas-hint > div { flex: 1 1 300px; min-width: 0; }
+.local-agendas-hint .eyebrow { margin: 0 0 6px; font-size: 0.68rem; }
+.local-agendas-hint h2 { margin: 0 0 4px; font-size: 1.1rem; font-weight: 800; line-height: 1.25; text-transform: none; }
+.local-agendas-hint p:last-child { margin: 0; color: var(--ink-warm-soft); font-size: var(--text-body-sm); line-height: 1.5; }
+.local-agendas-hint > a {
+  flex: none;
+  padding: 10px 16px;
+  border: 1.5px solid var(--color-text);
+  border-radius: var(--radius-editorial);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.local-agendas-hint > a:hover { background: var(--color-text); color: var(--color-surface); }
+.local-agendas-hint > a:focus-visible { outline: 3px solid var(--color-blue); outline-offset: 3px; }
+@media (max-width: 680px) {
+  .local-agendas-hint { padding: 18px; }
+  .local-agendas-hint > a { width: 100%; text-align: center; }
+}
 @media (max-width: 680px) {
   .local-agenda { align-items: flex-start; padding: 20px; }
   .local-agenda-logo { width: 52px; height: 52px; }
