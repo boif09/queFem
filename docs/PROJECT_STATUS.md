@@ -57,7 +57,8 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
   planes. Evento Umami `local_agenda_click`. Página `/agendes-locals` (alias `/agendas-locales`, en el pie
   y en el sitemap) con la lista, los criterios y una invitación a otras agendas; se enlaza
   también desde una franja al final de la home y desde los resultados vacíos de un municipio sin agenda
-  propia: **implementada en local, sin desplegar**. El mismo bloque en `/avui` y `/cap-de-setmana` se
+  propia: **desplegada también ese día** (commit `6d956e0`, comprobado en producción: página, alias,
+  sitemap, franja de la home y enlace en resultados vacíos). El mismo bloque en `/avui` y `/cap-de-setmana` se
   **desplegó también ese día** (commit `a6cd03e`, comprobado en producción en ambas páginas). Criterios en
   [`DATA_SOURCES.md`](DATA_SOURCES.md).
 
