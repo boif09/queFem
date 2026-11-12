@@ -50,7 +50,8 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
   meses y vacía los identificadores de clic ya guardados; falta ejecutarlo y programarlo en producción
   ([`DEPLOYMENT.md`](DEPLOYMENT.md)). Sigue abierto el NIF y domicilio del aviso legal (LSSI art. 10).
 
-- Agenda local recomendada (2026-11-12, **implementada en local, sin desplegar**): al filtrar `/plans` por el
+- Agenda local recomendada (2026-11-12, **desplegada ese día**, commit `ee26606`, sin cambios en Nginx;
+  comprobado en producción: bloque y logo visibles en `/plans?municipality=Terrassa`, también en la página 2): al filtrar `/plans` por el
   municipio de Terrassa, un bloque entre los resultados y la paginación, visible en todas las páginas,
   enlaza a «Terrassa amb plans» con el permiso de su responsable. Solo es un enlace: no se importan sus
   planes. Evento Umami `local_agenda_click`. Criterios y pendientes (página «Agendes locals») en
