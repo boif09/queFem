@@ -4,6 +4,7 @@ import { FavoritesPage } from './pages/FavoritesPage.jsx';
 import { FontsPage } from './pages/FontsPage.jsx';
 import { DiscoveryLandingPage } from './pages/DiscoveryLandingPage.jsx';
 import { HomePage } from './pages/HomePage.jsx';
+import { LocalAgendasPage } from './pages/LocalAgendasPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { PlanDetailPage } from './pages/PlanDetailPage.jsx';
 import { PlansPage } from './pages/PlansPage.jsx';
@@ -23,6 +24,8 @@ export function AppRoutes() {
           <Route path="favoritos" element={<FavoritesPage />} />
           <Route path="fonts" element={<FontsPage />} />
           <Route path="widget" element={<WidgetPage />} />
+          <Route path="agendes-locals" element={<LocalAgendasPage />} />
+          <Route path="agendas-locales" element={<LocalAgendasPage />} />
           <Route path="legal" element={<LegalNoticePage />} />
           <Route path="privacitat" element={<PrivacyPage />} />
           <Route path="privacidad" element={<PrivacyPage />} />

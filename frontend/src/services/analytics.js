@@ -34,8 +34,8 @@ export function trackFavoriteChange({ planId, saved, placement, language }) {
   trackEvent(saved ? 'favorite_add' : 'favorite_remove', withSocialAttribution({ plan_id: planId, placement, language }));
 }
 
-export function trackLocalAgendaClick({ agenda, language }) {
-  trackEvent('local_agenda_click', withSocialAttribution({ agenda, language }));
+export function trackLocalAgendaClick({ agenda, placement, language }) {
+  trackEvent('local_agenda_click', withSocialAttribution({ agenda, placement, language }));
 }
 
 export function trackPlanShare({ planId, method, language }) {

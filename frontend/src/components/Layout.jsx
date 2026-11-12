@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { TensPlaHorizontalLogo } from '../assets/brand/TensPlaLogos.jsx';
 import { Header } from './Header.jsx';
 import { ScrollManager } from './ScrollManager.jsx';
+import { LOCAL_AGENDAS_PATHS, localAgendasPath } from '../config/localAgendas.js';
 import { FAVORITES_PATHS, favoritesPath } from '../utils/favoritesPath.js';
 import { uiLanguage } from '../utils/language.js';
 
@@ -51,6 +52,7 @@ export function Layout() {
     || pathname === '/plans'
     || pathname === '/widget'
     || FAVORITES_PATHS.includes(pathname)
+    || LOCAL_AGENDAS_PATHS.includes(pathname)
     || pathname.startsWith('/plans/');
   return (
     <div className={`site-shell${showMobileNav ? ' has-mobile-nav' : ''}`}>
@@ -70,6 +72,7 @@ export function Layout() {
               <Link to={spanish ? '/privacidad' : '/privacitat'}>{t('footer.privacy')}</Link>
               <Link to={spanish ? '/almacenamiento' : '/emmagatzematge'}>{t('footer.storage')}</Link>
               <Link to="/fonts">{t('footer.sources')}</Link>
+              <Link to={localAgendasPath(language)}>{t('footer.localAgendas')}</Link>
               <Link to="/widget">{t('footer.widget')}</Link>
               <Link to={spanish ? '/contacto' : '/contacte'}>{t('footer.contact')}</Link>
             </nav>

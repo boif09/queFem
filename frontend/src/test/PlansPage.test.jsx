@@ -111,7 +111,8 @@ describe('PlansPage', () => {
 
     link.addEventListener('click', (event) => event.preventDefault());
     await userEvent.setup().click(link);
-    expect(window.umami.track).toHaveBeenCalledWith('local_agenda_click', { agenda: 'terrassa-amb-plans', language: 'ca' });
+    expect(window.umami.track).toHaveBeenCalledWith('local_agenda_click', { agenda: 'terrassa-amb-plans', placement: 'results', language: 'ca' });
+    expect(screen.getByRole('link', { name: 'Totes les agendes locals' })).toHaveAttribute('href', '/agendes-locals');
     delete window.umami;
   });
 
@@ -120,11 +121,13 @@ describe('PlansPage', () => {
     const { unmount } = render(<MemoryRouter initialEntries={['/plans?municipality=Barcelona']}><PlansPage /></MemoryRouter>);
     await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Mira les agendes locals que recomanem' })).toHaveAttribute('href', '/agendes-locals');
     unmount();
 
     render(<MemoryRouter initialEntries={['/plans']}><PlansPage /></MemoryRouter>);
     await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Mira les agendes locals que recomanem' })).not.toBeInTheDocument();
   });
 
   function LocationProbe() {

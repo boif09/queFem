@@ -29,6 +29,13 @@ describe('Pop Editorial home', () => {
     api.getCategories.mockResolvedValue({ data: [{ slug: 'musica', name_ca: 'Música', name_es: 'Música', icon: 'music' }] });
   });
 
+  it('links to the recommended local agendas from a band at the end of the home', async () => {
+    renderHome();
+    expect(screen.getByRole('heading', { level: 2, name: 'Agendes locals que recomanem' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Veure les agendes locals/ })).toHaveAttribute('href', '/agendes-locals');
+    await screen.findByRole('heading', { name: 'Pla real' });
+  });
+
   it('shows Tens pla?, real API plans and real category navigation without legacy branding', async () => {
     renderHome();
     expect(screen.getAllByLabelText('Tens pla?').length).toBeGreaterThan(0);

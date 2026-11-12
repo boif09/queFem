@@ -7,6 +7,7 @@ import { PlanList } from '../components/PlanList.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { homeExploreCategories } from '../config/exploreCategoryImages.js';
+import { localAgendasPath } from '../config/localAgendas.js';
 import { api } from '../services/api.js';
 import { getCataloniaQuickDateRange } from '../utils/dates.js';
 import { clearLocationPreference, formatLocationPreference, readLocationPreference } from '../utils/locationPreference.js';
@@ -177,6 +178,19 @@ export function HomePage() {
       <PlanSection eyebrow={t('home.permanentEyebrow')} title={t('home.permanentTitle')} intro={t('home.permanentIntro')} state={permanentPlans} locationUrl={changeLocationUrl} onRetry={retry} locationActive={locationActive} onClearLocation={clearLocation} variant="permanent" />
 
       <PlanSection eyebrow={t('home.upcomingEyebrow')} title={t('home.upcomingTitle')} state={upcomingWithoutWeekend} viewAllUrl={planUrl({ dateFrom: today.date })} onRetry={retry} locationActive={locationActive} onClearLocation={clearLocation} />
+
+      <aside className="home-local-agendas" aria-labelledby="home-local-agendas-title">
+        <div className="container">
+          <div className="local-agenda">
+            <div className="local-agenda-text">
+              <p className="eyebrow dark">{t('localAgendas.eyebrow')}</p>
+              <h2 id="home-local-agendas-title">{t('localAgendas.title')}</h2>
+              <p>{t('home.localAgendasText')}</p>
+            </div>
+            <Link className="local-agenda-cta" to={localAgendasPath(language)}>{t('home.localAgendasCta')} <span aria-hidden="true">→</span></Link>
+          </div>
+        </div>
+      </aside>
     </div>
   </>;
 }

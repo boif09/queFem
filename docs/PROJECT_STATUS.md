@@ -54,8 +54,11 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
   comprobado en producción: bloque y logo visibles en `/plans?municipality=Terrassa`, también en la página 2): al filtrar `/plans` por el
   municipio de Terrassa, un bloque entre los resultados y la paginación, visible en todas las páginas,
   enlaza a «Terrassa amb plans» con el permiso de su responsable. Solo es un enlace: no se importan sus
-  planes. Evento Umami `local_agenda_click`. El mismo bloque en `/avui` y `/cap-de-setmana` se
-  **desplegó también ese día** (commit `a6cd03e`, comprobado en producción en ambas páginas). Criterios y pendientes (página «Agendes locals») en
+  planes. Evento Umami `local_agenda_click`. Página `/agendes-locals` (alias `/agendas-locales`, en el pie
+  y en el sitemap) con la lista, los criterios y una invitación a otras agendas; se enlaza
+  también desde una franja al final de la home y desde los resultados vacíos de un municipio sin agenda
+  propia: **implementada en local, sin desplegar**. El mismo bloque en `/avui` y `/cap-de-setmana` se
+  **desplegó también ese día** (commit `a6cd03e`, comprobado en producción en ambas páginas). Criterios en
   [`DATA_SOURCES.md`](DATA_SOURCES.md).
 
 - Favoritos y compartir (2026-10-21, **desplegado ese día**, commit `3f91fad`, sin cambios en Nginx;

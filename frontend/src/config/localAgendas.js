@@ -7,8 +7,15 @@ export const LOCAL_AGENDAS = [
     name: 'Terrassa amb plans',
     url: 'https://terrassambplans.cat/',
     logo: '/images/local-agendas/terrassa-amb-plans.webp',
+    wideLogo: { src: '/images/local-agendas/terrassa-amb-plans-wide.webp', width: 480, height: 129 },
   },
 ];
+
+export const LOCAL_AGENDAS_PATHS = ['/agendes-locals', '/agendas-locales'];
+
+export function localAgendasPath(language) {
+  return language === 'es' ? '/agendas-locales' : '/agendes-locals';
+}
 
 const normalize = (value) => String(value || '')
   .normalize('NFD')

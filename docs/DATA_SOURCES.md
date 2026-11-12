@@ -152,7 +152,10 @@ never imported, scraped or shown; this is not a source and creates no `sources` 
 Criteria set by the owner for any further entry: an independent local project without advertising,
 added only with its owner's written permission (link and logo). Entries live in
 `frontend/src/config/localAgendas.js`; logos are served from `frontend/public/images/local-agendas/`.
-A dedicated «Agendes locals» page is planned for when there are more entries; it is not implemented.
+The page `/agendes-locals` (Spanish alias `/agendas-locales`, linked from the footer, the
+recommendation block, a band at the end of the home and empty results for a municipality with no
+entry of its own) lists every entry, states these criteria publicly and invites other local
+agendas to write to `contacte@tenspla.cat`.
 
 
 ## Surtdecasa
