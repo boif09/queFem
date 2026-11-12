@@ -275,5 +275,10 @@
   "share.button": "Share",
   "share.copied": "Link copied",
   "share.failed": "Couldn't copy it automatically. Copy this link:",
-  "share.linkLabel": "Link to this plan"
+  "share.linkLabel": "Link to this plan",
+  "localAgenda.eyebrow": "Recommended local agenda",
+  "localAgenda.title": "More plans in {{municipality}}",
+  "localAgenda.cta": "Visit {{name}}",
+  "localAgenda.newTab": "(opens in a new tab)",
+  "localAgenda.description.terrassa-amb-plans": "Terrassa amb plans gathers activities from the city's neighbourhoods, associations and venues. It is an independent project, made in Terrassa and free of ads. Its content is in Catalan."
 }

@@ -5,6 +5,7 @@ import { Pagination } from '../components/Pagination.jsx';
 import { PlanList } from '../components/PlanList.jsx';
 import { ActiveFilters } from '../components/ActiveFilters.jsx';
 import { FiltersPanel } from '../components/FiltersPanel.jsx';
+import { LocalAgendaRecommendation } from '../components/LocalAgendaRecommendation.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../services/api.js';
@@ -84,6 +85,7 @@ export function PlansPage() {
             <p className="result-count">{t('results.count', { count: state.pagination.total })}</p>
             {language === 'en' && <p className="content-notice">{t('app.contentNotice')}</p>}
             {state.plans.length > 0 ? <PlanList plans={state.plans} /> : <div className="filtered-empty"><EmptyState /><button type="button" className="button button-primary" onClick={() => applyFilters({})}>{t('filters.clear')}</button></div>}
+            <LocalAgendaRecommendation municipality={filters.municipality} />
             <Pagination pagination={state.pagination} />
           </>
         )}

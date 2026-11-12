@@ -139,6 +139,22 @@ The embed widget uses a derived official-names index (`npm run geography:icgc:na
 be syndicated without an explicit licence review. See [`EMBED_WIDGET.md`](EMBED_WIDGET.md).
 
 
+## Linked local agendas (not data sources)
+
+Independent local agendas that Tens Pla? recommends with an outbound link only. Their plans are
+never imported, scraped or shown; this is not a source and creates no `sources` row.
+
+- **Terrassa amb plans** (`https://terrassambplans.cat/`): its owner agreed in writing in November
+  2026 to be linked from Tens Pla? and supplied the logo for that purpose; the owner of Tens Pla?
+  keeps that message. A recommendation block appears on every `/plans` results page when the
+  municipality filter is Terrassa, between the results and the pagination.
+
+Criteria set by the owner for any further entry: an independent local project without advertising,
+added only with its owner's written permission (link and logo). Entries live in
+`frontend/src/config/localAgendas.js`; logos are served from `frontend/public/images/local-agendas/`.
+A dedicated «Agendes locals» page is planned for when there are more entries; it is not implemented.
+
+
 ## Surtdecasa
 
 Status: NOT APPROVED

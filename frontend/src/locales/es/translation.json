@@ -260,5 +260,10 @@
   "share.button": "Compartir",
   "share.copied": "Enlace copiado",
   "share.failed": "No se ha podido copiar automáticamente. Copia este enlace:",
-  "share.linkLabel": "Enlace del plan"
+  "share.linkLabel": "Enlace del plan",
+  "localAgenda.eyebrow": "Agenda local recomendada",
+  "localAgenda.title": "Más planes en {{municipality}}",
+  "localAgenda.cta": "Visita {{name}}",
+  "localAgenda.newTab": "(se abre en una pestaña nueva)",
+  "localAgenda.description.terrassa-amb-plans": "Terrassa amb plans reúne actividades de barrios, entidades y centros de la ciudad. Es un proyecto independiente, hecho desde Terrassa y sin anuncios. Su contenido está en catalán."
 }

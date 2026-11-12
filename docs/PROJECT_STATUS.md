@@ -50,6 +50,12 @@ La infraestructura de producción es parcialmente externa a Git. «Confirmado» 
   meses y vacía los identificadores de clic ya guardados; falta ejecutarlo y programarlo en producción
   ([`DEPLOYMENT.md`](DEPLOYMENT.md)). Sigue abierto el NIF y domicilio del aviso legal (LSSI art. 10).
 
+- Agenda local recomendada (2026-11-12, **implementada en local, sin desplegar**): al filtrar `/plans` por el
+  municipio de Terrassa, un bloque entre los resultados y la paginación, visible en todas las páginas,
+  enlaza a «Terrassa amb plans» con el permiso de su responsable. Solo es un enlace: no se importan sus
+  planes. Evento Umami `local_agenda_click`. Criterios y pendientes (página «Agendes locals») en
+  [`DATA_SOURCES.md`](DATA_SOURCES.md).
+
 - Favoritos y compartir (2026-10-21, **desplegado ese día**, commit `3f91fad`, sin cambios en Nginx;
   comprobado en producción: corazones, página `/preferits` y `/favoritos` en 200 y botón «Comparteix»): paso 2 del plan de app móvil. Corazón en
   cada tarjeta y en la ficha, página `/preferits` (alias `/favoritos`) con enlace en la cabecera (oculto en

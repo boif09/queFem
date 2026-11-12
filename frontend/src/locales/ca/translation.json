@@ -260,5 +260,10 @@
   "share.button": "Comparteix",
   "share.copied": "Enllaç copiat",
   "share.failed": "No s'ha pogut copiar automàticament. Copia aquest enllaç:",
-  "share.linkLabel": "Enllaç del pla"
+  "share.linkLabel": "Enllaç del pla",
+  "localAgenda.eyebrow": "Agenda local recomanada",
+  "localAgenda.title": "Més plans a {{municipality}}",
+  "localAgenda.cta": "Visita {{name}}",
+  "localAgenda.newTab": "(s'obre en una pestanya nova)",
+  "localAgenda.description.terrassa-amb-plans": "Terrassa amb plans recull activitats de barris, entitats i centres de la ciutat. És un projecte independent, fet des de Terrassa i sense anuncis."
 }

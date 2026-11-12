@@ -97,6 +97,36 @@ describe('PlansPage', () => {
     expect(document.head.querySelector('link[rel="canonical"]')).not.toBeInTheDocument();
   });
 
+  it('recommends the local agenda on every results page when filtering by Terrassa', async () => {
+    api.getPlans.mockResolvedValue({ data: [], pagination: { page: 3, limit: 12, total: 61, pages: 6 } });
+    window.umami = { track: vi.fn() };
+    render(<MemoryRouter initialEntries={['/plans?municipality=terrassa&page=3']}><PlansPage /></MemoryRouter>);
+
+    const block = await screen.findByRole('complementary', { name: 'Més plans a Terrassa' });
+    const link = screen.getByRole('link', { name: /Visita Terrassa amb plans/ });
+    expect(link).toHaveAttribute('href', 'https://terrassambplans.cat/');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(block.compareDocumentPosition(screen.getByRole('navigation', { name: 'Paginació' })))
+      .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+
+    link.addEventListener('click', (event) => event.preventDefault());
+    await userEvent.setup().click(link);
+    expect(window.umami.track).toHaveBeenCalledWith('local_agenda_click', { agenda: 'terrassa-amb-plans', language: 'ca' });
+    delete window.umami;
+  });
+
+  it('does not recommend a local agenda for other municipalities or unfiltered results', async () => {
+    api.getPlans.mockResolvedValue({ data: [], pagination: { page: 1, limit: 12, total: 0, pages: 0 } });
+    const { unmount } = render(<MemoryRouter initialEntries={['/plans?municipality=Barcelona']}><PlansPage /></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
+    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    unmount();
+
+    render(<MemoryRouter initialEntries={['/plans']}><PlansPage /></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'No hem trobat cap pla' });
+    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+  });
+
   function LocationProbe() {
     const location = useLocation();
     return <output data-testid="current-location">{`${location.pathname}${location.search}`}</output>;

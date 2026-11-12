@@ -530,6 +530,50 @@
 
 .discovery-page .page-control { border: 1.5px solid rgba(26, 26, 26, 0.16); border-radius: 999px; box-shadow: none; }
 
+/* Recommended local agenda: sits between the results and the pagination on every page */
+
+.local-agenda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 24px;
+  margin-top: 40px;
+  padding: 26px 28px;
+  border: var(--surface-medium-border);
+  border-radius: var(--radius-editorial);
+  background: var(--color-surface);
+  box-shadow: var(--surface-medium-shadow);
+}
+.local-agenda-logo { flex: none; width: 64px; height: 64px; border-radius: 50%; }
+.local-agenda-text { flex: 1 1 320px; min-width: 0; }
+.local-agenda-text .eyebrow { margin: 0 0 8px; font-size: 0.7rem; }
+.local-agenda-text h2 { margin: 0 0 6px; font-size: 1.3rem; font-weight: 800; line-height: 1.2; letter-spacing: -0.01em; text-transform: none; }
+.local-agenda-text p:last-child { max-width: 62ch; margin: 0; color: var(--ink-warm-soft); font-size: var(--text-body-sm); line-height: 1.5; }
+.local-agenda-cta {
+  flex: none;
+  display: inline-block;
+  padding: 12px 20px;
+  border: var(--surface-strong-border);
+  border-radius: var(--radius-editorial);
+  box-shadow: var(--surface-strong-shadow-sm);
+  background: var(--color-yellow);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.local-agenda-cta:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--color-text); }
+.local-agenda-cta:focus-visible { outline: 3px solid var(--color-blue); outline-offset: 3px; }
+.local-agenda + .pagination { margin-top: 36px; }
+@media (max-width: 680px) {
+  .local-agenda { align-items: flex-start; padding: 20px; }
+  .local-agenda-logo { width: 52px; height: 52px; }
+  .local-agenda-text { flex-basis: 0; }
+  .local-agenda-cta { width: 100%; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) { .local-agenda-cta:hover { transform: none; } }
+
 /* ---------------------------------------------------------------------- */
 /* Plan detail page — Phase 3                                             */
 /* Additive, scoped under the existing `.detail-page` ancestor (already   */
