@@ -237,14 +237,27 @@
     },
     {
       "aliasPlanId": 8798,
-      "canonicalPlanId": 6893,
+      "canonicalPlanId": 8196,
       "title": "Els bons",
       "decision": "MERGE",
       "aliasSource": {
         "sourceKey": "diba-escenari",
         "sourceRecordId": "escenari859517416012192001373284"
       },
-      "reason": "Two sessions (17:30 and 20:00) of the same show on 2026-12-05 at the same venue (Espai l'Amistat, Premià de Mar); DIBA Escenari lists each session as its own record. Confirmed by the project owner, with the older plan as canonical.",
+      "reason": "Same show on 2026-12-05 at the same venue (Espai l'Amistat, Premià de Mar) as the Gencat plan; DIBA Escenari lists each session as its own record (17:30 here). Confirmed by the project owner, with the Gencat plan as canonical.",
+      "reviewedAt": "2026-11-24",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 6893,
+      "canonicalPlanId": 8196,
+      "title": "Els bons",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-escenari",
+        "sourceRecordId": "escenari859517416012192001371895"
+      },
+      "reason": "Same show on 2026-12-05 at the same venue (Espai l'Amistat, Premià de Mar) as the Gencat plan; DIBA Escenari lists each session as its own record (20:00 here). Confirmed by the project owner, with the Gencat plan as canonical.",
       "reviewedAt": "2026-11-24",
       "reviewer": "project-owner"
     }
