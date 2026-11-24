@@ -260,6 +260,48 @@
       "reason": "Same show on 2026-12-05 at the same venue (Espai l'Amistat, Premià de Mar) as the Gencat plan; DIBA Escenari lists each session as its own record (20:00 here). Confirmed by the project owner, with the Gencat plan as canonical.",
       "reviewedAt": "2026-11-24",
       "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 8777,
+      "canonicalPlanId": 8804,
+      "title": "Jornada de Portes Obertes",
+      "canonicalTitle": "Jornada de portes obertes al Museu Municipal",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-tourisme",
+        "sourceRecordId": "agendaturisme463341633"
+      },
+      "reason": "Open day of 2026-12-06 in Calella at the same venue (Museu Arxiu (c/ Escoles Pies); coordinates match) listed twice by DIBA, in Turisme and in Museus, with different titles. Confirmed by the project owner; the more specific DIBA Museus plan is kept.",
+      "reviewedAt": "2026-11-24",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 8779,
+      "canonicalPlanId": 8805,
+      "title": "Jornada de Portes Obertes",
+      "canonicalTitle": "Jornada de portes obertes al Museu del Turisme",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-tourisme",
+        "sourceRecordId": "agendaturisme463341245"
+      },
+      "reason": "Open day of 2026-12-06 in Calella at the same venue (Museu del Turisme; coordinates match) listed twice by DIBA, in Turisme and in Museus, with different titles. Confirmed by the project owner; the more specific DIBA Museus plan is kept.",
+      "reviewedAt": "2026-11-24",
+      "reviewer": "project-owner"
+    },
+    {
+      "aliasPlanId": 8783,
+      "canonicalPlanId": 8806,
+      "title": "Jornada de Portes Obertes",
+      "canonicalTitle": "Jornada de portes obertes al Centre d'Interpretació del Far",
+      "decision": "MERGE",
+      "aliasSource": {
+        "sourceKey": "diba-tourisme",
+        "sourceRecordId": "agendaturisme463341420"
+      },
+      "reason": "Open day of 2026-12-06 in Calella at the same venue (Centre d'Interpretació del Far; coordinates match) listed twice by DIBA, in Turisme and in Museus, with different titles. Confirmed by the project owner; the more specific DIBA Museus plan is kept.",
+      "reviewedAt": "2026-11-24",
+      "reviewer": "project-owner"
     }
   ]
 }

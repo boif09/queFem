@@ -167,6 +167,59 @@ test('after a merge a repeated DIBA import keeps the record on the Gencat plan a
   });
 });
 
+test('a reviewed canonicalTitle merges two differently worded titles, and only the exact declared one', () => {
+  const aliasTitle = 'Jornada de Portes Obertes';
+  const canonicalTitle = 'Jornada de portes obertes al Museu del Turisme';
+  withTestDatabase((db) => {
+    // Same event listed by DIBA Turisme (alias) and DIBA Museus (kept), worded differently.
+    const { canonicalPlanId, aliasPlanId } = pair(db, { dibaOverrides: { title: aliasTitle }, gencatOverrides: { title: canonicalTitle, sourceKey: 'diba-museus' } });
+    const strict = computeMergePlan(db, decision(aliasPlanId, canonicalPlanId, { title: aliasTitle }));
+    assert.equal(strict.ok, false, 'without canonicalTitle both titles must match, as before');
+    assert.match(strict.problems.join(' | '), /canonical plan title/);
+
+    const wrong = computeMergePlan(db, decision(aliasPlanId, canonicalPlanId, { title: aliasTitle, canonicalTitle: 'Un altre títol' }));
+    assert.equal(wrong.ok, false, 'a canonicalTitle that is not the kept plan\'s title is refused');
+
+    const wrongAlias = computeMergePlan(db, decision(aliasPlanId, canonicalPlanId, { title: 'Un altre títol', canonicalTitle }));
+    assert.equal(wrongAlias.ok, false, 'the alias plan must still carry the reviewed title');
+    assert.match(wrongAlias.problems.join(' | '), /alias plan title/);
+
+    const reviewed = computeMergePlan(db, decision(aliasPlanId, canonicalPlanId, { title: aliasTitle, canonicalTitle }));
+    assert.equal(reviewed.ok, true, reviewed.problems.join(' | '));
+    applyMerge(db, reviewed);
+    assert.equal(owner(db, 'd-1'), canonicalPlanId);
+    assert.equal(planRow(db, aliasPlanId).status, 'inactive');
+    assert.equal(db.prepare('SELECT original_title FROM plans WHERE id = ?').get(canonicalPlanId).original_title, canonicalTitle, 'the kept plan keeps its own, more specific title');
+  });
+});
+
+test('canonicalTitle does not relax the other preconditions', () => {
+  withTestDatabase((db) => {
+    const { canonicalPlanId, aliasPlanId } = pair(db, { dibaOverrides: { title: 'Titol A', startDate: '2026-09-11', endDate: '2026-09-11' }, gencatOverrides: { title: 'Titol A al museu' } });
+    const plan = computeMergePlan(db, decision(aliasPlanId, canonicalPlanId, { title: 'Titol A', canonicalTitle: 'Titol A al museu' }));
+    assert.equal(plan.ok, false);
+    assert.match(plan.problems.join(' | '), /dates differ/);
+  });
+});
+
+test('the decisions file accepts an optional canonicalTitle and rejects an empty one', async () => {
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'tenspla-merge-decisions-'));
+  try {
+    const write = (extra) => {
+      const file = path.join(directory, 'decisions.json');
+      fs.writeFileSync(file, JSON.stringify({ version: 1, decisions: [decision(2, 1, extra)] }));
+      return file;
+    };
+    assert.doesNotThrow(() => loadDuplicateMergeDecisions(write({ canonicalTitle: 'Titol A al museu' })));
+    assert.doesNotThrow(() => loadDuplicateMergeDecisions(write({})));
+    assert.throws(() => loadDuplicateMergeDecisions(write({ canonicalTitle: '  ' })), /canonicalTitle must be a non-empty string/);
+    assert.throws(() => loadDuplicateMergeDecisions(write({ canonicalTitle: 5 })), /canonicalTitle must be a non-empty string/);
+  } finally { fs.rmSync(directory, { recursive: true, force: true }); }
+});
+
 test('the committed merge decisions are well formed', () => {
   const { decisions } = loadDuplicateMergeDecisions();
   assert.ok(decisions.length > 0);

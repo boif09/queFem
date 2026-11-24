@@ -20,6 +20,12 @@ export function loadDuplicateMergeDecisions(path = DUPLICATE_MERGE_DECISIONS_PAT
     for (const field of ['title', 'reason', 'reviewedAt', 'reviewer']) {
       if (typeof decision[field] !== 'string' || !decision[field].trim()) throw new Error(`duplicate-plan-merges: ${field} is required (plan ${decision.aliasPlanId}).`);
     }
+    // Optional: the title of the plan that is kept, when the person reviewing decided it is the same event although the
+    // two sources word the title differently (e.g. "Jornada de Portes Obertes" vs "Jornada de portes obertes al Museu").
+    // Without it both plans must carry exactly `title`.
+    if (decision.canonicalTitle !== undefined && (typeof decision.canonicalTitle !== 'string' || !decision.canonicalTitle.trim())) {
+      throw new Error(`duplicate-plan-merges: canonicalTitle must be a non-empty string when present (plan ${decision.aliasPlanId}).`);
+    }
     if (decision.decision !== 'MERGE') throw new Error(`duplicate-plan-merges: unsupported decision for plan ${decision.aliasPlanId}.`);
     if (seen.has(decision.aliasPlanId)) throw new Error(`duplicate-plan-merges: plan ${decision.aliasPlanId} is listed twice.`);
     seen.add(decision.aliasPlanId);
@@ -48,7 +54,8 @@ export function computeMergePlan(db, decision) {
     if (aliasPlan.status !== 'active') problems.push(`alias plan ${aliasPlanId} is not active (${aliasPlan.status}).`);
     if (canonicalPlan.status !== 'active') problems.push(`canonical plan ${canonicalPlanId} is not active (${canonicalPlan.status}).`);
     if (!same(aliasPlan.original_title, decision.title)) problems.push(`alias plan title "${aliasPlan.original_title}" differs from the reviewed title "${decision.title}".`);
-    if (!same(canonicalPlan.original_title, decision.title)) problems.push(`canonical plan title "${canonicalPlan.original_title}" differs from the reviewed title "${decision.title}".`);
+    const reviewedCanonicalTitle = decision.canonicalTitle ?? decision.title;
+    if (!same(canonicalPlan.original_title, reviewedCanonicalTitle)) problems.push(`canonical plan title "${canonicalPlan.original_title}" differs from the reviewed title "${reviewedCanonicalTitle}".`);
     if (aliasPlan.start_date !== canonicalPlan.start_date || aliasPlan.end_date !== canonicalPlan.end_date) {
       problems.push(`dates differ (${aliasPlan.start_date}→${aliasPlan.end_date} vs ${canonicalPlan.start_date}→${canonicalPlan.end_date}).`);
     }
